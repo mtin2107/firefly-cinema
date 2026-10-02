@@ -17,5 +17,5 @@ FRONTEND_ORIGINS = [o.strip() for o in os.getenv("FRONTEND_ORIGIN", "http://loca
 
 MODEL_DIR = os.getenv("MODEL_DIR", "")
 NEGATIVE_LABEL_ID = int(os.getenv("NEGATIVE_LABEL_ID", "1"))
-USE_WORD_SEGMENT = os.getenv("USE_WORD_SEGMENT", "true").lower() == "true"
+USE_WORD_SEGMENT = os.getenv("USE_WORD_SEGMENT", "false").lower() == "true"
 NEGATIVE_THRESHOLD = float(os.getenv("NEGATIVE_THRESHOLD", "0.5"))

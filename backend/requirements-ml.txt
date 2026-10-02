@@ -1,0 +1,4 @@
+# Chỉ cài khi bắt đầu gắn model PhoBERT (Phần 4 trong HUONG_DAN.md)
+torch
+transformers
+underthesea

@@ -5,3 +5,10 @@ venv/
 __pycache__/
 *.db
 backend/models/
+
+# Large data and model files live on D:\KhoaLuan_PhimVe, not in git
+data/**/*.csv
+data/**/*.xlsx
+ml/**/*.safetensors
+ml/**/*.joblib
+ml/**/*.bin

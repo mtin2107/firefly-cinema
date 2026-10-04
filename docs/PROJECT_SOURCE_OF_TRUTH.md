@@ -10,8 +10,9 @@
 | Sản phẩm | Firefly Cinema — website đặt vé xem phim tích hợp PhoBERT phân loại bình luận tiêu cực |
 | Đề tài | Khóa luận #67, Khoa học dữ liệu, NTTU — sinh viên Lê Minh Tín |
 | Hạn | Sản phẩm 05/10 – 01/11/2026 · Báo cáo 02/11 – 29/11/2026 |
-| Repo | `C:\Projects\firefly-cinema` (thư mục gốc duy nhất), nhánh chính `master` |
-| Kho file lớn | `D:\KhoaLuan_PhimVe\` — không chứa code đang dùng, không sửa code ở đây |
+| Repo | `C:\Projects\firefly-cinema` (thư mục gốc duy nhất, **mọi hoạt động diễn ra ở đây**), nhánh chính `master` |
+| File lớn | Trong repo nhưng ngoài Git: `data\` (CSV), `ml\artifacts\` (model gốc, joblib), `backend\models\` (model web dùng), `backup\`, `Bao_cao\*.docx`. Bản sao ngoài máy: Google Drive |
+| Ổ D | `D:\KhoaLuan_PhimVe\` **ngừng sử dụng** từ 04/10/2026 (dữ liệu đã chép sang ổ C). Task mới không đọc, không ghi ở đây |
 | Mốc đã có | tag `giao-dien-v1`, `phobert-v1` |
 | Stack | React 18 + Vite 5 · FastAPI 0.115 + SQLAlchemy 2 + SQLite · PhoBERT (transformers 5.18, torch 2.11 CPU) |
 

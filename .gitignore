@@ -6,9 +6,13 @@ __pycache__/
 *.db
 backend/models/
 
-# Large data and model files live on D:\KhoaLuan_PhimVe, not in git
+# Du lieu lon, model, ban sao luu nam ngay trong repo (o C) nhung khong dua vao Git
 data/**/*.csv
 data/**/*.xlsx
 ml/**/*.safetensors
 ml/**/*.joblib
 ml/**/*.bin
+ml/artifacts/
+backup/
+Bao_cao/*.docx
+.idea/

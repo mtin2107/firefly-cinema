@@ -35,6 +35,8 @@ C:\Projects\firefly-cinema\
 ├── chay-firefly.bat               ⚠ tài liệu ghi là có nhưng CHƯA có trong repo (xem mục 4)
 ├── reset-demo.bat                 [T12]
 ├── .gitignore
+├── Bao_cao\                       bản Word báo cáo (*.docx ngoài Git)
+├── backup\                        (ngoài Git) 02_api_cu\ API cũ, v1.0\ [T13]
 │
 ├── frontend\                      ── GIAO DIỆN (React + Vite)
 │   ├── .env                       (ngoài Git)
@@ -93,27 +95,32 @@ C:\Projects\firefly-cinema\
 │
 ├── ml\                            ── HỌC MÁY (mã train, notebook, kết quả nhỏ)
 │   ├── README.md                  [T00] bản đồ dữ liệu / model / notebook
-│   ├── README_goc.md              [T00] README cũ từ ổ D
+│   ├── README_goc.md              [T00] README cũ của thesis_project
 │   ├── model_card_A.md            [T00]
 │   ├── model_card_B.md            [T09]
 │   ├── labeling_guideline.md      [T03]
 │   ├── test_sentences.json        [T10]
 │   ├── requirements-ml-train.txt  [T01]
 │   ├── src\
-│   │   ├── (mã cũ từ ổ D)             [T00] prep, train, base…, comm…, erro…
+│   │   ├── (mã cũ thesis_project)     [T00] prep, train, base…, comm…, erro…
 │   │   ├── baselines.py               [T01]
 │   │   ├── eval_utils.py              [T02] hàm tính chỉ số dùng chung
 │   │   └── prepare_movie_data.py      [T03]
 │   ├── notebooks\                 T01_baselines, T02_comparison, T08_domain_shift,
 │   │                              T09_phobert_B, T15_word_segment (.ipynb)
-│   └── results\
-│       ├── baselines.csv [T01], comparison_A.csv [T02], domain_shift.csv [T08],
-│       │   comparison_B.csv [T09], word_segment.csv [T15]
-│       ├── error_analysis.md [T02], domain_shift_errors.md [T08], movie_data_stats.md [T03]
-│       └── figures\*.png
+│   ├── results\
+│   │   ├── baselines.csv [T01], comparison_A.csv [T02], domain_shift.csv [T08],
+│   │   │   comparison_B.csv [T09], word_segment.csv [T15]
+│   │   ├── error_analysis.md [T02], domain_shift_errors.md [T08], movie_data_stats.md [T03]
+│   │   └── figures\*.png
+│   └── artifacts\                 (ngoài Git) phobert_A_best\ model A gốc, phobert_A.json,
+│                                  phobert_B_best\ [T09], baselines\*.joblib [T01]
 │
-├── data\                          ── DỮ LIỆU PHIM: chỉ README, CSV để ở ổ D
-│   └── README.md                  [T03]
+├── data\                          ── DỮ LIỆU: README trong Git, CSV ngoài Git
+│   ├── README.md                  [T00 tạo, T03 bổ sung]
+│   ├── uit-visfd\processed\       (ngoài Git) train/dev/test(.csv), *_aspect_sentiment.csv
+│   ├── uit-visfd\results\         (ngoài Git) error_analysis_taskA.csv
+│   └── phim\                      (ngoài Git) movie_comments_v1.csv, train/test [T03]
 │
 ├── docs\                          ── TÀI LIỆU DỰ ÁN (xem docs/README.md)
 │   ├── tasks\T00.md … T15.md
@@ -124,17 +131,19 @@ C:\Projects\firefly-cinema\
 └── reports\YYYY-MM-DD\            ── BÁO CÁO Codex / Claude / PO theo từng task
 ```
 
-Ngoài repo (không có Git):
+Ngoài máy: Google Drive `MyDrive/thesis/data/…`, `MyDrive/thesis_results/…`, `MyDrive/thesis_backup_v1/` [T13].
 
-```
-D:\KhoaLuan_PhimVe\
-├── 01_training\thesis_project\processed\   dữ liệu UIT-ViSFD đã xử lý (giữ nguyên)
-├── 04_data_phim\                           movie_comments_v1.csv, train/test [T03]
-├── 05_baocao\                              bản Word báo cáo
-├── 06_backup\                              02_api_cu [T00], v1.0 [T13]
-└── thesis_results\                         model A gốc, phobert_B [T09], baselines\*.joblib [T01]
-Google Drive: MyDrive/thesis/data/…, MyDrive/thesis_results/…, MyDrive/thesis_backup_v1/ [T13]
-```
+**Ổ D ngừng sử dụng từ 04/10/2026.** Ánh xạ nơi cũ → nơi mới (Claude chép, kiểm SHA256 18/18 file khớp):
+
+| Nơi cũ (`D:\KhoaLuan_PhimVe\`) | Nơi mới (`C:\Projects\firefly-cinema\`) |
+|---|---|
+| `01_training\thesis_project\processed\` | `data\uit-visfd\processed\` |
+| `01_training\thesis_project\results\error_analysis_taskA.csv` | `data\uit-visfd\results\` |
+| `01_training\thesis_project\src\`, `README.md`, `results\*.json` | `ml\src\`, `ml\README_goc.md`, `ml\results\` (Codex chép trong T00) |
+| `thesis_results\` (model A gốc, `phobert_A.json`) | `ml\artifacts\` |
+| `06_backup\02_api_cu\api\` (bỏ `venv\`) | `backup\02_api_cu\api\` |
+| `04_data_phim\` (rỗng) | `data\phim\` |
+| `05_baocao\` (rỗng) | `Bao_cao\` |
 
 ## 2. Hợp đồng bất biến
 
@@ -189,3 +198,4 @@ Google Drive: MyDrive/thesis/data/…, MyDrive/thesis_results/…, MyDrive/thesi
 |---|---|---|
 | 03/10/2026 | — | Tạo file từ trạng thái `phobert-v1` |
 | 04/10/2026 | — | Thêm cây thư mục đích. Phát hiện: `chay-firefly.bat` không có trong repo; thư mục `Bao_cao\` rỗng ở gốc trùng vai trò với `docs\` và `D:\KhoaLuan_PhimVe\05_baocao\` |
+| 04/10/2026 | T00 (PO đổi phạm vi) | Mọi hoạt động chuyển về ổ C. Thêm `data\uit-visfd\`, `data\phim\`, `ml\artifacts\`, `backup\` (ngoài Git); `Bao_cao\` giữ lại làm nơi để bản Word. Ổ D ngừng sử dụng |

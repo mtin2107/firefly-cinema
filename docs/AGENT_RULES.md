@@ -85,7 +85,7 @@ Dự án chưa có linter. Dùng các gate sau (lệnh PowerShell, chạy ở `C
 | Tái lập | Seed cố định; chạy lại notebook từ runtime mới ra cùng số (sai lệch ≤ 0,001) |
 | Đúng cách chia | Dùng đúng `train/dev/test.csv` trên Drive; không dùng test để chọn siêu tham số |
 | Đúng tiền xử lý | Notebook import hoặc chép nguyên văn `normalize()` của backend, có ô so sánh trên 20 câu mẫu |
-| Kết quả nhỏ vào Git | `ml/results/*.csv`, `*.md`, hình PNG; model và dữ liệu lớn chỉ ghi đường dẫn Drive / ổ D |
+| Kết quả nhỏ vào Git | `ml/results/*.csv`, `*.md`, hình PNG; model và dữ liệu lớn để ở `ml\artifacts\` / `data\` (ngoài Git) và Drive, chỉ ghi đường dẫn |
 | Bằng chứng | Report đính kèm bảng số liệu và đường dẫn notebook trên Drive |
 
 Claude không chạy được Colab: với task ML, Claude kiểm tra notebook, file kết quả, tính nhất quán số liệu và tái lập phần chạy được trên CPU (ví dụ mô hình truyền thống). Phần cần GPU do Tín chạy lại khi PO_REVIEW nếu cần.

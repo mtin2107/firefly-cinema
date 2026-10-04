@@ -21,7 +21,7 @@ Vai trò trong dự án:
 Việc đầu tiên: từ mục 9 (Kế hoạch) và mục 10 (Mẫu đặc tả task), tạo các file docs/tasks/T00.md ... T15.md.
 Sau đó chỉ làm MỘT task mỗi lần, theo đúng quy trình ở mục 11.
 THƯ MỤC GỐC DUY NHẤT để cài đặt, chạy code và commit là C:\Projects\firefly-cinema.
-D:\KhoaLuan_PhimVe chỉ là kho chứa file lớn (model, dữ liệu, sao lưu, báo cáo). KHÔNG sửa code ở ổ D.
+Mọi hoạt động diễn ra ở C:\Projects\firefly-cinema. File lớn (model, dữ liệu, sao lưu, báo cáo Word) nằm trong repo nhưng ngoài Git. D:\KhoaLuan_PhimVe ngừng sử dụng từ 04/10/2026.
 Khi không chắc một quyết định (đổi kiến trúc, đổi thư viện, đổi giao diện đã chốt), HỎI tôi trước, không tự quyết.
 Trả lời tôi bằng tiếng Việt. Tên biến, hàm, API viết bằng tiếng Anh. Mọi chữ hiển thị trên giao diện viết bằng tiếng Việt.
 ```
@@ -72,23 +72,24 @@ Trả lời tôi bằng tiếng Việt. Tên biến, hàm, API viết bằng ti�
 |---|---|---|
 | **`C:\Projects\firefly-cinema`** | **THƯ MỤC GỐC.** Toàn bộ mã nguồn (web, backend, `ml/` script + notebook + kết quả nhỏ), tài liệu `docs/`. Mọi lệnh cài đặt, chạy, commit đều làm ở đây | Có (nhánh `master`, tag `giao-dien-v1`, `phobert-v1`) |
 | `C:\Projects\firefly-cinema\backend\models\phobert-binhluan\` | Bản model mà backend đang dùng | Không (`.gitignore`) |
-| `D:\KhoaLuan_PhimVe\` | **Kho file lớn**, không chứa code đang dùng, không có Git | Không |
-| `D:\KhoaLuan_PhimVe\thesis_results\` | Bản gốc model PhoBERT A (và model B sau này) | — |
-| `D:\KhoaLuan_PhimVe\04_data_phim\` | Dữ liệu bình luận phim cho T03 | — |
-| `D:\KhoaLuan_PhimVe\05_baocao\` | Bản thảo báo cáo Word | — |
-| `D:\KhoaLuan_PhimVe\06_backup\` | Sao lưu (T13) và code cũ đã ngừng dùng | — |
+| `ml\artifacts\` | Bản gốc model PhoBERT A (và model B, `*.joblib` sau này) | Không (gitignore) |
+| `data\uit-visfd\` | Dữ liệu UIT-ViSFD đã xử lý (processed) | Không (gitignore CSV) |
+| `data\phim\` | Dữ liệu bình luận phim cho T03 | Không (gitignore CSV) |
+| `Bao_cao\` | Bản thảo báo cáo Word | Không (gitignore `*.docx`) |
+| `backup\` | Sao lưu (T13) và code cũ đã ngừng dùng (`02_api_cu`) | Không (gitignore) |
+| `D:\KhoaLuan_PhimVe\` | **Ngừng sử dụng từ 04/10/2026**, dữ liệu đã chép sang các thư mục trên | — |
 | Google Drive `MyDrive/thesis_results/` | Model trên Colab, `firefly_phobert.zip` | — |
 
 **Quy tắc đặt tên:** trong repo dùng tên theo chức năng (`ml`, `backend`, `frontend`, `data`, `docs`), không dùng tiền tố số như ổ D, vì `chay-firefly.bat` và mọi hướng dẫn đều trỏ tới `frontend`/`backend`. Thư mục `ml/`, `data/`, `docs/tasks/`, `docs/images/` đã được tạo sẵn (có `.gitkeep`).
 
-**Những thứ có sẵn ở ổ D, cần xử lý trong T00:**
+**Những thứ từng ở ổ D (đã chép sang ổ C ngày 04/10/2026), cần xử lý trong T00:**
 - `D:\KhoaLuan_PhimVe\01_training\thesis_project\`: mã train phần A dạng script (`src\prep.py`, `src\trai…`, `src\base…`, `src\comm…`, `src\erro…`), `README.md`, `processed\` (khoảng 23 MB, 6 file CSV), `results\`.
   - Chép `src\`, `README.md`, `results\` sang `C:\Projects\firefly-cinema\ml\` để đưa vào Git.
-  - `processed\` để nguyên ở ổ D và trên Drive, chỉ ghi đường dẫn trong `ml\README.md`.
+  - `processed\` đã chép sang `data\uit-visfd\processed\` (ngoài Git) và có trên Drive, chỉ ghi đường dẫn trong `ml\README.md`.
   - **Trước khi làm T01, kiểm tra file `src\base…`**. Nếu đã là mã mô hình truyền thống thì T01 chỉ hoàn thiện tiếp, không viết lại.
-- `D:\KhoaLuan_PhimVe\02_api\api\`: API dự đoán cũ (`main.py`, `text_utils.py`, bản sao model). **Trùng chức năng với backend, ngừng dùng**, chuyển vào `06_backup`.
+- `D:\KhoaLuan_PhimVe\02_api\api\`: API dự đoán cũ (`main.py`, `text_utils.py`, bản sao model). **Trùng chức năng với backend, ngừng dùng**, đã chép sang `backup\02_api_cu\` (bỏ venv).
   - Riêng `text_utils.py` nhiều khả năng là hàm chuẩn hóa gốc tạo ra `text_norm`. Phải đối chiếu với `normalize()` trong `backend/app/classifier.py`. Nếu khác nhau, dùng hàm gốc và đo lại F1.
-- Model PhoBERT A đang có khoảng 4 bản sao (`01_training\thesis_results`, `02_api\api\model`, `thesis_results`, `06_backup`). Chỉ giữ bản gốc ở `D:\KhoaLuan_PhimVe\thesis_results\` và bản backend dùng, các bản còn lại xóa đi.
+- Model PhoBERT A đang có khoảng 4 bản sao (`01_training\thesis_results`, `02_api\api\model`, `thesis_results`, `06_backup`). Trên ổ C chỉ còn bản gốc `ml\artifacts\phobert_A_best\` và bản backend dùng.
 
 ---
 
@@ -99,10 +100,11 @@ firefly-cinema/
 ├── chay-firefly.bat            Khởi động một chạm (Windows)
 ├── HUONG_DAN.md / README.md    Hướng dẫn cài đặt, chạy, gắn model
 ├── .gitignore                  node_modules, dist, .env, venv, __pycache__, *.db, backend/models/,
-│                               data/**/*.csv|xlsx, ml/**/*.safetensors|joblib|bin
-├── ml/                         ≈ D:\...\01_training — mã train (src/), notebooks/, results/ (file nhỏ), model_card_*.md
-├── data/                       ≈ D:\...\04_data_phim — README + hướng dẫn gán nhãn; CSV lớn để ở ổ D
-├── docs/                       ≈ D:\...\05_baocao — BOI_CANH_DU_AN.md, tasks/Txx.md, images/ (ảnh cho báo cáo)
+│                               data/**/*.csv|xlsx, ml/**/*.safetensors|joblib|bin, ml/artifacts/,
+│                               backup/, Bao_cao/*.docx, .idea/
+├── ml/                         mã train (src/), notebooks/, results/ (file nhỏ), model_card_*.md, artifacts/ (model, ngoài Git)
+├── data/                       README + hướng dẫn gán nhãn; uit-visfd/ và phim/ chứa CSV (ngoài Git)
+├── docs/                       BOI_CANH_DU_AN.md, tasks/Txx.md, images/ (ảnh cho báo cáo)
 ├── frontend/                   React 18 + Vite 5 + react-router-dom 6, CSS thuần (không Tailwind)
 │   ├── .env                    VITE_USE_MOCK=false, VITE_API_URL=http://localhost:8000
 │   └── src/
@@ -304,7 +306,7 @@ Nếu trễ tiến độ, cắt theo thứ tự T14 → T15 → rút gọn T05. 
 **T00. Gom mã từ ổ D, lưu trữ dữ liệu, thẻ mô hình phần A** (repo + Colab)
 - Mục tiêu: không mất dữ liệu khi phiên Colab hết hạn; cố định cách chia dữ liệu cho mọi mô hình về sau.
 - Đầu ra:
-  - Gom mã train phần A từ `D:\KhoaLuan_PhimVe\01_training\thesis_project\` vào `C:\Projects\firefly-cinema\ml\` (xem mục "Nơi lưu trữ"); chuyển `02_api` vào `06_backup`; đối chiếu `text_utils.py` với `normalize()`; dọn các bản sao model thừa.
+  - Gom mã train phần A từ `D:\KhoaLuan_PhimVe\01_training\thesis_project\` vào `C:\Projects\firefly-cinema\ml\` (xem mục "Nơi lưu trữ"); API cũ đã ở `backup\02_api_cu`; đối chiếu `text_utils.py` với `normalize()`; ghi SHA256 hai bản model A trên ổ C.
   - Drive `thesis/data/processed/{train,dev,test}.csv` và `error_analysis_taskA.csv`; notebook phần A lưu trên Drive.
   - Repo thêm `ml/README.md` (sơ đồ nơi lưu dữ liệu, model, notebook) và `ml/model_card_A.md` (nội dung mục 5).
   - Cập nhật `requirements-ml.txt` và `HUONG_DAN.md` (nợ kỹ thuật ở mục 8).

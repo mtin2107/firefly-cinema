@@ -27,8 +27,9 @@ Không đọc task đã CLOSED hay report cũ, trừ khi có dependency, mâu th
 7. **Nếu PASS / PASS_WITH_TODO:** đặt task kế tiếp sang `READY_FOR_HANDOFF` theo thứ tự và điều kiện ở `docs/AGENT_RULES.md` mục 1.1, thêm prompt ChatGPT soạn sẵn vào cuối review report, nhắc Tín merge rồi tạo nhánh mới từ master. Không merge, không tag, không đóng task vừa review.
 
 ## Thư mục
-- Thư mục gốc duy nhất: `C:\Projects\firefly-cinema` (Git, nhánh `master`).
-- `D:\KhoaLuan_PhimVe` chỉ là kho file lớn (model, dữ liệu, sao lưu). Được ĐỌC, KHÔNG sửa code ở đó.
+- Thư mục gốc duy nhất: `C:\Projects\firefly-cinema` (Git, nhánh `master`). Mọi hoạt động diễn ra ở đây.
+- File lớn nằm trong repo nhưng ngoài Git: `data\` (CSV), `ml\artifacts\` (model gốc, joblib), `backend\models\`, `backup\`. Khi review, kiểm tra không file nào trong số đó bị `git add`.
+- `D:\KhoaLuan_PhimVe` ngừng sử dụng từ 04/10/2026. Task mới mà ghi đường dẫn `D:\` là lỗi cần nêu trong review.
 - Code mới đặt đúng chỗ theo cây thư mục đích ở `docs/ARCHITECTURE.md` mục 1b. Không dời hay tổ chức lại cấu trúc hiện có.
 
 ## Môi trường và gate

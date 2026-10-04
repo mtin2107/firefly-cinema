@@ -20,24 +20,24 @@ Trước khi áp dụng workflow: giao diện React đầy đủ (`giao-dien-v1`
 
 ## 4. Current Project Status
 ```
-Overall Status: PLANNING
-Phase: PO duyệt Task Record T00–T15 (bản nháp đã có)
-Current Active Task: NONE
-Next Task: NOT SELECTED
+Overall Status: READY_FOR_HANDOFF
+Phase: Bắt đầu T00 (gửi cho ChatGPT/Codex)
+Current Active Task: T00
+Next Task: T00 — nhánh task/T00-gom-ma-o-d
 Ngày bắt đầu sản phẩm: 05/10/2026 · Hạn: 01/11/2026
 ```
 
 ## 5. Current Active Task
-NONE
+T00 — Gom mã từ ổ D, lưu trữ dữ liệu, model card A · READY_FOR_HANDOFF
 
 ## 6. Current Task Record
-NONE — sẽ trỏ tới `docs/tasks/Txx.md` khi có task READY_FOR_HANDOFF.
+[docs/tasks/T00.md](tasks/T00.md)
 
 ## 7. Roadmap và trạng thái
 
 | ID | Task | Loại | Tuần | Phụ thuộc | Task Record | Trạng thái |
 |---|---|---|---|---|---|---|
-| T00 | Gom mã từ ổ D, lưu trữ dữ liệu, model card A | ML | 1 | — | [T00.md](tasks/T00.md) | PLANNED |
+| T00 | Gom mã từ ổ D, lưu trữ dữ liệu, model card A | ML | 1 | — | [T00.md](tasks/T00.md) | READY_FOR_HANDOFF |
 | T01 | Mô hình truyền thống (NB, LR, SVM) | ML | 1 | T00 | [T01.md](tasks/T01.md) | PLANNED |
 | T02 | So sánh PhoBERT với mô hình truyền thống | ML | 1 | T01 | [T02.md](tasks/T02.md) | PLANNED |
 | T03 | Bộ dữ liệu bình luận phim | Dữ liệu | 1–2 | — | [T03.md](tasks/T03.md) | PLANNED (BLOCKED Q1) |
@@ -77,12 +77,14 @@ Nếu trễ: cắt T14 → T15 → rút gọn T05. Không cắt T01–T03, T07�
 | T11 | Cần thêm `httpx` (TestClient) cùng `pytest` | Chờ PO cho phép |
 
 ## 11. Current Next Step
-1. **Tín (PO):** đọc 16 Task Record bản nháp trong `docs/tasks/`. Có thể nhờ Codex rà lại (prompt `AGENT_RULES.md` 6.1, đổi việc thành "rà và đề xuất sửa", không viết lại từ đầu).
-2. **Tín (PO):** chốt T00 và T03 trước; ghi "PO duyệt Task Record Txx — <ngày>" vào mục 12, đổi trạng thái sang READY_FOR_HANDOFF. Trả lời Q1 để mở khóa T03.
-3. **Tín:** chọn task đầu tiên (đề xuất T00), điền mục 4–6, tạo nhánh `task/T00-gom-ma-o-d`, dán prompt 6.2 cho Codex.
+1. **Quy ước duyệt:** Tín gửi `Txx.md` cho ChatGPT/Codex = PO duyệt, task chuyển `READY_FOR_HANDOFF`.
+2. **Codex:** nhận T00, chuyển `READY_FOR_HANDOFF → IN_PROGRESS`, làm theo prompt 6.2. Tín trả lời Q1 để mở khóa T03 (song song).
+3. **Claude:** review T00 khi trạng thái là `CLAUDE_REVIEW`.
 
 ## 12. Active Timeline
 | Ngày | Ai | Sự kiện |
 |---|---|---|
 | 03/10/2026 | Tín + Claude | Dựng bộ tài liệu workflow (docs/README, SOURCE_OF_TRUTH, ARCHITECTURE, REQUIREMENTS, AGENT_RULES, file điều phối, mẫu task, reports/) |
 | 03/10/2026 | Claude | Soạn bản nháp Task Record T00–T15 (PLANNED, chờ PO duyệt) |
+| 04/10/2026 | Tín | Chốt quy ước: gửi Txx.md cho ChatGPT = PO duyệt. Commit bộ tài liệu (a9d6155) |
+| 04/10/2026 | Tín | T00 → READY_FOR_HANDOFF, tạo nhánh task/T00-gom-ma-o-d |

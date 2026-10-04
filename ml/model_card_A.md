@@ -8,11 +8,12 @@
 | Dữ liệu train | UIT-ViSFD, miền bình luận điện thoại |
 | Bài toán | Phân loại nhị phân `has_negative` |
 | Nhãn | `0 = binh_thuong`, `1 = tieu_cuc` |
-| Kiến trúc | `RobertaForSequenceClassification` dùng PhoBERT-base, 2 nhãn, `max_position_embeddings=258`, `max_length=256` |
+| Kiến trúc | `RobertaForSequenceClassification` từ pretrained `vinai/phobert-base-v2`, 2 nhãn, `max_position_embeddings=258`, `max_length=256` |
 | Đầu vào | Cột `text_norm`: chữ thường, tách dấu câu, mở rộng một số từ viết tắt; không tách từ |
 | Ngưỡng quyết định | `0.5` cho xác suất nhãn tiêu cực |
 | Phiên bản | `transformers==5.18.0`, `torch==2.11.0` |
-| Kết quả test đã ghi nhận | F1 lớp tiêu cực `0,9178` với `text_norm`; `0,9180` khi dùng `normalize()` hiện tại của backend |
+| Kết quả gốc trong `ml/artifacts/phobert_A.json` | Dev macro-F1 `0,9176` tại epoch 6; test macro-F1 `0,9128`; test accuracy `0,9141` |
+| F1 lớp tiêu cực đã ghi nhận riêng | `0,9178` với `text_norm`; `0,9180` khi dùng `normalize()` hiện tại của backend — không phải macro-F1 |
 
 ## Dữ liệu và phân bố nhãn
 
@@ -24,7 +25,9 @@ Các số dưới đây được đếm trực tiếp từ ba CSV trong `data/ui
 | Dev | 1.112 | 516 | 596 |
 | Test | 2.224 | 981 | 1.243 |
 
-Đường dẫn nguồn: `data/uit-visfd/processed/{train,dev,test}.csv`. CSV ở trong project ổ C nhưng ngoài Git. Việc upload và đọc lại từ `MyDrive/thesis/data/processed/` trong runtime Colab mới vẫn cần bằng chứng của Tín.
+Đường dẫn nguồn: `data/uit-visfd/processed/{train,dev,test}.csv`. CSV ở trong project ổ C nhưng ngoài Git. Ba split đã upload lên `MyDrive/thesis/data/processed/`; runtime Colab mới đã đọc thành công ngày 04/10/2026. File phân tích lỗi ở `MyDrive/thesis/results/error_analysis_taskA.csv` và bản sao notebook ở `MyDrive/thesis/notebooks/phobert_A.ipynb` cũng đã được kiểm tra tồn tại.
+
+Notebook `phobert_A.ipynb` là bản sao notebook lịch sử A/B/C; còn lệnh cài thư viện và đường dẫn cũ. Việc kiểm tra Drive không chứng minh notebook hiện hành đã tái lập toàn bộ quá trình train.
 
 ## Đối chiếu `text_utils.py` ↔ `normalize()`
 

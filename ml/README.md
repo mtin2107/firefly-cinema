@@ -9,15 +9,17 @@
 | Mã chuẩn bị dữ liệu, baseline và train PhoBERT | `ml/src/` | Chưa yêu cầu |
 | README gốc của mã train | `ml/README_goc.md` | Chưa yêu cầu |
 | Kết quả JSON nhỏ | `ml/results/` | Chưa yêu cầu |
-| Dữ liệu processed `train/dev/test.csv` | `data/uit-visfd/processed/` (ngoài Git) | `MyDrive/thesis/data/processed/` — chờ upload và kiểm chứng từ Colab mới |
-| Error analysis Task A | `data/uit-visfd/results/error_analysis_taskA.csv` (ngoài Git) | `MyDrive/thesis/results/error_analysis_taskA.csv` — chờ upload |
+| Dữ liệu processed `train/dev/test.csv` | `data/uit-visfd/processed/` (ngoài Git) | `MyDrive/thesis/data/processed/` — đã upload; runtime Colab mới đọc thành công ngày 04/10/2026 |
+| Error analysis Task A | `data/uit-visfd/results/error_analysis_taskA.csv` (ngoài Git) | `MyDrive/thesis/results/error_analysis_taskA.csv` — đã upload, kiểm tra tồn tại từ runtime Colab mới ngày 04/10/2026 |
 | Model A gốc | `ml/artifacts/phobert_A_best/` (ngoài Git) | `MyDrive/thesis_results/phobert_A_best/` |
 | Model A backend | `backend/models/phobert-binhluan/` (ngoài Git) | Không áp dụng |
 | Gói `firefly_phobert.zip` | Chưa có trong project | `MyDrive/thesis_results/firefly_phobert.zip` — chưa xác minh trong T00 |
-| Notebook phần A | Chưa có file notebook trong project | Chờ Tín lưu trên Drive và cung cấp đường dẫn |
+| Notebook phần A | Không đưa notebook vào Git | `MyDrive/thesis/notebooks/phobert_A.ipynb` — bản sao notebook lịch sử A/B/C, đã kiểm tra tồn tại từ runtime Colab mới ngày 04/10/2026 |
 | API cũ để tham chiếu | `backup/02_api_cu/api/` (ngoài Git) | Không áp dụng |
 
 Không chép CSV, model, file nén hoặc backup vào Git. Xem cách khôi phục dữ liệu tại `data/README.md` và thông tin model tại `ml/model_card_A.md`.
+
+Notebook `phobert_A.ipynb` còn lệnh cài thư viện và đường dẫn cũ. Việc lưu bản sao và đọc lại CSV trên Drive không có nghĩa notebook hiện hành đã tái lập toàn bộ quá trình train.
 
 ## Trạng thái baseline truyền thống
 

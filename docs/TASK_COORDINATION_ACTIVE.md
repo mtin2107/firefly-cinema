@@ -20,15 +20,15 @@ Trước khi áp dụng workflow: giao diện React đầy đủ (`giao-dien-v1`
 
 ## 4. Current Project Status
 ```
-Overall Status: FIX_LOOP
-Phase: Codex sửa RF-01 → RF-03 của T00
+Overall Status: CLAUDE_REVIEW
+Phase: Claude review T00 vòng 2 sau fix round 1
 Current Active Task: T00
 Next Task: T00 — nhánh task/T00-gom-ma-o-d
 Ngày bắt đầu sản phẩm: 05/10/2026 · Hạn: 01/11/2026
 ```
 
 ## 5. Current Active Task
-T00 — Gom mã và dữ liệu về project ổ C, model card A · FIX_LOOP
+T00 — Gom mã và dữ liệu về project ổ C, model card A · CLAUDE_REVIEW
 
 ## 6. Current Task Record
 [docs/tasks/T00.md](tasks/T00.md)
@@ -37,7 +37,7 @@ T00 — Gom mã và dữ liệu về project ổ C, model card A · FIX_LOOP
 
 | ID | Task | Loại | Tuần | Phụ thuộc | Task Record | Trạng thái |
 |---|---|---|---|---|---|---|
-| T00 | Gom mã và dữ liệu về project ổ C, model card A | ML | 1 | — | [T00.md](tasks/T00.md) | FIX_LOOP |
+| T00 | Gom mã và dữ liệu về project ổ C, model card A | ML | 1 | — | [T00.md](tasks/T00.md) | CLAUDE_REVIEW |
 | T01 | Mô hình truyền thống (NB, LR, SVM) | ML | 1 | T00 | [T01.md](tasks/T01.md) | PLANNED |
 | T02 | So sánh PhoBERT với mô hình truyền thống | ML | 1 | T01 | [T02.md](tasks/T02.md) | PLANNED |
 | T03 | Bộ dữ liệu bình luận phim | Dữ liệu | 1–2 | — | [T03.md](tasks/T03.md) | PLANNED (BLOCKED Q1) |
@@ -63,10 +63,7 @@ Nếu trễ: cắt T14 → T15 → rút gọn T05. Không cắt T01–T03, T07�
 - Q2 (Alembic hay xóa `firefly.db`) cần chốt trước T06.
 
 ## 9. Open Required Fixes
-3 — xem `reports/2026-10-04/claude_review_T00_FAIL_2026-10-04.md`
-- RF-01 (Medium): `ml/README.md`, `ml/model_card_A.md`, `data/README.md` còn ghi Drive/notebook "chờ upload / chờ đường dẫn", lệch evidence đã có.
-- RF-02 (Low): report fix dán nguyên văn output ô Colab cho AC-02.
-- RF-03 (Low): model card ghi `vinai/phobert-base-v2` thay vì "PhoBERT-base".
+0 — Codex đã sửa RF-01 → RF-03 và ghi evidence trong `reports/2026-10-04/codex_fix_T00_round1_2026-10-04.md`; chờ Claude kiểm độc lập vòng 2.
 
 ## 10. Open TODOs
 | Nguồn | TODO | Disposition |
@@ -81,8 +78,7 @@ Nếu trễ: cắt T14 → T15 → rút gọn T05. Không cắt T01–T03, T07�
 | T11 | Cần thêm `httpx` (TestClient) cùng `pytest` | Chờ PO cho phép |
 
 ## 11. Current Next Step
-1. **Codex:** sửa đúng RF-01 → RF-03 theo prompt 6.4, chỉ trong allowlist T00; viết `codex_fix_T00_round1_*`, chuyển `FIX_LOOP → CLAUDE_REVIEW`.
-2. **Claude:** review vòng 2 khi trạng thái là `CLAUDE_REVIEW`.
+1. **Claude:** review độc lập RF-01 → RF-03, evidence Colab trong report fix và các gate T00; kết luận vòng 2.
 3. **Tín:** quyết định cách xử lý hai checkpoint model A ở PO review (Claude đề xuất đo F1 test cả hai bản trước T02); không thay model backend khi chưa đo và duyệt.
 
 ## 12. Active Timeline
@@ -100,3 +96,5 @@ Nếu trễ: cắt T14 → T15 → rút gọn T05. Không cắt T01–T03, T07�
 | 04/10/2026 | Tín | Fast-forward `master` tới commit PO `a3ed4cb`, tách thay đổi phạm vi khỏi diff implementation T00 |
 | 04/10/2026 | Codex | Chạy lại scope gate: chỉ 16 file allowlist; cập nhật report, T00 `IN_PROGRESS` → `CLAUDE_REVIEW` |
 | 04/10/2026 | Claude | Review T00: **FAIL** (3 RF tài liệu, gate kỹ thuật đạt). T00 `CLAUDE_REVIEW` → `FIX_LOOP`. Không mở T01 |
+| 04/10/2026 | Tín | Gửi ảnh output Colab có đường dẫn, shape, phân bố nhãn từng split, error analysis, notebook và `T00_DRIVE_CHECK_OK` |
+| 04/10/2026 | Codex | Sửa RF-01 → RF-03, ghi output Colab nguyên văn vào fix report; T00 `FIX_LOOP` → `CLAUDE_REVIEW` |

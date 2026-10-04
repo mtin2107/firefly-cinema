@@ -436,6 +436,8 @@ Có/Không. Nếu có: các bước người dùng phải làm (xóa firefly.db.
 
 ## 11. Quy trình mỗi task
 
+> **Từ 03/10/2026, quy trình chính thức nằm ở `docs/AGENT_RULES.md`** (trạng thái task, gate, tên report, prompt). Mục dưới đây giữ lại để tham khảo; khi khác nhau thì `AGENT_RULES.md` thắng.
+
 1. Tín tạo nhánh: `git checkout -b task/Txx-ten-ngan`.
 2. ChatGPT/Codex đọc `docs/tasks/Txx.md`, thực hiện, rồi báo cáo theo mẫu:
 

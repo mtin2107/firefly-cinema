@@ -145,20 +145,20 @@ Thư mục phải có tối thiểu: `config.json`, `model.safetensors` (hoặc 
 ### 4.2. Đưa model vào backend
 
 1. Tải cả thư mục từ Google Drive về, đặt thành `backend/models/phobert-binhluan/`.
-2. Cài thư viện ML (trong venv):
-   ```bash
-   # Bản CPU, nhẹ hơn nhiều so với bản GPU
-   pip install torch --index-url https://download.pytorch.org/whl/cpu
-   pip install transformers underthesea
+2. Cài thư viện ML đã ghim phiên bản (trong venv, PowerShell):
+   ```powershell
+   pip install torch==2.11.0 --index-url https://download.pytorch.org/whl/cpu
+   pip install transformers==5.18.0
    ```
 3. Sửa `backend/.env`:
    ```
-   MODEL_DIR=models/phobert-binhluan
-   NEGATIVE_LABEL_ID=1
-   USE_WORD_SEGMENT=true
-   ```
-   - `NEGATIVE_LABEL_ID`: chỉ số của nhãn tiêu cực trong `id2label` bạn in ở 4.1. Ví dụ `{0: "binh_thuong", 1: "tieu_cuc"}` thì để `1`. Model 3 lớp cũng dùng được, chỉ cần trỏ đúng lớp tiêu cực.
-   - `USE_WORD_SEGMENT`: PhoBERT cần văn bản đã tách từ (`thất_vọng`, `kịch_bản`). Để `true` nếu lúc train bạn có tách từ. **Bộ tách từ ở backend phải giống lúc train**: backend đang dùng `underthesea`; nếu bạn train bằng VnCoreNLP (RDRSegmenter) thì sửa hàm `_segment` trong `app/classifier.py` cho khớp, nếu không kết quả trên web sẽ kém hơn kết quả trong báo cáo.
+    MODEL_DIR=models/phobert-binhluan
+    NEGATIVE_LABEL_ID=1
+    USE_WORD_SEGMENT=false
+    USE_TEXT_NORM=true
+    ```
+    - `NEGATIVE_LABEL_ID`: chỉ số của nhãn tiêu cực trong `id2label` bạn in ở 4.1. Ví dụ `{0: "binh_thuong", 1: "tieu_cuc"}` thì để `1`. Model 3 lớp cũng dùng được, chỉ cần trỏ đúng lớp tiêu cực.
+    - Model A dùng cột `text_norm`: bật `USE_TEXT_NORM` và để `USE_WORD_SEGMENT=false`. Không tách từ vì dữ liệu train của model A không có dấu gạch dưới nối từ.
 4. Chạy lại backend (`Ctrl + C`, rồi `uvicorn app.main:app --reload --port 8000`).
 5. Mở http://localhost:8000/api/health, phải thấy `"classifier":"phobert"`. Nếu vẫn là `keyword`, xem `classifier_error` để biết lỗi.
 

@@ -1,0 +1,86 @@
+{
+  "Train": {
+    "n_comments": 7786,
+    "overall_dist": {
+      "Negative": 4302,
+      "Positive": 3261,
+      "Neutral": 223
+    },
+    "has_negative_rate": 0.5525,
+    "avg_aspects_per_comment": 3.066,
+    "n_aspect_sentiment_pairs": 23872,
+    "pair_polarity_dist": {
+      "Positive": 13505,
+      "Negative": 7464,
+      "Neutral": 2903
+    },
+    "aspect_dist": {
+      "SCREEN": 949,
+      "CAMERA": 2146,
+      "FEATURES": 2642,
+      "BATTERY": 3604,
+      "PERFORMANCE": 4140,
+      "STORAGE": 91,
+      "DESIGN": 1378,
+      "PRICE": 2061,
+      "GENERAL": 4866,
+      "SER&ACC": 1995
+    }
+  },
+  "Dev": {
+    "n_comments": 1112,
+    "overall_dist": {
+      "Negative": 596,
+      "Positive": 479,
+      "Neutral": 37
+    },
+    "has_negative_rate": 0.536,
+    "avg_aspects_per_comment": 2.982,
+    "n_aspect_sentiment_pairs": 3316,
+    "pair_polarity_dist": {
+      "Positive": 1924,
+      "Negative": 1011,
+      "Neutral": 381
+    },
+    "aspect_dist": {
+      "SCREEN": 121,
+      "CAMERA": 296,
+      "FEATURES": 381,
+      "BATTERY": 504,
+      "PERFORMANCE": 582,
+      "STORAGE": 14,
+      "DESIGN": 187,
+      "PRICE": 252,
+      "GENERAL": 689,
+      "SER&ACC": 290
+    }
+  },
+  "Test": {
+    "n_comments": 2224,
+    "overall_dist": {
+      "Negative": 1243,
+      "Positive": 920,
+      "Neutral": 61
+    },
+    "has_negative_rate": 0.5589,
+    "avg_aspects_per_comment": 3.022,
+    "n_aspect_sentiment_pairs": 6722,
+    "pair_polarity_dist": {
+      "Positive": 3695,
+      "Negative": 2210,
+      "Neutral": 817
+    },
+    "aspect_dist": {
+      "SCREEN": 269,
+      "CAMERA": 588,
+      "FEATURES": 711,
+      "BATTERY": 1014,
+      "PERFORMANCE": 1172,
+      "STORAGE": 27,
+      "DESIGN": 398,
+      "PRICE": 569,
+      "GENERAL": 1381,
+      "SER&ACC": 593
+    }
+  }
+}

@@ -1,4 +1,4 @@
-# Chỉ cài khi bắt đầu gắn model PhoBERT (Phần 4 trong HUONG_DAN.md)
-torch
-transformers
-underthesea
+# Cài torch bản CPU trước:
+# pip install torch==2.11.0 --index-url https://download.pytorch.org/whl/cpu
+torch==2.11.0
+transformers==5.18.0

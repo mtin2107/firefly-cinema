@@ -1,0 +1,172 @@
+{
+  "A_has_negative": {
+    "ComplementNB|text_raw": {
+      "dev_macroF1": 0.8555,
+      "test_macroF1": 0.8466,
+      "test_F1_negative": 0.8634,
+      "test_acc": 0.8485,
+      "params": "ComplementNB(alpha=0.3)"
+    },
+    "LogReg|text_raw": {
+      "dev_macroF1": 0.8798,
+      "test_macroF1": 0.875,
+      "test_F1_negative": 0.8901,
+      "test_acc": 0.8768,
+      "params": "LogisticRegression(C=1, class_weight='balanced', max_iter=2000)"
+    },
+    "LinearSVC|text_raw": {
+      "dev_macroF1": 0.878,
+      "test_macroF1": 0.8755,
+      "test_F1_negative": 0.8903,
+      "test_acc": 0.8772,
+      "params": "LinearSVC(C=0.3, class_weight='balanced')"
+    },
+    "ComplementNB|text_norm": {
+      "dev_macroF1": 0.8538,
+      "test_macroF1": 0.8452,
+      "test_F1_negative": 0.8623,
+      "test_acc": 0.8471,
+      "params": "ComplementNB(alpha=0.3)"
+    },
+    "LogReg|text_norm": {
+      "dev_macroF1": 0.8807,
+      "test_macroF1": 0.8823,
+      "test_F1_negative": 0.8966,
+      "test_acc": 0.884,
+      "params": "LogisticRegression(C=5, class_weight='balanced', max_iter=2000)"
+    },
+    "LinearSVC|text_norm": {
+      "dev_macroF1": 0.8798,
+      "test_macroF1": 0.8813,
+      "test_F1_negative": 0.8958,
+      "test_acc": 0.8831,
+      "params": "LinearSVC(C=0.1, class_weight='balanced')"
+    }
+  },
+  "B_aspect_detection": {
+    "LogReg|text_raw": {
+      "dev_microF1": 0.8651,
+      "test_microF1": 0.8594,
+      "test_macroF1": 0.8415,
+      "per_aspect_F1": {
+        "SCREEN": 0.7582,
+        "CAMERA": 0.9345,
+        "FEATURES": 0.8545,
+        "BATTERY": 0.9524,
+        "PERFORMANCE": 0.872,
+        "STORAGE": 0.7778,
+        "DESIGN": 0.7723,
+        "PRICE": 0.865,
+        "GENERAL": 0.8101,
+        "SER&ACC": 0.8183
+      }
+    },
+    "LinearSVC|text_raw": {
+      "dev_microF1": 0.8692,
+      "test_microF1": 0.8634,
+      "test_macroF1": 0.8432,
+      "per_aspect_F1": {
+        "SCREEN": 0.7621,
+        "CAMERA": 0.9384,
+        "FEATURES": 0.8569,
+        "BATTERY": 0.9556,
+        "PERFORMANCE": 0.8762,
+        "STORAGE": 0.75,
+        "DESIGN": 0.7864,
+        "PRICE": 0.8706,
+        "GENERAL": 0.8106,
+        "SER&ACC": 0.825
+      }
+    },
+    "LogReg|text_norm": {
+      "dev_microF1": 0.8656,
+      "test_microF1": 0.8611,
+      "test_macroF1": 0.8429,
+      "per_aspect_F1": {
+        "SCREEN": 0.7491,
+        "CAMERA": 0.9346,
+        "FEATURES": 0.859,
+        "BATTERY": 0.9524,
+        "PERFORMANCE": 0.8781,
+        "STORAGE": 0.7843,
+        "DESIGN": 0.7778,
+        "PRICE": 0.8654,
+        "GENERAL": 0.8131,
+        "SER&ACC": 0.8149
+      }
+    },
+    "LinearSVC|text_norm": {
+      "dev_microF1": 0.8679,
+      "test_microF1": 0.8636,
+      "test_macroF1": 0.8426,
+      "per_aspect_F1": {
+        "SCREEN": 0.7474,
+        "CAMERA": 0.9392,
+        "FEATURES": 0.8573,
+        "BATTERY": 0.9561,
+        "PERFORMANCE": 0.8796,
+        "STORAGE": 0.75,
+        "DESIGN": 0.7857,
+        "PRICE": 0.876,
+        "GENERAL": 0.8093,
+        "SER&ACC": 0.825
+      }
+    }
+  },
+  "C_aspect_sentiment": {
+    "per-aspect LinearSVC|text_raw": {
+      "test_macroF1": 0.7563,
+      "test_acc": 0.8411,
+      "n_pairs": 6722,
+      "per_class_F1": {
+        "Negative": 0.8425,
+        "Neutral": 0.5309,
+        "Positive": 0.8953
+      },
+      "confusion(rows=true,cols=pred;Neg,Neu,Pos)": [
+        [
+          1913,
+          77,
+          220
+        ],
+        [
+          199,
+          356,
+          262
+        ],
+        [
+          219,
+          91,
+          3385
+        ]
+      ]
+    },
+    "per-aspect LinearSVC|text_norm": {
+      "test_macroF1": 0.7558,
+      "test_acc": 0.8422,
+      "n_pairs": 6722,
+      "per_class_F1": {
+        "Negative": 0.849,
+        "Neutral": 0.5218,
+        "Positive": 0.8967
+      },
+      "confusion(rows=true,cols=pred;Neg,Neu,Pos)": [
+        [
+          1937,
+          82,
+          191
+        ],
+        [
+          204,
+          359,
+          254
+        ],
+        [
+          212,
+          118,
+          3365
+        ]
+      ]
+    }
+  }
+}

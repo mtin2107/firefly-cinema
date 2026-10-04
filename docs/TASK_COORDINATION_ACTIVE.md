@@ -20,15 +20,15 @@ Trước khi áp dụng workflow: giao diện React đầy đủ (`giao-dien-v1`
 
 ## 4. Current Project Status
 ```
-Overall Status: READY_FOR_HANDOFF
-Phase: Bắt đầu T00 (gửi cho ChatGPT/Codex)
+Overall Status: IN_PROGRESS
+Phase: Thực hiện T00
 Current Active Task: T00
 Next Task: T00 — nhánh task/T00-gom-ma-o-d
 Ngày bắt đầu sản phẩm: 05/10/2026 · Hạn: 01/11/2026
 ```
 
 ## 5. Current Active Task
-T00 — Gom mã từ ổ D, lưu trữ dữ liệu, model card A · READY_FOR_HANDOFF
+T00 — Gom mã từ ổ D, lưu trữ dữ liệu, model card A · IN_PROGRESS
 
 ## 6. Current Task Record
 [docs/tasks/T00.md](tasks/T00.md)
@@ -37,7 +37,7 @@ T00 — Gom mã từ ổ D, lưu trữ dữ liệu, model card A · READY_FOR_HA
 
 | ID | Task | Loại | Tuần | Phụ thuộc | Task Record | Trạng thái |
 |---|---|---|---|---|---|---|
-| T00 | Gom mã từ ổ D, lưu trữ dữ liệu, model card A | ML | 1 | — | [T00.md](tasks/T00.md) | READY_FOR_HANDOFF |
+| T00 | Gom mã từ ổ D, lưu trữ dữ liệu, model card A | ML | 1 | — | [T00.md](tasks/T00.md) | IN_PROGRESS |
 | T01 | Mô hình truyền thống (NB, LR, SVM) | ML | 1 | T00 | [T01.md](tasks/T01.md) | PLANNED |
 | T02 | So sánh PhoBERT với mô hình truyền thống | ML | 1 | T01 | [T02.md](tasks/T02.md) | PLANNED |
 | T03 | Bộ dữ liệu bình luận phim | Dữ liệu | 1–2 | — | [T03.md](tasks/T03.md) | PLANNED (BLOCKED Q1) |
@@ -58,6 +58,8 @@ Chuỗi chính: `T00 → T01 → T02` và `T03 → T08 → T09 → T10`. T03 b�
 Nếu trễ: cắt T14 → T15 → rút gọn T05. Không cắt T01–T03, T07–T10.
 
 ## 8. Open Blockers
+- T00 scope gate: `git diff --name-only master...HEAD` gồm 11 file ngoài allowlist do commit PO đổi phạm vi `a3ed4cb` đã có trên nhánh T00 nhưng chưa có trên `master`. Codex không sửa/hoàn tác commit PO; chờ Tín xử lý mốc nhánh hoặc cập nhật Task Record để gate này hợp lệ.
+- T00 model A: hai bản trên ổ C khác toàn bộ 201 tensor; 1/10 câu kiểm thử đổi nhãn. Đã ghi trong model card; chờ PO quyết hướng xử lý sau khi đối chiếu checkpoint/test, không tự thay model backend.
 - Q1 (nguồn bình luận phim, người gán nhãn 2) chặn T03.
 - Q2 (Alembic hay xóa `firefly.db`) cần chốt trước T06.
 
@@ -73,12 +75,13 @@ Nếu trễ: cắt T14 → T15 → rút gọn T05. Không cắt T01–T03, T07�
 | Nợ kỹ thuật | `/api/admin/comments` chưa phân trang | Đưa vào T06 |
 | Nợ kỹ thuật | `comments.model_name` chưa có phiên bản | Đưa vào T10 |
 | Phát hiện 04/10 | `chay-firefly.bat` không có trong repo dù tài liệu ghi "Xong" | Chờ PO: commit file từ máy Tín hoặc đưa vào T00 |
-| Phát hiện 04/10 | Thư mục rỗng `Bao_cao\` ở gốc trùng vai trò `docs\` / `D:\...\05_baocao` | Chờ PO: xóa |
+| Phát hiện 04/10 | Thư mục rỗng `Bao_cao\` ở gốc | Đã xử lý 04/10: giữ làm nơi để bản Word (`*.docx` ngoài Git) |
 | T11 | Cần thêm `httpx` (TestClient) cùng `pytest` | Chờ PO cho phép |
 
 ## 11. Current Next Step
-1. **Quy ước duyệt:** Tín gửi `Txx.md` cho ChatGPT/Codex = PO duyệt, task chuyển `READY_FOR_HANDOFF`.
-2. **Codex:** nhận T00, chuyển `READY_FOR_HANDOFF → IN_PROGRESS`, làm theo prompt 6.2. Tín trả lời Q1 để mở khóa T03 (song song).
+1. **Codex:** hoàn tất report T00 với AC-02 được xác nhận từ runtime Colab mới; ghi scope gate chưa đạt và giữ `IN_PROGRESS`.
+2. **Tín:** xử lý xung đột scope giữa commit PO `a3ed4cb` và `master` theo quy trình Git của dự án; quyết định cách xử lý hai checkpoint model A khác nhau.
+3. **Codex:** chạy lại scope gate theo đúng `master...HEAD`; chỉ chuyển T00 sang `CLAUDE_REVIEW` khi gate đạt.
 3. **Claude:** review T00 khi trạng thái là `CLAUDE_REVIEW`.
 
 ## 12. Active Timeline
@@ -88,3 +91,8 @@ Nếu trễ: cắt T14 → T15 → rút gọn T05. Không cắt T01–T03, T07�
 | 03/10/2026 | Claude | Soạn bản nháp Task Record T00–T15 (PLANNED, chờ PO duyệt) |
 | 04/10/2026 | Tín | Chốt quy ước: gửi Txx.md cho ChatGPT = PO duyệt. Commit bộ tài liệu (a9d6155) |
 | 04/10/2026 | Tín | T00 → READY_FOR_HANDOFF, tạo nhánh task/T00-gom-ma-o-d |
+| 04/10/2026 | Codex | T00: READY_FOR_HANDOFF → IN_PROGRESS; bắt đầu kiểm kê mã, dữ liệu và bản sao model trên ổ D |
+| 04/10/2026 | Codex | Hoàn tất phần local của T00; chuyển API cũ vào `06_backup`, đưa bản gốc model về đúng `D:\KhoaLuan_PhimVe\thesis_results`; chờ Tín cung cấp evidence Drive/Colab và tự xóa hai bản sao model dư |
+| 04/10/2026 | Tín + Claude | **PO đổi phạm vi: mọi hoạt động về ổ C.** Claude chép dữ liệu ổ D vào `data\uit-visfd\`, `ml\artifacts\`, `backup\02_api_cu\` (SHA256 18/18 khớp, ngoài Git); cập nhật T00/T01/T03/T09/T13, SOURCE_OF_TRUTH, ARCHITECTURE, BOI_CANH, AGENT_RULES, CLAUDE.md, `.gitignore`. Ổ D ngừng sử dụng |
+| 04/10/2026 | Tín | Upload ba split CSV, error analysis và bản sao notebook phần A lên Drive; runtime Colab mới đọc đúng 7.786/1.112/2.224 dòng và phân bố nhãn |
+| 04/10/2026 | Codex | Kiểm hai model ổ C: 201/201 tensor khác, 1/10 câu đổi nhãn; final gates kỹ thuật đạt, scope gate `master...HEAD` vướng commit PO ngoài allowlist nên giữ T00 `IN_PROGRESS` |

@@ -20,15 +20,15 @@ Trước khi áp dụng workflow: giao diện React đầy đủ (`giao-dien-v1`
 
 ## 4. Current Project Status
 ```
-Overall Status: PO_REVIEW
-Phase: Tín PO review T00 (Claude round 2: PASS_WITH_TODO)
+Overall Status: PO_APPROVED
+Phase: Tín merge T00 vào master rồi tạo nhánh T01 từ master mới nhất
 Current Active Task: T00
 Next Task: T01 — READY_FOR_HANDOFF, nhánh task/T01-mo-hinh-truyen-thong (tạo sau khi merge T00)
 Ngày bắt đầu sản phẩm: 05/10/2026 · Hạn: 01/11/2026
 ```
 
 ## 5. Current Active Task
-T00 — Gom mã và dữ liệu về project ổ C, model card A · PO_REVIEW
+T00 — Gom mã và dữ liệu về project ổ C, model card A · PO_APPROVED (chờ Tín merge)
 
 ## 6. Current Task Record
 [docs/tasks/T00.md](tasks/T00.md)
@@ -37,7 +37,7 @@ T00 — Gom mã và dữ liệu về project ổ C, model card A · PO_REVIEW
 
 | ID | Task | Loại | Tuần | Phụ thuộc | Task Record | Trạng thái |
 |---|---|---|---|---|---|---|
-| T00 | Gom mã và dữ liệu về project ổ C, model card A | ML | 1 | — | [T00.md](tasks/T00.md) | PO_REVIEW |
+| T00 | Gom mã và dữ liệu về project ổ C, model card A | ML | 1 | — | [T00.md](tasks/T00.md) | PO_APPROVED (chờ merge) |
 | T01 | Mô hình truyền thống (NB, LR, SVM) | ML | 1 | T00 | [T01.md](tasks/T01.md) | READY_FOR_HANDOFF |
 | T02 | So sánh PhoBERT với mô hình truyền thống | ML | 1 | T01 | [T02.md](tasks/T02.md) | PLANNED |
 | T03 | Bộ dữ liệu bình luận phim | Dữ liệu | 1–2 | — | [T03.md](tasks/T03.md) | PLANNED (BLOCKED Q1) |
@@ -58,7 +58,7 @@ Chuỗi chính: `T00 → T01 → T02` và `T03 → T08 → T09 → T10`. T03 b�
 Nếu trễ: cắt T14 → T15 → rút gọn T05. Không cắt T01–T03, T07–T10.
 
 ## 8. Open Blockers
-- T00 model A: hai bản trên ổ C khác toàn bộ 201 tensor; 1/10 câu kiểm thử đổi nhãn. Đã ghi trong model card; chờ PO quyết hướng xử lý sau khi đối chiếu checkpoint/test, không tự thay model backend. Không chặn T01 (T01 không dùng checkpoint PhoBERT); cần chốt trước T02.
+- T02: hai checkpoint model A khác trọng số và `normalize()` khác `text_utils.py`; PO đã chấp nhận xử lý ở T02 bằng phép đo trên cùng tập test. Không chặn T01; không thay model backend trong T00.
 - Q1 (nguồn bình luận phim, người gán nhãn 2) chặn T03.
 - Q2 (Alembic hay xóa `firefly.db`) cần chốt trước T06.
 
@@ -68,9 +68,12 @@ Nếu trễ: cắt T14 → T15 → rút gọn T05. Không cắt T01–T03, T07�
 ## 10. Open TODOs
 | Nguồn | TODO | Disposition |
 |---|---|---|
-| Nợ kỹ thuật | `requirements-ml.txt` còn `underthesea`, chưa ghim phiên bản; `HUONG_DAN.md` 4.2 | Đã sửa trong T00 (chờ PO duyệt) |
-| Phát hiện 03/10 | `backend/.env.example` ghi `USE_WORD_SEGMENT=true`, thiếu `USE_TEXT_NORM` — lệch BOI_CANH 3.4 | Đã sửa trong T00 (chờ PO duyệt) |
-| Claude review T00 r2 | TODO-01 hai checkpoint model A; TODO-02 `normalize()` ≠ `text_utils.py`; TODO-03 `firefly_phobert.zip` chưa xác minh; TODO-04 thụt lề HUONG_DAN 4.2 | Chờ PO disposition (đề xuất: T02 / T02 / T13 / WONT_FIX) |
+| Nợ kỹ thuật | `requirements-ml.txt` còn `underthesea`, chưa ghim phiên bản; `HUONG_DAN.md` 4.2 | Đã sửa và PO duyệt trong T00 |
+| Phát hiện 03/10 | `backend/.env.example` ghi `USE_WORD_SEGMENT=true`, thiếu `USE_TEXT_NORM` — lệch BOI_CANH 3.4 | Đã sửa và PO duyệt trong T00 |
+| Claude review T00 r2 | TODO-01 hai checkpoint model A | ACCEPT_LATER — T02; đo F1 hai bản trên cùng test bằng `normalize()` hiện tại, PO chọn |
+| Claude review T00 r2 | TODO-02 `normalize()` ≠ `text_utils.py` | ACCEPT_LATER — T02; đo ảnh hưởng tiền xử lý trước khi quyết định sửa backend |
+| Claude review T00 r2 | TODO-03 `firefly_phobert.zip` trên Drive chưa xác minh | ACCEPT_LATER — T13; xác minh file, checksum, khả năng khôi phục |
+| Claude review T00 r2 | TODO-04 thụt lề `HUONG_DAN.md` 4.2 | WONT_FIX — Markdown hiển thị đúng, không ảnh hưởng nghiệm thu |
 | Nợ kỹ thuật | `_SAMPLE_SALES` lặp ở `seed.py` và `mock.js` | T12 (tùy chọn) |
 | Nợ kỹ thuật | `/api/admin/comments` chưa phân trang | Đưa vào T06 |
 | Nợ kỹ thuật | `comments.model_name` chưa có phiên bản | Đưa vào T10 |
@@ -79,9 +82,9 @@ Nếu trễ: cắt T14 → T15 → rút gọn T05. Không cắt T01–T03, T07�
 | T11 | Cần thêm `httpx` (TestClient) cùng `pytest` | Chờ PO cho phép |
 
 ## 11. Current Next Step
-1. **Tín:** PO review T00, cho disposition TODO-01 → TODO-04 (review round 2 mục 3), quyết hướng xử lý hai checkpoint model A (Claude đề xuất đo F1 test cả hai bản trước T02).
-2. **Tín:** `git checkout master` → `git merge task/T00-gom-ma-o-d` → `git checkout -b task/T01-mo-hinh-truyen-thong`.
-3. **Tín:** gửi prompt ở mục "Bàn giao task kế tiếp" của review round 2 kèm `T01.md` và file này cho ChatGPT/Codex.
+1. **Tín:** merge nhánh `task/T00-gom-ma-o-d` vào `master` sau PO APPROVED; không merge T01 trước T00.
+2. **Tín:** tạo nhánh `task/T01-mo-hinh-truyen-thong` từ `master` mới nhất. Nếu nhánh T01 tên này đã tồn tại từ trước, kiểm tra điểm tách nhánh trước khi dùng; không bắt đầu trên code T00 chưa merge.
+3. **Tín:** gửi `T01.md`, file điều phối mới này và PO report T00 cho ChatGPT/Codex để bắt đầu T01.
 
 ## 12. Active Timeline
 | Ngày | Ai | Sự kiện |
@@ -101,3 +104,4 @@ Nếu trễ: cắt T14 → T15 → rút gọn T05. Không cắt T01–T03, T07�
 | 04/10/2026 | Tín | Gửi ảnh output Colab có đường dẫn, shape, phân bố nhãn từng split, error analysis, notebook và `T00_DRIVE_CHECK_OK` |
 | 04/10/2026 | Codex | Sửa RF-01 → RF-03, ghi output Colab nguyên văn vào fix report; T00 `FIX_LOOP` → `CLAUDE_REVIEW` |
 | 04/10/2026 | Claude | Review T00 vòng 2: **PASS_WITH_TODO** (RF-01 → RF-03 đã sửa, gate đạt). T00 `CLAUDE_REVIEW` → `PO_REVIEW`; T01 → `READY_FOR_HANDOFF` |
+| 04/10/2026 | Tín | PO review T00: **APPROVED**, Required Fixes 0; TODO-01/02 → T02, TODO-03 → T13, TODO-04 WONT_FIX; chờ Tín merge vào `master` |

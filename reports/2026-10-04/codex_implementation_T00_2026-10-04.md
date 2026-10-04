@@ -2,7 +2,7 @@
 
 ## Task / Result
 
-T00 — Gom mã và dữ liệu từ ổ D về repo ổ C, model card A. **Implementation hoàn tất, chưa bàn giao review:** scope gate `git diff --name-only master...HEAD` chưa đạt do commit PO đổi phạm vi `a3ed4cb` có 11 file ngoài allowlist T00. T00 giữ `IN_PROGRESS`; Codex không tự sửa/hoàn tác commit PO.
+T00 — Gom mã và dữ liệu từ ổ D về repo ổ C, model card A. **Implementation hoàn tất, bàn giao `CLAUDE_REVIEW`.** Tín đã đưa riêng commit PO đổi phạm vi `a3ed4cb` vào `master` bằng fast-forward; scope gate `git diff --name-only master...HEAD` hiện chỉ liệt kê file trong allowlist T00.
 
 ## Files Changed
 
@@ -46,7 +46,7 @@ Project chính duy nhất: `C:\Projects\firefly-cinema`. CSV ở `data/uit-visfd
 | ML tái lập train | Không áp dụng cho T00: không train lại model trong scope |
 | Hồi quy web | Health và build đạt; không đổi luồng web, không chạy checklist tương tác 7 mục |
 | `git diff --cached --check` | Đạt |
-| Scope `git diff --name-only master...HEAD` | **Chưa đạt**: commit PO `a3ed4cb` có 11 file ngoài allowlist |
+| Scope `git diff --name-only master...HEAD` | Đạt: chỉ 16 file trong allowlist T00 |
 
 ## Acceptance Criteria AC-01 → AC-10
 
@@ -69,16 +69,15 @@ Không stage/commit `.env`, `firefly.db`, CSV, `.safetensors`, `.bin`, `.zip`, `
 
 ## Scope result
 
-Diff phần Codex đã stage chỉ gồm file trong allowlist T00. Tuy nhiên, lệnh bắt buộc `git diff --name-only master...HEAD` liệt kê 11 file ngoài allowlist: `.gitignore`, `CLAUDE.md`, `docs/AGENT_RULES.md`, `docs/ARCHITECTURE.md`, `docs/BOI_CANH_DU_AN.md`, `docs/PROJECT_SOURCE_OF_TRUTH.md`, `docs/tasks/T00.md`, `docs/tasks/T01.md`, `docs/tasks/T03.md`, `docs/tasks/T09.md`, `docs/tasks/T13.md`. Đây là commit PO đổi phạm vi `a3ed4cb`, đã có trước phần implementation của Codex và chưa có trên `master`. Không được đánh scope PASS khi so với `master`.
+`git diff --name-only master...HEAD` sau khi Tín fast-forward `master` tới commit PO `a3ed4cb` chỉ có 16 file của implementation T00: `HUONG_DAN.md`, `backend/.env.example`, `backend/requirements-ml.txt`, `data/README.md`, `docs/TASK_COORDINATION_ACTIVE.md`, 10 file dưới `ml/`, và report này. Tất cả đều nằm trong allowlist. Không có `.env`, database, CSV hoặc model trong diff.
 
 ## Blockers
 
-1. Scope gate chưa đạt vì mốc `master` chưa chứa commit PO đổi phạm vi. Chờ Tín xử lý Git/quy ước allowlist; Codex không tự merge vào `master`.
-2. Hai checkpoint model A khác trọng số và một câu đổi nhãn; cần PO quyết sau khi đối chiếu nhật ký train và kết quả test. Điều này không chặn việc lưu tài liệu T00, nhưng không được tự thay model backend.
+Không còn blocker cho bàn giao Claude review. Hai checkpoint model A khác trọng số và một câu đổi nhãn là vấn đề cần PO quyết sau khi đối chiếu nhật ký train và kết quả test; không tự thay model backend trong T00.
 
 ## Required Follow-up
 
-- Tín xử lý mốc Git để `git diff --name-only master...HEAD` chỉ còn file T00 trong allowlist, hoặc cập nhật Task Record/quy định gate bằng quyết định PO rõ ràng. Sau đó Codex chạy lại scope gate và chuyển `CLAUDE_REVIEW` nếu đạt.
+- Claude review độc lập code, tài liệu, evidence Drive/Colab và final gates theo `AGENT_RULES.md`.
 - PO quyết cách xử lý hai bản model A khác trọng số; nếu cần đo lại F1/đổi model, đưa vào task được duyệt riêng.
 
 ## TODO

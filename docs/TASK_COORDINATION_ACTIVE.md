@@ -20,15 +20,15 @@ Trước khi áp dụng workflow: giao diện React đầy đủ (`giao-dien-v1`
 
 ## 4. Current Project Status
 ```
-Overall Status: IN_PROGRESS
-Phase: Thực hiện T00
+Overall Status: CLAUDE_REVIEW
+Phase: Claude review T00
 Current Active Task: T00
 Next Task: T00 — nhánh task/T00-gom-ma-o-d
 Ngày bắt đầu sản phẩm: 05/10/2026 · Hạn: 01/11/2026
 ```
 
 ## 5. Current Active Task
-T00 — Gom mã từ ổ D, lưu trữ dữ liệu, model card A · IN_PROGRESS
+T00 — Gom mã và dữ liệu về project ổ C, model card A · CLAUDE_REVIEW
 
 ## 6. Current Task Record
 [docs/tasks/T00.md](tasks/T00.md)
@@ -37,7 +37,7 @@ T00 — Gom mã từ ổ D, lưu trữ dữ liệu, model card A · IN_PROGRESS
 
 | ID | Task | Loại | Tuần | Phụ thuộc | Task Record | Trạng thái |
 |---|---|---|---|---|---|---|
-| T00 | Gom mã từ ổ D, lưu trữ dữ liệu, model card A | ML | 1 | — | [T00.md](tasks/T00.md) | IN_PROGRESS |
+| T00 | Gom mã và dữ liệu về project ổ C, model card A | ML | 1 | — | [T00.md](tasks/T00.md) | CLAUDE_REVIEW |
 | T01 | Mô hình truyền thống (NB, LR, SVM) | ML | 1 | T00 | [T01.md](tasks/T01.md) | PLANNED |
 | T02 | So sánh PhoBERT với mô hình truyền thống | ML | 1 | T01 | [T02.md](tasks/T02.md) | PLANNED |
 | T03 | Bộ dữ liệu bình luận phim | Dữ liệu | 1–2 | — | [T03.md](tasks/T03.md) | PLANNED (BLOCKED Q1) |
@@ -58,7 +58,6 @@ Chuỗi chính: `T00 → T01 → T02` và `T03 → T08 → T09 → T10`. T03 b�
 Nếu trễ: cắt T14 → T15 → rút gọn T05. Không cắt T01–T03, T07–T10.
 
 ## 8. Open Blockers
-- T00 scope gate: `git diff --name-only master...HEAD` gồm 11 file ngoài allowlist do commit PO đổi phạm vi `a3ed4cb` đã có trên nhánh T00 nhưng chưa có trên `master`. Codex không sửa/hoàn tác commit PO; chờ Tín xử lý mốc nhánh hoặc cập nhật Task Record để gate này hợp lệ.
 - T00 model A: hai bản trên ổ C khác toàn bộ 201 tensor; 1/10 câu kiểm thử đổi nhãn. Đã ghi trong model card; chờ PO quyết hướng xử lý sau khi đối chiếu checkpoint/test, không tự thay model backend.
 - Q1 (nguồn bình luận phim, người gán nhãn 2) chặn T03.
 - Q2 (Alembic hay xóa `firefly.db`) cần chốt trước T06.
@@ -79,9 +78,8 @@ Nếu trễ: cắt T14 → T15 → rút gọn T05. Không cắt T01–T03, T07�
 | T11 | Cần thêm `httpx` (TestClient) cùng `pytest` | Chờ PO cho phép |
 
 ## 11. Current Next Step
-1. **Codex:** hoàn tất report T00 với AC-02 được xác nhận từ runtime Colab mới; ghi scope gate chưa đạt và giữ `IN_PROGRESS`.
-2. **Tín:** xử lý xung đột scope giữa commit PO `a3ed4cb` và `master` theo quy trình Git của dự án; quyết định cách xử lý hai checkpoint model A khác nhau.
-3. **Codex:** chạy lại scope gate theo đúng `master...HEAD`; chỉ chuyển T00 sang `CLAUDE_REVIEW` khi gate đạt.
+1. **Claude:** review T00 độc lập theo `AGENT_RULES.md`, report Codex và code thật; chạy lại gate, kết luận `PASS` / `PASS_WITH_TODO` / `FAIL`.
+2. **Tín:** sau review, quyết định cách xử lý hai checkpoint model A khác nhau trong PO review; không thay model backend khi chưa đo và duyệt.
 3. **Claude:** review T00 khi trạng thái là `CLAUDE_REVIEW`.
 
 ## 12. Active Timeline
@@ -96,3 +94,5 @@ Nếu trễ: cắt T14 → T15 → rút gọn T05. Không cắt T01–T03, T07�
 | 04/10/2026 | Tín + Claude | **PO đổi phạm vi: mọi hoạt động về ổ C.** Claude chép dữ liệu ổ D vào `data\uit-visfd\`, `ml\artifacts\`, `backup\02_api_cu\` (SHA256 18/18 khớp, ngoài Git); cập nhật T00/T01/T03/T09/T13, SOURCE_OF_TRUTH, ARCHITECTURE, BOI_CANH, AGENT_RULES, CLAUDE.md, `.gitignore`. Ổ D ngừng sử dụng |
 | 04/10/2026 | Tín | Upload ba split CSV, error analysis và bản sao notebook phần A lên Drive; runtime Colab mới đọc đúng 7.786/1.112/2.224 dòng và phân bố nhãn |
 | 04/10/2026 | Codex | Kiểm hai model ổ C: 201/201 tensor khác, 1/10 câu đổi nhãn; final gates kỹ thuật đạt, scope gate `master...HEAD` vướng commit PO ngoài allowlist nên giữ T00 `IN_PROGRESS` |
+| 04/10/2026 | Tín | Fast-forward `master` tới commit PO `a3ed4cb`, tách thay đổi phạm vi khỏi diff implementation T00 |
+| 04/10/2026 | Codex | Chạy lại scope gate: chỉ 16 file allowlist; cập nhật report, T00 `IN_PROGRESS` → `CLAUDE_REVIEW` |

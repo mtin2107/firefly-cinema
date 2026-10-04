@@ -24,6 +24,7 @@ Không đọc task đã CLOSED hay report cũ, trừ khi có dependency, mâu th
 4. Chạy gate độc lập theo `AGENT_RULES.md` mục 3.
 5. Kết luận **PASS / PASS_WITH_TODO / FAIL**. Nếu FAIL thì ghi RF-01, RF-02… có Severity, File, Problem, Evidence, Expected Fix.
 6. Viết `reports/YYYY-MM-DD/claude_review_Txx_<RESULT>_YYYY-MM-DD.md` (vòng sau thêm `_roundN`), cập nhật file điều phối: PASS → `PO_REVIEW`, FAIL → `FIX_LOOP`.
+7. **Nếu PASS / PASS_WITH_TODO:** đặt task kế tiếp sang `READY_FOR_HANDOFF` theo thứ tự và điều kiện ở `docs/AGENT_RULES.md` mục 1.1, thêm prompt ChatGPT soạn sẵn vào cuối review report, nhắc Tín merge rồi tạo nhánh mới từ master. Không merge, không tag, không đóng task vừa review.
 
 ## Thư mục
 - Thư mục gốc duy nhất: `C:\Projects\firefly-cinema` (Git, nhánh `master`).

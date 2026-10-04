@@ -25,6 +25,8 @@
 
 **Quy ước duyệt (Tín chốt 04/10/2026):** Task Record T00–T15 đã có sẵn bản nháp. Khi Tín gửi `Txx.md` cho ChatGPT/Codex để bắt đầu, task đó **được coi là PO đã duyệt và ở trạng thái `READY_FOR_HANDOFF`** theo đúng nội dung file lúc gửi. Muốn đổi gì thì Tín sửa `Txx.md` trước khi gửi.
 
+**Ủy quyền cho Claude (04/10/2026):** khi review PASS / PASS_WITH_TODO, Claude đặt task kế tiếp sang `READY_FOR_HANDOFF` và soạn sẵn prompt bàn giao (`AGENT_RULES.md` mục 1.1). Duyệt PO, merge và tag vẫn do Tín làm.
+
 ## 3. Thứ tự ưu tiên nguồn khi mâu thuẫn
 
 1. Code và test thật trong repo (đã kiểm chứng).

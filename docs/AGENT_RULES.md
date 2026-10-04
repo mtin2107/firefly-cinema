@@ -26,6 +26,29 @@ CLOSED              File điều phối về "Current Active Task: NONE"
 
 **Mỗi lần chỉ một task ở trạng thái IN_PROGRESS.** Task ML (Colab) và task dữ liệu T03 được phép chạy song song với một task web, nhưng phải ghi rõ trong file điều phối.
 
+### 1.1. Ủy quyền: Claude chuẩn bị task kế tiếp (Tín chốt 04/10/2026)
+
+Ngoại lệ có chủ đích so với chính sách mục 2.2 ("Claude không tự tạo task tiếp theo"). Task Record T00–T15 đã có sẵn, nên Claude **chỉ chuyển trạng thái, không soạn task mới**.
+
+Khi Claude review task hiện tại ra **PASS** hoặc **PASS_WITH_TODO** (mọi TODO đều không chặn task sau), Claude làm thêm:
+1. Chọn task kế tiếp theo **thứ tự bàn giao** bên dưới: lấy task đầu tiên chưa xong mà đạt cả 3 điều kiện:
+   - mọi dependency đã `CLOSED`, hoặc chính là task vừa PASS;
+   - không bị chặn bởi câu hỏi mở (Q1–Q4) hay blocker;
+   - không phải task tùy chọn (T14, T15 chỉ mở khi Tín yêu cầu).
+2. Ghi task đó là `READY_FOR_HANDOFF` trong file điều phối, cùng commit với review report.
+3. Ở cuối review report, thêm mục **"Bàn giao task kế tiếp"** gồm prompt ChatGPT soạn sẵn cho task đó, theo mẫu prompt T00.
+
+Claude **không** được: chuyển task vừa review sang `PO_APPROVED` / `CLOSED`, merge, gắn tag, hay sửa nội dung `Txx.md`.
+FAIL thì không mở task kế tiếp.
+
+**Thứ tự bàn giao:** T00 → T01 → T02 → T04 → T05 → T06 → T07 → T08 → T09 → T10 → T11 → T12 → T13.
+T03 chạy song song: Claude đánh dấu T03 `READY_FOR_HANDOFF` ngay khi Q1 được chốt.
+
+**Việc Tín vẫn phải làm trước khi gửi task kế tiếp cho ChatGPT:**
+1. PO review task vừa PASS, rồi `git checkout master` → `git merge task/Txx-...` (gắn tag nếu là mốc).
+2. `git checkout -b task/Tyy-...` **từ master đã merge**, để Codex làm trên code mới nhất.
+3. Gửi prompt trong mục "Bàn giao task kế tiếp" kèm `Tyy.md` và file điều phối.
+
 ## 2. Ai được sửa gì
 
 | File | Codex | Claude | Tín |
@@ -33,7 +56,7 @@ CLOSED              File điều phối về "Current Active Task: NONE"
 | Production code (`frontend/`, `backend/`, `ml/src/`) | Có, trong allowlist | **Không** | Có |
 | Test (`backend/tests/`) | Có | Chỉ probe tạm, xóa trước gate cuối | Có |
 | `docs/tasks/Txx.md` | Soạn ở PLANNING; sau khi duyệt chỉ sửa khi Tín yêu cầu | Không | Có |
-| `docs/TASK_COORDINATION_ACTIVE.md` | Cập nhật trạng thái mình chuyển được | Cập nhật kết quả review | Cập nhật duyệt PO |
+| `docs/TASK_COORDINATION_ACTIVE.md` | Cập nhật trạng thái mình chuyển được | Cập nhật kết quả review; đặt task kế tiếp `READY_FOR_HANDOFF` khi PASS (mục 1.1) | Cập nhật duyệt PO |
 | `docs/ARCHITECTURE.md`, `CONG_NGHE.md`, `HUONG_DAN.md` | Khi task đổi kiến trúc / thư viện / cách chạy | Không | Có |
 | `docs/PROJECT_SOURCE_OF_TRUTH.md`, `AGENT_RULES.md`, `BOI_CANH_DU_AN.md` | Không | Không | Có |
 | `reports/` | Report của mình | Report của mình | Report PO |

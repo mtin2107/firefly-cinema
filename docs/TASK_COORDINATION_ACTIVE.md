@@ -20,15 +20,15 @@ Trước khi áp dụng workflow: giao diện React đầy đủ (`giao-dien-v1`
 
 ## 4. Current Project Status
 ```
-Overall Status: CLAUDE_REVIEW
-Phase: T01 DONE/CLOSED; T02 CLAUDE_REVIEW
-Current Active Task: T02 — chờ Claude review độc lập
+Overall Status: FIX_LOOP
+Phase: T01 DONE/CLOSED; T02 FIX_LOOP (Claude review FAIL, RF-01, RF-02)
+Current Active Task: T02 — chờ Codex sửa RF-01, RF-02
 Next Task: NONE — không mở task kế tiếp trước khi T02 qua review
 Ngày bắt đầu sản phẩm: 05/10/2026 · Hạn: 01/11/2026
 ```
 
 ## 5. Current Active Task
-T02 — So sánh PhoBERT với mô hình truyền thống · CLAUDE_REVIEW
+T02 — So sánh PhoBERT với mô hình truyền thống · FIX_LOOP
 
 ## 6. Current Task Record
 [docs/tasks/T02.md](tasks/T02.md)
@@ -39,7 +39,7 @@ T02 — So sánh PhoBERT với mô hình truyền thống · CLAUDE_REVIEW
 |---|---|---|---|---|---|---|
 | T00 | Gom mã và dữ liệu về project ổ C, model card A | ML | 1 | — | [T00.md](tasks/T00.md) | PO_APPROVED (đã có trên master tại `20daf6a`) |
 | T01 | Mô hình truyền thống (NB, LR, SVM) | ML | 1 | T00 | [T01.md](tasks/T01.md) | DONE / CLOSED |
-| T02 | So sánh PhoBERT với mô hình truyền thống | ML | 1 | T01 | [T02.md](tasks/T02.md) | CLAUDE_REVIEW |
+| T02 | So sánh PhoBERT với mô hình truyền thống | ML | 1 | T01 | [T02.md](tasks/T02.md) | FIX_LOOP |
 | T03 | Bộ dữ liệu bình luận phim | Dữ liệu | 1–2 | — | [T03.md](tasks/T03.md) | PLANNED (BLOCKED Q1) |
 | T04 | Quản lý phim (admin) | Web | 2 | — | [T04.md](tasks/T04.md) | PLANNED |
 | T05 | Quản lý suất chiếu (admin) | Web | 2 | T04 | [T05.md](tasks/T05.md) | PLANNED |
@@ -58,12 +58,16 @@ Chuỗi chính: `T00 → T01 → T02` và `T03 → T08 → T09 → T10`. T03 b�
 Nếu trễ: cắt T14 → T15 → rút gọn T05. Không cắt T01–T03, T07–T10.
 
 ## 8. Open Blockers
-- T02: phép đo hoàn tất trên artifact PhoBERT A gốc; chênh F1 `text_norm`/`normalize(text_raw)` lớn nhất `0,003217 < 0,01`, nên không phát sinh blocker preprocessing. Hai checkpoint vẫn khác trọng số; T02 không thay model backend.
+- T02: phép đo hoàn tất trên artifact PhoBERT A gốc; chênh F1 `text_norm`/`normalize(text_raw)` lớn nhất `0,003217 < 0,01`, nên không phát sinh blocker preprocessing. Hai checkpoint vẫn khác trọng số; probe Claude: checkpoint backend F1 neg 0,9178 (text_norm) / 0,9180 (normalize), checkpoint gốc 0,9216 / 0,9199. Mốc 0,918 thuộc bản backend → RF-02, PO chọn sau khi Codex ghi đủ số. T02 không thay model backend.
 - Q1 (nguồn bình luận phim, người gán nhãn 2) chặn T03.
 - Q2 (Alembic hay xóa `firefly.db`) cần chốt trước T06.
 
 ## 9. Open Required Fixes
-0 — Claude review T01 không có RF (`reports/2026-10-05/claude_review_T01_PASS_WITH_TODO_2026-10-05.md`). RF-01 → RF-03 của T00 đã đóng.
+2 — Claude review T02 FAIL (`reports/2026-10-05/claude_review_T02_FAIL_2026-10-05.md`):
+- RF-01 (Medium): `error_analysis.md` phân nhóm bằng từ khóa sai nhiều câu, nhóm "Nhãn nhiễu" luôn 0, bảng tổng hợp chỉ là hạn mức round-robin, trade-off thiếu số tốc độ/dung lượng.
+- RF-02 (Medium): chưa đo checkpoint backend theo disposition TODO-01 T00; ghi rõ checkpoint nào trong bảng so sánh, PO chọn.
+
+RF-01 → RF-03 của T00 đã đóng; T01 không có RF.
 
 ## 10. Open TODOs
 | Nguồn | TODO | Disposition |
@@ -83,11 +87,15 @@ Nếu trễ: cắt T14 → T15 → rút gọn T05. Không cắt T01–T03, T07�
 | Claude review T01 | TODO-01 ba `.joblib` chưa có trên `MyDrive/thesis_results/baselines/` | ACCEPT_WITH_ACTION — Tín upload trước khi bắt đầu implementation T02 |
 | Claude review T01 | TODO-02 `baselines.py` viết lại, bỏ baseline Task B/C + ablation `text_raw`, report Codex không ghi | ACCEPT — PO chấp nhận, không yêu cầu sửa T01 |
 | Claude review T01 | TODO-03 `EXPECTED_SPLITS` cố định cho UIT-ViSFD | ACCEPT_LATER → T09 |
-| Claude review T01 | TODO-04 `ms_per_sentence` dùng `process_time` (độ phân giải Windows thô, dao động ~2×) | ACCEPT_LATER → T02; đo CPU 4 mô hình cùng phương pháp bằng `time.perf_counter` |
+| Claude review T01 | TODO-04 `ms_per_sentence` dùng `process_time` (độ phân giải Windows thô, dao động ~2×) | ACCEPT_LATER → T02; đo CPU 4 mô hình cùng phương pháp bằng `time.perf_counter` — Claude review T02: đã xử lý, đề xuất đóng |
+| Claude review T02 | TODO-01 latency tuyệt đối phụ thuộc tải máy (Claude đo nhanh hơn ~2,5–3×); chưa ghi cách dựng môi trường torch + sklearn | Đề xuất xử lý trong vòng fix T02 |
+| Claude review T02 | TODO-02 không checkpoint nào tái lập `phobert_A.json` (macro 0,9128 / acc 0,9141) | Đề xuất ACCEPT_LATER → PO; ghi chú trong model card |
+| Claude review T02 | TODO-03 notebook không có assert AC-03; report nhắc `NOTEBOOK_EXECUTION_OK` không có trong notebook | Đề xuất xử lý trong vòng fix T02 |
+| Claude review T02 | TODO-04 `size_mb` là MiB nhưng ghi MB | Đề xuất WONT_FIX / ghi chú đơn vị |
 
 ## 11. Current Next Step
-1. **Claude:** review độc lập T02, chạy lại gate CPU khả thi và đối chiếu report/kết quả.
-2. **Tín:** PO review sau kết luận của Claude.
+1. **Tín:** gửi report `claude_review_T02_FAIL_2026-10-05.md` + coordination cho Codex (prompt Fix, AGENT_RULES 6.4).
+2. **Codex:** sửa RF-01, RF-02 trên nhánh `task/T02-so-sanh-A`, viết `codex_fix_T02_round1_*`, chuyển `FIX_LOOP` → `CLAUDE_REVIEW`.
 3. Không merge hoặc mở task phụ thuộc tiếp theo trước khi T02 qua Claude review và PO review.
 
 ## 12. Active Timeline
@@ -114,3 +122,4 @@ Nếu trễ: cắt T14 → T15 → rút gọn T05. Không cắt T01–T03, T07�
 | 05/10/2026 | Tín | PO review T01: **APPROVED**; merge T01 vào `master`; T01 `DONE/CLOSED`; T02 `READY_FOR_HANDOFF` |
 | 05/10/2026 | Codex | Xác minh đúng nhánh T02, nhánh chứa master đã merge T01; PO xác nhận artifact Drive và ba `.joblib` local tồn tại; T02 `READY_FOR_HANDOFF` → `IN_PROGRESS` |
 | 05/10/2026 | Codex | Hoàn tất so sánh 4 model × 2 input, benchmark CPU, confusion matrix, error analysis và 3 lượt tái lập metric (max diff 0); T02 `IN_PROGRESS` → `CLAUDE_REVIEW` |
+| 05/10/2026 | Claude | Review T02: **FAIL** (RF-01 error analysis, RF-02 hai checkpoint; metric/PNG/error_analysis tái lập từng byte, preprocessing max Δ 0,003217, baseline parity 0). T02 `CLAUDE_REVIEW` → `FIX_LOOP`. Không mở task kế tiếp |

@@ -20,15 +20,15 @@ Trước khi áp dụng workflow: giao diện React đầy đủ (`giao-dien-v1`
 
 ## 4. Current Project Status
 ```
-Overall Status: READY_FOR_HANDOFF
-Phase: T01 DONE/CLOSED; T02 READY_FOR_HANDOFF
-Current Active Task: NONE
-Next Task: T02 — READY_FOR_HANDOFF, nhánh task/T02-so-sanh-A
+Overall Status: CLAUDE_REVIEW
+Phase: T01 DONE/CLOSED; T02 CLAUDE_REVIEW
+Current Active Task: T02 — chờ Claude review độc lập
+Next Task: NONE — không mở task kế tiếp trước khi T02 qua review
 Ngày bắt đầu sản phẩm: 05/10/2026 · Hạn: 01/11/2026
 ```
 
 ## 5. Current Active Task
-T02 — So sánh PhoBERT với mô hình truyền thống · READY_FOR_HANDOFF
+T02 — So sánh PhoBERT với mô hình truyền thống · CLAUDE_REVIEW
 
 ## 6. Current Task Record
 [docs/tasks/T02.md](tasks/T02.md)
@@ -39,7 +39,7 @@ T02 — So sánh PhoBERT với mô hình truyền thống · READY_FOR_HANDOFF
 |---|---|---|---|---|---|---|
 | T00 | Gom mã và dữ liệu về project ổ C, model card A | ML | 1 | — | [T00.md](tasks/T00.md) | PO_APPROVED (đã có trên master tại `20daf6a`) |
 | T01 | Mô hình truyền thống (NB, LR, SVM) | ML | 1 | T00 | [T01.md](tasks/T01.md) | DONE / CLOSED |
-| T02 | So sánh PhoBERT với mô hình truyền thống | ML | 1 | T01 | [T02.md](tasks/T02.md) | READY_FOR_HANDOFF |
+| T02 | So sánh PhoBERT với mô hình truyền thống | ML | 1 | T01 | [T02.md](tasks/T02.md) | CLAUDE_REVIEW |
 | T03 | Bộ dữ liệu bình luận phim | Dữ liệu | 1–2 | — | [T03.md](tasks/T03.md) | PLANNED (BLOCKED Q1) |
 | T04 | Quản lý phim (admin) | Web | 2 | — | [T04.md](tasks/T04.md) | PLANNED |
 | T05 | Quản lý suất chiếu (admin) | Web | 2 | T04 | [T05.md](tasks/T05.md) | PLANNED |
@@ -58,7 +58,7 @@ Chuỗi chính: `T00 → T01 → T02` và `T03 → T08 → T09 → T10`. T03 b�
 Nếu trễ: cắt T14 → T15 → rút gọn T05. Không cắt T01–T03, T07–T10.
 
 ## 8. Open Blockers
-- T02: hai checkpoint model A khác trọng số và `normalize()` khác `text_utils.py`; PO đã chấp nhận xử lý ở T02 bằng phép đo trên cùng tập test. Không chặn T01; không thay model backend trong T00.
+- T02: phép đo hoàn tất trên artifact PhoBERT A gốc; chênh F1 `text_norm`/`normalize(text_raw)` lớn nhất `0,003217 < 0,01`, nên không phát sinh blocker preprocessing. Hai checkpoint vẫn khác trọng số; T02 không thay model backend.
 - Q1 (nguồn bình luận phim, người gán nhãn 2) chặn T03.
 - Q2 (Alembic hay xóa `firefly.db`) cần chốt trước T06.
 
@@ -86,10 +86,9 @@ Nếu trễ: cắt T14 → T15 → rút gọn T05. Không cắt T01–T03, T07�
 | Claude review T01 | TODO-04 `ms_per_sentence` dùng `process_time` (độ phân giải Windows thô, dao động ~2×) | ACCEPT_LATER → T02; đo CPU 4 mô hình cùng phương pháp bằng `time.perf_counter` |
 
 ## 11. Current Next Step
-1. **Tín:** xác nhận ba `.joblib` đã có trên `MyDrive/thesis_results/baselines/`.
-2. **Tín:** gửi `T02.md` + coordination mới nhất cho ChatGPT/Codex.
-3. **Codex:** chuyển T02 `READY_FOR_HANDOFF` → `IN_PROGRESS`.
-4. Không merge hoặc mở task phụ thuộc tiếp theo trước khi T02 qua Claude review và PO review.
+1. **Claude:** review độc lập T02, chạy lại gate CPU khả thi và đối chiếu report/kết quả.
+2. **Tín:** PO review sau kết luận của Claude.
+3. Không merge hoặc mở task phụ thuộc tiếp theo trước khi T02 qua Claude review và PO review.
 
 ## 12. Active Timeline
 | Ngày | Ai | Sự kiện |
@@ -113,3 +112,5 @@ Nếu trễ: cắt T14 → T15 → rút gọn T05. Không cắt T01–T03, T07�
 | 05/10/2026 | Codex | T01: train NB/LR/LinearSVC trên đúng split T00; 2 lượt chạy có max metric diff 0; pipeline load/predict đạt; T01 `IN_PROGRESS` → `CLAUDE_REVIEW` |
 | 05/10/2026 | Claude | Review T01: **PASS_WITH_TODO** (RF 0, tái lập max diff 0,0, AC-01 → AC-06 đạt). T01 `CLAUDE_REVIEW` → `PO_REVIEW`; T02 → `READY_FOR_HANDOFF` (chờ merge T01) |
 | 05/10/2026 | Tín | PO review T01: **APPROVED**; merge T01 vào `master`; T01 `DONE/CLOSED`; T02 `READY_FOR_HANDOFF` |
+| 05/10/2026 | Codex | Xác minh đúng nhánh T02, nhánh chứa master đã merge T01; PO xác nhận artifact Drive và ba `.joblib` local tồn tại; T02 `READY_FOR_HANDOFF` → `IN_PROGRESS` |
+| 05/10/2026 | Codex | Hoàn tất so sánh 4 model × 2 input, benchmark CPU, confusion matrix, error analysis và 3 lượt tái lập metric (max diff 0); T02 `IN_PROGRESS` → `CLAUDE_REVIEW` |

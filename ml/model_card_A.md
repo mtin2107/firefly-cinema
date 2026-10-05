@@ -93,3 +93,18 @@ Một câu đổi nhãn. Đây là khác biệt có tác động tới sản ph�
 - Model chỉ hỗ trợ kiểm duyệt; không nên coi dự đoán tự động là đánh giá cuối cùng trong tình huống có ảnh hưởng tới người dùng.
 - Không dùng test để chọn siêu tham số. Mọi notebook đánh giá sau phải dùng đúng split cố định và cùng logic `normalize()` đã chốt, hoặc ghi rõ thí nghiệm khác biệt.
 - Dữ liệu ViSFD dùng cho nghiên cứu; cần trích dẫn SA2SL (Phan và cộng sự, 2021). Việc sử dụng thương mại cần kiểm tra lại quyền dữ liệu.
+
+## Benchmark so sánh T02 (05/10/2026)
+
+PhoBERT A tại `ml/artifacts/phobert_A_best/` được đánh giá lại cùng ba pipeline T01 trên đúng 2.224 câu của UIT-ViSFD test. Kết quả `text_norm`: precision tiêu cực `0,916468`, recall tiêu cực `0,926790`, F1 tiêu cực `0,921600`, macro-F1 `0,910492`, accuracy `0,911871`.
+
+CPU batch 1 được đo bằng `time.perf_counter`, warm-up 1 câu rồi đo 1.000 câu test đầu tiên, cùng phương pháp cho cả bốn mô hình. Máy đo: Windows 11, Intel Core i5-12450HX (8 core/12 logical CPU), RAM 16 GB; Python 3.13.2, PyTorch 2.11.0+cpu, Transformers 5.18.0, scikit-learn 1.7.2. Độ trễ trung bình trên `text_norm`:
+
+| Mô hình | ms/câu CPU |
+|---|---:|
+| PhoBERT A | 120,992818 |
+| SVM | 1,067651 |
+| Logistic Regression | 1,081002 |
+| Naive Bayes | 1,372282 |
+
+Số GPU `1,817131 ms/câu` của PhoBERT trong `comparison_A.csv` chỉ là tham khảo, quy đổi từ runtime test lịch sử `4,0413 giây / 2.224 câu`; phép đo lịch sử dùng batching nên không so trực tiếp với CPU batch 1. Kết quả đầy đủ cho `text_norm` và `normalize(text_raw)` nằm ở `ml/results/comparison_A.csv`.

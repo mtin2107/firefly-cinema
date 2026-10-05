@@ -20,26 +20,26 @@ Trước khi áp dụng workflow: giao diện React đầy đủ (`giao-dien-v1`
 
 ## 4. Current Project Status
 ```
-Overall Status: PO_REVIEW
-Phase: Tín PO review T01 (Claude PASS_WITH_TODO), xử lý TODO-01 Drive, rồi merge T01 vào master
-Current Active Task: T01
-Next Task: T02 — READY_FOR_HANDOFF, nhánh task/T02-so-sanh-A; chỉ gửi Codex sau khi T01 PO_APPROVED và đã merge
+Overall Status: READY_FOR_HANDOFF
+Phase: T01 DONE/CLOSED; T02 READY_FOR_HANDOFF
+Current Active Task: NONE
+Next Task: T02 — READY_FOR_HANDOFF, nhánh task/T02-so-sanh-A
 Ngày bắt đầu sản phẩm: 05/10/2026 · Hạn: 01/11/2026
 ```
 
 ## 5. Current Active Task
-T01 — Mô hình truyền thống (NB, LR, SVM) · PO_REVIEW (Claude PASS_WITH_TODO)
+T02 — So sánh PhoBERT với mô hình truyền thống · READY_FOR_HANDOFF
 
 ## 6. Current Task Record
-[docs/tasks/T01.md](tasks/T01.md)
+[docs/tasks/T02.md](tasks/T02.md)
 
 ## 7. Roadmap và trạng thái
 
 | ID | Task | Loại | Tuần | Phụ thuộc | Task Record | Trạng thái |
 |---|---|---|---|---|---|---|
 | T00 | Gom mã và dữ liệu về project ổ C, model card A | ML | 1 | — | [T00.md](tasks/T00.md) | PO_APPROVED (đã có trên master tại `20daf6a`) |
-| T01 | Mô hình truyền thống (NB, LR, SVM) | ML | 1 | T00 | [T01.md](tasks/T01.md) | PO_REVIEW |
-| T02 | So sánh PhoBERT với mô hình truyền thống | ML | 1 | T01 | [T02.md](tasks/T02.md) | READY_FOR_HANDOFF (sau khi merge T01) |
+| T01 | Mô hình truyền thống (NB, LR, SVM) | ML | 1 | T00 | [T01.md](tasks/T01.md) | DONE / CLOSED |
+| T02 | So sánh PhoBERT với mô hình truyền thống | ML | 1 | T01 | [T02.md](tasks/T02.md) | READY_FOR_HANDOFF |
 | T03 | Bộ dữ liệu bình luận phim | Dữ liệu | 1–2 | — | [T03.md](tasks/T03.md) | PLANNED (BLOCKED Q1) |
 | T04 | Quản lý phim (admin) | Web | 2 | — | [T04.md](tasks/T04.md) | PLANNED |
 | T05 | Quản lý suất chiếu (admin) | Web | 2 | T04 | [T05.md](tasks/T05.md) | PLANNED |
@@ -80,16 +80,16 @@ Nếu trễ: cắt T14 → T15 → rút gọn T05. Không cắt T01–T03, T07�
 | Phát hiện 04/10 | `chay-firefly.bat` không có trong repo dù tài liệu ghi "Xong" | Chờ PO: commit file từ máy Tín hoặc đưa vào T00 |
 | Phát hiện 04/10 | Thư mục rỗng `Bao_cao\` ở gốc | Đã xử lý 04/10: giữ làm nơi để bản Word (`*.docx` ngoài Git) |
 | T11 | Cần thêm `httpx` (TestClient) cùng `pytest` | Chờ PO cho phép |
-| Claude review T01 | TODO-01 ba `.joblib` chưa có trên `MyDrive/thesis_results/baselines/` | Chờ PO — Tín upload trước khi gửi prompt T02 (T02 chạy Colab cần ba pipeline này) |
-| Claude review T01 | TODO-02 `baselines.py` viết lại, bỏ baseline Task B/C + ablation `text_raw`, report Codex không ghi | Chờ PO — Claude đề xuất ACCEPT (mọi thay đổi do T01 bắt buộc; mã cũ còn ở `20daf6a`) |
-| Claude review T01 | TODO-03 `EXPECTED_SPLITS` cố định cho UIT-ViSFD | Chờ PO — đề xuất ACCEPT_LATER → T09 |
-| Claude review T01 | TODO-04 `ms_per_sentence` dùng `process_time` (độ phân giải Windows thô, dao động ~2×) | Chờ PO — đề xuất ACCEPT_LATER → T02 đo CPU 4 mô hình cùng phương pháp |
+| Claude review T01 | TODO-01 ba `.joblib` chưa có trên `MyDrive/thesis_results/baselines/` | ACCEPT_WITH_ACTION — Tín upload trước khi bắt đầu implementation T02 |
+| Claude review T01 | TODO-02 `baselines.py` viết lại, bỏ baseline Task B/C + ablation `text_raw`, report Codex không ghi | ACCEPT — PO chấp nhận, không yêu cầu sửa T01 |
+| Claude review T01 | TODO-03 `EXPECTED_SPLITS` cố định cho UIT-ViSFD | ACCEPT_LATER → T09 |
+| Claude review T01 | TODO-04 `ms_per_sentence` dùng `process_time` (độ phân giải Windows thô, dao động ~2×) | ACCEPT_LATER → T02; đo CPU 4 mô hình cùng phương pháp bằng `time.perf_counter` |
 
 ## 11. Current Next Step
-1. **Tín:** PO review T01 theo `reports/2026-10-05/claude_review_T01_PASS_WITH_TODO_2026-10-05.md`, cho disposition TODO-01 → TODO-04.
-2. **Tín:** upload ba `.joblib` lên `MyDrive/thesis_results/baselines/` (TODO-01).
-3. **Tín:** sau PO_APPROVED, merge `task/T01-mo-hinh-truyen-thong` vào `master` (không gắn tag; `ml-baselines` gắn khi xong T02), rồi tạo `task/T02-so-sanh-A` từ master mới.
-4. **Tín:** gửi prompt T02 ở mục 15 của review report, kèm `T02.md` và file điều phối. Không bắt đầu T02 trước bước 3.
+1. **Tín:** xác nhận ba `.joblib` đã có trên `MyDrive/thesis_results/baselines/`.
+2. **Tín:** gửi `T02.md` + coordination mới nhất cho ChatGPT/Codex.
+3. **Codex:** chuyển T02 `READY_FOR_HANDOFF` → `IN_PROGRESS`.
+4. Không merge hoặc mở task phụ thuộc tiếp theo trước khi T02 qua Claude review và PO review.
 
 ## 12. Active Timeline
 | Ngày | Ai | Sự kiện |
@@ -112,3 +112,4 @@ Nếu trễ: cắt T14 → T15 → rút gọn T05. Không cắt T01–T03, T07�
 | 04/10/2026 | Tín | PO review T00: **APPROVED**, Required Fixes 0; TODO-01/02 → T02, TODO-03 → T13, TODO-04 WONT_FIX; chờ Tín merge vào `master` |
 | 05/10/2026 | Codex | T01: train NB/LR/LinearSVC trên đúng split T00; 2 lượt chạy có max metric diff 0; pipeline load/predict đạt; T01 `IN_PROGRESS` → `CLAUDE_REVIEW` |
 | 05/10/2026 | Claude | Review T01: **PASS_WITH_TODO** (RF 0, tái lập max diff 0,0, AC-01 → AC-06 đạt). T01 `CLAUDE_REVIEW` → `PO_REVIEW`; T02 → `READY_FOR_HANDOFF` (chờ merge T01) |
+| 05/10/2026 | Tín | PO review T01: **APPROVED**; merge T01 vào `master`; T01 `DONE/CLOSED`; T02 `READY_FOR_HANDOFF` |

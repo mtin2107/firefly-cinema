@@ -5,7 +5,7 @@
 
 ## 1. Project Snapshot
 Firefly Cinema — website đặt vé phim + PhoBERT phân loại bình luận tiêu cực. Khóa luận #67 NTTU.
-Repo `C:\Projects\firefly-cinema`, nhánh `master`. Chi tiết: `PROJECT_SOURCE_OF_TRUTH.md`.
+Repo `C:\Projects\firefly-cinema`, nhánh `task/T01-mo-hinh-truyen-thong`. Chi tiết: `PROJECT_SOURCE_OF_TRUTH.md`.
 
 ## 2. Stable Rules (tóm tắt — bản đầy đủ ở ARCHITECTURE.md và BOI_CANH_DU_AN.md mục 6)
 - Frontend chỉ gọi API qua `src/api/index.js`; endpoint mới có ở cả `real.js` và `mock.js`.
@@ -20,25 +20,25 @@ Trước khi áp dụng workflow: giao diện React đầy đủ (`giao-dien-v1`
 
 ## 4. Current Project Status
 ```
-Overall Status: PO_APPROVED
-Phase: Tín merge T00 vào master rồi tạo nhánh T01 từ master mới nhất
-Current Active Task: T00
-Next Task: T01 — READY_FOR_HANDOFF, nhánh task/T01-mo-hinh-truyen-thong (tạo sau khi merge T00)
+Overall Status: CLAUDE_REVIEW
+Phase: T01 chờ Claude independent review
+Current Active Task: T01
+Next Task: T02 — PLANNED, không mở trước khi T01 qua review/PO và được merge
 Ngày bắt đầu sản phẩm: 05/10/2026 · Hạn: 01/11/2026
 ```
 
 ## 5. Current Active Task
-T00 — Gom mã và dữ liệu về project ổ C, model card A · PO_APPROVED (chờ Tín merge)
+T01 — Mô hình truyền thống (NB, LR, SVM) · CLAUDE_REVIEW
 
 ## 6. Current Task Record
-[docs/tasks/T00.md](tasks/T00.md)
+[docs/tasks/T01.md](tasks/T01.md)
 
 ## 7. Roadmap và trạng thái
 
 | ID | Task | Loại | Tuần | Phụ thuộc | Task Record | Trạng thái |
 |---|---|---|---|---|---|---|
-| T00 | Gom mã và dữ liệu về project ổ C, model card A | ML | 1 | — | [T00.md](tasks/T00.md) | PO_APPROVED (chờ merge) |
-| T01 | Mô hình truyền thống (NB, LR, SVM) | ML | 1 | T00 | [T01.md](tasks/T01.md) | READY_FOR_HANDOFF |
+| T00 | Gom mã và dữ liệu về project ổ C, model card A | ML | 1 | — | [T00.md](tasks/T00.md) | PO_APPROVED (đã có trên master tại `20daf6a`) |
+| T01 | Mô hình truyền thống (NB, LR, SVM) | ML | 1 | T00 | [T01.md](tasks/T01.md) | CLAUDE_REVIEW |
 | T02 | So sánh PhoBERT với mô hình truyền thống | ML | 1 | T01 | [T02.md](tasks/T02.md) | PLANNED |
 | T03 | Bộ dữ liệu bình luận phim | Dữ liệu | 1–2 | — | [T03.md](tasks/T03.md) | PLANNED (BLOCKED Q1) |
 | T04 | Quản lý phim (admin) | Web | 2 | — | [T04.md](tasks/T04.md) | PLANNED |
@@ -80,11 +80,12 @@ Nếu trễ: cắt T14 → T15 → rút gọn T05. Không cắt T01–T03, T07�
 | Phát hiện 04/10 | `chay-firefly.bat` không có trong repo dù tài liệu ghi "Xong" | Chờ PO: commit file từ máy Tín hoặc đưa vào T00 |
 | Phát hiện 04/10 | Thư mục rỗng `Bao_cao\` ở gốc | Đã xử lý 04/10: giữ làm nơi để bản Word (`*.docx` ngoài Git) |
 | T11 | Cần thêm `httpx` (TestClient) cùng `pytest` | Chờ PO cho phép |
+| T01 | Ba baseline `.joblib` chưa sao chép lên Drive vì máy không có Drive mount | Tín chạy tùy chọn `--drive-artifacts` hoặc upload trước PO review |
 
 ## 11. Current Next Step
-1. **Tín:** merge nhánh `task/T00-gom-ma-o-d` vào `master` sau PO APPROVED; không merge T01 trước T00.
-2. **Tín:** tạo nhánh `task/T01-mo-hinh-truyen-thong` từ `master` mới nhất. Nếu nhánh T01 tên này đã tồn tại từ trước, kiểm tra điểm tách nhánh trước khi dùng; không bắt đầu trên code T00 chưa merge.
-3. **Tín:** gửi `T01.md`, file điều phối mới này và PO report T00 cho ChatGPT/Codex để bắt đầu T01.
+1. **Claude:** review độc lập T01 từ diff thật, chạy lại gate CPU và kết luận PASS / PASS_WITH_TODO / FAIL.
+2. **Tín:** sao chép ba `.joblib` lên `MyDrive/thesis_results/baselines/` trước PO review.
+3. Không mở T02, không merge T01 cho tới khi hoàn tất Claude review và PO review.
 
 ## 12. Active Timeline
 | Ngày | Ai | Sự kiện |
@@ -105,3 +106,4 @@ Nếu trễ: cắt T14 → T15 → rút gọn T05. Không cắt T01–T03, T07�
 | 04/10/2026 | Codex | Sửa RF-01 → RF-03, ghi output Colab nguyên văn vào fix report; T00 `FIX_LOOP` → `CLAUDE_REVIEW` |
 | 04/10/2026 | Claude | Review T00 vòng 2: **PASS_WITH_TODO** (RF-01 → RF-03 đã sửa, gate đạt). T00 `CLAUDE_REVIEW` → `PO_REVIEW`; T01 → `READY_FOR_HANDOFF` |
 | 04/10/2026 | Tín | PO review T00: **APPROVED**, Required Fixes 0; TODO-01/02 → T02, TODO-03 → T13, TODO-04 WONT_FIX; chờ Tín merge vào `master` |
+| 05/10/2026 | Codex | T01: train NB/LR/LinearSVC trên đúng split T00; 2 lượt chạy có max metric diff 0; pipeline load/predict đạt; T01 `IN_PROGRESS` → `CLAUDE_REVIEW` |

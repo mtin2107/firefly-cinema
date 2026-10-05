@@ -98,9 +98,16 @@ Cấu hình trong `backend/.env`: `MODEL_DIR=models/phobert-binhluan`, `NEGATIVE
 
 | Thư viện | Task | Dùng để |
 |---|---|---|
-| scikit-learn | T01 | TF-IDF + Naive Bayes, Logistic Regression, SVM |
-| joblib | T01, T07 | Lưu và nạp mô hình truyền thống |
 | pytest | T11 | Kiểm thử tự động backend |
+
+## 5a. Mô hình truyền thống
+
+| Thành phần | Phiên bản | Vai trò |
+|---|---:|---|
+| scikit-learn | 1.7.2 | TF-IDF word/character, MultinomialNB, LogisticRegression và LinearSVC |
+| joblib | 1.5.2 | Lưu và nạp toàn bộ pipeline vectorizer + classifier |
+
+T01 dùng `text_norm` và `has_negative` trên đúng split UIT-ViSFD của T00. Siêu tham số chỉ được chọn trên dev; test chỉ đánh giá các cấu hình cuối.
 
 ---
 

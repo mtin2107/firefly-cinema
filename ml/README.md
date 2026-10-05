@@ -21,11 +21,59 @@ Không chép CSV, model, file nén hoặc backup vào Git. Xem cách khôi phụ
 
 Notebook `phobert_A.ipynb` còn lệnh cài thư viện và đường dẫn cũ. Việc lưu bản sao và đọc lại CSV trên Drive không có nghĩa notebook hiện hành đã tái lập toàn bộ quá trình train.
 
-## Trạng thái baseline truyền thống
+## Baseline truyền thống T01
 
-`ml/src/baselines.py` đã có TF-IDF word/character kết hợp ComplementNB, Logistic Regression và LinearSVC cho Task A; đồng thời có baseline cho Task B và C. Kết quả một lần chạy nằm trong `ml/results/baseline_results.json`.
+Script `ml/src/baselines.py` huấn luyện ba baseline cho Task A trên CPU:
 
-T01 sẽ hoàn thiện trên mã hiện có: kiểm tra tái lập, dùng đúng tập train/dev/test cố định, bổ sung kết quả nhiều seed và bằng chứng cần thiết theo Task Record T01. Không cần viết lại toàn bộ baseline.
+- TF-IDF + MultinomialNB;
+- TF-IDF + LogisticRegression;
+- TF-IDF + LinearSVC.
+
+Mỗi model thử TF-IDF word n-gram `(1, 2)`, char n-gram `(2, 5)` và FeatureUnion word + char. Grid nhỏ gồm `min_df`, `sublinear_tf`, `alpha` hoặc `C`. Cấu hình được chọn chỉ bằng macro-F1 trên dev; script chưa đọc test cho tới khi cả ba cấu hình đã được chốt và pipeline cuối đã train xong.
+
+### Cài dependency
+
+Chạy ở thư mục gốc project bằng PowerShell:
+
+```powershell
+python -m pip install -r ml\requirements-ml-train.txt
+```
+
+### Dữ liệu vào
+
+Ba file cố định từ T00 nằm tại `data\uit-visfd\processed\{train,dev,test}.csv`. Script chỉ dùng cột `text_norm` và nhãn `has_negative`, đồng thời dừng ngay nếu số dòng hoặc phân bố nhãn không khớp `ml/model_card_A.md`.
+
+### Chạy baseline
+
+```powershell
+python ml\src\baselines.py `
+  --data data\uit-visfd\processed `
+  --out ml\results
+```
+
+Kết quả nhỏ được ghi vào `ml\results\baselines.csv`. Ba pipeline đầy đủ được ghi mặc định vào thư mục ngoài Git `ml\artifacts\baselines\`:
+
+- `nb_A.joblib`;
+- `lr_A.joblib`;
+- `svm_A.joblib`.
+
+Khi chạy trên Colab hoặc máy đã mount Google Drive, thêm đối số sau để đồng thời sao chép model tới `MyDrive/thesis_results/baselines/`:
+
+```powershell
+--drive-artifacts <duong-dan-mount>\MyDrive\thesis_results\baselines
+```
+
+Không `git add -f` hoặc commit bất kỳ `.joblib` nào. Model chỉ được lưu ở `ml\artifacts\baselines\` và bản sao Google Drive.
+
+### Kiểm tra tái lập
+
+```powershell
+python ml\src\baselines.py `
+  --data data\uit-visfd\processed `
+  --out $env:TEMP\t01_rerun
+```
+
+So sánh các cột metric giữa hai file `baselines.csv`; timing CPU có thể dao động. Mọi vị trí có randomness dùng `random_state=42`.
 
 ## Lưu ý khi tái lập
 

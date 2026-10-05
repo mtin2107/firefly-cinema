@@ -1,0 +1,7 @@
+model,vectorizer,best_params,split,precision_neg,recall_neg,f1_neg,macro_f1,accuracy,ms_per_sentence,model_size_mb
+MultinomialNB,word,"{""alpha"": 0.1, ""min_df"": 3, ""sublinear_tf"": true, ""vectorizer"": ""word""}",dev,0.877311,0.875839,0.876574,0.867135,0.867806,0.84375,0.630454
+MultinomialNB,word,"{""alpha"": 0.1, ""min_df"": 3, ""sublinear_tf"": true, ""vectorizer"": ""word""}",test,0.869531,0.879324,0.8744,0.856605,0.858813,0.84375,0.630454
+LogisticRegression,word,"{""C"": 1.0, ""min_df"": 2, ""sublinear_tf"": true, ""vectorizer"": ""word""}",dev,0.894472,0.895973,0.895222,0.88699,0.88759,0.640625,0.474881
+LogisticRegression,word,"{""C"": 1.0, ""min_df"": 2, ""sublinear_tf"": true, ""vectorizer"": ""word""}",test,0.886672,0.893805,0.890224,0.874928,0.876799,0.640625,0.474881
+LinearSVC,word,"{""C"": 0.1, ""min_df"": 2, ""sublinear_tf"": true, ""vectorizer"": ""word""}",dev,0.891667,0.897651,0.894649,0.88604,0.886691,0.640625,0.474196
+LinearSVC,word,"{""C"": 0.1, ""min_df"": 2, ""sublinear_tf"": true, ""vectorizer"": ""word""}",test,0.886328,0.897023,0.891643,0.876227,0.878147,0.640625,0.474196

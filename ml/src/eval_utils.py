@@ -15,7 +15,7 @@ import re
 import sys
 import time
 import unicodedata
-from collections import Counter, defaultdict
+from collections import Counter
 from pathlib import Path
 from typing import Callable, Iterable, Sequence
 
@@ -49,6 +49,64 @@ COMPARISON_COLUMNS = (
     "ms_gpu",
     "size_mb",
 )
+
+ERROR_GROUPS = (
+    "Phủ định",
+    "Chê một phần",
+    "Châm biếm",
+    "Từ lóng/viết tắt",
+    "Nhãn nhiễu/thiếu ngữ cảnh",
+    "Khác",
+)
+
+# The 80 rows produced in the first T02 run were manually reviewed on
+# 2026-10-07. These fixed indices and categories are review evidence, not a
+# rule-based estimate of the distribution across every model error.
+REVIEWED_ERROR_INDICES = {
+    "PhoBERT A": (27, 41, 8, 28, 34, 58, 315, 69, 54, 64, 387, 170, 65, 157, 630, 178, 72, 184, 858, 205),
+    "SVM": (9, 38, 1879, 109, 69, 27, 58, 1950, 180, 136, 30, 187, 630, 170, 54, 227, 858, 178, 72, 312),
+    "Logistic Regression": (9, 38, 1879, 109, 69, 27, 41, 1950, 180, 136, 54, 58, 630, 170, 72, 187, 858, 178, 75, 227),
+    "Naive Bayes": (9, 41, 1879, 109, 21, 27, 58, 1950, 180, 69, 30, 64, 2221, 853, 115, 35, 187, 858, 170, 54),
+}
+REVIEWED_ERROR_CATEGORIES = {
+    8: "Nhãn nhiễu/thiếu ngữ cảnh",
+    9: "Phủ định",
+    21: "Khác",
+    27: "Nhãn nhiễu/thiếu ngữ cảnh",
+    28: "Từ lóng/viết tắt",
+    30: "Phủ định",
+    34: "Phủ định",
+    35: "Phủ định",
+    38: "Chê một phần",
+    41: "Chê một phần",
+    54: "Phủ định",
+    58: "Nhãn nhiễu/thiếu ngữ cảnh",
+    64: "Chê một phần",
+    65: "Phủ định",
+    69: "Nhãn nhiễu/thiếu ngữ cảnh",
+    72: "Khác",
+    75: "Phủ định",
+    109: "Từ lóng/viết tắt",
+    115: "Khác",
+    136: "Khác",
+    157: "Khác",
+    170: "Khác",
+    178: "Nhãn nhiễu/thiếu ngữ cảnh",
+    180: "Nhãn nhiễu/thiếu ngữ cảnh",
+    184: "Chê một phần",
+    187: "Chê một phần",
+    205: "Khác",
+    227: "Chê một phần",
+    312: "Khác",
+    315: "Từ lóng/viết tắt",
+    387: "Từ lóng/viết tắt",
+    630: "Từ lóng/viết tắt",
+    853: "Chê một phần",
+    858: "Từ lóng/viết tắt",
+    1879: "Khác",
+    1950: "Chê một phần",
+    2221: "Khác",
+}
 
 # Verbatim preprocessing contract from backend/app/classifier.py on 2026-10-05.
 _ABBR = {
@@ -137,57 +195,82 @@ def plot_confusion_matrix(
     plt.close()
 
 
-def classify_error(text: str, truth: int, prediction: int) -> str:
-    lowered = text.lower()
-    if any(token in lowered for token in ("không", "chẳng", "chưa", "ko ", " k ")):
-        return "Phủ định"
-    if any(token in lowered for token in ("nhưng", "tuy", "mỗi tội", "ngoại trừ")):
-        return "Chê một phần"
-    if any(token in lowered for token in ("haha", "=))", ":)", "quá tuyệt", "xin chúc mừng")):
-        return "Châm biếm"
-    if any(token in lowered.split() for token in _ABBR) or re.search(r"\w*(\w)\1{2,}", lowered):
-        return "Từ lóng/viết tắt"
-    if truth != prediction and len(lowered.split()) <= 3:
-        return "Nhãn nhiễu/thiếu ngữ cảnh"
-    return "Khác"
-
-
 def select_errors(
-    frame: pd.DataFrame, predictions: Sequence[int], count: int = 20
+    frame: pd.DataFrame, predictions: Sequence[int], model_name: str
 ) -> list[dict[str, object]]:
-    candidates: list[dict[str, object]] = []
+    candidates: dict[int, dict[str, object]] = {}
     for row_index, (truth, prediction) in enumerate(
         zip(frame[LABEL_COLUMN].astype(int), predictions)
     ):
         if truth == int(prediction):
             continue
+        item_index = int(frame.iloc[row_index].get("index", row_index))
         raw = str(frame.iloc[row_index]["text_raw"])
-        candidates.append(
+        candidates[item_index] = {
+            "index": item_index,
+            "text": raw.replace("|", "\\|").replace("\n", " "),
+            "true": int(truth),
+            "pred": int(prediction),
+        }
+
+    expected_indices = REVIEWED_ERROR_INDICES[model_name]
+    missing = [index for index in expected_indices if index not in candidates]
+    if missing:
+        raise ValueError(
+            f"Reviewed errors are no longer prediction errors for {model_name}: {missing}"
+        )
+    selected: list[dict[str, object]] = []
+    for index in expected_indices:
+        selected.append(
+            {**candidates[index], "group": REVIEWED_ERROR_CATEGORIES[index]}
+        )
+    counts = Counter(str(item["group"]) for item in selected)
+    if len(selected) != 20 or any(count > 5 for count in counts.values()):
+        raise ValueError(f"Invalid reviewed sample for {model_name}: {counts}")
+    return selected
+
+
+def evaluate_phobert_checkpoint(
+    checkpoint_path: Path, frame: pd.DataFrame, checkpoint_name: str
+) -> pd.DataFrame:
+    """Measure one frozen PhoBERT checkpoint on both T02 input variants."""
+    import torch
+    from transformers import AutoModelForSequenceClassification, AutoTokenizer
+
+    torch.manual_seed(RANDOM_STATE)
+    torch.set_num_threads(max(1, min(4, os.cpu_count() or 1)))
+    tokenizer = AutoTokenizer.from_pretrained(checkpoint_path, local_files_only=True)
+    model = AutoModelForSequenceClassification.from_pretrained(
+        checkpoint_path, local_files_only=True
+    ).to("cpu")
+    model.eval()
+    labels = frame[LABEL_COLUMN].astype(int).tolist()
+    rows: list[dict[str, object]] = []
+    for input_name in ("text_norm", "normalize"):
+        texts = frame[input_name].astype(str).tolist()
+        predictions: list[int] = []
+        for start in range(0, len(texts), 16):
+            batch = tokenizer(
+                texts[start : start + 16],
+                padding=True,
+                truncation=True,
+                max_length=256,
+                return_tensors="pt",
+            )
+            with torch.inference_mode():
+                probabilities = torch.softmax(model(**batch).logits, dim=-1)[:, 1]
+            predictions.extend((probabilities >= 0.5).to(torch.int64).tolist())
+        rows.append(
             {
-                "index": int(frame.iloc[row_index].get("index", row_index)),
-                "text": raw.replace("|", "\\|").replace("\n", " "),
-                "true": int(truth),
-                "pred": int(prediction),
-                "group": classify_error(raw, int(truth), int(prediction)),
+                "checkpoint": checkpoint_name,
+                "input": input_name,
+                **{
+                    key: round(value, 6)
+                    for key, value in compute_metrics(labels, predictions).items()
+                },
             }
         )
-    buckets: dict[str, list[dict[str, object]]] = defaultdict(list)
-    for item in candidates:
-        buckets[str(item["group"])].append(item)
-    selected: list[dict[str, object]] = []
-    groups = (
-        "Phủ định", "Chê một phần", "Châm biếm", "Từ lóng/viết tắt",
-        "Nhãn nhiễu/thiếu ngữ cảnh", "Khác",
-    )
-    while len(selected) < count:
-        added = False
-        for group in groups:
-            if buckets[group] and len(selected) < count:
-                selected.append(buckets[group].pop(0))
-                added = True
-        if not added:
-            break
-    return selected
+    return pd.DataFrame(rows)
 
 
 def environment_info() -> dict[str, object]:
@@ -225,27 +308,37 @@ def write_error_analysis(
         model: Counter(str(item["group"]) for item in items)
         for model, items in errors.items()
     }
-    groups = (
-        "Phủ định", "Chê một phần", "Châm biếm", "Từ lóng/viết tắt",
-        "Nhãn nhiễu/thiếu ngữ cảnh", "Khác",
-    )
     lines = [
         "# Phân tích lỗi T02 — UIT-ViSFD test",
         "",
-        "Phân tích dùng dự đoán `text_norm`. Mỗi mô hình có đúng 20 câu sai, "
-        "được gán nhóm bằng quy tắc từ khóa cố định để hỗ trợ rà soát thủ công; "
-        "nhóm không phải nhãn chuẩn của bộ dữ liệu.",
+        "Phân tích dùng dự đoán `text_norm`. Đây là **mẫu cố định 20 lỗi/mô hình** "
+        "từ lần chạy T02 đầu tiên, tổng cộng 80 dòng (37 câu duy nhất do nhiều mô hình "
+        "có thể sai cùng câu). Codex đã đọc và gán lại thủ công từng dòng ngày 07/10/2026; "
+        "không dùng quy tắc substring hoặc emoticon để quyết định category cuối cùng.",
         "",
-        "## Tổng hợp nhóm lỗi trong 20 câu/mô hình",
+        "Mẫu ban đầu được chọn từ các prediction sai theo thứ tự test và gợi ý phân tầng; "
+        "sau rà soát, giữ nguyên 20 index của mỗi mô hình để việc đối chiếu review tái lập được. "
+        "Các số dưới đây **chỉ là số câu trong mẫu 20**, không phải phân bố trên toàn bộ lỗi "
+        "của mô hình và không được dùng để suy rộng tỷ lệ nguyên nhân.",
+        "",
+        "## Số ví dụ phù hợp trong mẫu 20 lỗi/mô hình",
         "",
         "| Nhóm | PhoBERT A | SVM | Logistic Regression | Naive Bayes |",
         "|---|---:|---:|---:|---:|",
     ]
     model_order = ("PhoBERT A", "SVM", "Logistic Regression", "Naive Bayes")
-    for group in groups:
+    for group in ERROR_GROUPS:
         lines.append(
             "| " + group + " | " + " | ".join(str(counts[m][group]) for m in model_order) + " |"
         )
+    lines.extend(
+        [
+            "",
+            "Mỗi nhóm hiển thị tối đa 5 ví dụ. Ô có số nhỏ hơn 5 nghĩa là chỉ tìm thấy "
+            "đúng số ví dụ phù hợp đó trong mẫu đã rà; riêng nhóm châm biếm không có câu nào "
+            "đủ bằng chứng ngữ cảnh để gán, nên giữ 0 thay vì suy diễn từ emoticon.",
+        ]
+    )
     for model in model_order:
         lines.extend(
             [
@@ -262,21 +355,33 @@ def write_error_analysis(
                 f"{item['group']} | {item['text']} |"
             )
     by_model = {row["model"]: row for row in comparison_rows if row["input"] == "text_norm"}
+    phobert_latency = float(by_model["PhoBERT A"]["ms_cpu"])
+    baseline_ratios = [
+        phobert_latency / float(by_model[model]["ms_cpu"])
+        for model in model_order[1:]
+    ]
     lines.extend(
         [
             "",
             "## Nhận xét trade-off",
             "",
-            f"- PhoBERT A đạt F1 tiêu cực `{float(by_model['PhoBERT A']['f1_neg']):.6f}`, "
-            "cao nhất nhưng có dung lượng và độ trễ CPU lớn nhất; GPU chỉ được ghi như số tham khảo lịch sử.",
-            f"- SVM đạt F1 tiêu cực `{float(by_model['SVM']['f1_neg']):.6f}` và thường là lựa chọn "
-            "truyền thống cân bằng nhất giữa chất lượng, tốc độ và dung lượng.",
-            f"- Logistic Regression đạt `{float(by_model['Logistic Regression']['f1_neg']):.6f}`; "
-            "xác suất/điểm quyết định dễ khai thác hơn SVM nếu cần hiệu chỉnh sau này.",
-            f"- Naive Bayes nhỏ và đơn giản, nhưng F1 tiêu cực `{float(by_model['Naive Bayes']['f1_neg']):.6f}` "
-            "thấp nhất trong bốn mô hình.",
-            "- Các ví dụ sai cho thấy phủ định, câu vừa khen vừa chê và cách viết mạng xã hội vẫn là các nguồn lỗi chính; "
-            "không dùng những lỗi test này để đổi siêu tham số.",
+            "| Mô hình | F1 tiêu cực | CPU ms/câu | Dung lượng (MiB) |",
+            "|---|---:|---:|---:|",
+            *[
+                f"| {model} | {float(by_model[model]['f1_neg']):.6f} | "
+                f"{float(by_model[model]['ms_cpu']):.6f} | "
+                f"{float(by_model[model]['size_mb']):.6f} |"
+                for model in model_order
+            ],
+            "",
+            f"- PhoBERT A có F1 cao nhất nhưng chiếm khoảng `{float(by_model['PhoBERT A']['size_mb']):.2f}` MiB, "
+            "trong khi ba baseline chỉ khoảng `0,47–0,63` MiB.",
+            f"- Trên CPU batch 1 của lượt đo T02, PhoBERT chậm hơn baseline khoảng "
+            f"`{min(baseline_ratios):.0f}–{max(baseline_ratios):.0f}×`, tức xấp xỉ hai bậc độ lớn.",
+            "- Latency tuyệt đối phụ thuộc tải máy và runtime; khi diễn giải nên chú trọng thứ tự "
+            "và tỉ lệ hơn số tuyệt đối của một lượt đo.",
+            "- Các category chỉ giải thích mẫu lỗi đã rà. Không dùng error analysis này để đổi "
+            "model, threshold, hyperparameter hoặc preprocessing.",
             "",
         ]
     )
@@ -372,7 +477,7 @@ def run_comparison(
             print(json.dumps(row, ensure_ascii=False))
             if input_name == "text_norm":
                 predictions_by_model[model_name] = predictions
-                errors[model_name] = select_errors(frame, predictions)
+                errors[model_name] = select_errors(frame, predictions, model_name)
 
     result_dir.mkdir(parents=True, exist_ok=True)
     comparison_path = result_dir / "comparison_A.csv"

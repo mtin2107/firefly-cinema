@@ -12,8 +12,8 @@
 | Đầu vào | Cột `text_norm`: chữ thường, tách dấu câu, mở rộng một số từ viết tắt; không tách từ |
 | Ngưỡng quyết định | `0.5` cho xác suất nhãn tiêu cực |
 | Phiên bản | `transformers==5.18.0`, `torch==2.11.0` |
-| Kết quả gốc trong `ml/artifacts/phobert_A.json` | Dev macro-F1 `0,9176` tại epoch 6; test macro-F1 `0,9128`; test accuracy `0,9141` |
-| F1 lớp tiêu cực đã ghi nhận riêng | `0,9178` với `text_norm`; `0,9180` khi dùng `normalize()` hiện tại của backend — không phải macro-F1 |
+| Kết quả lịch sử trong `ml/artifacts/phobert_A.json` | Dev macro-F1 `0,9176` tại epoch 6; test macro-F1 `0,9128`; test accuracy `0,9141`. Đây là số lịch sử, hiện chưa tái lập đầy đủ bằng một trong hai checkpoint còn trên máy |
+| F1 lớp tiêu cực của checkpoint backend | `0,917808` với `text_norm`; `0,918046` khi dùng `normalize()` hiện tại — không phải macro-F1 |
 
 ## Dữ liệu và phân bố nhãn
 
@@ -96,15 +96,32 @@ Một câu đổi nhãn. Đây là khác biệt có tác động tới sản ph�
 
 ## Benchmark so sánh T02 (05/10/2026)
 
-PhoBERT A tại `ml/artifacts/phobert_A_best/` được đánh giá lại cùng ba pipeline T01 trên đúng 2.224 câu của UIT-ViSFD test. Kết quả `text_norm`: precision tiêu cực `0,916468`, recall tiêu cực `0,926790`, F1 tiêu cực `0,921600`, macro-F1 `0,910492`, accuracy `0,911871`.
+PhoBERT A trong `ml/results/comparison_A.csv` là **checkpoint gốc** tại `ml/artifacts/phobert_A_best/`, được đánh giá lại cùng ba pipeline T01 trên đúng 2.224 câu của UIT-ViSFD test. Mốc lịch sử khoảng `0,918` thuộc **checkpoint backend** tại `backend/models/phobert-binhluan/`, không phải checkpoint gốc trong bảng so sánh chính.
+
+Hai checkpoint khác trọng số (cả 201 tensor đều khác). T02 chỉ đo và định danh, không tự động chọn checkpoint nào thay checkpoint còn lại, không thay model backend. PO sẽ quyết định disposition sau review.
+
+### Đo lại hai checkpoint trên cùng test
+
+Cùng dùng `compute_metrics()`, nhãn `1 = tiêu cực`, ngưỡng `0,5`, `max_length=256` và hai input T02:
+
+| Checkpoint | Input | Precision neg | Recall neg | F1 neg | Macro-F1 | Accuracy |
+|---|---|---:|---:|---:|---:|---:|
+| Gốc — `ml/artifacts/phobert_A_best/` | `text_norm` | 0,916468 | 0,926790 | 0,921600 | 0,910492 | 0,911871 |
+| Gốc — `ml/artifacts/phobert_A_best/` | `normalize(text_raw)` | 0,915538 | 0,924377 | 0,919936 | 0,908686 | 0,910072 |
+| Backend — `backend/models/phobert-binhluan/` | `text_norm` | 0,919290 | 0,916331 | 0,917808 | 0,907022 | 0,908273 |
+| Backend — `backend/models/phobert-binhluan/` | `normalize(text_raw)` | 0,921394 | 0,914722 | 0,918046 | 0,907526 | 0,908723 |
+
+Không checkpoint nào tái lập đầy đủ cặp số lịch sử trong `phobert_A.json` (test macro-F1 `0,9128`, accuracy `0,9141`). Vì không còn nhật ký môi trường/lần lưu tương ứng, T02 giữ số lịch sử để truy vết nhưng dùng số đo lại có định danh checkpoint cho báo cáo thực nghiệm.
 
 CPU batch 1 được đo bằng `time.perf_counter`, warm-up 1 câu rồi đo 1.000 câu test đầu tiên, cùng phương pháp cho cả bốn mô hình. Máy đo: Windows 11, Intel Core i5-12450HX (8 core/12 logical CPU), RAM 16 GB; Python 3.13.2, PyTorch 2.11.0+cpu, Transformers 5.18.0, scikit-learn 1.7.2. Độ trễ trung bình trên `text_norm`:
 
 | Mô hình | ms/câu CPU |
 |---|---:|
-| PhoBERT A | 120,992818 |
-| SVM | 1,067651 |
-| Logistic Regression | 1,081002 |
-| Naive Bayes | 1,372282 |
+| PhoBERT A | 45,716840 |
+| SVM | 0,354897 |
+| Logistic Regression | 0,344190 |
+| Naive Bayes | 0,418245 |
 
 Số GPU `1,817131 ms/câu` của PhoBERT trong `comparison_A.csv` chỉ là tham khảo, quy đổi từ runtime test lịch sử `4,0413 giây / 2.224 câu`; phép đo lịch sử dùng batching nên không so trực tiếp với CPU batch 1. Kết quả đầy đủ cho `text_norm` và `normalize(text_raw)` nằm ở `ml/results/comparison_A.csv`.
+
+Tên cột `size_mb` được giữ vì schema T02 đã cố định; giá trị thực tế được tính theo MiB (`1024²` byte).

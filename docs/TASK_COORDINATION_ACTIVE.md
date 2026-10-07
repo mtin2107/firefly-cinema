@@ -16,22 +16,24 @@ Repo `C:\Projects\firefly-cinema`, nhánh `master`. Chi tiết: `PROJECT_SOURCE_
 - Mỗi task một nhánh `task/Txx-ten-ngan`, commit `[Txx] mô tả`. Chỉ Tín merge.
 
 ## 3. Latest Completed Task Summary
+**T02 — So sánh PhoBERT với mô hình truyền thống: DONE / CLOSED (07/10/2026).** Claude review vòng 2 PASS_WITH_TODO, AC 6/6, RF 0, blocker 0, DoD MET; PO APPROVED (`reports/2026-10-07/po_review_T02_APPROVED_2026-10-07.md`); merge vào `master` tại `6d5fda5`, tag `ml-baselines`. Canonical research checkpoint: `ml/artifacts/phobert_A_best` (F1 neg `text_norm` 0,921600); runtime web vẫn là `backend/models/phobert-binhluan` (0,917808), không thay trong T02. `phobert_A.json` là HISTORICAL / NOT FULLY REPRODUCED, không dùng làm metric canonical.
+
 Trước khi áp dụng workflow: giao diện React đầy đủ (`giao-dien-v1`), backend FastAPI + SQLite, PhoBERT A gắn vào backend, F1 test 0,918 (`phobert-v1`).
 
 ## 4. Current Project Status
 ```
-Overall Status: PO_REVIEW
-Phase: T01 DONE/CLOSED; T02 PO_REVIEW (Claude review vòng 2 PASS_WITH_TODO)
-Current Active Task: T02 — chờ Tín PO review
-Next Task: NONE — Claude không mở task kế tiếp theo yêu cầu review vòng 2; Tín quyết định sau PO review
+Overall Status: IDLE — chờ PO authorize task kế tiếp
+Phase: T00 PO_APPROVED; T01, T02 DONE/CLOSED (tag ml-baselines)
+Current Active Task: NONE
+Next Task: T04 — PLANNED, chờ PO authorize (chưa READY_FOR_HANDOFF); T03 vẫn BLOCKED Q1
 Ngày bắt đầu sản phẩm: 05/10/2026 · Hạn: 01/11/2026
 ```
 
 ## 5. Current Active Task
-T02 — So sánh PhoBERT với mô hình truyền thống · PO_REVIEW
+NONE
 
 ## 6. Current Task Record
-[docs/tasks/T02.md](tasks/T02.md)
+NONE — task vừa đóng: [docs/tasks/T02.md](tasks/T02.md)
 
 ## 7. Roadmap và trạng thái
 
@@ -39,9 +41,9 @@ T02 — So sánh PhoBERT với mô hình truyền thống · PO_REVIEW
 |---|---|---|---|---|---|---|
 | T00 | Gom mã và dữ liệu về project ổ C, model card A | ML | 1 | — | [T00.md](tasks/T00.md) | PO_APPROVED (đã có trên master tại `20daf6a`) |
 | T01 | Mô hình truyền thống (NB, LR, SVM) | ML | 1 | T00 | [T01.md](tasks/T01.md) | DONE / CLOSED |
-| T02 | So sánh PhoBERT với mô hình truyền thống | ML | 1 | T01 | [T02.md](tasks/T02.md) | PO_REVIEW |
+| T02 | So sánh PhoBERT với mô hình truyền thống | ML | 1 | T01 | [T02.md](tasks/T02.md) | DONE / CLOSED (merge `6d5fda5`, tag `ml-baselines`) |
 | T03 | Bộ dữ liệu bình luận phim | Dữ liệu | 1–2 | — | [T03.md](tasks/T03.md) | PLANNED (BLOCKED Q1) |
-| T04 | Quản lý phim (admin) | Web | 2 | — | [T04.md](tasks/T04.md) | PLANNED |
+| T04 | Quản lý phim (admin) | Web | 2 | — | [T04.md](tasks/T04.md) | PLANNED (task kế tiếp, chờ PO authorize) |
 | T05 | Quản lý suất chiếu (admin) | Web | 2 | T04 | [T05.md](tasks/T05.md) | PLANNED |
 | T06 | Kiểm duyệt có người duyệt (đổi schema) | Web | 2 | — | [T06.md](tasks/T06.md) | PLANNED (cần Q2) |
 | T07 | Đa mô hình và trang So sánh mô hình | Web + ML | 2 | T01 | [T07.md](tasks/T07.md) | PLANNED |
@@ -58,22 +60,19 @@ Chuỗi chính: `T00 → T01 → T02` và `T03 → T08 → T09 → T10`. T03 b�
 Nếu trễ: cắt T14 → T15 → rút gọn T05. Không cắt T01–T03, T07–T10.
 
 ## 8. Open Blockers
-- T02: không có blocker (Claude review vòng 2 xác minh). Codex đã đo đủ hai checkpoint: backend F1 neg 0,917808 (`text_norm`) / 0,918046 (`normalize`), gốc 0,921600 / 0,919936. Hai bản khác trọng số; không tự thay model backend, PO chọn disposition sau review. Chênh preprocessing lớn nhất `0,003217 < 0,01`.
-- Q1 (nguồn bình luận phim, người gán nhãn 2) chặn T03.
+- Q1 (nguồn bình luận phim, người gán nhãn thứ 2) **BLOCK T03**. Không mở T03 khi Q1 chưa được chốt.
 - Q2 (Alembic hay xóa `firefly.db`) cần chốt trước T06.
 
 ## 9. Open Required Fixes
-0 — Claude review T02 vòng 2 (`reports/2026-10-07/claude_review_T02_round2_PASS_WITH_TODO_2026-10-07.md`): RF-01 (error analysis) và RF-02 (hai checkpoint) **CLOSED**.
-
-RF-01 → RF-03 của T00 đã đóng; T01 không có RF.
+0 — RF-01, RF-02 của T02 CLOSED (Claude review vòng 2); RF-01 → RF-03 của T00 đã đóng; T01 không có RF.
 
 ## 10. Open TODOs
 | Nguồn | TODO | Disposition |
 |---|---|---|
 | Nợ kỹ thuật | `requirements-ml.txt` còn `underthesea`, chưa ghim phiên bản; `HUONG_DAN.md` 4.2 | Đã sửa và PO duyệt trong T00 |
 | Phát hiện 03/10 | `backend/.env.example` ghi `USE_WORD_SEGMENT=true`, thiếu `USE_TEXT_NORM` — lệch BOI_CANH 3.4 | Đã sửa và PO duyệt trong T00 |
-| Claude review T00 r2 | TODO-01 hai checkpoint model A | ACCEPT_LATER — T02; đo F1 hai bản trên cùng test bằng `normalize()` hiện tại, PO chọn |
-| Claude review T00 r2 | TODO-02 `normalize()` ≠ `text_utils.py` | ACCEPT_LATER — T02; đo ảnh hưởng tiền xử lý trước khi quyết định sửa backend |
+| Claude review T00 r2 | TODO-01 hai checkpoint model A | RESOLVED trong T02 — đo cả hai; canonical research = `ml/artifacts/phobert_A_best`, runtime web giữ `backend/models/phobert-binhluan` |
+| Claude review T00 r2 | TODO-02 `normalize()` ≠ `text_utils.py` | RESOLVED trong T02 — max \|Δ F1\| 0,003217 < 0,01, không sửa `normalize()` |
 | Claude review T00 r2 | TODO-03 `firefly_phobert.zip` trên Drive chưa xác minh | ACCEPT_LATER — T13; xác minh file, checksum, khả năng khôi phục |
 | Claude review T00 r2 | TODO-04 thụt lề `HUONG_DAN.md` 4.2 | WONT_FIX — Markdown hiển thị đúng, không ảnh hưởng nghiệm thu |
 | Nợ kỹ thuật | `_SAMPLE_SALES` lặp ở `seed.py` và `mock.js` | T12 (tùy chọn) |
@@ -85,19 +84,19 @@ RF-01 → RF-03 của T00 đã đóng; T01 không có RF.
 | Claude review T01 | TODO-01 ba `.joblib` chưa có trên `MyDrive/thesis_results/baselines/` | ACCEPT_WITH_ACTION — Tín upload trước khi bắt đầu implementation T02 |
 | Claude review T01 | TODO-02 `baselines.py` viết lại, bỏ baseline Task B/C + ablation `text_raw`, report Codex không ghi | ACCEPT — PO chấp nhận, không yêu cầu sửa T01 |
 | Claude review T01 | TODO-03 `EXPECTED_SPLITS` cố định cho UIT-ViSFD | ACCEPT_LATER → T09 |
-| Claude review T01 | TODO-04 `ms_per_sentence` dùng `process_time` (độ phân giải Windows thô, dao động ~2×) | ACCEPT_LATER → T02; đo CPU 4 mô hình cùng phương pháp bằng `time.perf_counter` — Claude review T02: đã xử lý, đề xuất đóng |
+| Claude review T01 | TODO-04 `ms_per_sentence` dùng `process_time` (độ phân giải Windows thô, dao động ~2×) | ACCEPT_LATER → T02; đo CPU 4 mô hình cùng phương pháp bằng `time.perf_counter` — RESOLVED trong T02 (`perf_counter`) |
 | Claude review T02 | TODO-01 latency phụ thuộc tải máy; cách dựng môi trường torch + sklearn | Đã xử lý round 1: report ghi interpreter, `PYTHONPATH`, phiên bản và lưu ý ưu tiên thứ tự/tỉ lệ |
-| Claude review T02 | TODO-02 không checkpoint nào tái lập `phobert_A.json` (macro 0,9128 / acc 0,9141) | ACCEPT_LATER → PO; model card đã phân biệt historical/remeasured metric |
+| Claude review T02 | TODO-02 không checkpoint nào tái lập `phobert_A.json` (macro 0,9128 / acc 0,9141) | ACCEPT_LATER / DOCUMENTED — HISTORICAL / NOT FULLY REPRODUCED, không dùng làm metric canonical |
 | Claude review T02 | TODO-03 notebook thiếu assert AC-03 và marker | Đã xử lý round 1: có assert parity và `NOTEBOOK_EXECUTION_OK` thực |
 | Claude review T02 | TODO-04 `size_mb` là MiB nhưng ghi MB | Đã ghi chú: giữ schema, giá trị tính theo MiB (`1024²` byte) |
-| Claude review T02 r2 | TODO-R2-01 chọn checkpoint chính thức (gốc 0,9216 / backend 0,9178) | Chờ PO quyết định; đổi model backend nếu có thì làm task riêng |
-| Claude review T02 r2 | TODO-R2-02 lệnh chạy (interpreter + `PYTHONPATH`) chỉ có trong fix report; tiêu đề mục benchmark model card còn ghi 05/10 | Đề xuất ACCEPT_LATER → T13 (`HUONG_DAN.md`) |
-| Claude review T02 r2 | TODO-R2-03 category index 72 và 136 còn tranh luận được | Đề xuất WONT_FIX / PO chỉnh tay khi viết chương |
+| Claude review T02 r2 | TODO-R2-01 chọn checkpoint chính thức (gốc 0,9216 / backend 0,9178) | RESOLVED — PO chọn canonical research `ml/artifacts/phobert_A_best`; thay model backend (nếu có) là task riêng |
+| Claude review T02 r2 | TODO-R2-02 lệnh chạy (interpreter + `PYTHONPATH`) chỉ có trong fix report; tiêu đề mục benchmark model card còn ghi 05/10 | ACCEPT_LATER → T13 (`HUONG_DAN.md`) |
+| Claude review T02 r2 | TODO-R2-03 category index 72 và 136 còn tranh luận được | WONT_FIX |
 
 ## 11. Current Next Step
-1. **Tín:** PO review T02; chốt TODO-R2-01 (checkpoint), TODO-02 (metric lịch sử) và các TODO còn lại.
-2. **Tín:** nếu APPROVED thì merge `task/T02-so-sanh-A` vào `master`, gắn tag `ml-baselines`, rồi quyết định mở task kế tiếp (T04 theo thứ tự bàn giao).
-3. Không merge hoặc mở task phụ thuộc tiếp theo trước khi T02 qua Claude review và PO review.
+1. **Tín:** authorize T04 (chuyển `READY_FOR_HANDOFF`, tạo nhánh `task/T04-...` từ `master` `6d5fda5`) khi sẵn sàng.
+2. **Tín:** chốt Q1 để mở T03; chốt Q2 trước T06.
+3. Không agent nào tự mở T03 khi Q1 chưa chốt, và không tự implementation task kế tiếp khi chưa có PO authorize.
 
 ## 12. Active Timeline
 | Ngày | Ai | Sự kiện |
@@ -126,3 +125,5 @@ RF-01 → RF-03 của T00 đã đóng; T01 không có RF.
 | 05/10/2026 | Claude | Review T02: **FAIL** (RF-01 error analysis, RF-02 hai checkpoint; metric/PNG/error_analysis tái lập từng byte, preprocessing max Δ 0,003217, baseline parity 0). T02 `CLAUDE_REVIEW` → `FIX_LOOP`. Không mở task kế tiếp |
 | 07/10/2026 | Codex | Fix round 1: rà thủ công 80 dòng lỗi, đo hai checkpoint trên hai input, bổ sung notebook/assert/runtime/model card; gate đạt, T02 `FIX_LOOP` → `CLAUDE_REVIEW` |
 | 07/10/2026 | Claude | Review T02 vòng 2: **PASS_WITH_TODO** (RF-01, RF-02 CLOSED; notebook full run đạt marker, metric/PNG tái lập, AC-01 → AC-06 đạt). T02 `CLAUDE_REVIEW` → `PO_REVIEW`. Không mở task kế tiếp |
+| 07/10/2026 | Tín | PO review T02: **APPROVED** (AC 6/6, RF 0, blocker 0, DoD MET). TODO-R2-01 RESOLVED, TODO-R2-02 → T13, TODO-R2-03 WONT_FIX, metric lịch sử DOCUMENTED |
+| 07/10/2026 | Tín | Merge T02 vào `master` tại `6d5fda5`, tag `ml-baselines`; T02 DONE/CLOSED |

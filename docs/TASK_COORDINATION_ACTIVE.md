@@ -22,7 +22,7 @@ Trước khi áp dụng workflow: giao diện React đầy đủ (`giao-dien-v1`
 
 ## 4. Current Project Status
 ```
-Overall Status: CLAUDE_REVIEW
+Overall Status: FIX_LOOP
 Phase: T00, T01, T02, T03, T04 DONE/CLOSED
 Current Active Task: T05 — Quản lý suất chiếu (admin)
 Next Task: NOT SELECTED
@@ -30,10 +30,10 @@ Ngày bắt đầu sản phẩm: 05/10/2026 · Hạn: 01/11/2026
 ```
 
 ## 5. Current Active Task
-T05 — Quản lý suất chiếu (admin), Codex đã bàn giao implementation commits `214fcaa`, `033e420`; chờ Claude review độc lập.
+T05 — Quản lý suất chiếu (admin): Claude review **FAIL** (`reports/2026-10-08/claude_review_T05_FAIL_2026-10-08.md`), AC 7/8, RF-01 (High). Chờ Codex sửa RF-01 và PO quyết scope conflict booking phim `ended`.
 
 ## 6. Current Task Record
-`docs/tasks/T05.md` — CLAUDE_REVIEW.
+`docs/tasks/T05.md` — FIX_LOOP.
 
 ## 7. Roadmap và trạng thái
 
@@ -44,7 +44,7 @@ T05 — Quản lý suất chiếu (admin), Codex đã bàn giao implementation c
 | T02 | So sánh PhoBERT với mô hình truyền thống | ML | 1 | T01 | [T02.md](tasks/T02.md) | DONE / CLOSED (merge `6d5fda5`, tag `ml-baselines`) |
 | T03 | Bộ dữ liệu bình luận phim | Dữ liệu | 1–2 | — | [T03.md](tasks/T03.md) | DONE / CLOSED (Claude PASS_WITH_TODO; PO APPROVED; merge `6bd1a3f`; Drive VERIFIED) |
 | T04 | Quản lý phim (admin) | Web | 2 | — | [T04.md](tasks/T04.md) | DONE / CLOSED (Claude PASS_WITH_TODO; PO APPROVED; AC 7/7; RF 0; blocker 0; SD-01/SD-02 approved retroactively; merge `fced3d7`) |
-| T05 | Quản lý suất chiếu (admin) | Web | 2 | T04 | [T05.md](tasks/T05.md) | CLAUDE_REVIEW |
+| T05 | Quản lý suất chiếu (admin) | Web | 2 | T04 | [T05.md](tasks/T05.md) | FIX_LOOP (Claude review FAIL: RF-01) |
 | T06 | Kiểm duyệt có người duyệt (đổi schema) | Web | 2 | — | [T06.md](tasks/T06.md) | PLANNED (cần Q2) |
 | T07 | Đa mô hình và trang So sánh mô hình | Web + ML | 2 | T01 | [T07.md](tasks/T07.md) | PLANNED |
 | T08 | Đo lệch miền điện thoại → phim | ML | 3 | T02, T03 | [T08.md](tasks/T08.md) | PLANNED |
@@ -63,11 +63,13 @@ Nếu trễ: cắt T14 → T15 → rút gọn T05. Không cắt T01–T03, T07�
 - T04: 0 technical blockers; SD-01/SD-02 đã được PO phê duyệt hồi tố, không còn chặn merge.
 - Q1 (nguồn bình luận phim, người gán nhãn thứ 2): RESOLVED 07/10/2026 — xem `PROJECT_SOURCE_OF_TRUTH.md` mục 5 và `docs/tasks/T03.md` mục 13.
 - T03: RESOLVED — PO APPROVED, Drive Backup VERIFIED, DONE / CLOSED, merge `6bd1a3f`.
-- T05 scope conflict: phim `ended` vẫn có thể bị đặt vé qua endpoint trực tiếp; fix nguồn cần sửa `backend/app/routers/bookings.py` ngoài allowlist T05. UI đã ẩn lịch ended và T05 chặn tạo/cập nhật suất cho phim ended. Chờ PO disposition/task sau; không chặn review phần T05 trong allowlist.
+- T05 scope conflict: phim `ended` vẫn có thể bị đặt vé qua endpoint trực tiếp; fix nguồn cần sửa `backend/app/routers/bookings.py` ngoài allowlist T05. UI đã ẩn lịch ended và T05 chặn tạo/cập nhật suất cho phim ended. Claude xác minh 08/10: vẫn tồn tại (booking suất phim ended → `201`), không chặn AC T05, chưa RESOLVED. **PO ACTION REQUIRED:** (a) mở rộng allowlist T05 cho `bookings.py` trong FIX_LOOP, hoặc (b) ACCEPT_LATER → T11 (review T05 mục 13).
 - Q2 (Alembic hay xóa `firefly.db`): OPEN — cần chốt trước T06.
 
 ## 9. Open Required Fixes
-0 — T04 RF 0; RF-01, RF-02 của T02 CLOSED (Claude review vòng 2); RF-01 → RF-03 của T00 đã đóng; T01 không có RF.
+- **T05 RF-01 (High, OPEN):** `_ensure_showtimes()` và mock `buildShowtimes()` bỏ trống 5/9 phim đang chiếu (phim 5, 8, 9, 10, 18 có 0 suất; "Phim hot" 9 → 4 phim). Sửa phân bổ phòng/khung giờ, giữ luật chống chồng giờ — xem `reports/2026-10-08/claude_review_T05_FAIL_2026-10-08.md` mục 11.
+
+Đã đóng: T04 RF 0; RF-01, RF-02 của T02 CLOSED (Claude review vòng 2); RF-01 → RF-03 của T00 đã đóng; T01 không có RF.
 
 ## 10. Open TODOs
 | Nguồn | TODO | Disposition |
@@ -108,12 +110,13 @@ Nếu trễ: cắt T14 → T15 → rút gọn T05. Không cắt T01–T03, T07�
 | Claude review T04 | TODO-01 report Codex khẳng định sai về allowlist; TODO-02 T04 mục 13 ghi "23 mục" (đúng: 22 thể loại) | TODO-01 DOCUMENTED / PROCESS CORRECTION; TODO-02 ACCEPT_LATER — documentation |
 | Claude review T04 | TODO-03 422 sai kiểu/thiếu trường còn câu Pydantic tiếng Anh; TODO-04 `genre` String(100) có thể vượt | ACCEPT_LATER → T11 |
 | Claude review T04 | TODO-05 xóa phim xóa luôn bình luận; TODO-06 câu 422 mock thiếu tiền tố; TODO-08 mock reset vé mỗi ngày | TODO-05 ACCEPT; TODO-06 và TODO-08 WONT_FIX |
-| Claude review T04 | TODO-07 phim mới chưa có suất chiếu; phim `ended` vẫn đặt vé được suất tương lai | Vế phim mới RESOLVED trong T05; vế booking phim ended cần PO authorize sửa `bookings.py` ngoài allowlist |
+| Claude review T04 | TODO-07 phim mới chưa có suất chiếu; phim `ended` vẫn đặt vé được suất tương lai | Vế phim mới RESOLVED trong T05 (AC-06 Claude xác minh); vế booking phim ended **vẫn tồn tại** — PO chọn (a) mở rộng allowlist T05 hoặc (b) ACCEPT_LATER → T11 |
+| Claude review T05 | TODO-01 mock khóa mọi suất seed do ghế giả `seedBooked`; TODO-02 sửa suất phim ended hiện ô Phim trống; TODO-03 `find_showtime_conflict` không lọc theo ngày; TODO-04 report Codex không đối chiếu số suất theo phim | Chờ PO disposition |
 
 ## 11. Current Next Step
-1. **Claude:** review độc lập T05 theo `docs/tasks/T05.md` và implementation report mới nhất; không sửa production code.
-2. **Tín/PO:** quyết định disposition cho scope conflict đặt vé trực tiếp của phim `ended`.
-3. Không mở task kế tiếp trước kết quả review theo workflow.
+1. **Tín/PO:** quyết định scope conflict booking phim `ended`: (a) mở rộng allowlist T05 cho `backend/app/routers/bookings.py` trong vòng fix này, hoặc (b) ACCEPT_LATER → T11.
+2. **Codex:** sửa đúng RF-01 (và phần booking nếu PO chọn (a)), tạo `reports/YYYY-MM-DD/codex_fix_T05_round1_YYYY-MM-DD.md`, chuyển `FIX_LOOP` → `CLAUDE_REVIEW`.
+3. Không mở task kế tiếp. T06 giữ PLANNED (Q2 còn mở).
 
 ## 12. Active Timeline
 | Ngày | Ai | Sự kiện |
@@ -162,3 +165,4 @@ Nếu trễ: cắt T14 → T15 → rút gọn T05. Không cắt T01–T03, T07�
 | 08/10/2026 | Tín | Authorize T05; xác minh branch `task/T05-quan-ly-suat-chieu`, baseline `a09fe673`, dependency T04 merge `fced3d7` và working tree sạch |
 | 08/10/2026 | Codex | T05 `READY_FOR_HANDOFF` → `IN_PROGRESS`; triển khai CRUD suất chiếu, luật chồng giờ +15 phút dùng chung với seed, real/mock API và UI responsive |
 | 08/10/2026 | Codex | Hoàn tất focused/full gates, real/mock/browser probes và report; implementation commits `214fcaa`, `033e420` (giữ diff `seed.py` chỉ trong `_ensure_showtimes`); ghi scope conflict booking phim `ended`; T05 `IN_PROGRESS` → `CLAUDE_REVIEW` |
+| 08/10/2026 | Claude | Review T05 độc lập: AC-01→AC-07 đạt (401/403 4/4, biên ±114/±115, 409 đúng câu, khóa vé đếm đúng, restart uvicorn thật 0 chồng giờ, mock contract + F5); **FAIL** do RF-01: seed backend + mock bỏ trống 5/9 phim đang chiếu, hot_week 9 → 4 phim (AC-08). Scope conflict booking phim ended xác minh còn tồn tại, chờ PO. T05 `CLAUDE_REVIEW` → `FIX_LOOP`; không mở task kế tiếp |

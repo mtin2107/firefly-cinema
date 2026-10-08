@@ -6,6 +6,7 @@ from sqlalchemy.orm import Session
 from .models import Movie, Showtime
 
 CLEANUP_MINUTES = 15
+ROOMS = ("Phòng 1", "Phòng 2", "Phòng 3", "Phòng 4")
 
 
 def find_showtime_conflict(

@@ -8,8 +8,7 @@ from ..database import get_db
 from ..models import BookingSeat, Movie, Showtime, User
 from ..schemas import ShowtimeIn, ShowtimeOut
 from ..security import require_admin
-from ..seed import ROOMS
-from ..showtime_rules import find_showtime_conflict
+from ..showtime_rules import ROOMS, find_showtime_conflict
 
 router = APIRouter(prefix="/api/admin/showtimes", tags=["Quản trị suất chiếu"])
 

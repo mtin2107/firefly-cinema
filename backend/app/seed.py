@@ -11,15 +11,15 @@ from .models import User, Movie, Showtime, Comment, Booking, BookingSeat
 from .seats import ROWS, COLS, seat_price
 from .security import hash_password
 from .classifier import classifier
-from .showtime_rules import find_showtime_conflict
 
 DATA = Path(__file__).parent / "data" / "movies.json"
 TIMES = ["09:30", "13:15", "16:00", "19:30", "22:00"]
-ROOMS = ("Phòng 1", "Phòng 2", "Phòng 3", "Phòng 4")
 
 
 def _ensure_showtimes(db: Session, days: int = 5) -> None:
     """Đảm bảo luôn có suất chiếu cho `days` ngày tới (chạy mỗi lần khởi động)."""
+    from .showtime_rules import ROOMS, find_showtime_conflict
+
     movies = db.scalars(select(Movie).where(Movie.status == "now_showing").order_by(Movie.id)).all()
     for d in range(days):
         day = date.today() + timedelta(days=d)

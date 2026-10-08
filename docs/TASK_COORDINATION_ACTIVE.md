@@ -16,24 +16,24 @@ Repo `C:\Projects\firefly-cinema`, nhánh `master`. Chi tiết: `PROJECT_SOURCE_
 - Mỗi task một nhánh `task/Txx-ten-ngan`, commit `[Txx] mô tả`. Chỉ Tín merge.
 
 ## 3. Latest Completed Task Summary
-**T03 — Bộ dữ liệu bình luận phim: DONE / CLOSED (08/10/2026).** Claude review PASS_WITH_TODO, AC 6/6, RF 0, blocker 0; PO APPROVED (`reports/2026-10-08/po_review_T03_APPROVED_2026-10-08.md`); Drive Backup VERIFIED; merge vào `master` tại `6bd1a3f`.
+**T04 — Quản lý phim (admin): DONE / CLOSED (08/10/2026).** Claude review PASS_WITH_TODO, AC 7/7, RF 0, blocker 0; PO APPROVED (`reports/2026-10-08/po_review_T04_APPROVED_2026-10-08.md`); SD-01 và SD-02 APPROVED RETROACTIVELY; merge vào `master` tại `fced3d7` (`T04_MERGE_VERIFIED`).
 
 Trước khi áp dụng workflow: giao diện React đầy đủ (`giao-dien-v1`), backend FastAPI + SQLite, PhoBERT A gắn vào backend, F1 test 0,918 (`phobert-v1`).
 
 ## 4. Current Project Status
 ```
-Overall Status: ACTIVE — T04 PO_APPROVED / PENDING_MERGE
-Phase: T00, T01, T02, T03 DONE/CLOSED; T04 PO_APPROVED — PENDING_MERGE
-Current Active Task: T04 — PENDING_MERGE (PO APPROVED 08/10/2026; branch task/T04-quan-ly-phim; implementation `d8e67e0`)
+Overall Status: READY_FOR_NEXT_TASK
+Phase: T00, T01, T02, T03, T04 DONE/CLOSED
+Current Active Task: NONE
 Next Task: NOT SELECTED
 Ngày bắt đầu sản phẩm: 05/10/2026 · Hạn: 01/11/2026
 ```
 
 ## 5. Current Active Task
-T04 — Quản lý phim (admin) — PO_APPROVED / PENDING_MERGE (Claude PASS_WITH_TODO; AC 7/7; RF 0; blocker 0; SD-01/SD-02 APPROVED RETROACTIVELY; PO report `reports/2026-10-08/po_review_T04_APPROVED_2026-10-08.md`)
+NONE — T04 đã DONE / CLOSED sau khi merge `fced3d7` được xác minh trên `master`.
 
 ## 6. Current Task Record
-[docs/tasks/T04.md](tasks/T04.md)
+NONE — task kế tiếp chưa được chọn hoặc authorize.
 
 ## 7. Roadmap và trạng thái
 
@@ -43,7 +43,7 @@ T04 — Quản lý phim (admin) — PO_APPROVED / PENDING_MERGE (Claude PASS_WIT
 | T01 | Mô hình truyền thống (NB, LR, SVM) | ML | 1 | T00 | [T01.md](tasks/T01.md) | DONE / CLOSED |
 | T02 | So sánh PhoBERT với mô hình truyền thống | ML | 1 | T01 | [T02.md](tasks/T02.md) | DONE / CLOSED (merge `6d5fda5`, tag `ml-baselines`) |
 | T03 | Bộ dữ liệu bình luận phim | Dữ liệu | 1–2 | — | [T03.md](tasks/T03.md) | DONE / CLOSED (Claude PASS_WITH_TODO; PO APPROVED; merge `6bd1a3f`; Drive VERIFIED) |
-| T04 | Quản lý phim (admin) | Web | 2 | — | [T04.md](tasks/T04.md) | PO_APPROVED — PENDING_MERGE (SD-01/SD-02 approved retroactively) |
+| T04 | Quản lý phim (admin) | Web | 2 | — | [T04.md](tasks/T04.md) | DONE / CLOSED (Claude PASS_WITH_TODO; PO APPROVED; AC 7/7; RF 0; blocker 0; SD-01/SD-02 approved retroactively; merge `fced3d7`) |
 | T05 | Quản lý suất chiếu (admin) | Web | 2 | T04 | [T05.md](tasks/T05.md) | PLANNED |
 | T06 | Kiểm duyệt có người duyệt (đổi schema) | Web | 2 | — | [T06.md](tasks/T06.md) | PLANNED (cần Q2) |
 | T07 | Đa mô hình và trang So sánh mô hình | Web + ML | 2 | T01 | [T07.md](tasks/T07.md) | PLANNED |
@@ -110,9 +110,9 @@ Nếu trễ: cắt T14 → T15 → rút gọn T05. Không cắt T01–T03, T07�
 | Claude review T04 | TODO-07 phim mới chưa có suất chiếu; phim `ended` vẫn đặt vé được suất tương lai | ACCEPT_LATER → T05 |
 
 ## 11. Current Next Step
-1. **Tín:** merge `task/T04-quan-ly-phim` vào `master` theo merge gate; xác minh commit merge thật.
-2. Sau khi merge: cập nhật coordination T04 `DONE / CLOSED` cùng merge commit; không mở T05 nếu chưa có authorization riêng.
-3. T05 giữ `PLANNED`; Next Task giữ `NOT SELECTED`.
+1. **Tín:** chọn task kế tiếp và authorize riêng theo workflow.
+2. T05 giữ `PLANNED`; chưa tạo branch, chưa chuyển `READY_FOR_HANDOFF` hoặc `IN_PROGRESS`.
+3. Next Task giữ `NOT SELECTED` cho tới khi có quyết định PO mới.
 
 ## 12. Active Timeline
 | Ngày | Ai | Sự kiện |
@@ -155,4 +155,6 @@ Nếu trễ: cắt T14 → T15 → rút gọn T05. Không cắt T01–T03, T07�
 | 08/10/2026 | Codex | Xác minh gate, bỏ qua cục bộ `data/phim/NGUON_THU.md` theo quyết định PO, tạo `task/T04-quan-ly-phim` từ `master` tại `b6cc3d6`; T04 READY_FOR_HANDOFF → IN_PROGRESS |
 | 08/10/2026 | Codex | Hoàn tất CRUD phim admin, validation/taxonomy, mock persistence và UI responsive; compile/build, API/browser probes, AC 7/7 self-check đạt; commit implementation `d8e67e0`; T04 IN_PROGRESS → CLAUDE_REVIEW |
 | 08/10/2026 | Claude | Review T04 độc lập: probe TestClient trên DB tạm (401/403 4/4, 422 5/5 + 8 ca thêm, 409 đúng câu, PUT `ended`, 21/21 phim seed lưu lại được), backend thật health `phobert`, UI real + mock (CRUD, F5, lọc/tìm không dấu, loading/rỗng/lỗi, 375px), hồi quy 7/7; **PASS_WITH_TODO** (AC 7/7, RF 0, blocker 0; SD-01/SD-02 chờ PO). T04 `CLAUDE_REVIEW` → `PO_REVIEW`. T05 giữ PLANNED theo yêu cầu PO |
-| 08/10/2026 | Tín | PO review T04: **APPROVED**; AC 7/7, RF 0, technical blocker 0; SD-01 và SD-02 APPROVED RETROACTIVELY; DoD accepted với hai ngoại lệ scope; TODO-01→08 đã disposition tại `reports/2026-10-08/po_review_T04_APPROVED_2026-10-08.md`; T04 → PO_APPROVED / PENDING_MERGE, T05 giữ PLANNED |
+| 08/10/2026 | Tín | PO review T04: **APPROVED**; AC 7/7, RF 0, technical blocker 0; SD-01 và SD-02 APPROVED RETROACTIVELY; DoD accepted với hai ngoại lệ scope; TODO-01→08 đã disposition tại `reports/2026-10-08/po_review_T04_APPROVED_2026-10-08.md`; chờ PO merge, T05 giữ PLANNED |
+| 08/10/2026 | Tín | Merge T04 vào `master` tại `fced3d7`; xác minh `T04_MERGE_VERIFIED`, branch T04 nằm trong lịch sử master |
+| 08/10/2026 | Codex | Final closure sync: T04 → DONE / CLOSED; Overall Status → READY_FOR_NEXT_TASK; Current Active Task → NONE; Next Task → NOT SELECTED; T05 giữ PLANNED |

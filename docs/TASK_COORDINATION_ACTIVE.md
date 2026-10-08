@@ -22,18 +22,18 @@ Trước khi áp dụng workflow: giao diện React đầy đủ (`giao-dien-v1`
 
 ## 4. Current Project Status
 ```
-Overall Status: READY_FOR_NEXT_TASK
+Overall Status: READY_FOR_HANDOFF
 Phase: T00, T01, T02, T03, T04 DONE/CLOSED
-Current Active Task: NONE
-Next Task: NOT SELECTED
+Current Active Task: T05 — Quản lý suất chiếu (admin)
+Next Task: T05
 Ngày bắt đầu sản phẩm: 05/10/2026 · Hạn: 01/11/2026
 ```
 
 ## 5. Current Active Task
-NONE — T04 đã DONE / CLOSED sau khi merge `fced3d7` được xác minh trên `master`.
+T05 — Quản lý suất chiếu (admin), đã được PO authorize và sẵn sàng bàn giao cho Codex.
 
 ## 6. Current Task Record
-NONE — task kế tiếp chưa được chọn hoặc authorize.
+`docs/tasks/T05.md` — READY_FOR_HANDOFF.
 
 ## 7. Roadmap và trạng thái
 
@@ -44,7 +44,7 @@ NONE — task kế tiếp chưa được chọn hoặc authorize.
 | T02 | So sánh PhoBERT với mô hình truyền thống | ML | 1 | T01 | [T02.md](tasks/T02.md) | DONE / CLOSED (merge `6d5fda5`, tag `ml-baselines`) |
 | T03 | Bộ dữ liệu bình luận phim | Dữ liệu | 1–2 | — | [T03.md](tasks/T03.md) | DONE / CLOSED (Claude PASS_WITH_TODO; PO APPROVED; merge `6bd1a3f`; Drive VERIFIED) |
 | T04 | Quản lý phim (admin) | Web | 2 | — | [T04.md](tasks/T04.md) | DONE / CLOSED (Claude PASS_WITH_TODO; PO APPROVED; AC 7/7; RF 0; blocker 0; SD-01/SD-02 approved retroactively; merge `fced3d7`) |
-| T05 | Quản lý suất chiếu (admin) | Web | 2 | T04 | [T05.md](tasks/T05.md) | PLANNED |
+| T05 | Quản lý suất chiếu (admin) | Web | 2 | T04 | [T05.md](tasks/T05.md) | READY_FOR_HANDOFF |
 | T06 | Kiểm duyệt có người duyệt (đổi schema) | Web | 2 | — | [T06.md](tasks/T06.md) | PLANNED (cần Q2) |
 | T07 | Đa mô hình và trang So sánh mô hình | Web + ML | 2 | T01 | [T07.md](tasks/T07.md) | PLANNED |
 | T08 | Đo lệch miền điện thoại → phim | ML | 3 | T02, T03 | [T08.md](tasks/T08.md) | PLANNED |

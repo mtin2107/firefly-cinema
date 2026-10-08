@@ -7,7 +7,7 @@
 - Baseline: `0b244b034fed4c17dbe5d054c5bba4c5ca654382` (`master`).
 - T05 merge `54a3715` đã được xác minh là ancestor của baseline.
 - Implementation commit: `942d7197ed5c104e6267446866822c2a2b165401`.
-- Trạng thái: `IN_PROGRESS / PENDING_PO_DATABASE_RESET`; chưa đủ điều kiện chuyển `CLAUDE_REVIEW`.
+- Trạng thái sau final verification 09/10/2026: `CLAUDE_REVIEW`.
 
 ## 2. File thay đổi
 
@@ -50,7 +50,7 @@ Không sửa `classifier.py`, `seats.py`, `.env`, database, model hoặc dữ li
 
 - Đổi schema: **CÓ**.
 - Q2: **RESOLVED / NO ALEMBIC / BACKUP_BEFORE_RESET**.
-- Development và probe schema chỉ chạy trên database tạm `%TEMP%/firefly_t06_probe/firefly_t06.db` (đã dọn tiến trình sau test), không reset database thật.
+- PO đã hoàn tất reset database thật theo quy trình đã phê duyệt; Codex xác minh lại database mới và chạy final verification ngày 09/10/2026.
 
 ## 6. Database backup evidence
 
@@ -62,8 +62,10 @@ Không sửa `classifier.py`, `seats.py`, `.env`, database, model hoặc dữ li
 - Thời điểm: `2026-10-08T23:44:17+07:00`; kích thước 102400 byte.
 - SHA-256: `c27abfcad23c2c53bd1b2f827dce8aed541a64838d00c9ce0d6543dc0a3e23bc`.
 - Xác minh backup: mở read-only được; `PRAGMA integrity_check=ok`; đủ sáu bảng và số dòng khớp nguồn; schema comments cũ đúng trạng thái trước T06.
-- Database reset: **PENDING_PO**. Codex không chạy `Remove-Item` với database thật.
-- Lệnh reset/khởi động/kiểm tra chính xác đã ghi tại `HUONG_DAN.md` mục 2.1.
+- Database reset: **COMPLETED_BY_PO** ngày 09/10/2026. Codex không chạy `Remove-Item` với database thật.
+- Database mới trước test: 81920 byte, `PRAGMA integrity_check=ok`; đủ sáu bảng; seed có `users=3`, `movies=21`, `showtimes=99`, `bookings=140`, `booking_seats=280`, `comments=12`.
+- Schema `comments` mới có đủ `human_label`, `reviewed_by`, `reviewed_at`, `hidden`; FK `reviewed_by → users.id`; `hidden` NOT NULL, server default `0`.
+- Sau regression real: integrity vẫn `ok`; `bookings=141`, `booking_seats=282`, `comments=13` do đúng một lượt đặt 2 ghế và một bình luận final-verification; 4 bình luận có human label, reviewer đều là admin id 1, không còn dòng bị hide sau ca unhide.
 
 ## 7. Focused tests
 
@@ -82,17 +84,19 @@ Không sửa `classifier.py`, `seats.py`, `.env`, database, model hoặc dữ li
 - Trình duyệt headless mock: 12 dòng tải thành công, đủ nút confirm/relabel/hide, confirm cập nhật stats, lọc reviewed còn đúng 1 dòng, không có exception runtime: PASS.
 - Responsive 375x812: document width = viewport 375; bảng cuộn trong `.table-wrap` (347/1120), stats 2 cột, nút CSV rộng 347: PASS.
 
-## 8. Final quality gates
+## 8. Final quality gates — chạy lại 09/10/2026
 
 - `backend\venv\Scripts\python.exe -m compileall -q backend\app`: PASS.
-- Backend start + `/api/health` trên DB thử nghiệm: PASS.
-- `frontend; npm run build`: PASS.
-- Real API moderation/permissions/CSV/stats: PASS trên DB tạm.
-- Mock API + browser probe: PASS.
+- Backend đang chạy trên database thật mới; `/api/health` trả `status=ok`, `classifier=phobert`, `classifier_error=null`: PASS.
+- `frontend; npm run build` real mode: PASS, 69 modules.
+- `VITE_USE_MOCK=true; npm run build`: PASS, 69 modules.
+- Real API moderation/permissions/CSV/stats: PASS trên database thật mới.
+- Real browser: PASS toàn luồng home/poster/search/auth redirect/booking/comments/admin; runtime exception 0.
+- Mock API + browser: PASS toàn luồng tương đương; runtime exception 0.
 - `git diff --check`: PASS (chỉ warning line ending LF/CRLF của Git, không có whitespace error).
 - Allowlist/scope scan: PASS; implementation commit chỉ có 11 file allowlist.
 - Secret/database/model scan: PASS; không có `.env`, `*.db`, CSV, model hoặc secret mới trong diff.
-- Gate phụ thuộc database thật sau reset/seed: **PENDING_PO_DATABASE_RESET**.
+- Database backup/schema/reset/seed gate: PASS.
 
 ## 9. Acceptance Criteria
 
@@ -105,21 +109,21 @@ Không sửa `classifier.py`, `seats.py`, `.env`, database, model hoặc dữ li
 | AC-05 | PASS | 4 endpoint mới: anonymous 401, user 403. |
 | AC-06 | PASS | `page_size=500` trả 422 rõ ràng ở real/mock. |
 | AC-07 | PASS | Mock module và browser probe đạt đủ thao tác, stats, filter, CSV. |
-| AC-08 | PENDING | Hướng dẫn DB đã có; regression trên DB tạm/mock đạt phần kiểm được, nhưng reset/seed và regression cuối trên DB thật chờ PO. |
+| AC-08 | PASS | `HUONG_DAN.md` có quy trình an toàn; PO reset/seed thành công; regression real và mock 7/7. |
 
-Tổng: **7/8 DEV PASS**, không tuyên bố full PASS.
+Tổng: **8/8 DEV PASS**. Đây là self-check implementation để bàn giao; không thay thế independent Claude review.
 
 ## 10. Regression checklist 7 mục
 
-1. Trang chủ/dữ liệu phim: API tạm trả 21 phim, 9 đang chiếu; frontend build PASS. Tương tác poster cuối trên DB thật: PENDING PO reset.
-2. Tìm `meo muop`: trả đúng `Mèo Mướp Đi Lạc`: PASS.
-3. Đăng ký + `/auth/me`: PASS; redirect UI cuối trên DB thật: PENDING.
-4. Đặt 2 ghế A1/A2, mở lại thấy booked và Vé của tôi có booking mới: PASS trên DB tạm.
-5. Bình luận `Ko hay như quảng cáo, hơi thất vọng`: `effective_negative=true`, score 0.9937; logic UI ẩn theo effective label và admin contract/build đạt: PASS trên DB tạm.
-6. `/api/health`: `status=ok`, `classifier=phobert`: PASS trên DB tạm.
-7. `VITE_USE_MOCK=true`: module + browser moderation/responsive probe: PASS.
+1. Trang chủ hiện 9 phim đang chiếu; cả “Xem chi tiết” và “Đặt vé” hiện PosterIntro: PASS real/mock.
+2. Menu Thể loại mở đúng; tìm `meo muop` trả `Mèo Mướp Đi Lạc`: PASS real/mock.
+3. Khi chưa đăng nhập, bấm suất chiếu chuyển đến login; đăng nhập demo quay lại đúng `/dat-ve/{id}`: PASS real/mock.
+4. Chọn 2 ghế, qua checkout, đặt vé và thấy thông báo/mã trong “Vé của tôi”: PASS real/mock. Real DB tăng đúng 1 booking và 2 booking seats.
+5. Gửi bình luận `Ko hay như quảng cáo, hơi thất vọng - kiểm thử final T06`: UI công khai ẩn nội dung theo effective label; admin thấy đúng bình luận và điểm: PASS real. Mock dùng câu chứa `chán`, `thất vọng` và đạt cùng hành vi.
+6. `/api/health`: `status=ok`, `classifier=phobert`, không có classifier error: PASS real.
+7. `VITE_USE_MOCK=true`: build, full browser flow, moderation/filter và API probes đều PASS.
 
-Kết luận regression cuối: **PARTIAL / PENDING_PO_DATABASE_RESET** do các bước UI real cuối chưa được phép chạy trên DB thật mới.
+Kết luận regression cuối: **7/7 PASS trên real mode và mock mode**. Responsive 375×812: document width = viewport 375; bảng chỉ cuộn trong wrapper 347/1120; stats 2 cột; runtime exception 0.
 
 ## 11. Security và scope
 
@@ -131,18 +135,43 @@ Kết luận regression cuối: **PARTIAL / PENDING_PO_DATABASE_RESET** do các 
 
 ## 12. Blockers, Required Fixes và TODO
 
-- Open blocker: 1 — `PENDING_PO_DATABASE_RESET`.
+- Open blocker: 0.
 - Required Fixes: 0 tại thời điểm implementation; chưa qua independent Claude review.
-- TODO bắt buộc: PO chạy reset/seed theo `HUONG_DAN.md` 2.1; Codex xác minh schema/dữ liệu DB thật, chạy regression UI real còn lại, cập nhật report/coordination rồi mới chuyển `CLAUDE_REVIEW`.
+- TODO bắt buộc trước merge: independent Claude review và PO review theo workflow.
 
 ## 13. Commit
 
 - Implementation commit: `942d7197ed5c104e6267446866822c2a2b165401` — `[T06] Implement human comment moderation`.
-- Report/coordination commit: được tạo sau report này.
+- Initial report/coordination commit: `ca109c7`.
+- Final-verification report/coordination commit: tạo sau khi cập nhật report này; hash được ghi trong kết quả bàn giao.
+
+### Definition of Done tại thời điểm bàn giao
+
+- AC có bằng chứng: PASS, 8/8 DEV.
+- Required gates: PASS.
+- Scope chỉ có file allowlist: PASS.
+- Tài liệu liên quan đã cập nhật: PASS.
+- Claude PASS/PASS_WITH_TODO và PO APPROVED: PENDING theo đúng workflow sau `CLAUDE_REVIEW`.
+
+Kết luận: **implementation DoD 4/4 MET_FOR_HANDOFF**; full task DoD chưa thể hoàn tất trước independent review và PO approval.
 
 ## 14. Handoff status
 
-- Handoff: **BLOCKED / PENDING_PO_DATABASE_RESET**.
+- Handoff: **CLAUDE_REVIEW**.
 - Claude Review: PENDING.
 - PO Approval: PENDING.
 - Next Task: NOT AUTHORIZED.
+
+## 15. Final verification evidence — 09/10/2026
+
+- Backup vẫn tồn tại, kích thước 102400 byte, last-write không đổi `2026-10-08T23:44:17+07:00`, SHA-256 vẫn là `c27abfcad23c2c53bd1b2f827dce8aed541a64838d00c9ce0d6543dc0a3e23bc`, integrity `ok`.
+- Database thật mới bắt đầu với stats reviewed = 0 và đúng 12 bình luận seed.
+- AC-01: confirm/relabel/hide trên 5 dòng; so sánh trước/sau xác nhận `is_negative`, `negative_score`, `model_name` không đổi.
+- AC-02: model negative relabel 0 vẫn public với `effective_negative=false`; hide biến mất; unhide hiện lại.
+- AC-03: real và mock đều cho `reviewed=4`, `agree=2`, `disagree=2`, `accuracy=0.5`, TP/FP/TN/FN = 1/1/1/1.
+- AC-04: real CSV bytes đầu `EF BB BF`, header đúng, 4 dòng; đối chiếu `NORMALIZE_PARITY=True`, `REVIEWED_ONLY=True`. Mock CSV có cùng BOM/header/4 dòng.
+- AC-05: real và mock, cả list/stats/export/PATCH đều anonymous 401 và user thường 403.
+- AC-06: relabel thiếu label 422; label 2 trả 422 tiếng Việt; `page_size=500` trả 422 tiếng Việt. Mock cùng contract.
+- AC-07: mock module và browser full flow PASS.
+- AC-08: database thật reset/seed/schema PASS; regression real/mock 7/7.
+- Security/scope, build và Git gates được chạy lại sau khi cập nhật report; kết quả cuối ghi ở commit bàn giao.

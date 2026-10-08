@@ -22,18 +22,18 @@ Trước khi áp dụng workflow: giao diện React đầy đủ (`giao-dien-v1`
 
 ## 4. Current Project Status
 ```
-Overall Status: IN_PROGRESS
+Overall Status: CLAUDE_REVIEW
 Phase: T00, T01, T02, T03, T04, T05 DONE/CLOSED
 Current Active Task: T06
-Next Task: T06
+Next Task: NOT AUTHORIZED
 Ngày bắt đầu sản phẩm: 05/10/2026 · Hạn: 01/11/2026
 ```
 
 ## 5. Current Active Task
-**T06 — Kiểm duyệt có người duyệt: IN_PROGRESS.** PO authorize ngày 08/10/2026; Q2 đã giải quyết theo phương án **NO ALEMBIC / BACKUP_BEFORE_RESET**. Branch `task/T06-kiem-duyet` tách từ `master` tại `0b244b0`; T07 chưa được authorize.
+**T06 — Kiểm duyệt có người duyệt: CLAUDE_REVIEW.** PO đã reset/seed database thật theo Q2; Codex final verification ngày 09/10/2026 đạt AC 8/8 DEV PASS, regression real/mock 7/7, implementation DoD 4/4, blocker 0. Mục DoD về Claude PASS và PO APPROVED còn chờ đúng workflow; T07 chưa được authorize.
 
 ## 6. Current Task Record
-`docs/tasks/T06.md` — PO đã authorize, trạng thái **IN_PROGRESS**.
+`docs/tasks/T06.md` — trạng thái **CLAUDE_REVIEW**.
 
 ## 7. Roadmap và trạng thái
 
@@ -45,7 +45,7 @@ Ngày bắt đầu sản phẩm: 05/10/2026 · Hạn: 01/11/2026
 | T03 | Bộ dữ liệu bình luận phim | Dữ liệu | 1–2 | — | [T03.md](tasks/T03.md) | DONE / CLOSED (Claude PASS_WITH_TODO; PO APPROVED; merge `6bd1a3f`; Drive VERIFIED) |
 | T04 | Quản lý phim (admin) | Web | 2 | — | [T04.md](tasks/T04.md) | DONE / CLOSED (Claude PASS_WITH_TODO; PO APPROVED; AC 7/7; RF 0; blocker 0; SD-01/SD-02 approved retroactively; merge `fced3d7`) |
 | T05 | Quản lý suất chiếu (admin) | Web | 2 | T04 | [T05.md](tasks/T05.md) | DONE / CLOSED (Claude Round 2 PASS_WITH_TODO; AC 8/8 PASS; DoD MET; RF-01 CLOSED; RF mở 0; PO APPROVED; merge `54a3715`; T05_MERGE_VERIFIED) |
-| T06 | Kiểm duyệt có người duyệt (đổi schema) | Web | 2 | — | [T06.md](tasks/T06.md) | IN_PROGRESS (Q2 RESOLVED) |
+| T06 | Kiểm duyệt có người duyệt (đổi schema) | Web | 2 | — | [T06.md](tasks/T06.md) | CLAUDE_REVIEW (AC 8/8 DEV PASS; implementation DoD 4/4) |
 | T07 | Đa mô hình và trang So sánh mô hình | Web + ML | 2 | T01 | [T07.md](tasks/T07.md) | PLANNED / NOT AUTHORIZED |
 | T08 | Đo lệch miền điện thoại → phim | ML | 3 | T02, T03 | [T08.md](tasks/T08.md) | PLANNED |
 | T09 | Train PhoBERT phần B | ML | 3 | T08 | [T09.md](tasks/T09.md) | PLANNED |
@@ -60,7 +60,7 @@ Chuỗi chính: `T00 → T01 → T02` và `T03 → T08 → T09 → T10`. T03 b�
 Nếu trễ: cắt T14 → T15 → rút gọn T05. Không cắt T01–T03, T07–T10.
 
 ## 8. Open Blockers
-- T06: **PENDING_PO_DATABASE_RESET.** Backup đã VERIFIED tại `backup/T06/firefly_pre_T06_20261008_234417.db` (SHA-256 `c27abfcad23c2c53bd1b2f827dce8aed541a64838d00c9ce0d6543dc0a3e23bc`, `PRAGMA integrity_check=ok`); backend đã dừng. Theo authorization, chỉ PO xóa `backend/firefly.db`, khởi động lại để create_all/seed và gửi evidence schema/dữ liệu thật. T06 giữ `IN_PROGRESS`, chưa chuyển `CLAUDE_REVIEW`.
+- T06: 0 blocker. `PENDING_PO_DATABASE_RESET` **RESOLVED 09/10/2026** — backup giữ nguyên checksum/integrity; database thật mới đủ schema, seed; AC 8/8 DEV PASS và regression real/mock 7/7.
 - T04: 0 technical blockers; SD-01/SD-02 đã được PO phê duyệt hồi tố, không còn chặn merge.
 - Q1 (nguồn bình luận phim, người gán nhãn thứ 2): RESOLVED 07/10/2026 — xem `PROJECT_SOURCE_OF_TRUTH.md` mục 5 và `docs/tasks/T03.md` mục 13.
 - T03: RESOLVED — PO APPROVED, Drive Backup VERIFIED, DONE / CLOSED, merge `6bd1a3f`.
@@ -120,9 +120,9 @@ Nếu trễ: cắt T14 → T15 → rút gọn T05. Không cắt T01–T03, T07�
 | Claude review T05 r2 | TODO-06 (Low) phân bổ không đều (phim 9/10/18 1 suất/ngày), DB cũ giữ 190 cặp chồng lịch sử, lần đầu chạy trên `firefly.db` thật thêm 38 suất | ACCEPT_WITH_NOTES → T12 |
 
 ## 11. Current Next Step
-1. **Next Task: T06.** PO thực hiện bước reset/seed database thật theo `HUONG_DAN.md` mục 2.1, sau đó Codex xác minh schema/dữ liệu và chạy lại gate phụ thuộc.
-2. T06 **IN_PROGRESS / PENDING_PO_DATABASE_RESET**; Q2 **RESOLVED — NO ALEMBIC / BACKUP_BEFORE_RESET**. Implementation commit `942d719`.
-3. T07 giữ **PLANNED / NOT AUTHORIZED**; không tự tạo branch hoặc mở task.
+1. Claude review độc lập T06 theo workflow; đọc report Codex và chạy gate riêng.
+2. T06 **CLAUDE_REVIEW**; Q2 **RESOLVED — NO ALEMBIC / BACKUP_BEFORE_RESET**. Implementation commit `942d719`; AC 8/8 DEV PASS, implementation DoD 4/4, blocker 0; full task DoD chờ Claude/PO.
+3. **Next Task: NOT AUTHORIZED.** T07 giữ **PLANNED / NOT AUTHORIZED**; không tự tạo branch hoặc mở task.
 
 ## 12. Active Timeline
 | Ngày | Ai | Sự kiện |
@@ -180,3 +180,5 @@ Nếu trễ: cắt T14 → T15 → rút gọn T05. Không cắt T01–T03, T07�
 | 08/10/2026 | Tín | PO authorize T06: `READY_FOR_HANDOFF`; Q2 RESOLVED theo phương án **NO ALEMBIC / BACKUP_BEFORE_RESET**; cho phép đổi schema comments, yêu cầu backup đã xác minh trước khi PO tự reset database thật; T07 giữ PLANNED / NOT AUTHORIZED |
 | 08/10/2026 | Codex | Pre-flight PASS: working tree sạch, `54a3715` là ancestor của `master`, baseline mới nhất local `0b244b0`; tạo `task/T06-kiem-duyet` không ghi đè branch; T06 `READY_FOR_HANDOFF` → `IN_PROGRESS` |
 | 08/10/2026 | Codex | T06 implementation commit `942d719`: schema/real+mock API/UI/tài liệu trong allowlist; backup DB thật VERIFIED; compile/build, DB tạm, real/mock API, permission, stats, CSV và responsive browser probe đạt. DB thật chưa reset theo đúng authorization nên T06 giữ `IN_PROGRESS / PENDING_PO_DATABASE_RESET`, chưa chuyển `CLAUDE_REVIEW` |
+| 09/10/2026 | Tín | PO hoàn tất reset database thật theo Q2 NO ALEMBIC / BACKUP_BEFORE_RESET và yêu cầu Codex final verification thực tế |
+| 09/10/2026 | Codex | Final verification PASS: backup checksum/integrity giữ nguyên; DB thật mới đủ schema + seed; AC 8/8 DEV PASS; regression browser/API real và mock 7/7; compile/build/health/security/scope đạt; blocker 0, implementation DoD 4/4. T06 `IN_PROGRESS` → `CLAUDE_REVIEW`; full task DoD chờ Claude/PO; T07 giữ PLANNED / NOT AUTHORIZED |

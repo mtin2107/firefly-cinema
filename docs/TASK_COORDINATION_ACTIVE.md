@@ -22,18 +22,18 @@ Trước khi áp dụng workflow: giao diện React đầy đủ (`giao-dien-v1`
 
 ## 4. Current Project Status
 ```
-Overall Status: READY_FOR_NEXT_TASK
+Overall Status: IN_PROGRESS
 Phase: T00, T01, T02, T03, T04, T05 DONE/CLOSED
-Current Active Task: NONE
-Next Task: NOT SELECTED
+Current Active Task: T06
+Next Task: T06
 Ngày bắt đầu sản phẩm: 05/10/2026 · Hạn: 01/11/2026
 ```
 
 ## 5. Current Active Task
-NONE. T05 đã **DONE / CLOSED** sau khi xác minh merge `54a3715` trên `master`; chưa chọn hoặc authorize task tiếp theo.
+**T06 — Kiểm duyệt có người duyệt: IN_PROGRESS.** PO authorize ngày 08/10/2026; Q2 đã giải quyết theo phương án **NO ALEMBIC / BACKUP_BEFORE_RESET**. Branch `task/T06-kiem-duyet` tách từ `master` tại `0b244b0`; T07 chưa được authorize.
 
 ## 6. Current Task Record
-NONE. Task hoàn tất gần nhất: `docs/tasks/T05.md` — DONE / CLOSED.
+`docs/tasks/T06.md` — PO đã authorize, trạng thái **IN_PROGRESS**.
 
 ## 7. Roadmap và trạng thái
 
@@ -45,8 +45,8 @@ NONE. Task hoàn tất gần nhất: `docs/tasks/T05.md` — DONE / CLOSED.
 | T03 | Bộ dữ liệu bình luận phim | Dữ liệu | 1–2 | — | [T03.md](tasks/T03.md) | DONE / CLOSED (Claude PASS_WITH_TODO; PO APPROVED; merge `6bd1a3f`; Drive VERIFIED) |
 | T04 | Quản lý phim (admin) | Web | 2 | — | [T04.md](tasks/T04.md) | DONE / CLOSED (Claude PASS_WITH_TODO; PO APPROVED; AC 7/7; RF 0; blocker 0; SD-01/SD-02 approved retroactively; merge `fced3d7`) |
 | T05 | Quản lý suất chiếu (admin) | Web | 2 | T04 | [T05.md](tasks/T05.md) | DONE / CLOSED (Claude Round 2 PASS_WITH_TODO; AC 8/8 PASS; DoD MET; RF-01 CLOSED; RF mở 0; PO APPROVED; merge `54a3715`; T05_MERGE_VERIFIED) |
-| T06 | Kiểm duyệt có người duyệt (đổi schema) | Web | 2 | — | [T06.md](tasks/T06.md) | PLANNED (cần Q2) |
-| T07 | Đa mô hình và trang So sánh mô hình | Web + ML | 2 | T01 | [T07.md](tasks/T07.md) | PLANNED |
+| T06 | Kiểm duyệt có người duyệt (đổi schema) | Web | 2 | — | [T06.md](tasks/T06.md) | IN_PROGRESS (Q2 RESOLVED) |
+| T07 | Đa mô hình và trang So sánh mô hình | Web + ML | 2 | T01 | [T07.md](tasks/T07.md) | PLANNED / NOT AUTHORIZED |
 | T08 | Đo lệch miền điện thoại → phim | ML | 3 | T02, T03 | [T08.md](tasks/T08.md) | PLANNED |
 | T09 | Train PhoBERT phần B | ML | 3 | T08 | [T09.md](tasks/T09.md) | PLANNED |
 | T10 | Gắn model B vào web | Web | 3 | T07, T09 | [T10.md](tasks/T10.md) | PLANNED |
@@ -64,7 +64,7 @@ Nếu trễ: cắt T14 → T15 → rút gọn T05. Không cắt T01–T03, T07�
 - Q1 (nguồn bình luận phim, người gán nhãn thứ 2): RESOLVED 07/10/2026 — xem `PROJECT_SOURCE_OF_TRUTH.md` mục 5 và `docs/tasks/T03.md` mục 13.
 - T03: RESOLVED — PO APPROVED, Drive Backup VERIFIED, DONE / CLOSED, merge `6bd1a3f`.
 - T05 scope conflict: phim `ended` vẫn có thể bị đặt vé qua endpoint trực tiếp; fix nguồn cần sửa `backend/app/routers/bookings.py` ngoài allowlist T05. UI đã ẩn lịch ended và T05 chặn tạo/cập nhật suất cho phim ended. Claude xác minh 08/10: vẫn tồn tại (booking suất phim ended → `201`), không chặn AC T05. **PO chọn phương án B: ACCEPT_LATER → T11**; vấn đề chưa được sửa trong T05.
-- Q2 (Alembic hay xóa `firefly.db`): OPEN — cần chốt trước T06.
+- Q2: **RESOLVED 08/10/2026 — NO ALEMBIC / BACKUP_BEFORE_RESET.** Sao lưu và xác minh đúng database trước khi PO tự reset; Codex không tự xóa database thật.
 
 ## 9. Open Required Fixes
 - **Open Required Fixes: 0.** T05 RF-01 (High) **CLOSED** — Claude Round 2 xác minh độc lập: fix commit `f5fca8d`; fresh real/mock đều có đủ 9 phim mỗi ngày, hot_week đủ 9, 0 cặp chồng, restart giữ nguyên suất admin/booking. Evidence: `reports/2026-10-08/codex_fix_T05_round1_2026-10-08.md`.
@@ -119,8 +119,8 @@ Nếu trễ: cắt T14 → T15 → rút gọn T05. Không cắt T01–T03, T07�
 | Claude review T05 r2 | TODO-06 (Low) phân bổ không đều (phim 9/10/18 1 suất/ngày), DB cũ giữ 190 cặp chồng lịch sử, lần đầu chạy trên `firefly.db` thật thêm 38 suất | ACCEPT_WITH_NOTES → T12 |
 
 ## 11. Current Next Step
-1. **Next Task: NOT SELECTED.** Chờ PO chọn và authorize task tiếp theo bằng bước planning riêng.
-2. T06 giữ **PLANNED**, Q2 **OPEN**.
+1. **Next Task: T06.** Codex triển khai đúng allowlist trên `task/T06-kiem-duyet`.
+2. T06 **IN_PROGRESS**; Q2 **RESOLVED — NO ALEMBIC / BACKUP_BEFORE_RESET**.
 3. T07 giữ **PLANNED / NOT AUTHORIZED**; không tự tạo branch hoặc mở task.
 
 ## 12. Active Timeline
@@ -176,3 +176,5 @@ Nếu trễ: cắt T14 → T15 → rút gọn T05. Không cắt T01–T03, T07�
 | 08/10/2026 | Tín | PO review T05: **APPROVED**; Claude PASS_WITH_TODO, AC 8/8 PASS, DoD MET, RF-01 CLOSED, Open Required Fixes 0. TODO-01→T11, TODO-02 ACCEPT, TODO-03→T11, TODO-04 RESOLVED, TODO-05→T11 ưu tiên trước demo, TODO-06 ACCEPT_WITH_NOTES→T12. Scope conflict booking phim `ended`: chọn phương án B, ACCEPT_LATER→T11, chưa sửa trong T05. T05 → `PO_APPROVED / PENDING_MERGE`; Next Task NOT SELECTED; T06 PLANNED với Q2 OPEN; không authorize T07 |
 | 08/10/2026 | Tín | Merge T05 vào `master` tại `54a3715`; merge commit có hai parent `a09fe673` và `b0a50de`; toàn bộ lịch sử branch `task/T05-quan-ly-suat-chieu` nằm trong `master` (`T05_MERGE_VERIFIED`) |
 | 08/10/2026 | Codex | Final closure sync: T05 → DONE / CLOSED; Overall Status → READY_FOR_NEXT_TASK; Current Active Task → NONE; Next Task → NOT SELECTED. T06 giữ PLANNED với Q2 OPEN; T07 giữ PLANNED / NOT AUTHORIZED; không mở task tiếp theo |
+| 08/10/2026 | Tín | PO authorize T06: `READY_FOR_HANDOFF`; Q2 RESOLVED theo phương án **NO ALEMBIC / BACKUP_BEFORE_RESET**; cho phép đổi schema comments, yêu cầu backup đã xác minh trước khi PO tự reset database thật; T07 giữ PLANNED / NOT AUTHORIZED |
+| 08/10/2026 | Codex | Pre-flight PASS: working tree sạch, `54a3715` là ancestor của `master`, baseline mới nhất local `0b244b0`; tạo `task/T06-kiem-duyet` không ghi đè branch; T06 `READY_FOR_HANDOFF` → `IN_PROGRESS` |

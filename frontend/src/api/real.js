@@ -1,5 +1,23 @@
 // Gọi backend FastAPI thật. Mỗi hàm ở đây khớp 1 endpoint trong backend/app/routers.
-import { request } from "./http";
+import { ApiError, request, tokenStore } from "./http";
+import { API_URL } from "../config";
+
+async function download(path) {
+  const headers = {};
+  const token = tokenStore.get();
+  if (token) headers.Authorization = `Bearer ${token}`;
+  let response;
+  try {
+    response = await fetch(`${API_URL}${path}`, { headers });
+  } catch {
+    throw new ApiError(`Không kết nối được máy chủ. Kiểm tra backend đã chạy ở ${API_URL} chưa.`, 0);
+  }
+  if (!response.ok) {
+    const data = await response.json().catch(() => null);
+    throw new ApiError(typeof data?.detail === "string" ? data.detail : "Không thể tải file CSV.", response.status);
+  }
+  return response.blob();
+}
 
 export const realApi = {
   auth: {
@@ -29,7 +47,15 @@ export const realApi = {
       request(`/api/movies/${movieId}/comments`, { method: "POST", body: { content } }),
   },
   admin: {
-    comments: (label) => request(`/api/admin/comments${label ? `?label=${label}` : ""}`),
+    comments: {
+      list: (filters = {}) => {
+        const params = new URLSearchParams(Object.entries(filters).filter(([, value]) => value !== undefined && value !== ""));
+        return request(`/api/admin/comments${params.toString() ? `?${params}` : ""}`);
+      },
+      update: (id, payload) => request(`/api/admin/comments/${id}`, { method: "PATCH", body: payload }),
+      stats: () => request("/api/admin/comments/stats"),
+      exportCsv: () => download("/api/admin/comments/export.csv"),
+    },
     movies: {
       list: () => request("/api/admin/movies"),
       create: (payload) => request("/api/admin/movies", { method: "POST", body: payload }),

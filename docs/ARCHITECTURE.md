@@ -2,7 +2,7 @@
 
 > Hợp đồng kỹ thuật mà mọi task phải giữ. Mô tả chi tiết cây thư mục, routes, API, schema xem `BOI_CANH_DU_AN.md` mục 3.
 > Task nào đổi một mục dưới đây phải cập nhật file này trong cùng nhánh và ghi vào report.
-> Cập nhật: 03/10/2026 (trạng thái sau tag `phobert-v1`).
+> Cập nhật: 08/10/2026 (T06 — kiểm duyệt có người duyệt).
 
 ## 1. Sơ đồ thành phần
 
@@ -171,7 +171,7 @@ Ngoài máy: Google Drive `MyDrive/thesis/data/…`, `MyDrive/thesis_results/…
 
 ### 2.5. Cơ sở dữ liệu
 - Ràng buộc `UNIQUE(showtime_id, seat_code)` trên `booking_seats` là cơ chế chống đặt trùng ghế. Không gỡ.
-- Chưa có migration (`create_all`). Task đổi schema phải ghi "Đổi schema: Có" và hướng dẫn xóa `firefly.db` trong report và `HUONG_DAN.md` (trừ khi Q2 chốt dùng Alembic).
+- Chưa có migration (`create_all`). Q2 đã chốt **NO ALEMBIC / BACKUP_BEFORE_RESET** cho T06: xác định đúng database, dừng backend, tạo và xác minh backup rồi PO mới tự xóa `firefly.db`; khởi động lại để `create_all` và seed tạo schema mới.
 
 ### 2.6. Mô hình
 - `normalize()` trong `backend/app/classifier.py` là hàm tiền xử lý chuẩn. Notebook đánh giá mọi model phải dùng đúng hàm này.
@@ -186,7 +186,13 @@ Ngoài máy: Google Drive `MyDrive/thesis/data/…`, `MyDrive/thesis_results/…
 - `backend/app/showtime_rules.py` là luật dùng chung cho CRUD và `_ensure_showtimes()`; seed lấp từng khung còn trống thay vì bỏ qua hoặc ghi đè cả ngày có suất admin.
 - Suất có dòng `booking_seats` không được sửa/xóa. Frontend real và mock cùng contract `api.admin.showtimes.{list,create,update,remove}`.
 
-### 2.8. Bí mật và file lớn
+### 2.8. Kiểm duyệt bình luận có người duyệt
+- `comments` giữ nguyên kết quả model ở `is_negative`, `negative_score`, `model_name`; nhãn người duyệt nằm riêng ở `human_label` (`0` hoặc `1`), kèm `reviewed_by`, `reviewed_at` và cờ `hidden`.
+- Nhãn hiệu lực công khai là `human_label` nếu đã duyệt, ngược lại là `is_negative`; bình luận `hidden=true` không được trả về API công khai.
+- API admin bình luận dùng `require_admin`, hỗ trợ phân trang/lọc trạng thái duyệt, confirm/relabel/hide/unhide, thống kê TP/FP/TN/FN và CSV UTF-8 BOM gồm đúng `text,text_norm,label`.
+- `text_norm` trong CSV luôn dùng `normalize()` hiện hành của backend. Real API và mock API giữ cùng contract.
+
+### 2.9. Bí mật và file lớn
 - Không commit: `.env`, `firefly.db`, `backend/models/`, `venv/`, `node_modules/`, file model, CSV/XLSX lớn.
 
 ## 3. Thay đổi kiến trúc dự kiến theo kế hoạch
@@ -208,3 +214,4 @@ Ngoài máy: Google Drive `MyDrive/thesis/data/…`, `MyDrive/thesis_results/…
 | 04/10/2026 | T00 (PO đổi phạm vi) | Mọi hoạt động chuyển về ổ C. Thêm `data\uit-visfd\`, `data\phim\`, `ml\artifacts\`, `backup\` (ngoài Git); `Bao_cao\` giữ lại làm nơi để bản Word. Ổ D ngừng sử dụng |
 | 08/10/2026 | T04 | Thêm CRUD `/api/admin/movies`, taxonomy backend/frontend đồng bộ và trang `/quan-tri/phim`; không đổi schema |
 | 08/10/2026 | T05 | Thêm CRUD `/api/admin/showtimes`, luật chống chồng phòng dùng chung với seed và trang `/quan-tri/suat-chieu`; không đổi schema |
+| 08/10/2026 | T06 | Thêm nhãn người duyệt/ẩn bình luận, phân trang, thống kê model và CSV; đổi schema comments theo Q2 NO ALEMBIC / BACKUP_BEFORE_RESET |

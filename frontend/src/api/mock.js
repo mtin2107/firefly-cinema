@@ -23,6 +23,19 @@ function fakeClassify(text) {
   return { is_negative: hit, negative_score: hit ? 0.87 : 0.08 };
 }
 
+const COMMENT_ABBR = {
+  ko: "không", k: "không", kh: "không", khg: "không", kg: "không", hok: "không", hong: "không",
+  "đc": "được", dc: "được", "đk": "được", dk: "được", j: "gì", vs: "với", mn: "mọi người",
+  ng: "người", bt: "bình thường", r: "rồi", z: "vậy", v: "vậy", mik: "mình", mk: "mình",
+  trc: "trước", sp: "sản phẩm",
+};
+function normalizeComment(text) {
+  const normalized = text.normalize("NFC").toLowerCase()
+    .replace(/([\p{L}\p{N}_])\1{2,}/gu, "$1")
+    .replace(/([.,!?;:()\[\]"“”…])/g, " $1 ");
+  return normalized.split(/\s+/).filter(Boolean).map((word) => COMMENT_ABBR[word] ?? word).join(" ");
+}
+
 function localIso(date, hhmm) {
   const [h, m] = hhmm.split(":").map(Number);
   const d = new Date(date);
@@ -128,6 +141,7 @@ function createDb() {
   ];
   const comments = sample.map(([movie_id, user_id, content], i) => ({
     id: i + 1, movie_id, user_id, content, ...fakeClassify(content),
+    model_name: "keyword", human_label: null, reviewed_by: null, reviewed_at: null, hidden: false,
     created_at: new Date(Date.now() - (i + 1) * 3600 * 1000 * 5).toISOString(),
   }));
   const showtimes = buildShowtimes();
@@ -148,6 +162,13 @@ function load() {
       if (!db.seq.movie) db.seq.movie = Math.max(...db.movies.map((m) => m.id)) + 1;
       if (!db.adminShowtimeIds) db.adminShowtimeIds = [];
       if (!db.seq.showtime) db.seq.showtime = Math.max(...db.showtimes.map((item) => item.id), 0) + 1;
+      db.comments.forEach((comment) => {
+        if (!comment.model_name) comment.model_name = "keyword";
+        if (!("human_label" in comment)) comment.human_label = null;
+        if (!("reviewed_by" in comment)) comment.reviewed_by = null;
+        if (!("reviewed_at" in comment)) comment.reviewed_at = null;
+        if (!("hidden" in comment)) comment.hidden = false;
+      });
       // làm mới suất chiếu mỗi ngày
       if (db.showtimesDay === new Date().toDateString()) {
         const additions = buildShowtimes(db.movies, db.showtimes, db.seq.showtime);
@@ -196,7 +217,16 @@ const bookedSeats = (showtimeId) => [
 ];
 const commentOut = (c) => ({
   id: c.id, movie_id: c.movie_id, user_name: db.users.find((u) => u.id === c.user_id)?.full_name ?? "Ẩn danh",
-  content: c.content, is_negative: c.is_negative, negative_score: c.negative_score, created_at: c.created_at,
+  content: c.content, is_negative: c.is_negative,
+  effective_negative: c.human_label === 0 || c.human_label === 1 ? c.human_label === 1 : c.is_negative,
+  reviewed: c.human_label === 0 || c.human_label === 1,
+  negative_score: c.negative_score, created_at: c.created_at,
+});
+const adminCommentOut = (c) => ({
+  ...commentOut(c), movie_title: movieById(c.movie_id).title, model_name: c.model_name,
+  human_label: c.human_label, reviewed_by: c.reviewed_by,
+  reviewed_by_name: db.users.find((u) => u.id === c.reviewed_by)?.full_name ?? null,
+  reviewed_at: c.reviewed_at, hidden: c.hidden,
 });
 
 // Lượt đặt mẫu (trong 7 ngày, từ 8 đến 30 ngày trước) — giống backend/app/seed.py
@@ -370,7 +400,7 @@ export const mockApi = {
   comments: {
     async list(movieId) {
       await wait();
-      return db.comments.filter((c) => c.movie_id === Number(movieId))
+      return db.comments.filter((c) => c.movie_id === Number(movieId) && !c.hidden)
         .sort((a, b) => b.created_at.localeCompare(a.created_at)).map(commentOut);
     },
     async create(movieId, content) {
@@ -379,19 +409,74 @@ export const mockApi = {
       movieById(movieId);
       const text = content.trim();
       if (text.length < 2 || text.length > 1000) throw new ApiError("Bình luận cần từ 2 đến 1000 ký tự.", 400);
-      const c = { id: db.seq.comment++, movie_id: Number(movieId), user_id: user.id, content: text, ...fakeClassify(text), created_at: nowIso() };
+      const c = { id: db.seq.comment++, movie_id: Number(movieId), user_id: user.id, content: text,
+        ...fakeClassify(text), model_name: "keyword", human_label: null, reviewed_by: null,
+        reviewed_at: null, hidden: false, created_at: nowIso() };
       db.comments.push(c); save();
       return commentOut(c);
     },
   },
   admin: {
-    async comments(label) {
-      await wait();
-      if (currentUser().role !== "admin") throw new ApiError("Chỉ quản trị viên mới xem được trang này.", 403);
-      return db.comments
-        .filter((c) => (label === "negative" ? c.is_negative : label === "normal" ? !c.is_negative : true))
-        .sort((a, b) => b.created_at.localeCompare(a.created_at))
-        .map((c) => ({ ...commentOut(c), movie_title: movieById(c.movie_id).title }));
+    comments: {
+      async list(filters = {}) {
+        await wait();
+        requireAdmin();
+        const page = Number(filters.page ?? 1);
+        const pageSize = Number(filters.page_size ?? 20);
+        if (!Number.isInteger(page) || page < 1) throw new ApiError("Trang phải là số nguyên từ 1 trở lên.", 422);
+        if (!Number.isInteger(pageSize) || pageSize < 1 || pageSize > 100) throw new ApiError("Số bình luận mỗi trang phải từ 1 đến 100.", 422);
+        const reviewed = filters.reviewed === true || filters.reviewed === "true"
+          ? true : filters.reviewed === false || filters.reviewed === "false" ? false : null;
+        const rows = db.comments
+          .filter((c) => (filters.label === "negative" ? c.is_negative : filters.label === "normal" ? !c.is_negative : true))
+          .filter((c) => reviewed === null || (c.human_label === 0 || c.human_label === 1) === reviewed)
+          .sort((a, b) => b.created_at.localeCompare(a.created_at) || b.id - a.id);
+        const start = (page - 1) * pageSize;
+        return clone({ items: rows.slice(start, start + pageSize).map(adminCommentOut), total: rows.length });
+      },
+      async update(id, payload) {
+        await wait();
+        const admin = currentUser();
+        if (admin.role !== "admin") throw new ApiError("Chỉ quản trị viên mới xem được trang này.", 403);
+        const comment = db.comments.find((item) => item.id === Number(id));
+        if (!comment) throw new ApiError("Không tìm thấy bình luận.", 404);
+        if (payload.action === "confirm") {
+          comment.human_label = comment.is_negative ? 1 : 0;
+          comment.reviewed_by = admin.id;
+          comment.reviewed_at = nowIso();
+        } else if (payload.action === "relabel") {
+          if (payload.label !== 0 && payload.label !== 1) throw new ApiError("Đổi nhãn cần label là 0 hoặc 1.", 422);
+          comment.human_label = payload.label;
+          comment.reviewed_by = admin.id;
+          comment.reviewed_at = nowIso();
+        } else if (payload.action === "hide") comment.hidden = true;
+        else if (payload.action === "unhide") comment.hidden = false;
+        else throw new ApiError("Thao tác kiểm duyệt không hợp lệ.", 422);
+        save();
+        return clone(adminCommentOut(comment));
+      },
+      async stats() {
+        await wait();
+        requireAdmin();
+        const rows = db.comments.filter((c) => c.human_label === 0 || c.human_label === 1);
+        const tp = rows.filter((c) => c.is_negative && c.human_label === 1).length;
+        const fp = rows.filter((c) => c.is_negative && c.human_label === 0).length;
+        const tn = rows.filter((c) => !c.is_negative && c.human_label === 0).length;
+        const fn = rows.filter((c) => !c.is_negative && c.human_label === 1).length;
+        const agree = tp + tn;
+        return { reviewed: rows.length, agree, disagree: fp + fn,
+          accuracy: rows.length ? agree / rows.length : 0, tp, fp, tn, fn };
+      },
+      async exportCsv() {
+        await wait();
+        requireAdmin();
+        const escape = (value) => `"${String(value).replace(/"/g, '""')}"`;
+        const lines = ["text,text_norm,label", ...db.comments
+          .filter((c) => c.human_label === 0 || c.human_label === 1)
+          .sort((a, b) => a.id - b.id)
+          .map((c) => `${escape(c.content)},${escape(normalizeComment(c.content))},${c.human_label}`)];
+        return new Blob(["\ufeff", lines.join("\r\n"), "\r\n"], { type: "text/csv;charset=utf-8" });
+      },
     },
     movies: {
       async list() {

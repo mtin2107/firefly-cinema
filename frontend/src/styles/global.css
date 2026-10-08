@@ -354,6 +354,22 @@ h1, h2, h3 { margin: 0; line-height: 1.15; }
 .meter { width: 90px; height: 6px; background: var(--line); border-radius: 3px; overflow: hidden; margin-top: 8px; }
 .meter__fill { display: block; height: 100%; background: var(--red); }
 .meter__num { font-size: .8rem; color: var(--muted); }
+.admin-comments__heading { display: flex; align-items: end; justify-content: space-between; gap: 24px; }
+.admin-comments__heading .page-title { margin-bottom: 12px; }
+.admin-comments__heading .btn { margin-bottom: 20px; white-space: nowrap; }
+.moderation-stats { display: grid; grid-template-columns: repeat(5, minmax(120px, 1fr)); gap: 12px; margin: 24px 0; }
+.moderation-stats > div { padding: 16px; background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius-sm); }
+.moderation-stats span, .moderation-stats strong { display: block; }
+.moderation-stats span { color: var(--muted); font-size: .82rem; }
+.moderation-stats strong { margin-top: 4px; color: var(--yellow); font-size: 1.25rem; }
+.admin-comments__filters { display: flex; align-items: end; justify-content: space-between; gap: 24px; }
+.admin-comments__filters .tabs { flex: 1; margin-bottom: 20px; }
+.moderation-review-filter { min-width: 180px; margin-bottom: 20px; }
+.moderation-review-filter select { width: 100%; }
+.moderation-table { min-width: 1120px; }
+.moderation-meta { display: block; margin-top: 7px; color: var(--muted); line-height: 1.4; }
+.moderation-actions { display: flex; flex-direction: column; align-items: stretch; gap: 7px; min-width: 170px; }
+.pagination { display: flex; align-items: center; justify-content: center; gap: 16px; margin: 24px 0 40px; color: var(--muted); }
 
 /* ---------- Quản lý phim ---------- */
 .admin-movie-editor {
@@ -452,6 +468,10 @@ h1, h2, h3 { margin: 0; line-height: 1.15; }
   .admin-movie-editor__preview .poster { width: min(240px, 72vw); }
   .showtime-form { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .admin-showtime-list-head { align-items: stretch; flex-direction: column; }
+  .moderation-stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .moderation-stats > div:last-child { grid-column: 1 / -1; }
+  .admin-comments__filters { align-items: stretch; flex-direction: column; gap: 0; }
+  .moderation-review-filter { width: 100%; }
 }
 @media (max-width: 600px) {
   .container { padding-left: 14px; padding-right: 14px; }
@@ -473,6 +493,10 @@ h1, h2, h3 { margin: 0; line-height: 1.15; }
   .admin-showtime-editor { padding: 18px 14px; }
   .showtime-form, .showtime-filters { display: grid; grid-template-columns: 1fr; }
   .showtime-filters .btn { width: 100%; }
+  .admin-comments__heading { align-items: stretch; flex-direction: column; gap: 0; }
+  .admin-comments__heading .btn { width: 100%; }
+  .admin-comments__filters .tab { font-size: 1.15rem; }
+  .pagination { justify-content: space-between; gap: 8px; font-size: .85rem; }
 }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation: none !important; transition: none !important; }

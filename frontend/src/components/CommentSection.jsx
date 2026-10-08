@@ -7,9 +7,9 @@ import { Loading, ErrorState } from "./StateViews";
 
 function CommentItem({ comment }) {
   const [revealed, setRevealed] = useState(false);
-  const hidden = comment.is_negative && !revealed;
+  const hidden = comment.effective_negative && !revealed;
   return (
-    <li className={`comment${comment.is_negative ? " comment--negative" : ""}`}>
+    <li className={`comment${comment.effective_negative ? " comment--negative" : ""}`}>
       <div className="comment__head">
         <span className="comment__author">{comment.user_name}</span>
         <span className="muted">{relativeTime(comment.created_at)}</span>
@@ -49,7 +49,7 @@ export default function CommentSection({ movieId }) {
       const created = await api.comments.create(movieId, text);
       setComments((list) => [created, ...(list ?? [])]);
       setText("");
-      setNotice(created.is_negative
+      setNotice(created.effective_negative
         ? { type: "warn", text: "Đã đăng. Hệ thống đánh giá bình luận này mang tính tiêu cực nên sẽ ẩn mặc định với người xem khác." }
         : { type: "ok", text: "Đã đăng bình luận." });
     } catch (err) {

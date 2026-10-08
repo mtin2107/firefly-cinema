@@ -2,6 +2,8 @@ from datetime import date, datetime, timezone
 import re
 from urllib.parse import urlparse
 
+from typing import Literal
+
 from pydantic import BaseModel, ConfigDict, EmailStr, Field, field_validator
 from pydantic_core import PydanticCustomError
 
@@ -269,6 +271,8 @@ class CommentOut(BaseModel):
     user_name: str
     content: str
     is_negative: bool
+    effective_negative: bool
+    reviewed: bool
     negative_score: float
     created_at: datetime
 
@@ -277,3 +281,45 @@ class AdminCommentOut(CommentOut):
     model_config = ConfigDict(protected_namespaces=())
     movie_title: str
     model_name: str
+    human_label: int | None
+    reviewed_by: int | None
+    reviewed_by_name: str | None
+    reviewed_at: datetime | None
+    hidden: bool
+
+
+class AdminCommentPage(BaseModel):
+    items: list[AdminCommentOut]
+    total: int
+
+
+class AdminCommentAction(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    action: Literal["confirm", "relabel", "hide", "unhide"]
+    label: Literal[0, 1] | None = None
+
+    @field_validator("action", mode="before")
+    @classmethod
+    def validate_action(cls, value: str) -> str:
+        if value not in {"confirm", "relabel", "hide", "unhide"}:
+            raise PydanticCustomError("comment_action", "Thao tác phải là confirm, relabel, hide hoặc unhide.")
+        return value
+
+    @field_validator("label", mode="before")
+    @classmethod
+    def validate_human_label(cls, value: int | None) -> int | None:
+        if value is not None and value not in (0, 1):
+            raise PydanticCustomError("comment_label", "Nhãn người duyệt phải là 0 hoặc 1.")
+        return value
+
+
+class AdminCommentStats(BaseModel):
+    reviewed: int
+    agree: int
+    disagree: int
+    accuracy: float
+    tp: int
+    fp: int
+    tn: int
+    fn: int

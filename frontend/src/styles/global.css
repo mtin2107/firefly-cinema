@@ -382,6 +382,22 @@ h1, h2, h3 { margin: 0; line-height: 1.15; }
 .admin-movie-title > div { display: flex; flex-direction: column; }
 .admin-movie-actions { display: flex; gap: 8px; }
 
+/* ---------- Quản lý suất chiếu ---------- */
+.admin-showtime-editor {
+  margin-top: 28px; padding: 28px; background: var(--surface-2);
+  border: 1px solid var(--line); border-radius: var(--radius);
+}
+.admin-showtime-editor .section-title { font-size: 1.5rem; }
+.showtime-form { display: grid; grid-template-columns: 2fr 1.4fr 1fr 1fr; gap: 16px; align-items: start; }
+.showtime-form > *, .showtime-filters > * { min-width: 0; }
+.showtime-form .field input, .showtime-form .field select,
+.showtime-filters .field input, .showtime-filters .field select { width: 100%; }
+.showtime-form .actions { grid-column: 1 / -1; }
+.admin-showtime-list-head { display: flex; align-items: end; justify-content: space-between; gap: 24px; margin-bottom: 20px; }
+.admin-showtime-list-head .section-title { margin-bottom: 0; }
+.showtime-filters { display: flex; align-items: end; gap: 12px; }
+.admin-showtime-table { min-width: 720px; }
+
 
 /* ---------- Khung bong bóng poster khi bấm vào phim ---------- */
 .intro {
@@ -434,6 +450,8 @@ h1, h2, h3 { margin: 0; line-height: 1.15; }
   .admin-movie-editor { grid-template-columns: 1fr; }
   .admin-movie-editor__preview { position: static; }
   .admin-movie-editor__preview .poster { width: min(240px, 72vw); }
+  .showtime-form { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .admin-showtime-list-head { align-items: stretch; flex-direction: column; }
 }
 @media (max-width: 600px) {
   .container { padding-left: 14px; padding-right: 14px; }
@@ -452,6 +470,9 @@ h1, h2, h3 { margin: 0; line-height: 1.15; }
   .movie-form__row, .movie-form__row:has(.field:nth-child(3)) { grid-template-columns: 1fr; }
   .choice-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .admin-movie-actions { flex-direction: column; }
+  .admin-showtime-editor { padding: 18px 14px; }
+  .showtime-form, .showtime-filters { display: grid; grid-template-columns: 1fr; }
+  .showtime-filters .btn { width: 100%; }
 }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation: none !important; transition: none !important; }

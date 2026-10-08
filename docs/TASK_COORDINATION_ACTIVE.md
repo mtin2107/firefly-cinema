@@ -60,6 +60,7 @@ Chuỗi chính: `T00 → T01 → T02` và `T03 → T08 → T09 → T10`. T03 b�
 Nếu trễ: cắt T14 → T15 → rút gọn T05. Không cắt T01–T03, T07–T10.
 
 ## 8. Open Blockers
+- T06: **PENDING_PO_DATABASE_RESET.** Backup đã VERIFIED tại `backup/T06/firefly_pre_T06_20261008_234417.db` (SHA-256 `c27abfcad23c2c53bd1b2f827dce8aed541a64838d00c9ce0d6543dc0a3e23bc`, `PRAGMA integrity_check=ok`); backend đã dừng. Theo authorization, chỉ PO xóa `backend/firefly.db`, khởi động lại để create_all/seed và gửi evidence schema/dữ liệu thật. T06 giữ `IN_PROGRESS`, chưa chuyển `CLAUDE_REVIEW`.
 - T04: 0 technical blockers; SD-01/SD-02 đã được PO phê duyệt hồi tố, không còn chặn merge.
 - Q1 (nguồn bình luận phim, người gán nhãn thứ 2): RESOLVED 07/10/2026 — xem `PROJECT_SOURCE_OF_TRUTH.md` mục 5 và `docs/tasks/T03.md` mục 13.
 - T03: RESOLVED — PO APPROVED, Drive Backup VERIFIED, DONE / CLOSED, merge `6bd1a3f`.
@@ -119,8 +120,8 @@ Nếu trễ: cắt T14 → T15 → rút gọn T05. Không cắt T01–T03, T07�
 | Claude review T05 r2 | TODO-06 (Low) phân bổ không đều (phim 9/10/18 1 suất/ngày), DB cũ giữ 190 cặp chồng lịch sử, lần đầu chạy trên `firefly.db` thật thêm 38 suất | ACCEPT_WITH_NOTES → T12 |
 
 ## 11. Current Next Step
-1. **Next Task: T06.** Codex triển khai đúng allowlist trên `task/T06-kiem-duyet`.
-2. T06 **IN_PROGRESS**; Q2 **RESOLVED — NO ALEMBIC / BACKUP_BEFORE_RESET**.
+1. **Next Task: T06.** PO thực hiện bước reset/seed database thật theo `HUONG_DAN.md` mục 2.1, sau đó Codex xác minh schema/dữ liệu và chạy lại gate phụ thuộc.
+2. T06 **IN_PROGRESS / PENDING_PO_DATABASE_RESET**; Q2 **RESOLVED — NO ALEMBIC / BACKUP_BEFORE_RESET**. Implementation commit `942d719`.
 3. T07 giữ **PLANNED / NOT AUTHORIZED**; không tự tạo branch hoặc mở task.
 
 ## 12. Active Timeline
@@ -178,3 +179,4 @@ Nếu trễ: cắt T14 → T15 → rút gọn T05. Không cắt T01–T03, T07�
 | 08/10/2026 | Codex | Final closure sync: T05 → DONE / CLOSED; Overall Status → READY_FOR_NEXT_TASK; Current Active Task → NONE; Next Task → NOT SELECTED. T06 giữ PLANNED với Q2 OPEN; T07 giữ PLANNED / NOT AUTHORIZED; không mở task tiếp theo |
 | 08/10/2026 | Tín | PO authorize T06: `READY_FOR_HANDOFF`; Q2 RESOLVED theo phương án **NO ALEMBIC / BACKUP_BEFORE_RESET**; cho phép đổi schema comments, yêu cầu backup đã xác minh trước khi PO tự reset database thật; T07 giữ PLANNED / NOT AUTHORIZED |
 | 08/10/2026 | Codex | Pre-flight PASS: working tree sạch, `54a3715` là ancestor của `master`, baseline mới nhất local `0b244b0`; tạo `task/T06-kiem-duyet` không ghi đè branch; T06 `READY_FOR_HANDOFF` → `IN_PROGRESS` |
+| 08/10/2026 | Codex | T06 implementation commit `942d719`: schema/real+mock API/UI/tài liệu trong allowlist; backup DB thật VERIFIED; compile/build, DB tạm, real/mock API, permission, stats, CSV và responsive browser probe đạt. DB thật chưa reset theo đúng authorization nên T06 giữ `IN_PROGRESS / PENDING_PO_DATABASE_RESET`, chưa chuyển `CLAUDE_REVIEW` |

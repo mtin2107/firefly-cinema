@@ -22,18 +22,18 @@ Trước khi áp dụng workflow: giao diện React đầy đủ (`giao-dien-v1`
 
 ## 4. Current Project Status
 ```
-Overall Status: IDLE — chờ PO authorize task kế tiếp
+Overall Status: ACTIVE — T03 PO_REVIEW
 Phase: T00 PO_APPROVED; T01, T02 DONE/CLOSED (tag ml-baselines)
-Current Active Task: NONE
-Next Task: T04 — PLANNED, chờ PO authorize (chưa READY_FOR_HANDOFF); T03 vẫn BLOCKED Q1
+Current Active Task: T03 — PO_REVIEW (branch task/T03-du-lieu-phim; Claude PASS_WITH_TODO 08/10/2026)
+Next Task: T04 — PLANNED, chờ PO authorize (chưa READY_FOR_HANDOFF)
 Ngày bắt đầu sản phẩm: 05/10/2026 · Hạn: 01/11/2026
 ```
 
 ## 5. Current Active Task
-NONE
+T03 — Bộ dữ liệu bình luận phim — PO_REVIEW (Claude PASS_WITH_TODO, AC 6/6, RF 0, blocker 0, DoD MET có điều kiện — xem `reports/2026-10-08/claude_review_T03_PASS_WITH_TODO_2026-10-08.md`)
 
 ## 6. Current Task Record
-NONE — task vừa đóng: [docs/tasks/T02.md](tasks/T02.md)
+[docs/tasks/T03.md](tasks/T03.md)
 
 ## 7. Roadmap và trạng thái
 
@@ -42,7 +42,7 @@ NONE — task vừa đóng: [docs/tasks/T02.md](tasks/T02.md)
 | T00 | Gom mã và dữ liệu về project ổ C, model card A | ML | 1 | — | [T00.md](tasks/T00.md) | PO_APPROVED (đã có trên master tại `20daf6a`) |
 | T01 | Mô hình truyền thống (NB, LR, SVM) | ML | 1 | T00 | [T01.md](tasks/T01.md) | DONE / CLOSED |
 | T02 | So sánh PhoBERT với mô hình truyền thống | ML | 1 | T01 | [T02.md](tasks/T02.md) | DONE / CLOSED (merge `6d5fda5`, tag `ml-baselines`) |
-| T03 | Bộ dữ liệu bình luận phim | Dữ liệu | 1–2 | — | [T03.md](tasks/T03.md) | PLANNED (BLOCKED Q1) |
+| T03 | Bộ dữ liệu bình luận phim | Dữ liệu | 1–2 | — | [T03.md](tasks/T03.md) | PO_REVIEW (Claude PASS_WITH_TODO 08/10) |
 | T04 | Quản lý phim (admin) | Web | 2 | — | [T04.md](tasks/T04.md) | PLANNED (task kế tiếp, chờ PO authorize) |
 | T05 | Quản lý suất chiếu (admin) | Web | 2 | T04 | [T05.md](tasks/T05.md) | PLANNED |
 | T06 | Kiểm duyệt có người duyệt (đổi schema) | Web | 2 | — | [T06.md](tasks/T06.md) | PLANNED (cần Q2) |
@@ -60,8 +60,9 @@ Chuỗi chính: `T00 → T01 → T02` và `T03 → T08 → T09 → T10`. T03 b�
 Nếu trễ: cắt T14 → T15 → rút gọn T05. Không cắt T01–T03, T07–T10.
 
 ## 8. Open Blockers
-- Q1 (nguồn bình luận phim, người gán nhãn thứ 2) **BLOCK T03**. Không mở T03 khi Q1 chưa được chốt.
-- Q2 (Alembic hay xóa `firefly.db`) cần chốt trước T06.
+- Q1 (nguồn bình luận phim, người gán nhãn thứ 2): RESOLVED 07/10/2026 — xem `PROJECT_SOURCE_OF_TRUTH.md` mục 5 và `docs/tasks/T03.md` mục 13.
+- T03: không còn blocker implementation. Claude review PASS_WITH_TODO 08/10/2026; TODO-01 đã xử lý (`movie_comments_v1.md` đã xóa, dữ liệu không được track, commit được tách theo loại). Chờ Tín xác nhận Drive và ra quyết định PO.
+- Q2 (Alembic hay xóa `firefly.db`): OPEN — cần chốt trước T06.
 
 ## 9. Open Required Fixes
 0 — RF-01, RF-02 của T02 CLOSED (Claude review vòng 2); RF-01 → RF-03 của T00 đã đóng; T01 không có RF.
@@ -92,11 +93,20 @@ Nếu trễ: cắt T14 → T15 → rút gọn T05. Không cắt T01–T03, T07�
 | Claude review T02 r2 | TODO-R2-01 chọn checkpoint chính thức (gốc 0,9216 / backend 0,9178) | RESOLVED — PO chọn canonical research `ml/artifacts/phobert_A_best`; thay model backend (nếu có) là task riêng |
 | Claude review T02 r2 | TODO-R2-02 lệnh chạy (interpreter + `PYTHONPATH`) chỉ có trong fix report; tiêu đề mục benchmark model card còn ghi 05/10 | ACCEPT_LATER → T13 (`HUONG_DAN.md`) |
 | Claude review T02 r2 | TODO-R2-03 category index 72 và 136 còn tranh luận được | WONT_FIX |
+| Claude review T03 | TODO-01 branch chưa commit; `movie_comments_v1.md` không bị ignore; cần tách implementation/PO | RESOLVED — đã xóa file Markdown dữ liệu; CSV ignored; tách commit; `NGUON_THU.md` không commit |
+| Claude review T03 | TODO-02 script chưa chặn ≥ 20 phim / ≤ 30 câu/phim / ≤ 40 %/nguồn | ACCEPT_LATER / DOCUMENTED — v1 hiện đạt; thêm gate nếu dataset v2 thay đổi |
+| Claude review T03 | TODO-03 chuỗi "67,94%" hard-code trong script | ACCEPT_LATER / LOW PRIORITY — không ảnh hưởng AC, không quay lại FIX_LOOP |
+| Claude review T03 | TODO-04 provenance thu/gán/chép nhãn | DOCUMENTED — Claude đề xuất ứng viên; Tín duyệt và gán A; Người 1 gán B; Claude chỉ chép nhãn theo ID sau lỗi ANSI; không sửa nhãn tăng kappa |
+| Claude review T03 | TODO-05 giới hạn độc lập do Claude hỗ trợ thu dữ liệu | ACCEPT_WITH_DISCLOSURE — không gán A/B; kiểm tra cơ học tái lập; ghi minh bạch trong khóa luận/report |
+| Claude review T03 | TODO-06 kappa 0,6025 sát ngưỡng, 19/100 bất đồng | ACCEPT_WITH_DISCLOSURE — mức đồng thuận vừa phải; không sửa nhãn; ghi trong khóa luận |
+| Claude review T03 | TODO-07 chưa xác minh 4 CSV trên Drive | PO ACTION REQUIRED — Tín upload/kiểm tra tại `MyDrive/thesis/data/movie/` trước khi đóng T03 |
+| Claude review T03 | TODO-08 dọn file trung gian | ACCEPT_LATER — CLEANUP AFTER T03 CLOSED; giữ candidates/evidence để truy vết |
 
 ## 11. Current Next Step
-1. **Tín:** authorize T04 (chuyển `READY_FOR_HANDOFF`, tạo nhánh `task/T04-...` từ `master` `6d5fda5`) khi sẵn sàng.
-2. **Tín:** chốt Q1 để mở T03; chốt Q2 trước T06.
-3. Không agent nào tự mở T03 khi Q1 chưa chốt, và không tự implementation task kế tiếp khi chưa có PO authorize.
+1. **Tín (PO_REVIEW T03):** tự upload/kiểm tra 4 CSV chính tại `MyDrive/thesis/data/movie/`, rà các disposition TODO, rồi ra quyết định PO. TODO-01 đã xử lý và commit được tách theo loại.
+2. **Tín:** giữ nguyên bộ 496 câu và mẫu kappa trong lúc review; không thêm/bớt câu hoặc sửa nhãn theo quyết định A.
+3. **Tín:** authorize T04 khi sẵn sàng (T03 được chạy song song với một task web); chốt Q2 trước T06.
+4. Không agent nào tự PO approve, merge, đóng T03 hoặc mở implementation task kế tiếp.
 
 ## 12. Active Timeline
 | Ngày | Ai | Sự kiện |
@@ -127,3 +137,11 @@ Nếu trễ: cắt T14 → T15 → rút gọn T05. Không cắt T01–T03, T07�
 | 07/10/2026 | Claude | Review T02 vòng 2: **PASS_WITH_TODO** (RF-01, RF-02 CLOSED; notebook full run đạt marker, metric/PNG tái lập, AC-01 → AC-06 đạt). T02 `CLAUDE_REVIEW` → `PO_REVIEW`. Không mở task kế tiếp |
 | 07/10/2026 | Tín | PO review T02: **APPROVED** (AC 6/6, RF 0, blocker 0, DoD MET). TODO-R2-01 RESOLVED, TODO-R2-02 → T13, TODO-R2-03 WONT_FIX, metric lịch sử DOCUMENTED |
 | 07/10/2026 | Tín | Merge T02 vào `master` tại `6d5fda5`, tag `ml-baselines`; T02 DONE/CLOSED |
+| 07/10/2026 | Tín | PO chốt Q1 (`reports/2026-10-07/claude_q1_decision_T03_2026-10-07.md`): nguồn review_site + social ≥ 80 %, self_written ≤ 20 %; Annotator A = Tín, B = "Người 1" ẩn danh. Gửi T03.md → T03 được authorize, `READY_FOR_HANDOFF` trên branch `task/T03-du-lieu-phim` |
+| 07/10/2026 | Codex | Xác minh branch/baseline và bắt đầu implementation T03; chuyển `READY_FOR_HANDOFF` → `IN_PROGRESS` |
+| 07/10/2026 | Codex | Hoàn tất guideline, script, README và kiểm tra kỹ thuật trên dữ liệu hiện có; dataset chỉ có header nên T03 giữ `IN_PROGRESS`, trạng thái `WAITING_FOR_DATA` và sau đó cần nhãn B thật |
+| 08/10/2026 | Tín + Người 1 | Hoàn tất 496 câu thật và 100 nhãn B; split 347/149, duplicate/PII/cross-split = 0, kappa 0,602510 |
+| 08/10/2026 | Tín | Chọn phương án A: chấp nhận label 1 = 67,94%, không thêm/bớt câu và không sửa nhãn; độ lệch tỷ lệ chỉ là warning |
+| 08/10/2026 | Codex | Cập nhật gate tỷ lệ theo quyết định PO, chạy lại bằng Python hệ thống; cùng ID train/test, kappa không đổi, trạng thái script `READY_FOR_AC_REVIEW`; T03 `IN_PROGRESS` → `CLAUDE_REVIEW` |
+| 08/10/2026 | Claude | Review T03 độc lập: gate tái lập (hash ID train/test không đổi), kappa tính lại 0,602510, PII 0, split/cross-dup đạt; **PASS_WITH_TODO** (AC 6/6, RF 0, blocker 0, 8 TODO; có ghi giới hạn độc lập do Claude hỗ trợ thu dữ liệu). T03 `CLAUDE_REVIEW` → `PO_REVIEW`. T04 giữ PLANNED theo ghi chú PO |
+| 08/10/2026 | Codex | Xử lý TODO trước PO approval: xóa `data/phim/movie_comments_v1.md`, giữ CSV ngoài Git, ghi disposition TODO-02–08 và tách commit implementation / review / quyết định PO; T03 giữ `PO_REVIEW`, T04 giữ `PLANNED` |

@@ -69,6 +69,8 @@ h1, h2, h3 { margin: 0; line-height: 1.15; }
 .btn--primary:hover:not(:disabled) { background: #ffd65e; }
 .btn--ghost { background: transparent; color: var(--text); border-color: var(--line); }
 .btn--ghost:hover:not(:disabled) { border-color: var(--yellow); color: var(--yellow); }
+.btn--danger { background: transparent; color: #ff8b99; border-color: var(--red); }
+.btn--danger:hover:not(:disabled) { background: var(--red-soft); }
 .btn--sm { padding: 6px 14px; font-size: .9rem; }
 .btn--lg { padding: 13px 28px; font-size: 1.05rem; }
 .btn--block { width: 100%; }
@@ -330,8 +332,11 @@ h1, h2, h3 { margin: 0; line-height: 1.15; }
 .auth { display: flex; justify-content: center; }
 .auth__form { width: 100%; max-width: 420px; display: flex; flex-direction: column; gap: 16px; }
 .field { display: flex; flex-direction: column; gap: 6px; font-size: .92rem; color: var(--muted); }
-.field input { padding: 12px 14px; background: var(--surface); border: 1.5px solid var(--line); border-radius: var(--radius-sm); color: var(--text); font: inherit; }
-.field input:focus { border-color: var(--yellow); outline: none; }
+.field input, .field select, .field textarea { padding: 12px 14px; background: var(--surface); border: 1.5px solid var(--line); border-radius: var(--radius-sm); color: var(--text); font: inherit; }
+.field input:focus, .field select:focus, .field textarea:focus { border-color: var(--yellow); outline: none; }
+.field textarea { resize: vertical; }
+.field [aria-invalid="true"] { border-color: var(--red); }
+.field__error { color: #ff8b99; font-size: .84rem; }
 .auth__switch { text-align: center; color: var(--muted); }
 .auth__demo { font-size: .85rem; text-align: center; border-top: 1px solid var(--line); padding-top: 14px; }
 
@@ -349,6 +354,33 @@ h1, h2, h3 { margin: 0; line-height: 1.15; }
 .meter { width: 90px; height: 6px; background: var(--line); border-radius: 3px; overflow: hidden; margin-top: 8px; }
 .meter__fill { display: block; height: 100%; background: var(--red); }
 .meter__num { font-size: .8rem; color: var(--muted); }
+
+/* ---------- Quản lý phim ---------- */
+.admin-movie-editor {
+  display: grid; grid-template-columns: minmax(0, 1fr) 300px; gap: 40px; align-items: start;
+  margin-top: 28px; padding: 28px; background: var(--surface-2); border: 1px solid var(--line); border-radius: var(--radius);
+}
+.admin-movie-editor .section-title { font-size: 1.5rem; }
+.admin-movie-editor__preview { position: sticky; top: 96px; }
+.admin-movie-editor__preview .poster { max-width: 280px; margin: 0 auto; }
+.movie-form { display: flex; flex-direction: column; gap: 18px; }
+.movie-form__row { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+.movie-form__row:has(.field:nth-child(3)) { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.choice-field { margin: 0; padding: 14px; border: 1px solid var(--line); border-radius: var(--radius-sm); }
+.choice-field legend { padding: 0 6px; color: var(--muted); font-size: .92rem; }
+.choice-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px 14px; }
+.choice-grid--short { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.choice-grid label { display: flex; align-items: flex-start; gap: 6px; font-size: .88rem; cursor: pointer; }
+.choice-grid input { margin-top: 5px; accent-color: var(--yellow); }
+.color-input { display: grid; grid-template-columns: 52px 1fr; gap: 8px; }
+.color-input input[type="color"] { width: 52px; height: 48px; padding: 4px; cursor: pointer; }
+.admin-movie-table { min-width: 760px; }
+.admin-movie-title { display: flex; gap: 12px; align-items: center; min-width: 220px; }
+.admin-movie-title .poster { width: 54px; flex: 0 0 54px; }
+.admin-movie-title .poster__title { font-size: .65rem; }
+.admin-movie-title .poster__genre, .admin-movie-title .poster__rating { display: none; }
+.admin-movie-title > div { display: flex; flex-direction: column; }
+.admin-movie-actions { display: flex; gap: 8px; }
 
 
 /* ---------- Khung bong bóng poster khi bấm vào phim ---------- */
@@ -399,8 +431,13 @@ h1, h2, h3 { margin: 0; line-height: 1.15; }
   .poster--lg { width: 200px; }
   .poster--lg .poster__title { font-size: 1.9rem; }
   .ticket__facts { grid-template-columns: 1fr; }
+  .admin-movie-editor { grid-template-columns: 1fr; }
+  .admin-movie-editor__preview { position: static; }
+  .admin-movie-editor__preview .poster { width: min(240px, 72vw); }
 }
 @media (max-width: 600px) {
+  .container { padding-left: 14px; padding-right: 14px; }
+  .page-title { font-size: 2rem; }
   .mock-flag { display: none; }
   .logo { font-size: 1.4rem; }
   .movie-grid { grid-template-columns: repeat(2, 1fr); gap: 28px 14px; }
@@ -411,6 +448,10 @@ h1, h2, h3 { margin: 0; line-height: 1.15; }
   .summary-bar__inner { flex-wrap: wrap; gap: 10px 16px; }
   .summary-bar__inner .btn { flex-basis: 100%; }
   .seat { width: 28px; height: 28px; }
+  .admin-movie-editor { padding: 18px 14px; gap: 28px; }
+  .movie-form__row, .movie-form__row:has(.field:nth-child(3)) { grid-template-columns: 1fr; }
+  .choice-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .admin-movie-actions { flex-direction: column; }
 }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation: none !important; transition: none !important; }

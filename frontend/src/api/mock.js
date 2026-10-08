@@ -6,6 +6,7 @@
 import MOVIES from "./movies.json";
 import { ApiError } from "./http";
 import { ROWS, COLS, totalPrice, MAX_SEATS_PER_BOOKING } from "../utils/seats";
+import { AGE_RATINGS, COUNTRY_LABELS, FORMAT_LABELS, GENRE_LABELS } from "../utils/taxonomy";
 
 const DB_KEY = "firefly_mockdb_v2";
 const wait = (ms = 250) => new Promise((r) => setTimeout(r, ms));
@@ -29,7 +30,7 @@ function localIso(date, hhmm) {
   return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}T${p(h)}:${p(m)}:00`;
 }
 
-function buildShowtimes() {
+function buildShowtimes(movies = MOVIES) {
   const times = ["09:30", "13:15", "16:00", "19:30", "22:00"];
   const list = [];
   let id = 1;
@@ -37,7 +38,7 @@ function buildShowtimes() {
   for (let day = 0; day < 5; day++) {
     const date = new Date(today);
     date.setDate(today.getDate() + day);
-    MOVIES.filter((m) => m.status === "now_showing").forEach((movie, idx) => {
+    movies.filter((m) => m.status === "now_showing").forEach((movie, idx) => {
       times
         .filter((_, i) => (i + idx + day) % 2 === 0 || i === 3)
         .forEach((t) => {
@@ -81,7 +82,7 @@ function createDb() {
     id: i + 1, movie_id, user_id, content, ...fakeClassify(content),
     created_at: new Date(Date.now() - (i + 1) * 3600 * 1000 * 5).toISOString(),
   }));
-  return { users, comments, bookings: [], showtimes: buildShowtimes(), seq: { user: 3, comment: 100, booking: 1 } };
+  return { users, movies: clone(MOVIES), comments, bookings: [], showtimes: buildShowtimes(), seq: { user: 3, movie: Math.max(...MOVIES.map((m) => m.id)) + 1, comment: 100, booking: 1 } };
 }
 
 function load() {
@@ -89,9 +90,11 @@ function load() {
     const raw = localStorage.getItem(DB_KEY);
     if (raw) {
       const db = JSON.parse(raw);
+      if (!db.movies) db.movies = clone(MOVIES);
+      if (!db.seq.movie) db.seq.movie = Math.max(...db.movies.map((m) => m.id)) + 1;
       // làm mới suất chiếu mỗi ngày
       if (db.showtimesDay === new Date().toDateString()) return db;
-      db.showtimes = buildShowtimes();
+      db.showtimes = buildShowtimes(db.movies);
       db.showtimesDay = new Date().toDateString();
       db.bookings = [];
       return db;
@@ -116,7 +119,7 @@ function currentUser() {
   return user;
 }
 const movieById = (id) => {
-  const m = MOVIES.find((x) => x.id === Number(id));
+  const m = db.movies.find((x) => x.id === Number(id));
   if (!m) throw new ApiError("Không tìm thấy phim.", 404);
   return m;
 };
@@ -147,6 +150,44 @@ function ranking(collection) {
   return rank;
 }
 
+function validateMovie(payload) {
+  const value = {
+    ...payload,
+    title: payload.title?.trim() ?? "",
+    genre: [...new Set((payload.genre ?? []).map((item) => item.trim()).filter(Boolean))],
+    formats: [...new Set((payload.formats ?? []).map((item) => item.trim()).filter(Boolean))],
+    country: payload.country?.trim() ?? "",
+    director: payload.director?.trim() ?? "",
+    cast: payload.cast?.trim() ?? "",
+    description: payload.description?.trim() ?? "",
+    poster_bg: payload.poster_bg?.trim().toLowerCase() ?? "",
+    poster_fg: payload.poster_fg?.trim().toLowerCase() ?? "",
+    poster_url: payload.poster_url?.trim() || null,
+  };
+  const fail = (message) => { throw new ApiError(message, 422); };
+  if (!value.title) fail("Tên phim không được để trống.");
+  if (value.title.length > 200) fail("Tên phim không được dài quá 200 ký tự.");
+  if (!value.genre.length) fail("Hãy chọn ít nhất một thể loại.");
+  const badGenre = value.genre.find((item) => !GENRE_LABELS.includes(item));
+  if (badGenre) fail(`Thể loại không hợp lệ: ${badGenre}.`);
+  if (!Number.isInteger(Number(value.duration_min)) || Number(value.duration_min) < 1 || Number(value.duration_min) > 400) fail("Thời lượng phải từ 1 đến 400 phút.");
+  value.duration_min = Number(value.duration_min);
+  if (!AGE_RATINGS.includes(value.age_rating)) fail("Phân loại độ tuổi phải là P, T13, T16 hoặc T18.");
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(value.release_date ?? "") || Number.isNaN(new Date(`${value.release_date}T00:00:00Z`).getTime()) || new Date(`${value.release_date}T00:00:00Z`).toISOString().slice(0, 10) !== value.release_date) fail("Ngày phát hành phải là ngày hợp lệ theo dạng YYYY-MM-DD.");
+  if (!["now_showing", "coming_soon", "ended"].includes(value.status)) fail("Trạng thái phim không hợp lệ.");
+  if (!COUNTRY_LABELS.includes(value.country)) fail("Quốc gia không thuộc danh mục cho phép.");
+  const badFormat = value.formats.find((item) => !FORMAT_LABELS.includes(item));
+  if (badFormat) fail(`Định dạng không hợp lệ: ${badFormat}.`);
+  if (!/^#[0-9a-f]{6}$/.test(value.poster_bg) || !/^#[0-9a-f]{6}$/.test(value.poster_fg)) fail("Màu poster phải có dạng #rrggbb.");
+  if (value.poster_url) {
+    try {
+      const url = new URL(value.poster_url);
+      if (!["http:", "https:"].includes(url.protocol)) fail("Đường dẫn poster phải bắt đầu bằng http:// hoặc https://.");
+    } catch { fail("Đường dẫn poster phải bắt đầu bằng http:// hoặc https://."); }
+  }
+  return value;
+}
+
 export const mockApi = {
   auth: {
     async register({ full_name, email, password }) {
@@ -171,7 +212,7 @@ export const mockApi = {
       const split = (v) => v.split(",").map((x) => x.trim()).filter(Boolean);
       const plain = (t) => t.normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/đ/gi, "d").toLowerCase();
       const f = filters;
-      let list = MOVIES.filter((m) => {
+      let list = db.movies.filter((m) => {
         const year = Number(m.release_date.slice(0, 4));
         return (!f.status || m.status === f.status)
           && (!f.genre || split(m.genre).includes(f.genre))
@@ -253,6 +294,44 @@ export const mockApi = {
         .filter((c) => (label === "negative" ? c.is_negative : label === "normal" ? !c.is_negative : true))
         .sort((a, b) => b.created_at.localeCompare(a.created_at))
         .map((c) => ({ ...commentOut(c), movie_title: movieById(c.movie_id).title }));
+    },
+    movies: {
+      async list() {
+        await wait();
+        if (currentUser().role !== "admin") throw new ApiError("Chỉ quản trị viên mới xem được trang này.", 403);
+        return clone([...db.movies].sort((a, b) => b.release_date.localeCompare(a.release_date) || b.id - a.id));
+      },
+      async create(payload) {
+        await wait();
+        if (currentUser().role !== "admin") throw new ApiError("Chỉ quản trị viên mới xem được trang này.", 403);
+        const value = validateMovie(payload);
+        const movie = { id: db.seq.movie++, ...value, genre: value.genre.join(", "), formats: value.formats.join(", "), score: 0 };
+        db.movies.push(movie); save();
+        return clone(movie);
+      },
+      async update(id, payload) {
+        await wait();
+        if (currentUser().role !== "admin") throw new ApiError("Chỉ quản trị viên mới xem được trang này.", 403);
+        const movie = movieById(id);
+        const value = validateMovie(payload);
+        Object.assign(movie, value, { genre: value.genre.join(", "), formats: value.formats.join(", ") });
+        save();
+        return clone(movie);
+      },
+      async remove(id) {
+        await wait();
+        if (currentUser().role !== "admin") throw new ApiError("Chỉ quản trị viên mới xem được trang này.", 403);
+        const movie = movieById(id);
+        const showtimeIds = db.showtimes.filter((item) => item.movie_id === movie.id).map((item) => item.id);
+        if (db.bookings.some((item) => showtimeIds.includes(item.showtime_id))) {
+          throw new ApiError("Phim đã có vé, không xóa được. Hãy chuyển trạng thái sang Đã chiếu xong.", 409);
+        }
+        db.movies = db.movies.filter((item) => item.id !== movie.id);
+        db.showtimes = db.showtimes.filter((item) => item.movie_id !== movie.id);
+        db.comments = db.comments.filter((item) => item.movie_id !== movie.id);
+        save();
+        return { detail: "Đã xóa phim." };
+      },
     },
   },
 };

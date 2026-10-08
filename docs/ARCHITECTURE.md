@@ -89,7 +89,7 @@ C:\Projects\firefly-cinema\
 │       │   └── demo_comments.json     [T12]
 │       └── routers\
 │           ├── auth.py, movies.py, bookings.py, comments.py
-│           ├── admin_movies.py        [T04]
+│           ├── admin_movies.py        [T04] CRUD phim, require_admin, chặn xóa phim đã có vé
 │           ├── admin_showtimes.py     [T05]
 │           └── admin_predict.py       [T07]
 │
@@ -199,3 +199,4 @@ Ngoài máy: Google Drive `MyDrive/thesis/data/…`, `MyDrive/thesis_results/…
 | 03/10/2026 | — | Tạo file từ trạng thái `phobert-v1` |
 | 04/10/2026 | — | Thêm cây thư mục đích. Phát hiện: `chay-firefly.bat` không có trong repo; thư mục `Bao_cao\` rỗng ở gốc trùng vai trò với `docs\` và `D:\KhoaLuan_PhimVe\05_baocao\` |
 | 04/10/2026 | T00 (PO đổi phạm vi) | Mọi hoạt động chuyển về ổ C. Thêm `data\uit-visfd\`, `data\phim\`, `ml\artifacts\`, `backup\` (ngoài Git); `Bao_cao\` giữ lại làm nơi để bản Word. Ổ D ngừng sử dụng |
+| 08/10/2026 | T04 | Thêm CRUD `/api/admin/movies`, taxonomy backend/frontend đồng bộ và trang `/quan-tri/phim`; không đổi schema |

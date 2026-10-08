@@ -1,5 +1,11 @@
-from datetime import datetime
-from pydantic import BaseModel, ConfigDict, EmailStr, Field
+from datetime import date, datetime
+import re
+from urllib.parse import urlparse
+
+from pydantic import BaseModel, ConfigDict, EmailStr, Field, field_validator
+from pydantic_core import PydanticCustomError
+
+from .taxonomy import AGE_RATINGS, COUNTRIES, FORMATS, GENRES, MOVIE_STATUSES
 
 
 class ORM(BaseModel):
@@ -48,6 +54,137 @@ class MovieOut(ORM):
     poster_url: str | None = None
     country: str
     formats: str
+
+
+class MovieIn(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    title: str
+    genre: list[str]
+    duration_min: int
+    age_rating: str
+    release_date: str
+    status: str
+    country: str
+    formats: list[str]
+    director: str = ""
+    cast: str = ""
+    description: str = ""
+    poster_bg: str
+    poster_fg: str
+    poster_url: str | None = None
+
+    @field_validator("title")
+    @classmethod
+    def validate_title(cls, value: str) -> str:
+        value = value.strip()
+        if not value:
+            raise PydanticCustomError("movie_title", "Tên phim không được để trống.")
+        if len(value) > 200:
+            raise PydanticCustomError("movie_title", "Tên phim không được dài quá 200 ký tự.")
+        return value
+
+    @field_validator("genre")
+    @classmethod
+    def validate_genre(cls, value: list[str]) -> list[str]:
+        cleaned = list(dict.fromkeys(item.strip() for item in value if item.strip()))
+        if not cleaned:
+            raise PydanticCustomError("movie_genre", "Hãy chọn ít nhất một thể loại.")
+        invalid = [item for item in cleaned if item not in GENRES]
+        if invalid:
+            raise PydanticCustomError("movie_genre", f"Thể loại không hợp lệ: {', '.join(invalid)}.")
+        return cleaned
+
+    @field_validator("duration_min")
+    @classmethod
+    def validate_duration(cls, value: int) -> int:
+        if not 0 < value <= 400:
+            raise PydanticCustomError("movie_duration", "Thời lượng phải từ 1 đến 400 phút.")
+        return value
+
+    @field_validator("age_rating")
+    @classmethod
+    def validate_age_rating(cls, value: str) -> str:
+        if value not in AGE_RATINGS:
+            raise PydanticCustomError("movie_age_rating", "Phân loại độ tuổi phải là P, T13, T16 hoặc T18.")
+        return value
+
+    @field_validator("release_date")
+    @classmethod
+    def validate_release_date(cls, value: str) -> str:
+        try:
+            parsed = date.fromisoformat(value)
+        except (TypeError, ValueError):
+            raise PydanticCustomError("movie_release_date", "Ngày phát hành phải là ngày hợp lệ theo dạng YYYY-MM-DD.")
+        if parsed.isoformat() != value:
+            raise PydanticCustomError("movie_release_date", "Ngày phát hành phải là ngày hợp lệ theo dạng YYYY-MM-DD.")
+        return value
+
+    @field_validator("status")
+    @classmethod
+    def validate_status(cls, value: str) -> str:
+        if value not in MOVIE_STATUSES:
+            raise PydanticCustomError("movie_status", "Trạng thái phim không hợp lệ.")
+        return value
+
+    @field_validator("country")
+    @classmethod
+    def validate_country(cls, value: str) -> str:
+        value = value.strip()
+        if value not in COUNTRIES:
+            raise PydanticCustomError("movie_country", "Quốc gia không thuộc danh mục cho phép.")
+        return value
+
+    @field_validator("formats")
+    @classmethod
+    def validate_formats(cls, value: list[str]) -> list[str]:
+        cleaned = list(dict.fromkeys(item.strip() for item in value if item.strip()))
+        invalid = [item for item in cleaned if item not in FORMATS]
+        if invalid:
+            raise PydanticCustomError("movie_formats", f"Định dạng không hợp lệ: {', '.join(invalid)}.")
+        return cleaned
+
+    @field_validator("director")
+    @classmethod
+    def validate_director(cls, value: str) -> str:
+        value = value.strip()
+        if len(value) > 100:
+            raise PydanticCustomError("movie_director", "Tên đạo diễn không được dài quá 100 ký tự.")
+        return value
+
+    @field_validator("cast")
+    @classmethod
+    def validate_cast(cls, value: str) -> str:
+        value = value.strip()
+        if len(value) > 255:
+            raise PydanticCustomError("movie_cast", "Danh sách diễn viên không được dài quá 255 ký tự.")
+        return value
+
+    @field_validator("description")
+    @classmethod
+    def clean_description(cls, value: str) -> str:
+        return value.strip()
+
+    @field_validator("poster_bg", "poster_fg")
+    @classmethod
+    def validate_color(cls, value: str) -> str:
+        value = value.strip().lower()
+        if not re.fullmatch(r"#[0-9a-f]{6}", value):
+            raise PydanticCustomError("movie_color", "Màu poster phải có dạng #rrggbb.")
+        return value
+
+    @field_validator("poster_url")
+    @classmethod
+    def validate_poster_url(cls, value: str | None) -> str | None:
+        if value is None or not value.strip():
+            return None
+        value = value.strip()
+        parsed = urlparse(value)
+        if parsed.scheme not in {"http", "https"} or not parsed.netloc:
+            raise PydanticCustomError("movie_poster_url", "Đường dẫn poster phải bắt đầu bằng http:// hoặc https://.")
+        if len(value) > 500:
+            raise PydanticCustomError("movie_poster_url", "Đường dẫn poster không được dài quá 500 ký tự.")
+        return value
 
 
 class ShowtimeOut(ORM):

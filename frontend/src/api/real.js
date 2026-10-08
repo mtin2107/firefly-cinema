@@ -30,5 +30,11 @@ export const realApi = {
   },
   admin: {
     comments: (label) => request(`/api/admin/comments${label ? `?label=${label}` : ""}`),
+    movies: {
+      list: () => request("/api/admin/movies"),
+      create: (payload) => request("/api/admin/movies", { method: "POST", body: payload }),
+      update: (id, payload) => request(`/api/admin/movies/${id}`, { method: "PUT", body: payload }),
+      remove: (id) => request(`/api/admin/movies/${id}`, { method: "DELETE" }),
+    },
   },
 };

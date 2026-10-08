@@ -75,6 +75,7 @@ export default function Header() {
             <Dropdown id="account" label={user.full_name} openId={openId} setOpenId={setOpenId} align="right">
               <ul className="dd__list dd__list--single">
                 <li><NavLink to="/ve-cua-toi">Vé của tôi</NavLink></li>
+                {user.role === "admin" && <li><NavLink to="/quan-tri/phim">Quản lý phim</NavLink></li>}
                 {user.role === "admin" && <li><NavLink to="/quan-tri/binh-luan">Kiểm duyệt bình luận</NavLink></li>}
                 <li><button type="button" className="dd__item-btn" onClick={() => { logout(); navigate("/"); }}>Đăng xuất</button></li>
               </ul>

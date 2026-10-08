@@ -8,7 +8,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from .classifier import classifier
 from .config import FRONTEND_ORIGINS
 from .database import Base, engine, SessionLocal
-from .routers import auth, movies, bookings, comments
+from .routers import auth, movies, bookings, comments, admin_movies
 from .seed import seed
 
 
@@ -43,6 +43,7 @@ app.include_router(auth.router)
 app.include_router(movies.router)
 app.include_router(bookings.router)
 app.include_router(comments.router)
+app.include_router(admin_movies.router)
 
 
 @app.get("/api/health", tags=["Hệ thống"])

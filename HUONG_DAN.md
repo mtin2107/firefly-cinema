@@ -6,11 +6,11 @@ Bộ mã gồm hai phần chạy riêng:
 firefly-cinema/
 ├── frontend/   Giao diện React (Vite) — chạy ở http://localhost:5173
 │   ├── src/api/        Lớp gọi API: mock.js (dữ liệu giả) và real.js (backend thật)
-│   ├── src/pages/      Các trang: trang chủ, lọc phim, chi tiết phim, chọn ghế, xác nhận, vé của tôi, đăng nhập, đăng ký, kiểm duyệt
+│   ├── src/pages/      Các trang: trang chủ, lọc phim, chi tiết phim, đặt vé và quản trị
 │   ├── src/components/ Thành phần dùng chung: poster, sơ đồ ghế, bình luận, cuống vé...
 │   └── src/styles/global.css   Toàn bộ màu sắc và kiểu chữ (sửa biến trong :root)
 └── backend/    API FastAPI — chạy ở http://localhost:8000
-    ├── app/routers/    Các nhóm endpoint: auth, movies, bookings, comments
+    ├── app/routers/    Các nhóm endpoint: auth, movies, bookings, comments, admin_movies
     ├── app/classifier.py   Nơi PhoBERT chấm điểm bình luận
     └── app/data/movies.json  Dữ liệu phim mẫu
 ```
@@ -57,7 +57,9 @@ Tài khoản mẫu:
 
 Thử đủ luồng: chọn phim → chọn ngày, giờ → chọn ghế → Tiếp tục → Đặt vé → xem ở *Vé của tôi*. Viết bình luận có chữ "chán" hoặc "thất vọng" để thấy bình luận bị ẩn. Đăng nhập admin để xem trang *Kiểm duyệt bình luận*.
 
-> Muốn xóa sạch dữ liệu mock: mở DevTools (F12) → Application → Local Storage → xóa khóa `firefly_mockdb_v1`.
+Đăng nhập bằng tài khoản quản trị rồi mở **Quản lý phim** trong menu tài khoản để thêm, sửa hoặc xóa phim. Phim thêm trong chế độ mock được lưu ở Local Storage nên vẫn còn sau khi tải lại trang.
+
+> Muốn xóa sạch dữ liệu mock: mở DevTools (F12) → Application → Local Storage → xóa khóa `firefly_mockdb_v2`.
 
 ---
 
@@ -202,6 +204,10 @@ Ngưỡng ẩn bình luận chỉnh bằng `NEGATIVE_THRESHOLD` (mặc định 0
 | GET | /api/movies/{id}/comments | | Bình luận của phim (kèm `is_negative`, `negative_score`) |
 | POST | /api/movies/{id}/comments | ✔ | Viết bình luận, PhoBERT chấm điểm ngay |
 | GET | /api/admin/comments?label= | ✔ admin | Danh sách kiểm duyệt (`negative` / `normal`) |
+| GET | /api/admin/movies | ✔ admin | Danh sách phim dành cho quản trị |
+| POST | /api/admin/movies | ✔ admin | Thêm phim |
+| PUT | /api/admin/movies/{id} | ✔ admin | Cập nhật phim |
+| DELETE | /api/admin/movies/{id} | ✔ admin | Xóa phim chưa có vé |
 | GET | /api/health | | Trạng thái backend và model đang dùng |
 
 Sơ đồ ghế: hàng A–H, mỗi hàng 12 ghế, hàng F–H là VIP (+20.000 đ). Quy tắc này nằm ở **hai nơi phải giống nhau**: `frontend/src/utils/seats.js` và `backend/app/seats.py`.

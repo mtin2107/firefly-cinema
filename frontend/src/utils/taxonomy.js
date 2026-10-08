@@ -8,6 +8,23 @@ export const slugify = (s) =>
 
 const make = (labels) => labels.map((label) => ({ label, slug: slugify(label) }));
 
+export const GENRE_LABELS = [
+  "Hành động", "Tình cảm", "Hài hước",
+  "Cổ trang", "Tâm lý", "Hình sự",
+  "Chiến tranh", "Thể thao", "Võ thuật",
+  "Viễn tưởng", "Phiêu lưu", "Khoa học",
+  "Kinh dị", "Âm nhạc", "Thần thoại",
+  "Tài liệu", "Gia đình", "Chính kịch",
+  "Bí ẩn", "Học đường", "Kinh điển", "Anime & Hoạt hình",
+];
+
+export const COUNTRY_LABELS = [
+  "Việt Nam", "Hàn Quốc", "Nhật Bản", "Trung Quốc", "Thái Lan", "Mỹ", "Anh", "Pháp", "Ấn Độ",
+];
+
+export const FORMAT_LABELS = ["Phụ đề", "Lồng tiếng"];
+export const AGE_RATINGS = ["P", "T13", "T16", "T18"];
+
 export const STATUSES = [
   { label: "Đang chiếu", slug: "dang-chieu", value: "now_showing" },
   { label: "Sắp chiếu", slug: "sap-chieu", value: "coming_soon" },
@@ -16,23 +33,13 @@ export const STATUSES = [
 
 // Thứ tự giống menu tham khảo (đọc theo hàng, 3 cột)
 export const GENRES = [
-  ...make([
-    "Hành động", "Tình cảm", "Hài hước",
-    "Cổ trang", "Tâm lý", "Hình sự",
-    "Chiến tranh", "Thể thao", "Võ thuật",
-    "Viễn tưởng", "Phiêu lưu", "Khoa học",
-    "Kinh dị", "Âm nhạc", "Thần thoại",
-    "Tài liệu", "Gia đình", "Chính kịch",
-    "Bí ẩn", "Học đường", "Kinh điển",
-  ]),
+  ...make(GENRE_LABELS.slice(0, -1)),
   // Hai mục đặc biệt: 18+ lọc theo độ tuổi, không phải thể loại
   { label: "Phim 18+", slug: "phim-18", query: { age_rating: "T18" } },
-  ...make(["Anime & Hoạt hình"]),
+  ...make(GENRE_LABELS.slice(-1)),
 ];
 
-export const COUNTRIES = make([
-  "Việt Nam", "Hàn Quốc", "Nhật Bản", "Trung Quốc", "Thái Lan", "Mỹ", "Anh", "Pháp", "Ấn Độ",
-]);
+export const COUNTRIES = make(COUNTRY_LABELS);
 
 export const YEARS = [
   { label: "2026", slug: "2026", query: { year: 2026 } },

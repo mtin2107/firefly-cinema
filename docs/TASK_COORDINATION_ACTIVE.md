@@ -16,24 +16,24 @@ Repo `C:\Projects\firefly-cinema`, nhánh `master`. Chi tiết: `PROJECT_SOURCE_
 - Mỗi task một nhánh `task/Txx-ten-ngan`, commit `[Txx] mô tả`. Chỉ Tín merge.
 
 ## 3. Latest Completed Task Summary
-**T02 — So sánh PhoBERT với mô hình truyền thống: DONE / CLOSED (07/10/2026).** Claude review vòng 2 PASS_WITH_TODO, AC 6/6, RF 0, blocker 0, DoD MET; PO APPROVED (`reports/2026-10-07/po_review_T02_APPROVED_2026-10-07.md`); merge vào `master` tại `6d5fda5`, tag `ml-baselines`. Canonical research checkpoint: `ml/artifacts/phobert_A_best` (F1 neg `text_norm` 0,921600); runtime web vẫn là `backend/models/phobert-binhluan` (0,917808), không thay trong T02. `phobert_A.json` là HISTORICAL / NOT FULLY REPRODUCED, không dùng làm metric canonical.
+**T03 — Bộ dữ liệu bình luận phim: DONE / CLOSED (08/10/2026).** Claude review PASS_WITH_TODO, AC 6/6, RF 0, blocker 0; PO APPROVED (`reports/2026-10-08/po_review_T03_APPROVED_2026-10-08.md`); Drive Backup VERIFIED; merge vào `master` tại `6bd1a3f`.
 
 Trước khi áp dụng workflow: giao diện React đầy đủ (`giao-dien-v1`), backend FastAPI + SQLite, PhoBERT A gắn vào backend, F1 test 0,918 (`phobert-v1`).
 
 ## 4. Current Project Status
 ```
-Overall Status: ACTIVE — T03 PO_REVIEW
-Phase: T00 PO_APPROVED; T01, T02 DONE/CLOSED (tag ml-baselines)
-Current Active Task: T03 — PO_REVIEW (branch task/T03-du-lieu-phim; Claude PASS_WITH_TODO 08/10/2026)
-Next Task: T04 — PLANNED, chờ PO authorize (chưa READY_FOR_HANDOFF)
+Overall Status: ACTIVE — T04 IN_PROGRESS
+Phase: T00, T01, T02, T03 DONE/CLOSED; T04 IN_PROGRESS
+Current Active Task: T04 — IN_PROGRESS (branch task/T04-quan-ly-phim)
+Next Task: NOT SELECTED
 Ngày bắt đầu sản phẩm: 05/10/2026 · Hạn: 01/11/2026
 ```
 
 ## 5. Current Active Task
-T03 — Bộ dữ liệu bình luận phim — PO_REVIEW (Claude PASS_WITH_TODO, AC 6/6, RF 0, blocker 0, DoD MET có điều kiện — xem `reports/2026-10-08/claude_review_T03_PASS_WITH_TODO_2026-10-08.md`)
+T04 — Quản lý phim (admin) — IN_PROGRESS (PO AUTHORIZED 08/10/2026; baseline `b6cc3d6`, branch `task/T04-quan-ly-phim`)
 
 ## 6. Current Task Record
-[docs/tasks/T03.md](tasks/T03.md)
+[docs/tasks/T04.md](tasks/T04.md)
 
 ## 7. Roadmap và trạng thái
 
@@ -42,7 +42,8 @@ T03 — Bộ dữ liệu bình luận phim — PO_REVIEW (Claude PASS_WITH_TODO,
 | T00 | Gom mã và dữ liệu về project ổ C, model card A | ML | 1 | — | [T00.md](tasks/T00.md) | PO_APPROVED (đã có trên master tại `20daf6a`) |
 | T01 | Mô hình truyền thống (NB, LR, SVM) | ML | 1 | T00 | [T01.md](tasks/T01.md) | DONE / CLOSED |
 | T02 | So sánh PhoBERT với mô hình truyền thống | ML | 1 | T01 | [T02.md](tasks/T02.md) | DONE / CLOSED (merge `6d5fda5`, tag `ml-baselines`) |
-| T03 | Bộ dữ liệu bình luận phim | Dữ liệu | 1–2 | — | [T03.md](tasks/T03.md) | DONE / CLOSED (Claude PASS_WITH_TODO; PO APPROVED 08/10) || T04 | Quản lý phim (admin) | Web | 2 | — | [T04.md](tasks/T04.md) | PLANNED (task kế tiếp, chờ PO authorize) |
+| T03 | Bộ dữ liệu bình luận phim | Dữ liệu | 1–2 | — | [T03.md](tasks/T03.md) | DONE / CLOSED (Claude PASS_WITH_TODO; PO APPROVED; merge `6bd1a3f`; Drive VERIFIED) |
+| T04 | Quản lý phim (admin) | Web | 2 | — | [T04.md](tasks/T04.md) | IN_PROGRESS |
 | T05 | Quản lý suất chiếu (admin) | Web | 2 | T04 | [T05.md](tasks/T05.md) | PLANNED |
 | T06 | Kiểm duyệt có người duyệt (đổi schema) | Web | 2 | — | [T06.md](tasks/T06.md) | PLANNED (cần Q2) |
 | T07 | Đa mô hình và trang So sánh mô hình | Web + ML | 2 | T01 | [T07.md](tasks/T07.md) | PLANNED |
@@ -60,7 +61,7 @@ Nếu trễ: cắt T14 → T15 → rút gọn T05. Không cắt T01–T03, T07�
 
 ## 8. Open Blockers
 - Q1 (nguồn bình luận phim, người gán nhãn thứ 2): RESOLVED 07/10/2026 — xem `PROJECT_SOURCE_OF_TRUTH.md` mục 5 và `docs/tasks/T03.md` mục 13.
-- T03: không còn blocker implementation. Claude review PASS_WITH_TODO 08/10/2026; TODO-01 đã xử lý (`movie_comments_v1.md` đã xóa, dữ liệu không được track, commit được tách theo loại). Chờ Tín xác nhận Drive và ra quyết định PO.
+- T03: RESOLVED — PO APPROVED, Drive Backup VERIFIED, DONE / CLOSED, merge `6bd1a3f`.
 - Q2 (Alembic hay xóa `firefly.db`): OPEN — cần chốt trước T06.
 
 ## 9. Open Required Fixes
@@ -102,10 +103,9 @@ Nếu trễ: cắt T14 → T15 → rút gọn T05. Không cắt T01–T03, T07�
 | Claude review T03 | TODO-08 dọn file trung gian | ACCEPT_LATER — CLEANUP AFTER T03 CLOSED; giữ candidates/evidence để truy vết |
 
 ## 11. Current Next Step
-1. **Tín (PO_REVIEW T03):** tự upload/kiểm tra 4 CSV chính tại `MyDrive/thesis/data/movie/`, rà các disposition TODO, rồi ra quyết định PO. TODO-01 đã xử lý và commit được tách theo loại.
-2. **Tín:** giữ nguyên bộ 496 câu và mẫu kappa trong lúc review; không thêm/bớt câu hoặc sửa nhãn theo quyết định A.
-3. **Tín:** authorize T04 khi sẵn sàng (T03 được chạy song song với một task web); chốt Q2 trước T06.
-4. Không agent nào tự PO approve, merge, đóng T03 hoặc mở implementation task kế tiếp.
+1. **Codex:** triển khai T04 theo `docs/tasks/T04.md`, chạy đủ gate và chuyển sang `CLAUDE_REVIEW` khi có bằng chứng đạt.
+2. **Claude:** review độc lập T04 sau khi nhận implementation report.
+3. Không agent nào tự PO approve, merge T04 hoặc mở T05.
 
 ## 12. Active Timeline
 | Ngày | Ai | Sự kiện |
@@ -144,3 +144,5 @@ Nếu trễ: cắt T14 → T15 → rút gọn T05. Không cắt T01–T03, T07�
 | 08/10/2026 | Codex | Cập nhật gate tỷ lệ theo quyết định PO, chạy lại bằng Python hệ thống; cùng ID train/test, kappa không đổi, trạng thái script `READY_FOR_AC_REVIEW`; T03 `IN_PROGRESS` → `CLAUDE_REVIEW` |
 | 08/10/2026 | Claude | Review T03 độc lập: gate tái lập (hash ID train/test không đổi), kappa tính lại 0,602510, PII 0, split/cross-dup đạt; **PASS_WITH_TODO** (AC 6/6, RF 0, blocker 0, 8 TODO; có ghi giới hạn độc lập do Claude hỗ trợ thu dữ liệu). T03 `CLAUDE_REVIEW` → `PO_REVIEW`. T04 giữ PLANNED theo ghi chú PO |
 | 08/10/2026 | Codex | Xử lý TODO trước PO approval: xóa `data/phim/movie_comments_v1.md`, giữ CSV ngoài Git, ghi disposition TODO-02–08 và tách commit implementation / review / quyết định PO; T03 giữ `PO_REVIEW`, T04 giữ `PLANNED` |
+| 08/10/2026 | Tín | PO APPROVED T03; Drive Backup VERIFIED; merge T03 vào `master` tại `6bd1a3f`; T03 DONE / CLOSED; authorize T04 READY_FOR_HANDOFF |
+| 08/10/2026 | Codex | Xác minh gate, bỏ qua cục bộ `data/phim/NGUON_THU.md` theo quyết định PO, tạo `task/T04-quan-ly-phim` từ `master` tại `b6cc3d6`; T04 READY_FOR_HANDOFF → IN_PROGRESS |

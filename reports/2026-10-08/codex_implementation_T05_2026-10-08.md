@@ -6,7 +6,7 @@
 - Nhánh: `task/T05-quan-ly-suat-chieu`
 - Git baseline: `a09fe6736d4a5d465e07dfa026b032caf9afe0be`
 - Dependency T04 merge đã xác minh: `fced3d7`
-- Implementation commit: `214fcaa1ebd41299bd00d69c0b3d76091655061c`
+- Implementation commits: `214fcaa1ebd41299bd00d69c0b3d76091655061c`, scope refinement `033e420863775489c3efe80fdb2f25a07f2c6cd5`
 - Đổi schema: **Không**
 - Trạng thái bàn giao: `CLAUDE_REVIEW` (chờ Claude kiểm tra độc lập; Codex không tự review/PASS)
 
@@ -26,7 +26,7 @@
 - `backend/app/main.py`
 - `backend/app/routers/admin_showtimes.py` (mới)
 - `backend/app/schemas.py`
-- `backend/app/seed.py` (chỉ `_ensure_showtimes`, thêm hằng phòng/import dùng cho hàm này)
+- `backend/app/seed.py` (chỉ `_ensure_showtimes`; import luật chung đặt cục bộ trong hàm)
 - `backend/app/showtime_rules.py` (mới)
 - `frontend/src/App.jsx`
 - `frontend/src/api/mock.js`

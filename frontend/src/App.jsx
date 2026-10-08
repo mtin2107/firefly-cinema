@@ -11,6 +11,7 @@ import Login from "./pages/Login";
 import Register from "./pages/Register";
 import AdminComments from "./pages/AdminComments";
 import AdminMovies from "./pages/AdminMovies";
+import AdminShowtimes from "./pages/AdminShowtimes";
 import NotFound from "./pages/NotFound";
 import Explore from "./pages/Explore";
 
@@ -32,6 +33,7 @@ export default function App() {
           </Route>
           <Route element={<ProtectedRoute adminOnly />}>
             <Route path="/quan-tri/phim" element={<AdminMovies />} />
+            <Route path="/quan-tri/suat-chieu" element={<AdminShowtimes />} />
             <Route path="/quan-tri/binh-luan" element={<AdminComments />} />
           </Route>
           <Route path="*" element={<NotFound />} />

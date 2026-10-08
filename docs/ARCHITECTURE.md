@@ -179,7 +179,14 @@ Ngoài máy: Google Drive `MyDrive/thesis/data/…`, `MyDrive/thesis_results/…
 - Nhãn `1 = tieu_cuc`, ngưỡng mặc định `NEGATIVE_THRESHOLD=0.5`.
 - Thiếu file model ⇒ web vẫn chạy (fallback keyword hoặc bỏ qua model đó), `/api/health` báo lỗi rõ.
 
-### 2.7. Bí mật và file lớn
+### 2.7. Quản trị suất chiếu
+- CRUD quản trị dùng `GET/POST /api/admin/showtimes` và `PUT/DELETE /api/admin/showtimes/{id}`; tất cả route dùng `require_admin`.
+- `ShowtimeIn` chỉ nhận phim tồn tại chưa `ended`, giờ tương lai, một trong bốn phòng `Phòng 1`–`Phòng 4`, giá 10.000–500.000 đồng và là bội số 1.000.
+- Khoảng chiếm phòng là `[start_time, start_time + duration_min + 15 phút)`. Hai khoảng giao nhau trong cùng phòng bị chặn; đúng mốc kết thúc cộng 15 phút được phép.
+- `backend/app/showtime_rules.py` là luật dùng chung cho CRUD và `_ensure_showtimes()`; seed lấp từng khung còn trống thay vì bỏ qua hoặc ghi đè cả ngày có suất admin.
+- Suất có dòng `booking_seats` không được sửa/xóa. Frontend real và mock cùng contract `api.admin.showtimes.{list,create,update,remove}`.
+
+### 2.8. Bí mật và file lớn
 - Không commit: `.env`, `firefly.db`, `backend/models/`, `venv/`, `node_modules/`, file model, CSV/XLSX lớn.
 
 ## 3. Thay đổi kiến trúc dự kiến theo kế hoạch
@@ -200,3 +207,4 @@ Ngoài máy: Google Drive `MyDrive/thesis/data/…`, `MyDrive/thesis_results/…
 | 04/10/2026 | — | Thêm cây thư mục đích. Phát hiện: `chay-firefly.bat` không có trong repo; thư mục `Bao_cao\` rỗng ở gốc trùng vai trò với `docs\` và `D:\KhoaLuan_PhimVe\05_baocao\` |
 | 04/10/2026 | T00 (PO đổi phạm vi) | Mọi hoạt động chuyển về ổ C. Thêm `data\uit-visfd\`, `data\phim\`, `ml\artifacts\`, `backup\` (ngoài Git); `Bao_cao\` giữ lại làm nơi để bản Word. Ổ D ngừng sử dụng |
 | 08/10/2026 | T04 | Thêm CRUD `/api/admin/movies`, taxonomy backend/frontend đồng bộ và trang `/quan-tri/phim`; không đổi schema |
+| 08/10/2026 | T05 | Thêm CRUD `/api/admin/showtimes`, luật chống chồng phòng dùng chung với seed và trang `/quan-tri/suat-chieu`; không đổi schema |

@@ -36,5 +36,14 @@ export const realApi = {
       update: (id, payload) => request(`/api/admin/movies/${id}`, { method: "PUT", body: payload }),
       remove: (id) => request(`/api/admin/movies/${id}`, { method: "DELETE" }),
     },
+    showtimes: {
+      list: (filters = {}) => {
+        const params = new URLSearchParams(Object.entries(filters).filter(([, value]) => value !== undefined && value !== ""));
+        return request(`/api/admin/showtimes${params.toString() ? `?${params}` : ""}`);
+      },
+      create: (payload) => request("/api/admin/showtimes", { method: "POST", body: payload }),
+      update: (id, payload) => request(`/api/admin/showtimes/${id}`, { method: "PUT", body: payload }),
+      remove: (id) => request(`/api/admin/showtimes/${id}`, { method: "DELETE" }),
+    },
   },
 };

@@ -1,4 +1,4 @@
-from datetime import date, datetime
+from datetime import date, datetime, timezone
 import re
 from urllib.parse import urlparse
 
@@ -193,6 +193,48 @@ class ShowtimeOut(ORM):
     start_time: datetime
     room: str
     price: int
+
+
+class ShowtimeIn(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    movie_id: int
+    start_time: datetime
+    room: str
+    price: int
+
+    @field_validator("movie_id")
+    @classmethod
+    def validate_movie_id(cls, value: int) -> int:
+        if value < 1:
+            raise PydanticCustomError("showtime_movie", "Phim không hợp lệ.")
+        return value
+
+    @field_validator("start_time")
+    @classmethod
+    def validate_start_time(cls, value: datetime) -> datetime:
+        if value.tzinfo is not None:
+            if value <= datetime.now(timezone.utc):
+                raise PydanticCustomError("showtime_start", "Suất chiếu phải ở tương lai.")
+            value = value.astimezone().replace(tzinfo=None)
+        elif value <= datetime.now():
+            raise PydanticCustomError("showtime_start", "Suất chiếu phải ở tương lai.")
+        return value.replace(second=0, microsecond=0)
+
+    @field_validator("room")
+    @classmethod
+    def clean_room(cls, value: str) -> str:
+        value = value.strip()
+        if not value:
+            raise PydanticCustomError("showtime_room", "Hãy chọn phòng chiếu.")
+        return value
+
+    @field_validator("price")
+    @classmethod
+    def validate_price(cls, value: int) -> int:
+        if not 10_000 <= value <= 500_000 or value % 1_000:
+            raise PydanticCustomError("showtime_price", "Giá vé phải từ 10.000 đến 500.000 đồng và là bội số 1.000.")
+        return value
 
 
 class ShowtimeDetailOut(BaseModel):

@@ -9,6 +9,8 @@ import { ROWS, COLS, totalPrice, MAX_SEATS_PER_BOOKING } from "../utils/seats";
 import { AGE_RATINGS, COUNTRY_LABELS, FORMAT_LABELS, GENRE_LABELS } from "../utils/taxonomy";
 
 const DB_KEY = "firefly_mockdb_v2";
+const ROOMS = ["Phòng 1", "Phòng 2", "Phòng 3", "Phòng 4"];
+const CLEANUP_MINUTES = 15;
 const wait = (ms = 250) => new Promise((r) => setTimeout(r, ms));
 const clone = (x) => JSON.parse(JSON.stringify(x));
 const nowIso = () => new Date().toISOString();
@@ -30,10 +32,22 @@ function localIso(date, hhmm) {
   return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}T${p(h)}:${p(m)}:00`;
 }
 
-function buildShowtimes(movies = MOVIES) {
+function intervalsOverlap(candidate, existing, movies) {
+  if (candidate.room !== existing.room) return false;
+  const candidateMovie = movies.find((movie) => movie.id === candidate.movie_id);
+  const existingMovie = movies.find((movie) => movie.id === existing.movie_id);
+  if (!candidateMovie || !existingMovie) return false;
+  const candidateStart = new Date(candidate.start_time).getTime();
+  const existingStart = new Date(existing.start_time).getTime();
+  const candidateEnd = candidateStart + (candidateMovie.duration_min + CLEANUP_MINUTES) * 60000;
+  const existingEnd = existingStart + (existingMovie.duration_min + CLEANUP_MINUTES) * 60000;
+  return candidateStart < existingEnd && existingStart < candidateEnd;
+}
+
+function buildShowtimes(movies = MOVIES, existing = [], startId = 1) {
   const times = ["09:30", "13:15", "16:00", "19:30", "22:00"];
   const list = [];
-  let id = 1;
+  let id = startId;
   const today = new Date();
   for (let day = 0; day < 5; day++) {
     const date = new Date(today);
@@ -43,7 +57,11 @@ function buildShowtimes(movies = MOVIES) {
         .filter((_, i) => (i + idx + day) % 2 === 0 || i === 3)
         .forEach((t) => {
           const price = Number(t.slice(0, 2)) >= 17 ? 95000 : 75000;
-          list.push({ id: id++, movie_id: movie.id, start_time: localIso(date, t), room: `Phòng ${(idx % 4) + 1}`, price });
+          const candidate = { id, movie_id: movie.id, start_time: localIso(date, t), room: ROOMS[idx % ROOMS.length], price };
+          if (![...existing, ...list].some((item) => intervalsOverlap(candidate, item, movies))) {
+            list.push(candidate);
+            id += 1;
+          }
         });
     });
   }
@@ -82,7 +100,12 @@ function createDb() {
     id: i + 1, movie_id, user_id, content, ...fakeClassify(content),
     created_at: new Date(Date.now() - (i + 1) * 3600 * 1000 * 5).toISOString(),
   }));
-  return { users, movies: clone(MOVIES), comments, bookings: [], showtimes: buildShowtimes(), seq: { user: 3, movie: Math.max(...MOVIES.map((m) => m.id)) + 1, comment: 100, booking: 1 } };
+  const showtimes = buildShowtimes();
+  return {
+    users, movies: clone(MOVIES), comments, bookings: [], showtimes,
+    adminShowtimeIds: [],
+    seq: { user: 3, movie: Math.max(...MOVIES.map((m) => m.id)) + 1, comment: 100, booking: 1, showtime: Math.max(...showtimes.map((item) => item.id), 0) + 1 },
+  };
 }
 
 function load() {
@@ -91,10 +114,16 @@ function load() {
     if (raw) {
       const db = JSON.parse(raw);
       if (!db.movies) db.movies = clone(MOVIES);
+      if (!db.showtimes) db.showtimes = buildShowtimes(db.movies);
       if (!db.seq.movie) db.seq.movie = Math.max(...db.movies.map((m) => m.id)) + 1;
+      if (!db.adminShowtimeIds) db.adminShowtimeIds = [];
+      if (!db.seq.showtime) db.seq.showtime = Math.max(...db.showtimes.map((item) => item.id), 0) + 1;
       // làm mới suất chiếu mỗi ngày
       if (db.showtimesDay === new Date().toDateString()) return db;
-      db.showtimes = buildShowtimes(db.movies);
+      const adminShowtimes = db.showtimes.filter((item) => db.adminShowtimeIds.includes(item.id));
+      const firstSeedId = Math.max(...adminShowtimes.map((item) => item.id), 0) + 1;
+      db.showtimes = [...adminShowtimes, ...buildShowtimes(db.movies, adminShowtimes, firstSeedId)];
+      db.seq.showtime = Math.max(...db.showtimes.map((item) => item.id), 0) + 1;
       db.showtimesDay = new Date().toDateString();
       db.bookings = [];
       return db;
@@ -124,7 +153,7 @@ const movieById = (id) => {
   return m;
 };
 const bookedSeats = (showtimeId) => [
-  ...seedBooked(showtimeId),
+  ...(db.adminShowtimeIds.includes(showtimeId) ? [] : seedBooked(showtimeId)),
   ...db.bookings.filter((b) => b.showtime_id === showtimeId).flatMap((b) => b.seats),
 ];
 const commentOut = (c) => ({
@@ -186,6 +215,37 @@ function validateMovie(payload) {
     } catch { fail("Đường dẫn poster phải bắt đầu bằng http:// hoặc https://."); }
   }
   return value;
+}
+
+function requireAdmin() {
+  if (currentUser().role !== "admin") throw new ApiError("Chỉ quản trị viên mới xem được trang này.", 403);
+}
+
+function validateShowtime(payload, excludeId = null) {
+  const movie = db.movies.find((item) => item.id === Number(payload.movie_id));
+  const fail = (message) => { throw new ApiError(message, 422); };
+  if (!movie) fail("Phim không tồn tại.");
+  if (movie.status === "ended") fail("Phim đã chiếu xong, không thể tạo suất mới.");
+  const start = new Date(payload.start_time);
+  if (Number.isNaN(start.getTime()) || start.getTime() <= Date.now()) fail("Suất chiếu phải ở tương lai.");
+  if (!ROOMS.includes(payload.room)) fail("Phòng chiếu không hợp lệ.");
+  const price = Number(payload.price);
+  if (!Number.isInteger(price) || price < 10000 || price > 500000 || price % 1000 !== 0) {
+    fail("Giá vé phải từ 10.000 đến 500.000 đồng và là bội số 1.000.");
+  }
+  const value = { movie_id: movie.id, start_time: payload.start_time, room: payload.room, price };
+  const conflict = db.showtimes.find((item) => item.id !== excludeId && intervalsOverlap(value, item, db.movies));
+  if (conflict) {
+    const conflictMovie = movieById(conflict.movie_id);
+    const time = conflict.start_time.slice(11, 16);
+    throw new ApiError(`Phòng ${value.room.replace("Phòng ", "")} đã có suất ${conflictMovie.title} lúc ${time}. Hãy chọn giờ khác hoặc phòng khác.`, 409);
+  }
+  return value;
+}
+
+function ensureMutableShowtime(showtime) {
+  const tickets = bookedSeats(showtime.id).length;
+  if (tickets) throw new ApiError(`Suất chiếu đã có ${tickets} vé, không sửa hay xóa được.`, 409);
 }
 
 export const mockApi = {
@@ -331,6 +391,47 @@ export const mockApi = {
         db.comments = db.comments.filter((item) => item.movie_id !== movie.id);
         save();
         return { detail: "Đã xóa phim." };
+      },
+    },
+    showtimes: {
+      async list(filters = {}) {
+        await wait();
+        requireAdmin();
+        return clone(db.showtimes
+          .filter((item) => (!filters.movie_id || item.movie_id === Number(filters.movie_id))
+            && (!filters.date || item.start_time.slice(0, 10) === filters.date))
+          .sort((a, b) => a.start_time.localeCompare(b.start_time) || a.room.localeCompare(b.room) || a.id - b.id));
+      },
+      async create(payload) {
+        await wait();
+        requireAdmin();
+        const value = validateShowtime(payload);
+        const showtime = { id: db.seq.showtime++, ...value };
+        db.showtimes.push(showtime);
+        db.adminShowtimeIds.push(showtime.id);
+        save();
+        return clone(showtime);
+      },
+      async update(id, payload) {
+        await wait();
+        requireAdmin();
+        const showtime = db.showtimes.find((item) => item.id === Number(id));
+        if (!showtime) throw new ApiError("Không tìm thấy suất chiếu.", 404);
+        ensureMutableShowtime(showtime);
+        Object.assign(showtime, validateShowtime(payload, showtime.id));
+        save();
+        return clone(showtime);
+      },
+      async remove(id) {
+        await wait();
+        requireAdmin();
+        const showtime = db.showtimes.find((item) => item.id === Number(id));
+        if (!showtime) throw new ApiError("Không tìm thấy suất chiếu.", 404);
+        ensureMutableShowtime(showtime);
+        db.showtimes = db.showtimes.filter((item) => item.id !== showtime.id);
+        db.adminShowtimeIds = db.adminShowtimeIds.filter((item) => item !== showtime.id);
+        save();
+        return { detail: "Đã xóa suất chiếu." };
       },
     },
   },

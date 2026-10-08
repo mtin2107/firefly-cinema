@@ -11,9 +11,11 @@ from .models import User, Movie, Showtime, Comment, Booking, BookingSeat
 from .seats import ROWS, COLS, seat_price
 from .security import hash_password
 from .classifier import classifier
+from .showtime_rules import find_showtime_conflict
 
 DATA = Path(__file__).parent / "data" / "movies.json"
 TIMES = ["09:30", "13:15", "16:00", "19:30", "22:00"]
+ROOMS = ("Phòng 1", "Phòng 2", "Phòng 3", "Phòng 4")
 
 
 def _ensure_showtimes(db: Session, days: int = 5) -> None:
@@ -21,17 +23,26 @@ def _ensure_showtimes(db: Session, days: int = 5) -> None:
     movies = db.scalars(select(Movie).where(Movie.status == "now_showing").order_by(Movie.id)).all()
     for d in range(days):
         day = date.today() + timedelta(days=d)
-        start = datetime.combine(day, time.min)
-        exists = db.scalar(select(func.count()).select_from(Showtime)
-                           .where(Showtime.start_time >= start, Showtime.start_time < start + timedelta(days=1)))
-        if exists:
-            continue
         for idx, movie in enumerate(movies):
             for i, t in enumerate(TIMES):
                 if (i + idx + day.toordinal()) % 2 == 0 or i == 3:
                     h, m = map(int, t.split(":"))
-                    db.add(Showtime(movie_id=movie.id, start_time=datetime.combine(day, time(h, m)),
-                                    room=f"Phòng {idx % 4 + 1}", price=95000 if h >= 17 else 75000))
+                    start_time = datetime.combine(day, time(h, m))
+                    room = ROOMS[idx % len(ROOMS)]
+                    duplicate = db.scalar(
+                        select(Showtime.id).where(
+                            Showtime.movie_id == movie.id,
+                            Showtime.start_time == start_time,
+                            Showtime.room == room,
+                        ).limit(1)
+                    )
+                    if duplicate is not None or find_showtime_conflict(
+                        db, room=room, start_time=start_time, duration_min=movie.duration_min
+                    ):
+                        continue
+                    db.add(Showtime(movie_id=movie.id, start_time=start_time, room=room,
+                                    price=95000 if h >= 17 else 75000))
+                    db.flush()
     db.commit()
 
 

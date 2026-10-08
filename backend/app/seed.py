@@ -21,28 +21,58 @@ def _ensure_showtimes(db: Session, days: int = 5) -> None:
     from .showtime_rules import ROOMS, find_showtime_conflict
 
     movies = db.scalars(select(Movie).where(Movie.status == "now_showing").order_by(Movie.id)).all()
+
+    def add_first_available(movie: Movie, movie_idx: int, day: date, day_idx: int,
+                            candidate_indexes: list[int]) -> bool:
+        for time_idx in candidate_indexes:
+            h, m = map(int, TIMES[time_idx].split(":"))
+            start_time = datetime.combine(day, time(h, m))
+            duplicate = db.scalar(
+                select(Showtime.id).where(
+                    Showtime.movie_id == movie.id,
+                    Showtime.start_time == start_time,
+                ).limit(1)
+            )
+            if duplicate is not None:
+                continue
+            room_start = (movie_idx + day_idx + time_idx) % len(ROOMS)
+            for room_step in range(len(ROOMS)):
+                room = ROOMS[(room_start + room_step) % len(ROOMS)]
+                if find_showtime_conflict(
+                    db, room=room, start_time=start_time, duration_min=movie.duration_min
+                ):
+                    continue
+                db.add(Showtime(movie_id=movie.id, start_time=start_time, room=room,
+                                price=95000 if h >= 17 else 75000))
+                db.flush()
+                return True
+        return False
+
     for d in range(days):
         day = date.today() + timedelta(days=d)
+        day_start = datetime.combine(day, time.min)
+        day_end = day_start + timedelta(days=1)
+
+        # Ưu tiên công bằng: mỗi phim đang chiếu có ít nhất một suất trong ngày.
+        existing_movie_ids = set(db.scalars(
+            select(Showtime.movie_id).where(
+                Showtime.start_time >= day_start,
+                Showtime.start_time < day_end,
+            )
+        ).all())
         for idx, movie in enumerate(movies):
-            for i, t in enumerate(TIMES):
-                if (i + idx + day.toordinal()) % 2 == 0 or i == 3:
-                    h, m = map(int, t.split(":"))
-                    start_time = datetime.combine(day, time(h, m))
-                    room = ROOMS[idx % len(ROOMS)]
-                    duplicate = db.scalar(
-                        select(Showtime.id).where(
-                            Showtime.movie_id == movie.id,
-                            Showtime.start_time == start_time,
-                            Showtime.room == room,
-                        ).limit(1)
-                    )
-                    if duplicate is not None or find_showtime_conflict(
-                        db, room=room, start_time=start_time, duration_min=movie.duration_min
-                    ):
-                        continue
-                    db.add(Showtime(movie_id=movie.id, start_time=start_time, room=room,
-                                    price=95000 if h >= 17 else 75000))
-                    db.flush()
+            if movie.id in existing_movie_ids:
+                continue
+            preferred = (idx + d) % len(TIMES)
+            candidates = [(preferred + step) % len(TIMES) for step in range(len(TIMES))]
+            if add_first_available(movie, idx, day, d, candidates):
+                existing_movie_ids.add(movie.id)
+
+        # Sau suất tối thiểu, lấp thêm lịch mẫu cũ; khi phòng ưu tiên bận thì thử phòng khác.
+        for idx, movie in enumerate(movies):
+            for i, _ in enumerate(TIMES):
+                if (i + idx + d) % 2 == 0 or i == 3:
+                    add_first_available(movie, idx, day, d, [i])
     db.commit()
 
 

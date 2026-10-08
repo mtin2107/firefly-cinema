@@ -49,20 +49,50 @@ function buildShowtimes(movies = MOVIES, existing = [], startId = 1) {
   const list = [];
   let id = startId;
   const today = new Date();
+  const nowShowing = movies.filter((movie) => movie.status === "now_showing");
+
+  const addFirstAvailable = (movie, movieIndex, date, dayIndex, candidateIndexes) => {
+    for (const timeIndex of candidateIndexes) {
+      const start_time = localIso(date, times[timeIndex]);
+      const all = [...existing, ...list];
+      if (all.some((item) => item.movie_id === movie.id && item.start_time === start_time)) continue;
+      const roomStart = (movieIndex + dayIndex + timeIndex) % ROOMS.length;
+      for (let roomStep = 0; roomStep < ROOMS.length; roomStep++) {
+        const candidate = {
+          id, movie_id: movie.id, start_time,
+          room: ROOMS[(roomStart + roomStep) % ROOMS.length],
+          price: Number(times[timeIndex].slice(0, 2)) >= 17 ? 95000 : 75000,
+        };
+        if (all.some((item) => intervalsOverlap(candidate, item, movies))) continue;
+        list.push(candidate);
+        id += 1;
+        return true;
+      }
+    }
+    return false;
+  };
+
   for (let day = 0; day < 5; day++) {
     const date = new Date(today);
     date.setDate(today.getDate() + day);
-    movies.filter((m) => m.status === "now_showing").forEach((movie, idx) => {
-      times
-        .filter((_, i) => (i + idx + day) % 2 === 0 || i === 3)
-        .forEach((t) => {
-          const price = Number(t.slice(0, 2)) >= 17 ? 95000 : 75000;
-          const candidate = { id, movie_id: movie.id, start_time: localIso(date, t), room: ROOMS[idx % ROOMS.length], price };
-          if (![...existing, ...list].some((item) => intervalsOverlap(candidate, item, movies))) {
-            list.push(candidate);
-            id += 1;
-          }
-        });
+    const dayKey = localIso(date, "00:00").slice(0, 10);
+    const present = new Set([...existing, ...list]
+      .filter((item) => item.start_time.slice(0, 10) === dayKey)
+      .map((item) => item.movie_id));
+
+    nowShowing.forEach((movie, idx) => {
+      if (present.has(movie.id)) return;
+      const preferred = (idx + day) % times.length;
+      const candidates = times.map((_, step) => (preferred + step) % times.length);
+      if (addFirstAvailable(movie, idx, date, day, candidates)) present.add(movie.id);
+    });
+
+    nowShowing.forEach((movie, idx) => {
+      times.forEach((_, timeIndex) => {
+        if ((timeIndex + idx + day) % 2 === 0 || timeIndex === 3) {
+          addFirstAvailable(movie, idx, date, day, [timeIndex]);
+        }
+      });
     });
   }
   return list;
@@ -119,7 +149,15 @@ function load() {
       if (!db.adminShowtimeIds) db.adminShowtimeIds = [];
       if (!db.seq.showtime) db.seq.showtime = Math.max(...db.showtimes.map((item) => item.id), 0) + 1;
       // làm mới suất chiếu mỗi ngày
-      if (db.showtimesDay === new Date().toDateString()) return db;
+      if (db.showtimesDay === new Date().toDateString()) {
+        const additions = buildShowtimes(db.movies, db.showtimes, db.seq.showtime);
+        if (additions.length) {
+          db.showtimes.push(...additions);
+          db.seq.showtime = Math.max(...db.showtimes.map((item) => item.id), 0) + 1;
+          localStorage.setItem(DB_KEY, JSON.stringify(db));
+        }
+        return db;
+      }
       const adminShowtimes = db.showtimes.filter((item) => db.adminShowtimeIds.includes(item.id));
       const firstSeedId = Math.max(...adminShowtimes.map((item) => item.id), 0) + 1;
       db.showtimes = [...adminShowtimes, ...buildShowtimes(db.movies, adminShowtimes, firstSeedId)];

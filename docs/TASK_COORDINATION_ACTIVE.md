@@ -22,15 +22,15 @@ Trước khi áp dụng workflow: giao diện React đầy đủ (`giao-dien-v1`
 
 ## 4. Current Project Status
 ```
-Overall Status: ACTIVE — T04 PO_REVIEW
-Phase: T00, T01, T02, T03 DONE/CLOSED; T04 PO_REVIEW
-Current Active Task: T04 — PO_REVIEW (branch task/T04-quan-ly-phim; implementation `d8e67e0`; Claude PASS_WITH_TODO)
+Overall Status: ACTIVE — T04 PO_APPROVED / PENDING_MERGE
+Phase: T00, T01, T02, T03 DONE/CLOSED; T04 PO_APPROVED — PENDING_MERGE
+Current Active Task: T04 — PENDING_MERGE (PO APPROVED 08/10/2026; branch task/T04-quan-ly-phim; implementation `d8e67e0`)
 Next Task: NOT SELECTED
 Ngày bắt đầu sản phẩm: 05/10/2026 · Hạn: 01/11/2026
 ```
 
 ## 5. Current Active Task
-T04 — Quản lý phim (admin) — PO_REVIEW (Claude **PASS_WITH_TODO**: AC 7/7, RF 0, blocker 0; 2 scope deviation SD-01 `taxonomy.js` ngoài allowlist, SD-02 `global.css` sửa rule toàn cục, cần PO quyết; report `reports/2026-10-08/claude_review_T04_2026-10-08.md`)
+T04 — Quản lý phim (admin) — PO_APPROVED / PENDING_MERGE (Claude PASS_WITH_TODO; AC 7/7; RF 0; blocker 0; SD-01/SD-02 APPROVED RETROACTIVELY; PO report `reports/2026-10-08/po_review_T04_APPROVED_2026-10-08.md`)
 
 ## 6. Current Task Record
 [docs/tasks/T04.md](tasks/T04.md)
@@ -43,7 +43,7 @@ T04 — Quản lý phim (admin) — PO_REVIEW (Claude **PASS_WITH_TODO**: AC 7/7
 | T01 | Mô hình truyền thống (NB, LR, SVM) | ML | 1 | T00 | [T01.md](tasks/T01.md) | DONE / CLOSED |
 | T02 | So sánh PhoBERT với mô hình truyền thống | ML | 1 | T01 | [T02.md](tasks/T02.md) | DONE / CLOSED (merge `6d5fda5`, tag `ml-baselines`) |
 | T03 | Bộ dữ liệu bình luận phim | Dữ liệu | 1–2 | — | [T03.md](tasks/T03.md) | DONE / CLOSED (Claude PASS_WITH_TODO; PO APPROVED; merge `6bd1a3f`; Drive VERIFIED) |
-| T04 | Quản lý phim (admin) | Web | 2 | — | [T04.md](tasks/T04.md) | PO_REVIEW (Claude PASS_WITH_TODO; chờ PO quyết SD-01/SD-02) |
+| T04 | Quản lý phim (admin) | Web | 2 | — | [T04.md](tasks/T04.md) | PO_APPROVED — PENDING_MERGE (SD-01/SD-02 approved retroactively) |
 | T05 | Quản lý suất chiếu (admin) | Web | 2 | T04 | [T05.md](tasks/T05.md) | PLANNED |
 | T06 | Kiểm duyệt có người duyệt (đổi schema) | Web | 2 | — | [T06.md](tasks/T06.md) | PLANNED (cần Q2) |
 | T07 | Đa mô hình và trang So sánh mô hình | Web + ML | 2 | T01 | [T07.md](tasks/T07.md) | PLANNED |
@@ -60,12 +60,13 @@ Chuỗi chính: `T00 → T01 → T02` và `T03 → T08 → T09 → T10`. T03 b�
 Nếu trễ: cắt T14 → T15 → rút gọn T05. Không cắt T01–T03, T07–T10.
 
 ## 8. Open Blockers
+- T04: 0 technical blockers; SD-01/SD-02 đã được PO phê duyệt hồi tố, không còn chặn merge.
 - Q1 (nguồn bình luận phim, người gán nhãn thứ 2): RESOLVED 07/10/2026 — xem `PROJECT_SOURCE_OF_TRUTH.md` mục 5 và `docs/tasks/T03.md` mục 13.
 - T03: RESOLVED — PO APPROVED, Drive Backup VERIFIED, DONE / CLOSED, merge `6bd1a3f`.
 - Q2 (Alembic hay xóa `firefly.db`): OPEN — cần chốt trước T06.
 
 ## 9. Open Required Fixes
-0 — RF-01, RF-02 của T02 CLOSED (Claude review vòng 2); RF-01 → RF-03 của T00 đã đóng; T01 không có RF.
+0 — T04 RF 0; RF-01, RF-02 của T02 CLOSED (Claude review vòng 2); RF-01 → RF-03 của T00 đã đóng; T01 không có RF.
 
 ## 10. Open TODOs
 | Nguồn | TODO | Disposition |
@@ -101,17 +102,17 @@ Nếu trễ: cắt T14 → T15 → rút gọn T05. Không cắt T01–T03, T07�
 | Claude review T03 | TODO-06 kappa 0,6025 sát ngưỡng, 19/100 bất đồng | ACCEPT_WITH_DISCLOSURE — mức đồng thuận vừa phải; không sửa nhãn; ghi trong khóa luận |
 | Claude review T03 | TODO-07 chưa xác minh 4 CSV trên Drive | PO ACTION REQUIRED — Tín upload/kiểm tra tại `MyDrive/thesis/data/movie/` trước khi đóng T03 |
 | Claude review T03 | TODO-08 dọn file trung gian | ACCEPT_LATER — CLEANUP AFTER T03 CLOSED; giữ candidates/evidence để truy vết |
-| Claude review T04 | SD-01 `frontend/src/utils/taxonomy.js` ngoài allowlist (refactor không đổi hành vi; report Codex ghi sai "đúng allowlist") | PO DECISION REQUIRED — chấp nhận hồi tố hoặc FIX_LOOP hoàn nguyên |
-| Claude review T04 | SD-02 `global.css` sửa `.container`/`.page-title` (≤600px, toàn site) và mở rộng `.field input` | PO DECISION REQUIRED |
-| Claude review T04 | TODO-01 report Codex khẳng định sai về allowlist; TODO-02 T04 mục 13 ghi "23 mục" (đúng: 22 thể loại) | Chờ PO |
-| Claude review T04 | TODO-03 422 sai kiểu/thiếu trường còn câu Pydantic tiếng Anh; TODO-04 `genre` String(100) có thể vượt | Đề xuất ACCEPT_LATER → T11 |
-| Claude review T04 | TODO-05 xóa phim xóa luôn bình luận; TODO-06 câu 422 mock thiếu tiền tố; TODO-08 mock reset vé mỗi ngày | Chờ PO (đề xuất ACCEPT / WONT_FIX) |
-| Claude review T04 | TODO-07 phim mới chưa có suất chiếu; phim `ended` vẫn đặt vé được suất tương lai | Đề xuất đưa vào T05 |
+| Claude review T04 | SD-01 `frontend/src/utils/taxonomy.js` ngoài allowlist (refactor không đổi hành vi; report Codex ghi sai "đúng allowlist") | APPROVED RETROACTIVELY — ngoại lệ scope T04; quy tắc allowlist task sau giữ nguyên |
+| Claude review T04 | SD-02 `global.css` sửa `.container`/`.page-title` (≤600px, toàn site) và mở rộng `.field input` | APPROVED RETROACTIVELY — Claude đã xác minh không regression |
+| Claude review T04 | TODO-01 report Codex khẳng định sai về allowlist; TODO-02 T04 mục 13 ghi "23 mục" (đúng: 22 thể loại) | TODO-01 DOCUMENTED / PROCESS CORRECTION; TODO-02 ACCEPT_LATER — documentation |
+| Claude review T04 | TODO-03 422 sai kiểu/thiếu trường còn câu Pydantic tiếng Anh; TODO-04 `genre` String(100) có thể vượt | ACCEPT_LATER → T11 |
+| Claude review T04 | TODO-05 xóa phim xóa luôn bình luận; TODO-06 câu 422 mock thiếu tiền tố; TODO-08 mock reset vé mỗi ngày | TODO-05 ACCEPT; TODO-06 và TODO-08 WONT_FIX |
+| Claude review T04 | TODO-07 phim mới chưa có suất chiếu; phim `ended` vẫn đặt vé được suất tương lai | ACCEPT_LATER → T05 |
 
 ## 11. Current Next Step
-1. **Tín:** PO review T04 theo `reports/2026-10-08/claude_review_T04_2026-10-08.md`; ghi quyết định SD-01, SD-02 và disposition TODO-01 → TODO-08 vào `po_review_T04_*`.
-2. Nếu APPROVED: Tín merge `task/T04-quan-ly-phim` vào `master`. Nếu chọn hoàn nguyên SD-01/SD-02: T04 → `FIX_LOOP`.
-3. T05 giữ `PLANNED` theo yêu cầu PO trong prompt review ("Không mở T05"); không agent nào tự PO approve, merge T04 hoặc mở T05.
+1. **Tín:** merge `task/T04-quan-ly-phim` vào `master` theo merge gate; xác minh commit merge thật.
+2. Sau khi merge: cập nhật coordination T04 `DONE / CLOSED` cùng merge commit; không mở T05 nếu chưa có authorization riêng.
+3. T05 giữ `PLANNED`; Next Task giữ `NOT SELECTED`.
 
 ## 12. Active Timeline
 | Ngày | Ai | Sự kiện |
@@ -154,3 +155,4 @@ Nếu trễ: cắt T14 → T15 → rút gọn T05. Không cắt T01–T03, T07�
 | 08/10/2026 | Codex | Xác minh gate, bỏ qua cục bộ `data/phim/NGUON_THU.md` theo quyết định PO, tạo `task/T04-quan-ly-phim` từ `master` tại `b6cc3d6`; T04 READY_FOR_HANDOFF → IN_PROGRESS |
 | 08/10/2026 | Codex | Hoàn tất CRUD phim admin, validation/taxonomy, mock persistence và UI responsive; compile/build, API/browser probes, AC 7/7 self-check đạt; commit implementation `d8e67e0`; T04 IN_PROGRESS → CLAUDE_REVIEW |
 | 08/10/2026 | Claude | Review T04 độc lập: probe TestClient trên DB tạm (401/403 4/4, 422 5/5 + 8 ca thêm, 409 đúng câu, PUT `ended`, 21/21 phim seed lưu lại được), backend thật health `phobert`, UI real + mock (CRUD, F5, lọc/tìm không dấu, loading/rỗng/lỗi, 375px), hồi quy 7/7; **PASS_WITH_TODO** (AC 7/7, RF 0, blocker 0; SD-01/SD-02 chờ PO). T04 `CLAUDE_REVIEW` → `PO_REVIEW`. T05 giữ PLANNED theo yêu cầu PO |
+| 08/10/2026 | Tín | PO review T04: **APPROVED**; AC 7/7, RF 0, technical blocker 0; SD-01 và SD-02 APPROVED RETROACTIVELY; DoD accepted với hai ngoại lệ scope; TODO-01→08 đã disposition tại `reports/2026-10-08/po_review_T04_APPROVED_2026-10-08.md`; T04 → PO_APPROVED / PENDING_MERGE, T05 giữ PLANNED |

@@ -22,7 +22,7 @@ Trước khi áp dụng workflow: giao diện React đầy đủ (`giao-dien-v1`
 
 ## 4. Current Project Status
 ```
-Overall Status: CLAUDE_REVIEW
+Overall Status: PO_REVIEW
 Phase: T00, T01, T02, T03, T04 DONE/CLOSED
 Current Active Task: T05 — Quản lý suất chiếu (admin)
 Next Task: NOT SELECTED
@@ -30,10 +30,10 @@ Ngày bắt đầu sản phẩm: 05/10/2026 · Hạn: 01/11/2026
 ```
 
 ## 5. Current Active Task
-T05 — Quản lý suất chiếu (admin): Codex đã sửa RF-01 ở fix commit `f5fca8d`; chờ Claude review Round 2. Scope conflict booking phim `ended` vẫn OPEN / PO ACTION REQUIRED.
+T05 — Quản lý suất chiếu (admin): Claude review Round 2 **PASS_WITH_TODO** (`reports/2026-10-08/claude_review_T05_round2_PASS_WITH_TODO_2026-10-08.md`); AC 8/8, RF-01 CLOSED, RF mở 0. Chờ PO review. Scope conflict booking phim `ended` vẫn OPEN / PO ACTION REQUIRED trước khi APPROVED.
 
 ## 6. Current Task Record
-`docs/tasks/T05.md` — CLAUDE_REVIEW (Round 2).
+`docs/tasks/T05.md` — PO_REVIEW.
 
 ## 7. Roadmap và trạng thái
 
@@ -44,7 +44,7 @@ T05 — Quản lý suất chiếu (admin): Codex đã sửa RF-01 ở fix commit
 | T02 | So sánh PhoBERT với mô hình truyền thống | ML | 1 | T01 | [T02.md](tasks/T02.md) | DONE / CLOSED (merge `6d5fda5`, tag `ml-baselines`) |
 | T03 | Bộ dữ liệu bình luận phim | Dữ liệu | 1–2 | — | [T03.md](tasks/T03.md) | DONE / CLOSED (Claude PASS_WITH_TODO; PO APPROVED; merge `6bd1a3f`; Drive VERIFIED) |
 | T04 | Quản lý phim (admin) | Web | 2 | — | [T04.md](tasks/T04.md) | DONE / CLOSED (Claude PASS_WITH_TODO; PO APPROVED; AC 7/7; RF 0; blocker 0; SD-01/SD-02 approved retroactively; merge `fced3d7`) |
-| T05 | Quản lý suất chiếu (admin) | Web | 2 | T04 | [T05.md](tasks/T05.md) | CLAUDE_REVIEW (Round 2; RF-01 fix `f5fca8d`) |
+| T05 | Quản lý suất chiếu (admin) | Web | 2 | T04 | [T05.md](tasks/T05.md) | PO_REVIEW (Claude Round 2 PASS_WITH_TODO; AC 8/8; RF-01 CLOSED) |
 | T06 | Kiểm duyệt có người duyệt (đổi schema) | Web | 2 | — | [T06.md](tasks/T06.md) | PLANNED (cần Q2) |
 | T07 | Đa mô hình và trang So sánh mô hình | Web + ML | 2 | T01 | [T07.md](tasks/T07.md) | PLANNED |
 | T08 | Đo lệch miền điện thoại → phim | ML | 3 | T02, T03 | [T08.md](tasks/T08.md) | PLANNED |
@@ -67,7 +67,7 @@ Nếu trễ: cắt T14 → T15 → rút gọn T05. Không cắt T01–T03, T07�
 - Q2 (Alembic hay xóa `firefly.db`): OPEN — cần chốt trước T06.
 
 ## 9. Open Required Fixes
-- **T05 RF-01 (High, FIXED BY CODEX / PENDING REVIEW):** fix commit `f5fca8d`; fresh real/mock đều có đủ 9 phim mỗi ngày, hot_week đủ 9, 0 cặp chồng, restart giữ nguyên suất admin/booking. Evidence: `reports/2026-10-08/codex_fix_T05_round1_2026-10-08.md`.
+- **T05 RF-01 (High, CLOSED — Claude Round 2 xác minh độc lập):** fix commit `f5fca8d`; fresh real/mock đều có đủ 9 phim mỗi ngày, hot_week đủ 9, 0 cặp chồng, restart giữ nguyên suất admin/booking. Evidence: `reports/2026-10-08/codex_fix_T05_round1_2026-10-08.md`.
 
 Đã đóng: T04 RF 0; RF-01, RF-02 của T02 CLOSED (Claude review vòng 2); RF-01 → RF-03 của T00 đã đóng; T01 không có RF.
 
@@ -111,12 +111,13 @@ Nếu trễ: cắt T14 → T15 → rút gọn T05. Không cắt T01–T03, T07�
 | Claude review T04 | TODO-03 422 sai kiểu/thiếu trường còn câu Pydantic tiếng Anh; TODO-04 `genre` String(100) có thể vượt | ACCEPT_LATER → T11 |
 | Claude review T04 | TODO-05 xóa phim xóa luôn bình luận; TODO-06 câu 422 mock thiếu tiền tố; TODO-08 mock reset vé mỗi ngày | TODO-05 ACCEPT; TODO-06 và TODO-08 WONT_FIX |
 | Claude review T04 | TODO-07 phim mới chưa có suất chiếu; phim `ended` vẫn đặt vé được suất tương lai | Vế phim mới RESOLVED trong T05 (AC-06 Claude xác minh); vế booking phim ended **vẫn tồn tại** — PO chọn (a) mở rộng allowlist T05 hoặc (b) ACCEPT_LATER → T11 |
-| Claude review T05 | TODO-01 mock khóa mọi suất seed do ghế giả `seedBooked`; TODO-02 sửa suất phim ended hiện ô Phim trống; TODO-03 `find_showtime_conflict` không lọc theo ngày; TODO-04 report Codex không đối chiếu số suất theo phim | Chờ PO disposition |
+| Claude review T05 | TODO-01 mock khóa mọi suất seed do ghế giả `seedBooked`; TODO-02 sửa suất phim ended hiện ô Phim trống; TODO-03 `find_showtime_conflict` không lọc theo ngày; TODO-04 report Codex không đối chiếu số suất theo phim | Round 2: TODO-04 RESOLVED; TODO-01/02/03 chờ PO disposition |
+| Claude review T05 r2 | TODO-05 (Medium) suất seed admin đã xóa được seed tạo lại khi restart backend; TODO-06 (Low) phân bổ không đều (phim 9/10/18 1 suất/ngày), DB cũ giữ 190 cặp chồng lịch sử, lần đầu chạy trên `firefly.db` thật thêm 38 suất | Chờ PO disposition |
 
 ## 11. Current Next Step
-1. **Claude:** review độc lập T05 Round 2, tập trung RF-01, restart/idempotency, real/mock parity và checklist hồi quy.
-2. **Tín/PO:** quyết định scope conflict booking phim `ended`: mở rộng allowlist hoặc ACCEPT_LATER → T11.
-3. Không mở task kế tiếp. T06 giữ PLANNED (Q2 còn mở).
+1. **Tín/PO:** PO review T05 theo `reports/2026-10-08/claude_review_T05_round2_PASS_WITH_TODO_2026-10-08.md`; disposition TODO-01→06.
+2. **Tín/PO:** chốt scope conflict booking phim `ended` trước khi APPROVED: (A) mở rộng scope T05 hoặc (B) ACCEPT_LATER → T11.
+3. Sau PO APPROVED: Tín merge `task/T05-quan-ly-suat-chieu` vào `master`. Task kế tiếp đủ điều kiện theo AGENT_RULES 1.1 là T07 (T06 chặn bởi Q2); Claude không tự đổi trạng thái, chờ PO authorize. T06 giữ PLANNED.
 
 ## 12. Active Timeline
 | Ngày | Ai | Sự kiện |
@@ -167,3 +168,4 @@ Nếu trễ: cắt T14 → T15 → rút gọn T05. Không cắt T01–T03, T07�
 | 08/10/2026 | Codex | Hoàn tất focused/full gates, real/mock/browser probes và report; implementation commits `214fcaa`, `033e420` (giữ diff `seed.py` chỉ trong `_ensure_showtimes`); ghi scope conflict booking phim `ended`; T05 `IN_PROGRESS` → `CLAUDE_REVIEW` |
 | 08/10/2026 | Claude | Review T05 độc lập: AC-01→AC-07 đạt (401/403 4/4, biên ±114/±115, 409 đúng câu, khóa vé đếm đúng, restart uvicorn thật 0 chồng giờ, mock contract + F5); **FAIL** do RF-01: seed backend + mock bỏ trống 5/9 phim đang chiếu, hot_week 9 → 4 phim (AC-08). Scope conflict booking phim ended xác minh còn tồn tại, chờ PO. T05 `CLAUDE_REVIEW` → `FIX_LOOP`; không mở task kế tiếp |
 | 08/10/2026 | Codex | Fix Round 1: sửa phân bổ seed real/mock theo hai pass, đủ 9 phim mỗi ngày, hot_week đủ 9, 0 chồng; ba lifespan + hai Uvicorn restart giữ nguyên suất admin/booking; repair mock data cũ idempotent; fix commit `f5fca8d`; T05 `FIX_LOOP` → `CLAUDE_REVIEW` Round 2 |
+| 08/10/2026 | Claude | Review T05 Round 2 độc lập: RF-01 CLOSED (DB sạch 99 suất, 9/9 phim mỗi ngày, 0 chồng, hot_week 9; uvicorn restart ×3 giữ nguyên suất admin/booking; DB cũ RF-01 được lấp, dòng cũ nguyên vẹn; real/mock cùng SHA-256 99 suất; repair localStorage idempotent); AC 8/8, hồi quy 7/7; **PASS_WITH_TODO** (TODO-05 Medium mới: suất seed bị xóa quay lại khi restart). T05 `CLAUDE_REVIEW` → `PO_REVIEW`; scope conflict ended vẫn chờ PO; không mở task kế tiếp |

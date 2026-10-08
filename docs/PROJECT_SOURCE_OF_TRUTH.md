@@ -52,7 +52,7 @@ Không âm thầm trộn hai phiên bản mâu thuẫn. Ghi conflict vào mục 
 
 | # | Câu hỏi | Ảnh hưởng task | Trạng thái |
 |---|---|---|---|
-| Q1 | Nguồn thu bình luận phim và người gán nhãn thứ hai | T03 | MỞ |
+| Q1 | Nguồn thu bình luận phim và người gán nhãn thứ hai | T03 | CHỐT: nguồn review_site + social là chính, self_written ≤20%; Annotator A = Lê Minh Tín, Annotator B = "Người 1" ẩn danh; 07/10/2026 |
 | Q2 | Dùng Alembic hay chấp nhận xóa `firefly.db` khi đổi schema | T06 trở đi | MỞ |
 | Q3 | Model mặc định sau T10: PhoBERT B hay admin chọn | T10 | MỞ |
 | Q4 | Deploy lên mạng hay chỉ chạy máy khi bảo vệ | T12, T13 | MỞ |

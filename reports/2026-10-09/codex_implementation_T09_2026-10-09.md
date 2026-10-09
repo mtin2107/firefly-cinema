@@ -150,6 +150,7 @@ Implementation DoD đã đủ để bàn giao `CLAUDE_REVIEW`; full task DoD ch�
 - Baseline dự đoán hằng: **RESOLVED** bằng kết quả thật trên hai test set.
 - Ảnh hưởng lệch tỷ lệ nhãn: **RESOLVED ở mức phân tích/disclosure**; không tuyên bố đã loại bỏ lệch nhãn.
 - Notebook portability: **RESOLVED** bằng hai clean-run từ runtime mới với Drive fallback/code ZIP.
+- Output notebook, Drive path và hướng dẫn ghép môi trường: **RESOLVED** bằng hai notebook run có output, artifact/ID Drive đã xác minh và hướng dẫn Colab từng bước cho PO.
 - Preprocessing parity: **RESOLVED** bằng 20/20 trong cả hai run.
 - Giới hạn movie test 149 câu: **RESOLVED ở mức disclosure**; giới hạn thống kê vẫn tồn tại.
 

@@ -135,15 +135,15 @@ Nếu trễ: cắt T14 → T15 → rút gọn T05. Không cắt T01–T03, T07�
 | Claude review T07 | TODO-04 422 thiếu/sai kiểu/quá 1.000 ký tự còn câu Pydantic tiếng Anh | ACCEPT_LATER → T11 |
 | Claude review T07 | TODO-05 health không có trường `ACTIVE_MODEL` được yêu cầu khi fallback | ACCEPT_LATER → T10 |
 | Claude review T07 | TODO-06 report Codex ghi AC-05 PASS khi chưa thử `""` | ACCEPT_WITH_NOTES — fix report/Round 2 đã kiểm đủ; task sau phải kiểm ca biên trước khi ghi PASS |
-| Claude review T08 | TODO-01 (Medium) F1_neg movie bị đẩy lên do tỷ lệ tiêu cực 67,8% (baseline hằng đạt 0,808) | **ACCEPT_LATER → T09/khóa luận**; ghi F1_neg, Macro-F1 và baseline dự đoán hằng; chưa RESOLVED |
+| Claude review T08 | TODO-01 (Medium) F1_neg movie bị đẩy lên do tỷ lệ tiêu cực 67,8% (baseline hằng đạt 0,808) | **RESOLVED trong T09** — đã ghi F1_neg, Macro-F1 và baseline hằng trên hai test set; giới hạn lệch nhãn vẫn được disclosure |
 | Claude review T08 | TODO-02 (Low) movie test 149 câu; CI 95% ΔF1_neg cận dưới 0,010–0,023 | **ACCEPT_WITH_DISCLOSURE**; công bố giới hạn 149 câu/CI 95%, T09 dùng cùng movie test |
-| Claude review T08 | TODO-03 (Low) notebook phụ thuộc cwd | **ACCEPT_LATER → T09/T13**; cải thiện portability và hướng dẫn cwd; chưa RESOLVED |
-| Claude review T08 | TODO-04 (Low) thiếu output notebook, Drive path và hướng dẫn ghép môi trường | **ACCEPT_WITH_NOTES → T13**; chấp nhận evidence độc lập, chưa bắt buộc sửa T08/chạy Colab; bằng chứng Drive và hướng dẫn môi trường còn thiếu, chưa RESOLVED |
-| Claude review T08 | TODO-05 (Info) PhoBERT nhạy với `normalize()` ở câu "lê thê" | **ACCEPT_LATER → T09/T10**; giữ `normalize()`, kiểm tra đồng nhất train/eval/runtime; chưa RESOLVED |
+| Claude review T08 | TODO-03 (Low) notebook phụ thuộc cwd | **RESOLVED trong T09** — tìm repo/fallback code ZIP và hai clean-run từ runtime mới đạt |
+| Claude review T08 | TODO-04 (Low) thiếu output notebook, Drive path và hướng dẫn ghép môi trường | **RESOLVED trong T09** — có run1/run2 lưu output, Drive ID/path, code ZIP và hướng dẫn PO từng bước |
+| Claude review T08 | TODO-05 (Info) PhoBERT nhạy với `normalize()` ở câu "lê thê" | **RESOLVED trong T09** — giữ nguyên `normalize()`, parity train/eval/runtime 20/20 trong hai clean-run; T10 vẫn phải dùng artifact đã review |
 
 ## 11. Current Next Step
-1. Codex hoàn thiện `ml/notebooks/T09_phobert_B.ipynb`, kiểm tra local/CPU, chuẩn bị hướng dẫn Colab và các output Tín cần gửi lại.
-2. Tín chạy notebook trên Colab GPU từ runtime mới, cung cấp metric thật, notebook output và evidence Drive. T09 giữ `IN_PROGRESS` cho đến khi đủ evidence và gate.
+1. Claude review độc lập T09: kiểm AC-01→AC-06, selection không dùng test, hai clean-run, metric/manifest, CPU reload, artifact Drive và scope/security.
+2. Nếu review FAIL thì T09 → `FIX_LOOP`; nếu PASS/PASS_WITH_TODO thì T09 → `PO_REVIEW`. Không mở T10, không merge và không đóng T09 trước quyết định PO.
 
 ## 12. Active Timeline
 | Ngày | Ai | Sự kiện |

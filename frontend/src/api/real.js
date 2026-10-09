@@ -47,6 +47,7 @@ export const realApi = {
       request(`/api/movies/${movieId}/comments`, { method: "POST", body: { content } }),
   },
   admin: {
+    predict: (text) => request("/api/admin/predict", { method: "POST", body: { text } }),
     comments: {
       list: (filters = {}) => {
         const params = new URLSearchParams(Object.entries(filters).filter(([, value]) => value !== undefined && value !== ""));

@@ -8,7 +8,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from .classifier import classifier
 from .config import FRONTEND_ORIGINS
 from .database import Base, engine, SessionLocal
-from .routers import auth, movies, bookings, comments, admin_movies, admin_showtimes
+from .routers import auth, movies, bookings, comments, admin_movies, admin_predict, admin_showtimes
 from .seed import seed
 
 
@@ -45,9 +45,16 @@ app.include_router(bookings.router)
 app.include_router(comments.router)
 app.include_router(admin_movies.router)
 app.include_router(admin_showtimes.router)
+app.include_router(admin_predict.router)
 
 
 @app.get("/api/health", tags=["Hệ thống"])
 def health():
     """Kiểm tra backend đang chạy và đang dùng model nào."""
-    return {"status": "ok", "classifier": classifier.name, "classifier_error": classifier.error}
+    return {
+        "status": "ok",
+        "classifier": classifier.name,
+        "classifier_error": classifier.error,
+        "models": classifier.health(),
+        "active_model": classifier.name,
+    }

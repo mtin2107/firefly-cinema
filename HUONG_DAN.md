@@ -191,6 +191,21 @@ Thư mục phải có tối thiểu: `config.json`, `model.safetensors` (hoặc 
 4. Chạy lại backend (`Ctrl + C`, rồi `uvicorn app.main:app --reload --port 8000`).
 5. Mở http://localhost:8000/api/health, phải thấy `"classifier":"phobert"`. Nếu vẫn là `keyword`, xem `classifier_error` để biết lỗi.
 
+### 4.4. Nạp các mô hình T01 và chọn model chấm bình luận
+
+Artifact mặc định nằm ngoài Git tại `ml/artifacts/baselines/`. Cài đúng phiên bản đã tạo artifact rồi thêm cấu hình vào `backend/.env`:
+
+```powershell
+backend\venv\Scripts\python -m pip install -r backend\requirements-ml.txt
+```
+
+```env
+ACTIVE_MODEL=phobert
+SKLEARN_MODELS=svm:../ml/artifacts/baselines/svm_A.joblib,lr:../ml/artifacts/baselines/lr_A.joblib,nb:../ml/artifacts/baselines/nb_A.joblib
+```
+
+Khởi động lại backend và kiểm tra `/api/health`: mỗi model có `loaded` và `error`, còn `active_model` là model thực sự dùng. Nếu `ACTIVE_MODEL` không nạp được, backend tự dùng PhoBERT rồi keyword. Trang admin `/quan-tri/so-sanh-mo-hinh` chỉ so sánh model, không thay đổi `ACTIVE_MODEL`.
+
 ### 4.3. Chấm lại dữ liệu mẫu bằng PhoBERT
 
 Các bình luận mẫu được chấm lúc tạo database. Muốn chấm lại bằng PhoBERT: tắt backend, xóa file `backend/firefly.db`, chạy lại. Cột `model_name` trong bảng `comments` ghi rõ mỗi bình luận được chấm bởi `phobert` hay `keyword`, dùng khi viết phần thực nghiệm.
@@ -230,6 +245,7 @@ Ngưỡng ẩn bình luận chỉnh bằng `NEGATIVE_THRESHOLD` (mặc định 0
 | GET | /api/bookings/me | ✔ | Vé của tôi |
 | GET | /api/movies/{id}/comments | | Bình luận không bị admin ẩn; kèm nhãn model, `effective_negative`, `reviewed` |
 | POST | /api/movies/{id}/comments | ✔ | Viết bình luận, PhoBERT chấm điểm ngay |
+| POST | /api/admin/predict | Admin | So sánh nhãn, điểm và thời gian của các model đã nạp |
 | GET | /api/admin/comments | ✔ admin | Danh sách `{items,total}`; lọc `label`, `reviewed`; phân trang `page`, `page_size` tối đa 100 |
 | PATCH | /api/admin/comments/{id} | ✔ admin | `confirm`, `relabel`, `hide`, `unhide`; relabel nhận `label` 0 hoặc 1 |
 | GET | /api/admin/comments/stats | ✔ admin | Thống kê reviewed/agree/disagree/accuracy và TP/FP/TN/FN |

@@ -417,6 +417,20 @@ export const mockApi = {
     },
   },
   admin: {
+    async predict(text) {
+      await wait(600);
+      requireAdmin();
+      const value = String(text ?? "").trim();
+      if (!value) throw new ApiError("Nội dung cần chấm điểm không được để trống.", 422);
+      const prediction = fakeClassify(value);
+      return [{
+        model: "mock",
+        version: "keyword-v1",
+        label: prediction.is_negative ? "tieu_cuc" : "binh_thuong",
+        score: prediction.negative_score,
+        ms: 0.2,
+      }];
+    },
     comments: {
       async list(filters = {}) {
         await wait();

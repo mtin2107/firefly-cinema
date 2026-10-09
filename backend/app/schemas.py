@@ -323,3 +323,23 @@ class AdminCommentStats(BaseModel):
     fp: int
     tn: int
     fn: int
+
+
+class AdminPredictIn(BaseModel):
+    text: str = Field(max_length=1000)
+
+    @field_validator("text")
+    @classmethod
+    def validate_text(cls, value: str) -> str:
+        value = value.strip()
+        if not value:
+            raise PydanticCustomError("predict_text", "Nội dung cần chấm điểm không được để trống.")
+        return value
+
+
+class AdminPredictionOut(BaseModel):
+    model: str
+    version: str
+    label: Literal["binh_thuong", "tieu_cuc"]
+    score: float
+    ms: float

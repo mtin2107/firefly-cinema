@@ -22,18 +22,18 @@ Trước khi áp dụng workflow: giao diện React đầy đủ (`giao-dien-v1`
 
 ## 4. Current Project Status
 ```
-Overall Status: READY_FOR_NEXT_TASK
-Phase: T00, T01, T02, T03, T04, T05, T06 DONE/CLOSED
-Current Active Task: NONE
-Next Task: NOT SELECTED / NOT AUTHORIZED
+Overall Status: PO_APPROVED / PENDING_MERGE
+Phase: T00, T01, T02, T03, T04, T05, T06 DONE/CLOSED; T07 PO_APPROVED / PENDING_MERGE
+Current Active Task: T07 — Đa mô hình và trang So sánh mô hình
+Next Task: PO merge T07 vào master và tag `admin-v1`; T08 PLANNED / NOT AUTHORIZED
 Ngày bắt đầu sản phẩm: 05/10/2026 · Hạn: 01/11/2026
 ```
 
 ## 5. Current Active Task
-**NONE.** T06 đã **DONE / CLOSED** sau khi PO APPROVED và merge được xác minh tại `81330c2`. Claude Round 2: PASS_WITH_TODO; AC 8/8 PASS; hồi quy 7/7 PASS; RF-01 CLOSED; Required Fixes 0; TODO 6/6 DISPOSITIONED. T07 vẫn PLANNED / NOT AUTHORIZED.
+**T07 — Đa mô hình và trang So sánh mô hình: PO_APPROVED / PENDING_MERGE (09/10/2026).** PO chấp nhận Claude Round 2 **PASS_WITH_TODO**, AC 8/8 PASS, DoD MET, RF-01 CLOSED, Open Required Fixes 0, blocker 0. Sáu TODO đã disposition: TODO-01 → T08/T09/T10 (giữ checkpoint backend), TODO-02/03/04 → T11, TODO-05 → T10, TODO-06 ACCEPT_WITH_NOTES. Không TODO nào chặn merge. Evidence: `reports/2026-10-09/po_review_T07_APPROVED_2026-10-09.md`.
 
 ## 6. Current Task Record
-Không có task active. T06 đã **DONE / CLOSED**; `docs/tasks/T06.md` còn header PLANNED như snapshot được PO chấp nhận tại TODO-06, còn file điều phối này là nguồn trạng thái vận hành.
+Task Record hiện hành: `docs/tasks/T07.md`. T06 giữ **DONE / CLOSED**.
 
 ## 7. Roadmap và trạng thái
 
@@ -46,8 +46,8 @@ Không có task active. T06 đã **DONE / CLOSED**; `docs/tasks/T06.md` còn hea
 | T04 | Quản lý phim (admin) | Web | 2 | — | [T04.md](tasks/T04.md) | DONE / CLOSED (Claude PASS_WITH_TODO; PO APPROVED; AC 7/7; RF 0; blocker 0; SD-01/SD-02 approved retroactively; merge `fced3d7`) |
 | T05 | Quản lý suất chiếu (admin) | Web | 2 | T04 | [T05.md](tasks/T05.md) | DONE / CLOSED (Claude Round 2 PASS_WITH_TODO; AC 8/8 PASS; DoD MET; RF-01 CLOSED; RF mở 0; PO APPROVED; merge `54a3715`; T05_MERGE_VERIFIED) |
 | T06 | Kiểm duyệt có người duyệt (đổi schema) | Web | 2 | — | [T06.md](tasks/T06.md) | DONE / CLOSED (Claude Round 2 PASS_WITH_TODO; PO APPROVED; AC 8/8; hồi quy 7/7; RF-01 CLOSED; RF mở 0; TODO 6/6 dispositioned; merge `81330c2`; T06_MERGE_VERIFIED) |
-| T07 | Đa mô hình và trang So sánh mô hình | Web + ML | 2 | T01 | [T07.md](tasks/T07.md) | PLANNED / NOT AUTHORIZED |
-| T08 | Đo lệch miền điện thoại → phim | ML | 3 | T02, T03 | [T08.md](tasks/T08.md) | PLANNED |
+| T07 | Đa mô hình và trang So sánh mô hình | Web + ML | 2 | T01 | [T07.md](tasks/T07.md) | PO_APPROVED / PENDING_MERGE (Claude Round 2 PASS_WITH_TODO; AC 8/8; DoD MET; RF-01 CLOSED; RF mở 0; TODO 6/6 dispositioned) |
+| T08 | Đo lệch miền điện thoại → phim | ML | 3 | T02, T03 | [T08.md](tasks/T08.md) | PLANNED / NOT AUTHORIZED |
 | T09 | Train PhoBERT phần B | ML | 3 | T08 | [T09.md](tasks/T09.md) | PLANNED |
 | T10 | Gắn model B vào web | Web | 3 | T07, T09 | [T10.md](tasks/T10.md) | PLANNED |
 | T11 | Kiểm thử tự động và sửa lỗi | Web | 4 | T04–T10 | [T11.md](tasks/T11.md) | PLANNED |
@@ -68,7 +68,8 @@ Nếu trễ: cắt T14 → T15 → rút gọn T05. Không cắt T01–T03, T07�
 - Q2: **RESOLVED 08/10/2026 — NO ALEMBIC / BACKUP_BEFORE_RESET.** Sao lưu và xác minh đúng database trước khi PO tự reset; Codex không tự xóa database thật.
 
 ## 9. Open Required Fixes
-- **Open Required Fixes: 0.** T06 RF-01 (Medium) **CLOSED / VERIFIED BY CLAUDE**: fix commit `8ef57ad` (`isinstance(value, str)` trước membership); Claude probe độc lập trên DB tạm `action` list/dict/123/true/null/"delete" và 4 ca thêm đều trả 422 đúng câu, dữ liệu không đổi; uvicorn thật cũng trả 422. Evidence: `reports/2026-10-09/claude_review_T06_round2_PASS_WITH_TODO_2026-10-09.md`.
+- **Open Required Fixes: 0.** T07 RF-01 (Medium) **CLOSED / VERIFIED BY CLAUDE**: fix `06fbd3d` bỏ `min_length=1`; Claude probe độc lập trên uvicorn thật + DB tạm: ba dạng chuỗi rỗng 422 đúng câu tiếng Việt, biên 1.000/1.001, 401/403, contract và health giữ nguyên (12/12). Evidence: `reports/2026-10-09/claude_review_T07_round2_PASS_WITH_TODO_2026-10-09.md`.
+- T06 RF-01 (Medium) **CLOSED / VERIFIED BY CLAUDE**: fix commit `8ef57ad` (`isinstance(value, str)` trước membership); Claude probe độc lập trên DB tạm `action` list/dict/123/true/null/"delete" và 4 ca thêm đều trả 422 đúng câu, dữ liệu không đổi; uvicorn thật cũng trả 422. Evidence: `reports/2026-10-09/claude_review_T06_round2_PASS_WITH_TODO_2026-10-09.md`.
 - T05 RF-01 (High) **CLOSED** — Claude Round 2 xác minh độc lập: fix commit `f5fca8d`; fresh real/mock đều có đủ 9 phim mỗi ngày, hot_week đủ 9, 0 cặp chồng, restart giữ nguyên suất admin/booking. Evidence: `reports/2026-10-08/codex_fix_T05_round1_2026-10-08.md`.
 
 Đã đóng: T04 RF 0; RF-01, RF-02 của T02 CLOSED (Claude review vòng 2); RF-01 → RF-03 của T00 đã đóng; T01 không có RF.
@@ -125,10 +126,16 @@ Nếu trễ: cắt T14 → T15 → rút gọn T05. Không cắt T01–T03, T07�
 | Claude review T06 r2 | TODO-04 câu chữ khi admin đổi nhãn hoặc model đánh giá tiêu cực | ACCEPT_LATER → T12 |
 | Claude review T06 r2 | TODO-05 dữ liệu kiểm thử trong database trước khi chuẩn bị demo | ACCEPT_LATER → T12 — phải backup, không tự xóa DB |
 | Claude review T06 r2 | TODO-06 Task Record còn ghi PLANNED; API không thêm undo review/audit hide-unhide | ACCEPT_WITH_NOTES — coordination là nguồn trạng thái hoạt động; chấp nhận phạm vi API hiện có |
+| Claude review T07 | TODO-01 (Medium, demo) câu mẫu "lê thê": PhoBERT backend 0,0485 (bình thường), research `phobert_A_best` 0,9602 | ACCEPT_LATER → T08/T09/T10 — giữ checkpoint backend hiện tại; không thay model trong T07 |
+| Claude review T07 | TODO-02 `/api/admin/predict` không cô lập exception từng model (một model lỗi → 500) | ACCEPT_LATER → T11 |
+| Claude review T07 | TODO-03 health công khai trả lỗi thô (đường dẫn tuyệt đối, `"110"` khi joblib hỏng) | ACCEPT_LATER → T11 |
+| Claude review T07 | TODO-04 422 thiếu/sai kiểu/quá 1.000 ký tự còn câu Pydantic tiếng Anh | ACCEPT_LATER → T11 |
+| Claude review T07 | TODO-05 health không có trường `ACTIVE_MODEL` được yêu cầu khi fallback | ACCEPT_LATER → T10 |
+| Claude review T07 | TODO-06 report Codex ghi AC-05 PASS khi chưa thử `""` | ACCEPT_WITH_NOTES — fix report/Round 2 đã kiểm đủ; task sau phải kiểm ca biên trước khi ghi PASS |
 
 ## 11. Current Next Step
-1. T06 đã **DONE / CLOSED**; toàn bộ tip `task/T06-kiem-duyet` nằm trong lịch sử `master` qua merge `81330c2`.
-2. **Next Task: NOT SELECTED / NOT AUTHORIZED.** T07 giữ **PLANNED / NOT AUTHORIZED**; không tự tạo branch, mở hoặc authorize task tiếp theo.
+1. Tín tự merge `task/T07-da-mo-hinh` vào `master`, tag `admin-v1`, rồi xác minh lịch sử merge trước khi closure T07.
+2. T08 giữ PLANNED / NOT AUTHORIZED cho tới khi T07 hoàn tất closure và PO ủy quyền riêng. Codex/Claude không tự merge/tag/đóng T07 hoặc mở T08.
 
 ## 12. Active Timeline
 | Ngày | Ai | Sự kiện |
@@ -194,3 +201,9 @@ Nếu trễ: cắt T14 → T15 → rút gọn T05. Không cắt T01–T03, T07�
 | 09/10/2026 | Tín | PO review T06: **APPROVED**; Claude Round 2 PASS_WITH_TODO, AC 8/8 PASS, hồi quy 7/7 PASS, RF-01 CLOSED / VERIFIED BY CLAUDE, RF mở 0, blocker 0, DoD MET theo quyết định PO. TODO-01→T11, TODO-02→T11, TODO-03→T11 / RISK ACKNOWLEDGED, TODO-04→T12, TODO-05→T12 có backup/không tự xóa DB, TODO-06 ACCEPT_WITH_NOTES. T06 `PO_REVIEW` → `PO_APPROVED / PENDING_MERGE`; T07 giữ PLANNED / NOT AUTHORIZED |
 | 09/10/2026 | Tín | Merge T06 vào `master` tại `81330c2`; merge commit có hai parent `0b244b0` và `bf12674`; toàn bộ lịch sử `task/T06-kiem-duyet` và PO report đã nằm trong `master` (`T06_MERGE_VERIFIED`) |
 | 09/10/2026 | Codex | Final closure sync: T06 → DONE / CLOSED; Overall Status → READY_FOR_NEXT_TASK; Current Active Task → NONE; Next Task → NOT SELECTED / NOT AUTHORIZED. TODO deferred giữ ở T11/T12, không ghi RESOLVED; T07 giữ PLANNED / NOT AUTHORIZED |
+| 09/10/2026 | Codex | PO authorize T07 `APPROVED / READY_FOR_HANDOFF`; pre-flight PASS: đúng branch, tree sạch, `master` chứa `81330c2`, T01 CLOSED, đủ `svm_A.joblib`/LR/NB, xác định môi trường artifact scikit-learn 1.7.2 + joblib 1.5.2 và hai checkpoint PhoBERT; T07 → `IN_PROGRESS`, T06 giữ DONE/CLOSED. |
+| 09/10/2026 | Codex | T07 implementation `e84820d`: registry PhoBERT/SVM/LR/NB + fallback, admin predict/health, trang so sánh real/mock và tài liệu; AC 8/8 DEV PASS, hồi quy 7/7, full gates/security/scope/secret PASS; RF 0, blocker 0, TODO chặn 0; T07 `IN_PROGRESS` → `CLAUDE_REVIEW`. |
+| 09/10/2026 | Claude | Review T07 độc lập (uvicorn thật trên DB tạm, bản chép joblib đổi tên; DB thật/artifact giữ nguyên checksum): AC-01/02/03/04/06/07/08 PASS — parity T02 10 câu lệch ≤ 4,9e-5 và 2.224 câu test khớp tuyệt đối F1 T02, fallback/`ACTIVE_MODEL=svm` đúng, real/mock 375px, hồi quy 7/7, scope/secret/gate đạt; **FAIL** do RF-01 (Medium, AC-05: `text` rỗng → 422 tiếng Anh). T07 `CLAUDE_REVIEW` → `FIX_LOOP`; 6 TODO không chặn; không mở T08 |
+| 09/10/2026 | Codex | Fix Loop Round 1: sửa duy nhất production file `backend/app/schemas.py` tại `06fbd3d`; `""`/khoảng trắng/newline-tab đều 422 câu tiếng Việt, biên 1.000/1.001, 401/403/admin contract/health đạt; compile/build/startup/scope/secret PASS trên DB tạm. RF-01 DEV FIXED, Open RF 0 pending Claude; T07 `FIX_LOOP` → `CLAUDE_REVIEW` Round 2 pending; không xử lý 6 TODO, không mở T08. |
+| 09/10/2026 | Claude | Review T07 Round 2 độc lập (uvicorn thật + DB tạm; DB thật/artifact giữ nguyên checksum): RF-01 **CLOSED / VERIFIED** (`""`, khoảng trắng, newline/tab → 422 tiếng Việt; 1.000/1.001; 401/403; contract 5 key; health 4 model; 12/12); compile/build (bundle hash không đổi)/diff-check/scope/secret đạt; AC 8/8, DoD MET; **PASS_WITH_TODO** (6 TODO Round 1 giữ nguyên chờ PO). T07 `CLAUDE_REVIEW` → `PO_REVIEW`; T08 giữ PLANNED / NOT AUTHORIZED |
+| 09/10/2026 | Tín | PO review T07: **APPROVED**; chấp nhận Claude Round 2 PASS_WITH_TODO, AC 8/8, DoD MET, RF-01 CLOSED, RF mở 0, blocker 0. TODO-01→T08/T09/T10 và giữ checkpoint backend; TODO-02/03/04→T11; TODO-05→T10; TODO-06 ACCEPT_WITH_NOTES. T07 → `PO_APPROVED / PENDING_MERGE`; T08 giữ PLANNED / NOT AUTHORIZED. |

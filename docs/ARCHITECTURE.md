@@ -178,6 +178,8 @@ Ngoài máy: Google Drive `MyDrive/thesis/data/…`, `MyDrive/thesis_results/…
 - Không sửa `normalize()` khi chưa đo lại F1 trên test và ghi vào model card.
 - Nhãn `1 = tieu_cuc`, ngưỡng mặc định `NEGATIVE_THRESHOLD=0.5`.
 - Thiếu file model ⇒ web vẫn chạy (fallback keyword hoặc bỏ qua model đó), `/api/health` báo lỗi rõ.
+- Registry nạp PhoBERT và các pipeline được khai báo trong `SKLEARN_MODELS`; `ACTIVE_MODEL` chọn model chấm bình luận mới. Nếu model active lỗi, thứ tự fallback là PhoBERT rồi keyword.
+- `POST /api/admin/predict` chạy các model đã nạp trên cùng `normalize()` và chỉ dành cho admin. Điểm SVM là sigmoid của `decision_function`, không phải xác suất đã hiệu chỉnh.
 
 ### 2.7. Quản trị suất chiếu
 - CRUD quản trị dùng `GET/POST /api/admin/showtimes` và `PUT/DELETE /api/admin/showtimes/{id}`; tất cả route dùng `require_admin`.

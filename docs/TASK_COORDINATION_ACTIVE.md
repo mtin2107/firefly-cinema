@@ -22,18 +22,18 @@ Trước khi áp dụng workflow: giao diện React đầy đủ (`giao-dien-v1`
 
 ## 4. Current Project Status
 ```
-Overall Status: READY_FOR_NEXT_TASK
-Phase: T00, T01, T02, T03, T04, T05, T06 DONE/CLOSED
-Current Active Task: NONE
-Next Task: NOT SELECTED / NOT AUTHORIZED
+Overall Status: IN_PROGRESS
+Phase: T00, T01, T02, T03, T04, T05, T06 DONE/CLOSED; T07 IN_PROGRESS
+Current Active Task: T07 — Đa mô hình và trang So sánh mô hình
+Next Task: T07 IN_PROGRESS
 Ngày bắt đầu sản phẩm: 05/10/2026 · Hạn: 01/11/2026
 ```
 
 ## 5. Current Active Task
-**NONE.** T06 đã **DONE / CLOSED** sau khi PO APPROVED và merge được xác minh tại `81330c2`. Claude Round 2: PASS_WITH_TODO; AC 8/8 PASS; hồi quy 7/7 PASS; RF-01 CLOSED; Required Fixes 0; TODO 6/6 DISPOSITIONED. T07 vẫn PLANNED / NOT AUTHORIZED.
+**T07 — Đa mô hình và trang So sánh mô hình: IN_PROGRESS (09/10/2026).** PO đã ủy quyền `APPROVED / READY_FOR_HANDOFF`; pre-flight PASS trên nhánh `task/T07-da-mo-hinh`, working tree sạch, `master` chứa merge T06 `81330c2`, dependency T01 CLOSED, đủ ba baseline artifact. Môi trường tạo artifact: scikit-learn 1.7.2 / joblib 1.5.2; backend venv cần cài đúng phiên bản theo T07. Backend dùng checkpoint `backend/models/phobert-binhluan`; notebook T02 dùng checkpoint gốc cho bảng chính và có cell đối chiếu riêng checkpoint backend.
 
 ## 6. Current Task Record
-Không có task active. T06 đã **DONE / CLOSED**; `docs/tasks/T06.md` còn header PLANNED như snapshot được PO chấp nhận tại TODO-06, còn file điều phối này là nguồn trạng thái vận hành.
+Task Record hiện hành: `docs/tasks/T07.md`. T06 giữ **DONE / CLOSED**.
 
 ## 7. Roadmap và trạng thái
 
@@ -46,7 +46,7 @@ Không có task active. T06 đã **DONE / CLOSED**; `docs/tasks/T06.md` còn hea
 | T04 | Quản lý phim (admin) | Web | 2 | — | [T04.md](tasks/T04.md) | DONE / CLOSED (Claude PASS_WITH_TODO; PO APPROVED; AC 7/7; RF 0; blocker 0; SD-01/SD-02 approved retroactively; merge `fced3d7`) |
 | T05 | Quản lý suất chiếu (admin) | Web | 2 | T04 | [T05.md](tasks/T05.md) | DONE / CLOSED (Claude Round 2 PASS_WITH_TODO; AC 8/8 PASS; DoD MET; RF-01 CLOSED; RF mở 0; PO APPROVED; merge `54a3715`; T05_MERGE_VERIFIED) |
 | T06 | Kiểm duyệt có người duyệt (đổi schema) | Web | 2 | — | [T06.md](tasks/T06.md) | DONE / CLOSED (Claude Round 2 PASS_WITH_TODO; PO APPROVED; AC 8/8; hồi quy 7/7; RF-01 CLOSED; RF mở 0; TODO 6/6 dispositioned; merge `81330c2`; T06_MERGE_VERIFIED) |
-| T07 | Đa mô hình và trang So sánh mô hình | Web + ML | 2 | T01 | [T07.md](tasks/T07.md) | PLANNED / NOT AUTHORIZED |
+| T07 | Đa mô hình và trang So sánh mô hình | Web + ML | 2 | T01 | [T07.md](tasks/T07.md) | IN_PROGRESS (PO APPROVED / READY_FOR_HANDOFF 09/10/2026; pre-flight PASS) |
 | T08 | Đo lệch miền điện thoại → phim | ML | 3 | T02, T03 | [T08.md](tasks/T08.md) | PLANNED |
 | T09 | Train PhoBERT phần B | ML | 3 | T08 | [T09.md](tasks/T09.md) | PLANNED |
 | T10 | Gắn model B vào web | Web | 3 | T07, T09 | [T10.md](tasks/T10.md) | PLANNED |
@@ -127,8 +127,8 @@ Nếu trễ: cắt T14 → T15 → rút gọn T05. Không cắt T01–T03, T07�
 | Claude review T06 r2 | TODO-06 Task Record còn ghi PLANNED; API không thêm undo review/audit hide-unhide | ACCEPT_WITH_NOTES — coordination là nguồn trạng thái hoạt động; chấp nhận phạm vi API hiện có |
 
 ## 11. Current Next Step
-1. T06 đã **DONE / CLOSED**; toàn bộ tip `task/T06-kiem-duyet` nằm trong lịch sử `master` qua merge `81330c2`.
-2. **Next Task: NOT SELECTED / NOT AUTHORIZED.** T07 giữ **PLANNED / NOT AUTHORIZED**; không tự tạo branch, mở hoặc authorize task tiếp theo.
+1. Thực hiện T07 đúng Task Record trên `task/T07-da-mo-hinh`; focused tests trước full gates.
+2. Chỉ chuyển T07 `IN_PROGRESS` → `CLAUDE_REVIEW` khi AC-01–AC-08, hồi quy 7 mục, security, scope và secret scan đều có bằng chứng.
 
 ## 12. Active Timeline
 | Ngày | Ai | Sự kiện |
@@ -194,3 +194,4 @@ Nếu trễ: cắt T14 → T15 → rút gọn T05. Không cắt T01–T03, T07�
 | 09/10/2026 | Tín | PO review T06: **APPROVED**; Claude Round 2 PASS_WITH_TODO, AC 8/8 PASS, hồi quy 7/7 PASS, RF-01 CLOSED / VERIFIED BY CLAUDE, RF mở 0, blocker 0, DoD MET theo quyết định PO. TODO-01→T11, TODO-02→T11, TODO-03→T11 / RISK ACKNOWLEDGED, TODO-04→T12, TODO-05→T12 có backup/không tự xóa DB, TODO-06 ACCEPT_WITH_NOTES. T06 `PO_REVIEW` → `PO_APPROVED / PENDING_MERGE`; T07 giữ PLANNED / NOT AUTHORIZED |
 | 09/10/2026 | Tín | Merge T06 vào `master` tại `81330c2`; merge commit có hai parent `0b244b0` và `bf12674`; toàn bộ lịch sử `task/T06-kiem-duyet` và PO report đã nằm trong `master` (`T06_MERGE_VERIFIED`) |
 | 09/10/2026 | Codex | Final closure sync: T06 → DONE / CLOSED; Overall Status → READY_FOR_NEXT_TASK; Current Active Task → NONE; Next Task → NOT SELECTED / NOT AUTHORIZED. TODO deferred giữ ở T11/T12, không ghi RESOLVED; T07 giữ PLANNED / NOT AUTHORIZED |
+| 09/10/2026 | Codex | PO authorize T07 `APPROVED / READY_FOR_HANDOFF`; pre-flight PASS: đúng branch, tree sạch, `master` chứa `81330c2`, T01 CLOSED, đủ `svm_A.joblib`/LR/NB, xác định môi trường artifact scikit-learn 1.7.2 + joblib 1.5.2 và hai checkpoint PhoBERT; T07 → `IN_PROGRESS`, T06 giữ DONE/CLOSED. |

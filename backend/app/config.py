@@ -16,6 +16,13 @@ DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///./firefly.db")
 FRONTEND_ORIGINS = [o.strip() for o in os.getenv("FRONTEND_ORIGIN", "http://localhost:5173").split(",")]
 
 MODEL_DIR = os.getenv("MODEL_DIR", "")
+ACTIVE_MODEL = os.getenv("ACTIVE_MODEL", "phobert").strip().lower()
+SKLEARN_MODELS = os.getenv(
+    "SKLEARN_MODELS",
+    "svm:../ml/artifacts/baselines/svm_A.joblib,"
+    "lr:../ml/artifacts/baselines/lr_A.joblib,"
+    "nb:../ml/artifacts/baselines/nb_A.joblib",
+)
 NEGATIVE_LABEL_ID = int(os.getenv("NEGATIVE_LABEL_ID", "1"))
 USE_WORD_SEGMENT = os.getenv("USE_WORD_SEGMENT", "false").lower() == "true"
 NEGATIVE_THRESHOLD = float(os.getenv("NEGATIVE_THRESHOLD", "0.5"))

@@ -107,6 +107,8 @@ Cấu hình trong `backend/.env`: `MODEL_DIR=models/phobert-binhluan`, `NEGATIVE
 | scikit-learn | 1.7.2 | TF-IDF word/character, MultinomialNB, LogisticRegression và LinearSVC |
 | joblib | 1.5.2 | Lưu và nạp toàn bộ pipeline vectorizer + classifier |
 
+Backend T07 ghim đúng `scikit-learn==1.7.2` và `joblib==1.5.2` để nạp artifact T01. Registry đọc `ACTIVE_MODEL` và `SKLEARN_MODELS`, giữ từng trạng thái nạp trong `/api/health`. LinearSVC không có `predict_proba`; điểm hiển thị được tính bằng `sigmoid(decision_function)` để cùng nằm trong khoảng 0–1, nhưng **không phải xác suất đã hiệu chỉnh**.
+
 T01 dùng `text_norm` và `has_negative` trên đúng split UIT-ViSFD của T00. Siêu tham số chỉ được chọn trên dev; test chỉ đánh giá các cấu hình cuối.
 
 ---

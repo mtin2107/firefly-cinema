@@ -1,6 +1,6 @@
 # PO Review — T09 — APPROVED — 09/10/2026
 
-> **BẢN NHÁP — CHỜ TÍN XÁC NHẬN.** Claude soạn hộ PO. Chưa phải quyết định chính thức cho đến khi Tín xác nhận trong chat.
+> **Product Owner (Tín) đã xác nhận APPROVED T09 ngày 09/10/2026** và chấp nhận toàn bộ 7/7 TODO disposition dưới đây. Claude soạn report theo ủy quyền của PO. TODO-02 vẫn **PENDING** và là điều kiện tiên quyết bắt buộc trước khi authorize T10.
 
 | Trường | Giá trị |
 |---|---|
@@ -107,3 +107,10 @@ Sau khi merge, phải xác minh lịch sử T09 đã nằm trong `master` rồi 
 ## 8. Task kế tiếp
 
 T10 giữ **PLANNED / NOT AUTHORIZED**. Ngoài quyết định riêng của PO, T10 còn có điều kiện tiên quyết là TODO-02 (mục 4) phải hoàn tất.
+
+## 9. Ghi nhận merge và closure
+
+- PO merge T09 vào `master` tại `27c364e` (hai parent: `6c4b8de` và tip T09 `273cc2d`). PO report commit `d79b97a`.
+- Merge verification: **PASS**. `git merge-base --is-ancestor task/T09-phobert-B master` trả exit code 0.
+- T09 → **DONE / CLOSED**. Tag `phobert-B` chưa gắn; sẽ gắn cùng T10.
+- TODO-02 vẫn **PENDING / REQUIRED BEFORE T10**. Các TODO deferred giữ nguyên disposition, chưa RESOLVED.

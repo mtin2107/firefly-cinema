@@ -22,18 +22,18 @@ Trước khi áp dụng workflow: giao diện React đầy đủ (`giao-dien-v1`
 
 ## 4. Current Project Status
 ```
-Overall Status: READY_FOR_NEXT_TASK
-Phase: T00–T07 DONE / CLOSED
-Current Active Task: NONE
-Next Task: NOT SELECTED / NOT AUTHORIZED
+Overall Status: CLAUDE_REVIEW
+Phase: T08 — Đo lệch miền điện thoại → phim
+Current Active Task: T08
+Next Task: T09 PLANNED / NOT AUTHORIZED
 Ngày bắt đầu sản phẩm: 05/10/2026 · Hạn: 01/11/2026
 ```
 
 ## 5. Current Active Task
-**NONE.** T07 đã **DONE / CLOSED** sau Claude Round 2 PASS_WITH_TODO, PO APPROVED, merge `434a489` và tag `admin-v1` được xác minh (`T07_MERGE_VERIFIED`). AC 8/8, hồi quy 7/7, DoD MET, RF-01 CLOSED / VERIFIED BY CLAUDE, Open Required Fixes 0, blocker 0, TODO 6/6 dispositioned.
+**T08 — Đo lệch miền điện thoại → phim: CLAUDE_REVIEW.** Implementation hoàn tất trên `task/T08-lech-mien`: clean notebook run PASS; AC-01→AC-05 DEV PASS; CSV 8 dòng, PNG và 20 lỗi đủ; phone parity max `4,92e-07`; delta movie `0,062793–0,080440`; gate scope/secret/large-file PASS. Chờ Claude review độc lập; Codex không tự PASS task.
 
 ## 6. Current Task Record
-Không có task active. T07 đã **DONE / CLOSED**; `docs/tasks/T07.md` giữ nguyên snapshot Task Record. T08 vẫn **PLANNED / NOT AUTHORIZED**.
+`docs/tasks/T08.md` giữ nguyên snapshot Task Record. Implementation report: `reports/2026-10-09/codex_implementation_T08_2026-10-09.md`. Trạng thái: **CLAUDE_REVIEW**.
 
 ## 7. Roadmap và trạng thái
 
@@ -47,7 +47,7 @@ Không có task active. T07 đã **DONE / CLOSED**; `docs/tasks/T07.md` giữ ng
 | T05 | Quản lý suất chiếu (admin) | Web | 2 | T04 | [T05.md](tasks/T05.md) | DONE / CLOSED (Claude Round 2 PASS_WITH_TODO; AC 8/8 PASS; DoD MET; RF-01 CLOSED; RF mở 0; PO APPROVED; merge `54a3715`; T05_MERGE_VERIFIED) |
 | T06 | Kiểm duyệt có người duyệt (đổi schema) | Web | 2 | — | [T06.md](tasks/T06.md) | DONE / CLOSED (Claude Round 2 PASS_WITH_TODO; PO APPROVED; AC 8/8; hồi quy 7/7; RF-01 CLOSED; RF mở 0; TODO 6/6 dispositioned; merge `81330c2`; T06_MERGE_VERIFIED) |
 | T07 | Đa mô hình và trang So sánh mô hình | Web + ML | 2 | T01 | [T07.md](tasks/T07.md) | DONE / CLOSED (Claude Round 2 PASS_WITH_TODO; AC 8/8; hồi quy 7/7; DoD MET; RF-01 CLOSED; RF mở 0; blocker 0; TODO 6/6 dispositioned; merge `434a489`; tag `admin-v1`; T07_MERGE_VERIFIED) |
-| T08 | Đo lệch miền điện thoại → phim | ML | 3 | T02, T03 | [T08.md](tasks/T08.md) | PLANNED / NOT AUTHORIZED |
+| T08 | Đo lệch miền điện thoại → phim | ML | 3 | T02, T03 | [T08.md](tasks/T08.md) | CLAUDE_REVIEW (AC 5/5 DEV PASS; clean-run/gates PASS; chờ review độc lập) |
 | T09 | Train PhoBERT phần B | ML | 3 | T08 | [T09.md](tasks/T09.md) | PLANNED |
 | T10 | Gắn model B vào web | Web | 3 | T07, T09 | [T10.md](tasks/T10.md) | PLANNED |
 | T11 | Kiểm thử tự động và sửa lỗi | Web | 4 | T04–T10 | [T11.md](tasks/T11.md) | PLANNED |
@@ -134,8 +134,8 @@ Nếu trễ: cắt T14 → T15 → rút gọn T05. Không cắt T01–T03, T07�
 | Claude review T07 | TODO-06 report Codex ghi AC-05 PASS khi chưa thử `""` | ACCEPT_WITH_NOTES — fix report/Round 2 đã kiểm đủ; task sau phải kiểm ca biên trước khi ghi PASS |
 
 ## 11. Current Next Step
-1. T07 đã **DONE / CLOSED**; merge `434a489` và tag `admin-v1` đã xác minh (`T07_MERGE_VERIFIED`).
-2. **Next Task: NOT SELECTED / NOT AUTHORIZED.** T08 giữ **PLANNED / NOT AUTHORIZED**; không tạo branch, authorize hoặc bắt đầu implementation.
+1. Claude review độc lập T08 theo report, notebook, CSV, PNG và error analysis; ưu tiên tái lập ba baseline trên CPU và consistency checks.
+2. T09 tiếp tục **PLANNED / NOT AUTHORIZED**; không mở cho tới khi workflow T08 cho phép.
 
 ## 12. Active Timeline
 | Ngày | Ai | Sự kiện |
@@ -209,3 +209,5 @@ Nếu trễ: cắt T14 → T15 → rút gọn T05. Không cắt T01–T03, T07�
 | 09/10/2026 | Tín | PO review T07: **APPROVED**; chấp nhận Claude Round 2 PASS_WITH_TODO, AC 8/8, DoD MET, RF-01 CLOSED, RF mở 0, blocker 0. TODO-01→T08/T09/T10 và giữ checkpoint backend; TODO-02/03/04→T11; TODO-05→T10; TODO-06 ACCEPT_WITH_NOTES. T07 → `PO_APPROVED / PENDING_MERGE`; T08 giữ PLANNED / NOT AUTHORIZED. |
 | 09/10/2026 | Tín | Merge T07 vào `master` tại `434a489`; merge commit có hai parent `6d1d4bb` và `245fab8`; toàn bộ lịch sử `task/T07-da-mo-hinh` và report PO/Claude đã nằm trong `master`; tag `admin-v1` trỏ đúng `434a489` (`T07_MERGE_VERIFIED`). |
 | 09/10/2026 | Codex | Final Closure Sync: T07 → DONE / CLOSED; Overall Status → READY_FOR_NEXT_TASK; Current Active Task → NONE; Next Task → NOT SELECTED / NOT AUTHORIZED. TODO deferred giữ disposition và chưa RESOLVED; T08 giữ PLANNED / NOT AUTHORIZED, không tạo branch hoặc bắt đầu implementation. |
+| 09/10/2026 | Codex | PO authorize T08 `APPROVED / READY_FOR_HANDOFF`; pre-flight PASS: đúng nhánh `task/T08-lech-mien`, tree sạch, baseline `5cf4eb0` chứa merge T07 `434a489`, T02/T03 CLOSED; đủ hai test set, checkpoint research canonical và ba baseline A; T08 → `IN_PROGRESS`, T09 giữ `PLANNED / NOT AUTHORIZED`. |
+| 09/10/2026 | Codex | Hoàn tất T08: notebook clean-run trên CPU có marker OK; normalize parity 20/20, CSV 4 model × 2 miền, phone parity max `4,92e-07`, 20 lỗi + PNG; delta F1 phim `0,062793–0,080440`, không có delta < 0,03; AC 5/5 DEV PASS, scope/secret/large-file PASS; T08 `IN_PROGRESS` → `CLAUDE_REVIEW`, T09 giữ `PLANNED / NOT AUTHORIZED`. |

@@ -22,18 +22,18 @@ Trước khi áp dụng workflow: giao diện React đầy đủ (`giao-dien-v1`
 
 ## 4. Current Project Status
 ```
-Overall Status: READY_FOR_NEXT_TASK
-Phase: T00–T08 DONE / CLOSED
-Current Active Task: NONE
-Next Task: NOT SELECTED / NOT AUTHORIZED
+Overall Status: IN_PROGRESS
+Phase: T09 — Train PhoBERT phần B
+Current Active Task: T09
+Next Task: T09 IN_PROGRESS
 Ngày bắt đầu sản phẩm: 05/10/2026 · Hạn: 01/11/2026
 ```
 
 ## 5. Current Active Task
-**NONE.** T08 đã **DONE / CLOSED** sau Claude PASS_WITH_TODO, PO APPROVED và merge `778675e` được xác minh (`T08_MERGE_VERIFIED`). AC 5/5 PASS, DoD MET, Open Required Fixes 0, blocker 0; TODO 5/5 đã disposition, deferred chưa RESOLVED.
+**T09 — Train PhoBERT phần B: IN_PROGRESS.** PO đã authorize `APPROVED / READY_FOR_HANDOFF` ngày 09/10/2026. Pre-flight PASS: đúng branch `task/T09-phobert-B`, working tree sạch, baseline `6c4b8de` trùng `master` và chứa merge T08 `778675e`; đủ movie train/test, phone train/dev/test, checkpoint research PhoBERT A và ba baseline A. T09 `READY_FOR_HANDOFF → IN_PROGRESS`.
 
 ## 6. Current Task Record
-Không có task active. T08 đã **DONE / CLOSED**; `docs/tasks/T08.md` giữ nguyên snapshot Task Record. Implementation, Claude review và PO report đều đã nằm trong `master` tại merge `778675e`.
+`docs/tasks/T09.md` là Task Record đã được PO authorize. Codex tạo notebook và kiểm tra phần local/CPU; Tín chạy GPU trên Colab, cung cấp output thật và xác minh artifact Drive. Chưa có evidence Colab thì không ghi AC PASS và không chuyển `CLAUDE_REVIEW`.
 
 ## 7. Roadmap và trạng thái
 
@@ -48,7 +48,7 @@ Không có task active. T08 đã **DONE / CLOSED**; `docs/tasks/T08.md` giữ ng
 | T06 | Kiểm duyệt có người duyệt (đổi schema) | Web | 2 | — | [T06.md](tasks/T06.md) | DONE / CLOSED (Claude Round 2 PASS_WITH_TODO; PO APPROVED; AC 8/8; hồi quy 7/7; RF-01 CLOSED; RF mở 0; TODO 6/6 dispositioned; merge `81330c2`; T06_MERGE_VERIFIED) |
 | T07 | Đa mô hình và trang So sánh mô hình | Web + ML | 2 | T01 | [T07.md](tasks/T07.md) | DONE / CLOSED (Claude Round 2 PASS_WITH_TODO; AC 8/8; hồi quy 7/7; DoD MET; RF-01 CLOSED; RF mở 0; blocker 0; TODO 6/6 dispositioned; merge `434a489`; tag `admin-v1`; T07_MERGE_VERIFIED) |
 | T08 | Đo lệch miền điện thoại → phim | ML | 3 | T02, T03 | [T08.md](tasks/T08.md) | DONE / CLOSED (Claude PASS_WITH_TODO; PO APPROVED; AC 5/5 PASS; DoD MET; RF 0; blocker 0; TODO 5/5 dispositioned, deferred chưa RESOLVED; merge `778675e`; T08_MERGE_VERIFIED) |
-| T09 | Train PhoBERT phần B | ML | 3 | T08 | [T09.md](tasks/T09.md) | PLANNED / NOT AUTHORIZED |
+| T09 | Train PhoBERT phần B | ML | 3 | T08 | [T09.md](tasks/T09.md) | IN_PROGRESS (PO AUTHORIZED; chờ implementation + Colab evidence) |
 | T10 | Gắn model B vào web | Web | 3 | T07, T09 | [T10.md](tasks/T10.md) | PLANNED |
 | T11 | Kiểm thử tự động và sửa lỗi | Web | 4 | T04–T10 | [T11.md](tasks/T11.md) | PLANNED |
 | T12 | Dữ liệu demo và kịch bản bảo vệ | Web | 4 | T10 | [T12.md](tasks/T12.md) | PLANNED |
@@ -141,8 +141,8 @@ Nếu trễ: cắt T14 → T15 → rút gọn T05. Không cắt T01–T03, T07�
 | Claude review T08 | TODO-05 (Info) PhoBERT nhạy với `normalize()` ở câu "lê thê" | **ACCEPT_LATER → T09/T10**; giữ `normalize()`, kiểm tra đồng nhất train/eval/runtime; chưa RESOLVED |
 
 ## 11. Current Next Step
-1. T08 đã **DONE / CLOSED**; merge `778675e` đã xác minh (`T08_MERGE_VERIFIED`).
-2. **Next Task: NOT SELECTED / NOT AUTHORIZED.** T09 tiếp tục **PLANNED / NOT AUTHORIZED**; không đặt READY_FOR_HANDOFF, không tạo nhánh và không bắt đầu implementation.
+1. Codex hoàn thiện `ml/notebooks/T09_phobert_B.ipynb`, kiểm tra local/CPU, chuẩn bị hướng dẫn Colab và các output Tín cần gửi lại.
+2. Tín chạy notebook trên Colab GPU từ runtime mới, cung cấp metric thật, notebook output và evidence Drive. T09 giữ `IN_PROGRESS` cho đến khi đủ evidence và gate.
 
 ## 12. Active Timeline
 | Ngày | Ai | Sự kiện |
@@ -222,3 +222,4 @@ Nếu trễ: cắt T14 → T15 → rút gọn T05. Không cắt T01–T03, T07�
 | 09/10/2026 | Tín | PO review T08: **APPROVED**; Claude PASS_WITH_TODO, AC 5/5 PASS, DoD MET theo quyết định PO, Open Required Fixes 0, blocker 0, CPU reproducibility 4/4 và artifact reproducibility 3/3. TODO 5/5 dispositioned: TODO-01→T09/khóa luận, TODO-02 ACCEPT_WITH_DISCLOSURE, TODO-03→T09/T13, TODO-04 ACCEPT_WITH_NOTES→T13, TODO-05→T09/T10; TODO deferred chưa RESOLVED. T08 → `PO_APPROVED / PENDING_MERGE`; T09 giữ `PLANNED / NOT AUTHORIZED`. |
 | 09/10/2026 | Tín | Merge T08 vào `master` tại `778675e`; merge commit có hai parent `5cf4eb0` và tip T08 `886cba8`; toàn bộ implementation `47e044e`, Claude review `621b75c`, PO report và artifact T08 nằm trong `master` (`T08_MERGE_VERIFIED`). |
 | 09/10/2026 | Codex | Final Closure Sync: T08 → DONE / CLOSED; Overall Status → READY_FOR_NEXT_TASK; Current Active Task → NONE; Next Task → NOT SELECTED / NOT AUTHORIZED. TODO 5/5 đã disposition, deferred chưa RESOLVED; T09 giữ PLANNED / NOT AUTHORIZED. |
+| 09/10/2026 | Tín + Codex | PO authorize T09 `APPROVED / READY_FOR_HANDOFF`; pre-flight PASS: đúng branch `task/T09-phobert-B`, tree sạch, baseline `6c4b8de` trùng `master` và chứa merge T08 `778675e`; đủ dữ liệu movie/phone, checkpoint research PhoBERT A và baseline T08/T01. T09 `READY_FOR_HANDOFF → IN_PROGRESS`. |

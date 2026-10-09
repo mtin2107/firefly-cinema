@@ -22,7 +22,7 @@ Trước khi áp dụng workflow: giao diện React đầy đủ (`giao-dien-v1`
 
 ## 4. Current Project Status
 ```
-Overall Status: CLAUDE_REVIEW
+Overall Status: PO_REVIEW
 Phase: T08 — Đo lệch miền điện thoại → phim
 Current Active Task: T08
 Next Task: T09 PLANNED / NOT AUTHORIZED
@@ -30,10 +30,10 @@ Ngày bắt đầu sản phẩm: 05/10/2026 · Hạn: 01/11/2026
 ```
 
 ## 5. Current Active Task
-**T08 — Đo lệch miền điện thoại → phim: CLAUDE_REVIEW.** Implementation hoàn tất trên `task/T08-lech-mien`: clean notebook run PASS; AC-01→AC-05 DEV PASS; CSV 8 dòng, PNG và 20 lỗi đủ; phone parity max `4,92e-07`; delta movie `0,062793–0,080440`; gate scope/secret/large-file PASS. Chờ Claude review độc lập; Codex không tự PASS task.
+**T08 — Đo lệch miền điện thoại → phim: PO_REVIEW.** Claude review **PASS_WITH_TODO** (`reports/2026-10-09/claude_review_T08_PASS_WITH_TODO_2026-10-09.md`): AC 5/5 PASS; RF 0; blocker 0; TODO 5 chờ PO disposition. Tái lập độc lập trên CPU cả 4 model (PhoBERT A research, SVM, LR, NB): lệch tối đa `4,92e-07`; CSV/MD/PNG tái tạo giống từng byte; 7 SHA-256 khớp; normalize parity 2.373/2.373; câu "lê thê" T08 khác câu T07 TODO-01 (không mâu thuẫn).
 
 ## 6. Current Task Record
-`docs/tasks/T08.md` giữ nguyên snapshot Task Record. Implementation report: `reports/2026-10-09/codex_implementation_T08_2026-10-09.md`. Trạng thái: **CLAUDE_REVIEW**.
+`docs/tasks/T08.md` giữ nguyên snapshot Task Record. Implementation report: `reports/2026-10-09/codex_implementation_T08_2026-10-09.md`. Claude review: `reports/2026-10-09/claude_review_T08_PASS_WITH_TODO_2026-10-09.md`. Trạng thái: **PO_REVIEW**.
 
 ## 7. Roadmap và trạng thái
 
@@ -47,7 +47,7 @@ Ngày bắt đầu sản phẩm: 05/10/2026 · Hạn: 01/11/2026
 | T05 | Quản lý suất chiếu (admin) | Web | 2 | T04 | [T05.md](tasks/T05.md) | DONE / CLOSED (Claude Round 2 PASS_WITH_TODO; AC 8/8 PASS; DoD MET; RF-01 CLOSED; RF mở 0; PO APPROVED; merge `54a3715`; T05_MERGE_VERIFIED) |
 | T06 | Kiểm duyệt có người duyệt (đổi schema) | Web | 2 | — | [T06.md](tasks/T06.md) | DONE / CLOSED (Claude Round 2 PASS_WITH_TODO; PO APPROVED; AC 8/8; hồi quy 7/7; RF-01 CLOSED; RF mở 0; TODO 6/6 dispositioned; merge `81330c2`; T06_MERGE_VERIFIED) |
 | T07 | Đa mô hình và trang So sánh mô hình | Web + ML | 2 | T01 | [T07.md](tasks/T07.md) | DONE / CLOSED (Claude Round 2 PASS_WITH_TODO; AC 8/8; hồi quy 7/7; DoD MET; RF-01 CLOSED; RF mở 0; blocker 0; TODO 6/6 dispositioned; merge `434a489`; tag `admin-v1`; T07_MERGE_VERIFIED) |
-| T08 | Đo lệch miền điện thoại → phim | ML | 3 | T02, T03 | [T08.md](tasks/T08.md) | CLAUDE_REVIEW (AC 5/5 DEV PASS; clean-run/gates PASS; chờ review độc lập) |
+| T08 | Đo lệch miền điện thoại → phim | ML | 3 | T02, T03 | [T08.md](tasks/T08.md) | PO_REVIEW (Claude PASS_WITH_TODO; AC 5/5; RF 0; blocker 0; TODO 5 chờ PO) |
 | T09 | Train PhoBERT phần B | ML | 3 | T08 | [T09.md](tasks/T09.md) | PLANNED |
 | T10 | Gắn model B vào web | Web | 3 | T07, T09 | [T10.md](tasks/T10.md) | PLANNED |
 | T11 | Kiểm thử tự động và sửa lỗi | Web | 4 | T04–T10 | [T11.md](tasks/T11.md) | PLANNED |
@@ -132,10 +132,15 @@ Nếu trễ: cắt T14 → T15 → rút gọn T05. Không cắt T01–T03, T07�
 | Claude review T07 | TODO-04 422 thiếu/sai kiểu/quá 1.000 ký tự còn câu Pydantic tiếng Anh | ACCEPT_LATER → T11 |
 | Claude review T07 | TODO-05 health không có trường `ACTIVE_MODEL` được yêu cầu khi fallback | ACCEPT_LATER → T10 |
 | Claude review T07 | TODO-06 report Codex ghi AC-05 PASS khi chưa thử `""` | ACCEPT_WITH_NOTES — fix report/Round 2 đã kiểm đủ; task sau phải kiểm ca biên trước khi ghi PASS |
+| Claude review T08 | TODO-01 (Medium) F1_neg movie bị đẩy lên do tỷ lệ tiêu cực 67,8% (bộ phân loại hằng đạt 0,808); cần trình bày kèm Δ Macro-F1 0,09–0,19 | Chờ PO |
+| Claude review T08 | TODO-02 (Low) movie test 149 câu: CI 95% ΔF1_neg cận dưới 0,010–0,023 (< 0,03); hướng lệch vững | Chờ PO |
+| Claude review T08 | TODO-03 (Low) notebook chỉ chạy khi cwd = gốc repo hoặc `/content/firefly-cinema` (kế thừa T02) | Chờ PO |
+| Claude review T08 | TODO-04 (Low) notebook không lưu output, hash chỉ in không assert, chưa có đường dẫn Drive, report không ghi cách ghép môi trường | Chờ PO |
+| Claude review T08 | TODO-05 (Info) PhoBERT rất nhạy với `normalize()` ở câu "lê thê" (research 0,977 → 0,388); lưu ý cho T09/T10 | Chờ PO |
 
 ## 11. Current Next Step
-1. Claude review độc lập T08 theo report, notebook, CSV, PNG và error analysis; ưu tiên tái lập ba baseline trên CPU và consistency checks.
-2. T09 tiếp tục **PLANNED / NOT AUTHORIZED**; không mở cho tới khi workflow T08 cho phép.
+1. Tín PO review T08 theo `reports/2026-10-09/claude_review_T08_PASS_WITH_TODO_2026-10-09.md`; disposition TODO-01→05; nếu APPROVED thì tự merge `task/T08-lech-mien` vào `master` (T08 không có tag mốc).
+2. T09 tiếp tục **PLANNED / NOT AUTHORIZED** cho tới quyết định PO; Claude không đặt READY_FOR_HANDOFF và không soạn prompt T09 theo chỉ thị PO.
 
 ## 12. Active Timeline
 | Ngày | Ai | Sự kiện |
@@ -211,3 +216,4 @@ Nếu trễ: cắt T14 → T15 → rút gọn T05. Không cắt T01–T03, T07�
 | 09/10/2026 | Codex | Final Closure Sync: T07 → DONE / CLOSED; Overall Status → READY_FOR_NEXT_TASK; Current Active Task → NONE; Next Task → NOT SELECTED / NOT AUTHORIZED. TODO deferred giữ disposition và chưa RESOLVED; T08 giữ PLANNED / NOT AUTHORIZED, không tạo branch hoặc bắt đầu implementation. |
 | 09/10/2026 | Codex | PO authorize T08 `APPROVED / READY_FOR_HANDOFF`; pre-flight PASS: đúng nhánh `task/T08-lech-mien`, tree sạch, baseline `5cf4eb0` chứa merge T07 `434a489`, T02/T03 CLOSED; đủ hai test set, checkpoint research canonical và ba baseline A; T08 → `IN_PROGRESS`, T09 giữ `PLANNED / NOT AUTHORIZED`. |
 | 09/10/2026 | Codex | Hoàn tất T08: notebook clean-run trên CPU có marker OK; normalize parity 20/20, CSV 4 model × 2 miền, phone parity max `4,92e-07`, 20 lỗi + PNG; delta F1 phim `0,062793–0,080440`, không có delta < 0,03; AC 5/5 DEV PASS, scope/secret/large-file PASS; T08 `IN_PROGRESS` → `CLAUDE_REVIEW`, T09 giữ `PLANNED / NOT AUTHORIZED`. |
+| 09/10/2026 | Claude | Review độc lập T08: **PASS_WITH_TODO**; AC 5/5; RF 0; blocker 0; TODO 5 chờ PO. Tái lập CPU 4/4 model lệch ≤ `4,92e-07`, 3 artifact byte-identical, hash/normalize/scope/secret/large-file PASS. T08 `CLAUDE_REVIEW` → `PO_REVIEW`; T09 giữ `PLANNED / NOT AUTHORIZED`. |

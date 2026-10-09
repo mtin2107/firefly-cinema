@@ -22,15 +22,15 @@ Trước khi áp dụng workflow: giao diện React đầy đủ (`giao-dien-v1`
 
 ## 4. Current Project Status
 ```
-Overall Status: IN_PROGRESS
-Phase: T00, T01, T02, T03, T04, T05, T06 DONE/CLOSED; T07 IN_PROGRESS
+Overall Status: CLAUDE_REVIEW
+Phase: T00, T01, T02, T03, T04, T05, T06 DONE/CLOSED; T07 CLAUDE_REVIEW
 Current Active Task: T07 — Đa mô hình và trang So sánh mô hình
-Next Task: T07 IN_PROGRESS
+Next Task: T07 CLAUDE_REVIEW
 Ngày bắt đầu sản phẩm: 05/10/2026 · Hạn: 01/11/2026
 ```
 
 ## 5. Current Active Task
-**T07 — Đa mô hình và trang So sánh mô hình: IN_PROGRESS (09/10/2026).** PO đã ủy quyền `APPROVED / READY_FOR_HANDOFF`; pre-flight PASS trên nhánh `task/T07-da-mo-hinh`, working tree sạch, `master` chứa merge T06 `81330c2`, dependency T01 CLOSED, đủ ba baseline artifact. Môi trường tạo artifact: scikit-learn 1.7.2 / joblib 1.5.2; backend venv cần cài đúng phiên bản theo T07. Backend dùng checkpoint `backend/models/phobert-binhluan`; notebook T02 dùng checkpoint gốc cho bảng chính và có cell đối chiếu riêng checkpoint backend.
+**T07 — Đa mô hình và trang So sánh mô hình: CLAUDE_REVIEW (09/10/2026).** Implementation commit `e84820d`; AC-01–AC-08 DEV PASS, hồi quy 7/7 PASS, compile/build/startup/health/security/scope/secret PASS. Đủ PhoBERT/SVM/LR/NB; probe thiếu SVM fallback đúng; 10 câu đối chiếu T02 lệch score tối đa <0,00005; `normalize()` không đổi; browser real/mock responsive đạt. Required Fixes 0, blocker 0, TODO chặn handoff 0. Evidence: `reports/2026-10-09/codex_implementation_T07_2026-10-09.md`.
 
 ## 6. Current Task Record
 Task Record hiện hành: `docs/tasks/T07.md`. T06 giữ **DONE / CLOSED**.
@@ -46,7 +46,7 @@ Task Record hiện hành: `docs/tasks/T07.md`. T06 giữ **DONE / CLOSED**.
 | T04 | Quản lý phim (admin) | Web | 2 | — | [T04.md](tasks/T04.md) | DONE / CLOSED (Claude PASS_WITH_TODO; PO APPROVED; AC 7/7; RF 0; blocker 0; SD-01/SD-02 approved retroactively; merge `fced3d7`) |
 | T05 | Quản lý suất chiếu (admin) | Web | 2 | T04 | [T05.md](tasks/T05.md) | DONE / CLOSED (Claude Round 2 PASS_WITH_TODO; AC 8/8 PASS; DoD MET; RF-01 CLOSED; RF mở 0; PO APPROVED; merge `54a3715`; T05_MERGE_VERIFIED) |
 | T06 | Kiểm duyệt có người duyệt (đổi schema) | Web | 2 | — | [T06.md](tasks/T06.md) | DONE / CLOSED (Claude Round 2 PASS_WITH_TODO; PO APPROVED; AC 8/8; hồi quy 7/7; RF-01 CLOSED; RF mở 0; TODO 6/6 dispositioned; merge `81330c2`; T06_MERGE_VERIFIED) |
-| T07 | Đa mô hình và trang So sánh mô hình | Web + ML | 2 | T01 | [T07.md](tasks/T07.md) | IN_PROGRESS (PO APPROVED / READY_FOR_HANDOFF 09/10/2026; pre-flight PASS) |
+| T07 | Đa mô hình và trang So sánh mô hình | Web + ML | 2 | T01 | [T07.md](tasks/T07.md) | CLAUDE_REVIEW (implementation `e84820d`; AC 8/8 DEV PASS; hồi quy 7/7; RF 0; blocker 0) |
 | T08 | Đo lệch miền điện thoại → phim | ML | 3 | T02, T03 | [T08.md](tasks/T08.md) | PLANNED |
 | T09 | Train PhoBERT phần B | ML | 3 | T08 | [T09.md](tasks/T09.md) | PLANNED |
 | T10 | Gắn model B vào web | Web | 3 | T07, T09 | [T10.md](tasks/T10.md) | PLANNED |
@@ -127,8 +127,8 @@ Nếu trễ: cắt T14 → T15 → rút gọn T05. Không cắt T01–T03, T07�
 | Claude review T06 r2 | TODO-06 Task Record còn ghi PLANNED; API không thêm undo review/audit hide-unhide | ACCEPT_WITH_NOTES — coordination là nguồn trạng thái hoạt động; chấp nhận phạm vi API hiện có |
 
 ## 11. Current Next Step
-1. Thực hiện T07 đúng Task Record trên `task/T07-da-mo-hinh`; focused tests trước full gates.
-2. Chỉ chuyển T07 `IN_PROGRESS` → `CLAUDE_REVIEW` khi AC-01–AC-08, hồi quy 7 mục, security, scope và secret scan đều có bằng chứng.
+1. Claude review độc lập T07 trên `task/T07-da-mo-hinh`, đọc implementation report mới nhất và chạy gate theo `AGENT_RULES.md`.
+2. Codex không tự review/approve/merge/tag/đóng T07 và không mở T08.
 
 ## 12. Active Timeline
 | Ngày | Ai | Sự kiện |
@@ -195,3 +195,4 @@ Nếu trễ: cắt T14 → T15 → rút gọn T05. Không cắt T01–T03, T07�
 | 09/10/2026 | Tín | Merge T06 vào `master` tại `81330c2`; merge commit có hai parent `0b244b0` và `bf12674`; toàn bộ lịch sử `task/T06-kiem-duyet` và PO report đã nằm trong `master` (`T06_MERGE_VERIFIED`) |
 | 09/10/2026 | Codex | Final closure sync: T06 → DONE / CLOSED; Overall Status → READY_FOR_NEXT_TASK; Current Active Task → NONE; Next Task → NOT SELECTED / NOT AUTHORIZED. TODO deferred giữ ở T11/T12, không ghi RESOLVED; T07 giữ PLANNED / NOT AUTHORIZED |
 | 09/10/2026 | Codex | PO authorize T07 `APPROVED / READY_FOR_HANDOFF`; pre-flight PASS: đúng branch, tree sạch, `master` chứa `81330c2`, T01 CLOSED, đủ `svm_A.joblib`/LR/NB, xác định môi trường artifact scikit-learn 1.7.2 + joblib 1.5.2 và hai checkpoint PhoBERT; T07 → `IN_PROGRESS`, T06 giữ DONE/CLOSED. |
+| 09/10/2026 | Codex | T07 implementation `e84820d`: registry PhoBERT/SVM/LR/NB + fallback, admin predict/health, trang so sánh real/mock và tài liệu; AC 8/8 DEV PASS, hồi quy 7/7, full gates/security/scope/secret PASS; RF 0, blocker 0, TODO chặn 0; T07 `IN_PROGRESS` → `CLAUDE_REVIEW`. |

@@ -16,25 +16,24 @@ Repo `C:\Projects\firefly-cinema`, nhánh `master`. Chi tiết: `PROJECT_SOURCE_
 - Mỗi task một nhánh `task/Txx-ten-ngan`, commit `[Txx] mô tả`. Chỉ Tín merge.
 
 ## 3. Latest Completed Task Summary
-**T07 — Đa mô hình và trang So sánh mô hình: DONE / CLOSED (09/10/2026).** Claude Round 2 PASS_WITH_TODO, AC 8/8 PASS, hồi quy 7/7 PASS, DoD MET, RF-01 CLOSED / VERIFIED BY CLAUDE, Open Required Fixes 0, blocker 0; PO APPROVED (`reports/2026-10-09/po_review_T07_APPROVED_2026-10-09.md`); merge vào `master` tại `434a489`, tag `admin-v1` (`T07_MERGE_VERIFIED`). TODO 6/6 đã disposition: TODO-01 → T08/T09/T10, TODO-02/03/04 → T11, TODO-05 → T10, TODO-06 ACCEPT_WITH_NOTES; TODO deferred chưa RESOLVED.
+**T08 — Đo lệch miền điện thoại → phim: DONE / CLOSED (09/10/2026).** Claude PASS_WITH_TODO, PO APPROVED, AC 5/5 PASS, DoD MET, Open Required Fixes 0, blocker 0; CPU reproducibility 4/4 model và artifact reproducibility 3/3 byte-identical; merge vào `master` tại `778675e` (`T08_MERGE_VERIFIED`). TODO 5/5 đã disposition; TODO deferred chưa RESOLVED.
 
 Trước khi áp dụng workflow: giao diện React đầy đủ (`giao-dien-v1`), backend FastAPI + SQLite, PhoBERT A gắn vào backend, F1 test 0,918 (`phobert-v1`).
 
 ## 4. Current Project Status
 ```
-Overall Status: PO_APPROVED / PENDING_MERGE
-Phase: T08 — Đo lệch miền điện thoại → phim
-Current Active Task: T08
-PO Decision: APPROVED
-Next Task: T09 PLANNED / NOT AUTHORIZED
+Overall Status: READY_FOR_NEXT_TASK
+Phase: T00–T08 DONE / CLOSED
+Current Active Task: NONE
+Next Task: NOT SELECTED / NOT AUTHORIZED
 Ngày bắt đầu sản phẩm: 05/10/2026 · Hạn: 01/11/2026
 ```
 
 ## 5. Current Active Task
-**T08 — Đo lệch miền điện thoại → phim: PO_APPROVED / PENDING_MERGE.** PO Decision: **APPROVED** (`reports/2026-10-09/po_review_T08_APPROVED_2026-10-09.md`), chấp nhận Claude **PASS_WITH_TODO**: AC 5/5 PASS, DoD MET theo quyết định PO, Open Required Fixes 0, blocker 0; tái lập CPU 4/4 model và 3/3 artifact byte-identical. TODO 5/5 đã disposition; các TODO deferred chưa RESOLVED. Chờ PO merge vào `master`; chưa DONE/CLOSED.
+**NONE.** T08 đã **DONE / CLOSED** sau Claude PASS_WITH_TODO, PO APPROVED và merge `778675e` được xác minh (`T08_MERGE_VERIFIED`). AC 5/5 PASS, DoD MET, Open Required Fixes 0, blocker 0; TODO 5/5 đã disposition, deferred chưa RESOLVED.
 
 ## 6. Current Task Record
-`docs/tasks/T08.md` giữ nguyên snapshot Task Record. Implementation report: `reports/2026-10-09/codex_implementation_T08_2026-10-09.md`. Claude review: `reports/2026-10-09/claude_review_T08_PASS_WITH_TODO_2026-10-09.md`. PO review: `reports/2026-10-09/po_review_T08_APPROVED_2026-10-09.md`. Trạng thái: **PO_APPROVED / PENDING_MERGE**.
+Không có task active. T08 đã **DONE / CLOSED**; `docs/tasks/T08.md` giữ nguyên snapshot Task Record. Implementation, Claude review và PO report đều đã nằm trong `master` tại merge `778675e`.
 
 ## 7. Roadmap và trạng thái
 
@@ -48,7 +47,7 @@ Ngày bắt đầu sản phẩm: 05/10/2026 · Hạn: 01/11/2026
 | T05 | Quản lý suất chiếu (admin) | Web | 2 | T04 | [T05.md](tasks/T05.md) | DONE / CLOSED (Claude Round 2 PASS_WITH_TODO; AC 8/8 PASS; DoD MET; RF-01 CLOSED; RF mở 0; PO APPROVED; merge `54a3715`; T05_MERGE_VERIFIED) |
 | T06 | Kiểm duyệt có người duyệt (đổi schema) | Web | 2 | — | [T06.md](tasks/T06.md) | DONE / CLOSED (Claude Round 2 PASS_WITH_TODO; PO APPROVED; AC 8/8; hồi quy 7/7; RF-01 CLOSED; RF mở 0; TODO 6/6 dispositioned; merge `81330c2`; T06_MERGE_VERIFIED) |
 | T07 | Đa mô hình và trang So sánh mô hình | Web + ML | 2 | T01 | [T07.md](tasks/T07.md) | DONE / CLOSED (Claude Round 2 PASS_WITH_TODO; AC 8/8; hồi quy 7/7; DoD MET; RF-01 CLOSED; RF mở 0; blocker 0; TODO 6/6 dispositioned; merge `434a489`; tag `admin-v1`; T07_MERGE_VERIFIED) |
-| T08 | Đo lệch miền điện thoại → phim | ML | 3 | T02, T03 | [T08.md](tasks/T08.md) | PO_APPROVED / PENDING_MERGE (Claude PASS_WITH_TODO; AC 5/5; DoD MET; RF 0; blocker 0; TODO 5/5 dispositioned, deferred chưa RESOLVED) |
+| T08 | Đo lệch miền điện thoại → phim | ML | 3 | T02, T03 | [T08.md](tasks/T08.md) | DONE / CLOSED (Claude PASS_WITH_TODO; PO APPROVED; AC 5/5 PASS; DoD MET; RF 0; blocker 0; TODO 5/5 dispositioned, deferred chưa RESOLVED; merge `778675e`; T08_MERGE_VERIFIED) |
 | T09 | Train PhoBERT phần B | ML | 3 | T08 | [T09.md](tasks/T09.md) | PLANNED / NOT AUTHORIZED |
 | T10 | Gắn model B vào web | Web | 3 | T07, T09 | [T10.md](tasks/T10.md) | PLANNED |
 | T11 | Kiểm thử tự động và sửa lỗi | Web | 4 | T04–T10 | [T11.md](tasks/T11.md) | PLANNED |
@@ -61,7 +60,7 @@ Chuỗi chính: `T00 → T01 → T02` và `T03 → T08 → T09 → T10`. T03 b�
 Nếu trễ: cắt T14 → T15 → rút gọn T05. Không cắt T01–T03, T07–T10.
 
 ## 8. Open Blockers
-- T08: **0 blocker**; PO APPROVED, chờ merge. TODO 5/5 đã disposition và không chặn merge.
+- T08: **DONE / CLOSED**, 0 blocker; merge `778675e` đã xác minh (`T08_MERGE_VERIFIED`). TODO 5/5 đã disposition; deferred chưa RESOLVED.
 - T06: 0 blocker; RF-01 CLOSED (Claude Round 2 xác minh 09/10/2026). `PENDING_PO_DATABASE_RESET` **RESOLVED 09/10/2026** — backup giữ nguyên checksum/integrity; database thật mới đủ schema, seed; AC 8/8 DEV PASS và regression real/mock 7/7.
 - T04: 0 technical blockers; SD-01/SD-02 đã được PO phê duyệt hồi tố, không còn chặn merge.
 - Q1 (nguồn bình luận phim, người gán nhãn thứ 2): RESOLVED 07/10/2026 — xem `PROJECT_SOURCE_OF_TRUTH.md` mục 5 và `docs/tasks/T03.md` mục 13.
@@ -70,7 +69,7 @@ Nếu trễ: cắt T14 → T15 → rút gọn T05. Không cắt T01–T03, T07�
 - Q2: **RESOLVED 08/10/2026 — NO ALEMBIC / BACKUP_BEFORE_RESET.** Sao lưu và xác minh đúng database trước khi PO tự reset; Codex không tự xóa database thật.
 
 ## 9. Open Required Fixes
-- **Open Required Fixes: 0.** T08 không có Required Fix; Claude PASS_WITH_TODO, AC 5/5, blocker 0.
+- **Open Required Fixes: 0.** T08 DONE / CLOSED; không có Required Fix, Claude PASS_WITH_TODO, AC 5/5 PASS, blocker 0.
 - T07 RF-01 (Medium) **CLOSED / VERIFIED BY CLAUDE**: fix `06fbd3d` bỏ `min_length=1`; Claude probe độc lập trên uvicorn thật + DB tạm: ba dạng chuỗi rỗng 422 đúng câu tiếng Việt, biên 1.000/1.001, 401/403, contract và health giữ nguyên (12/12). Evidence: `reports/2026-10-09/claude_review_T07_round2_PASS_WITH_TODO_2026-10-09.md`.
 - T06 RF-01 (Medium) **CLOSED / VERIFIED BY CLAUDE**: fix commit `8ef57ad` (`isinstance(value, str)` trước membership); Claude probe độc lập trên DB tạm `action` list/dict/123/true/null/"delete" và 4 ca thêm đều trả 422 đúng câu, dữ liệu không đổi; uvicorn thật cũng trả 422. Evidence: `reports/2026-10-09/claude_review_T06_round2_PASS_WITH_TODO_2026-10-09.md`.
 - T05 RF-01 (High) **CLOSED** — Claude Round 2 xác minh độc lập: fix commit `f5fca8d`; fresh real/mock đều có đủ 9 phim mỗi ngày, hot_week đủ 9, 0 cặp chồng, restart giữ nguyên suất admin/booking. Evidence: `reports/2026-10-08/codex_fix_T05_round1_2026-10-08.md`.
@@ -142,8 +141,8 @@ Nếu trễ: cắt T14 → T15 → rút gọn T05. Không cắt T01–T03, T07�
 | Claude review T08 | TODO-05 (Info) PhoBERT nhạy với `normalize()` ở câu "lê thê" | **ACCEPT_LATER → T09/T10**; giữ `normalize()`, kiểm tra đồng nhất train/eval/runtime; chưa RESOLVED |
 
 ## 11. Current Next Step
-1. PO merge `task/T08-lech-mien` vào `master` (T08 không có tag mốc), sau đó xác minh toàn bộ lịch sử T08 nằm trong merge trước khi chuyển `DONE / CLOSED`.
-2. T09 tiếp tục **PLANNED / NOT AUTHORIZED**; không đặt READY_FOR_HANDOFF, không tạo nhánh và không bắt đầu implementation.
+1. T08 đã **DONE / CLOSED**; merge `778675e` đã xác minh (`T08_MERGE_VERIFIED`).
+2. **Next Task: NOT SELECTED / NOT AUTHORIZED.** T09 tiếp tục **PLANNED / NOT AUTHORIZED**; không đặt READY_FOR_HANDOFF, không tạo nhánh và không bắt đầu implementation.
 
 ## 12. Active Timeline
 | Ngày | Ai | Sự kiện |
@@ -221,3 +220,5 @@ Nếu trễ: cắt T14 → T15 → rút gọn T05. Không cắt T01–T03, T07�
 | 09/10/2026 | Codex | Hoàn tất T08: notebook clean-run trên CPU có marker OK; normalize parity 20/20, CSV 4 model × 2 miền, phone parity max `4,92e-07`, 20 lỗi + PNG; delta F1 phim `0,062793–0,080440`, không có delta < 0,03; AC 5/5 DEV PASS, scope/secret/large-file PASS; T08 `IN_PROGRESS` → `CLAUDE_REVIEW`, T09 giữ `PLANNED / NOT AUTHORIZED`. |
 | 09/10/2026 | Claude | Review độc lập T08: **PASS_WITH_TODO**; AC 5/5; RF 0; blocker 0; TODO 5 chờ PO. Tái lập CPU 4/4 model lệch ≤ `4,92e-07`, 3 artifact byte-identical, hash/normalize/scope/secret/large-file PASS. T08 `CLAUDE_REVIEW` → `PO_REVIEW`; T09 giữ `PLANNED / NOT AUTHORIZED`. |
 | 09/10/2026 | Tín | PO review T08: **APPROVED**; Claude PASS_WITH_TODO, AC 5/5 PASS, DoD MET theo quyết định PO, Open Required Fixes 0, blocker 0, CPU reproducibility 4/4 và artifact reproducibility 3/3. TODO 5/5 dispositioned: TODO-01→T09/khóa luận, TODO-02 ACCEPT_WITH_DISCLOSURE, TODO-03→T09/T13, TODO-04 ACCEPT_WITH_NOTES→T13, TODO-05→T09/T10; TODO deferred chưa RESOLVED. T08 → `PO_APPROVED / PENDING_MERGE`; T09 giữ `PLANNED / NOT AUTHORIZED`. |
+| 09/10/2026 | Tín | Merge T08 vào `master` tại `778675e`; merge commit có hai parent `5cf4eb0` và tip T08 `886cba8`; toàn bộ implementation `47e044e`, Claude review `621b75c`, PO report và artifact T08 nằm trong `master` (`T08_MERGE_VERIFIED`). |
+| 09/10/2026 | Codex | Final Closure Sync: T08 → DONE / CLOSED; Overall Status → READY_FOR_NEXT_TASK; Current Active Task → NONE; Next Task → NOT SELECTED / NOT AUTHORIZED. TODO 5/5 đã disposition, deferred chưa RESOLVED; T09 giữ PLANNED / NOT AUTHORIZED. |

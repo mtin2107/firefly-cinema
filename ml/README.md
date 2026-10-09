@@ -78,3 +78,36 @@ So sánh các cột metric giữa hai file `baselines.csv`; timing CPU có thể
 ## Lưu ý khi tái lập
 
 Script cũ dùng đường dẫn tương đối `processed/`, `results/`, `src/`; dữ liệu hiện ở `data/uit-visfd/processed/`. T01 cần nối đúng đường dẫn hoặc chạy trong workspace phù hợp. `ml/src/train_phobert.py` là mã lịch sử còn gọi `underthesea`; cấu hình model A đang dùng `text_norm` không tách từ. Không dùng script cũ làm chuẩn tiền xử lý hiện tại.
+
+## T09 — Train PhoBERT B trên Colab GPU
+
+Notebook chuẩn là `ml/notebooks/T09_phobert_B.ipynb`. Notebook fine-tune từ checkpoint research canonical, thử hai cấu hình dữ liệu, khóa lựa chọn bằng movie validation rồi mới đọc hai test set. Phần SVM/LR/NB chạy được trên CPU; phần PhoBERT bắt buộc Colab GPU.
+
+### Chuẩn bị Drive
+
+Đảm bảo các đường dẫn sau tồn tại trước khi chạy:
+
+- `MyDrive/thesis/data/movie/movie_train.csv`
+- `MyDrive/thesis/data/movie/movie_test.csv`
+- `MyDrive/thesis/data/processed/train.csv`, `dev.csv`, `test.csv`
+- `MyDrive/thesis_results/phobert_A_best/`
+- `MyDrive/thesis_results/baselines/` có `svm_A.joblib`, `lr_A.joblib`, `nb_A.joblib`
+
+Nếu dữ liệu/artifact đã nằm trong bản repo được upload lên Colab ở các thư mục ngoài Git tương ứng, notebook ưu tiên bản local đó. Notebook cũng chấp nhận đường dẫn Drive cũ `MyDrive/thesis/data/phim/` nếu hai file movie tồn tại ở đó.
+
+### Chạy
+
+1. Đưa branch `task/T09-phobert-B` lên `/content/firefly-cinema`, hoặc đặt biến môi trường `FIREFLY_PROJECT_ROOT` trỏ tới repo. Nếu dùng gói code, tạo `firefly-cinema-T09-code.zip` bằng `git archive` từ commit T09 và upload vào `MyDrive/thesis/code/`; notebook sẽ tự giải nén vào `/content/firefly-cinema` khi chưa có repo.
+2. Mở notebook, chọn T4 GPU và chạy từ đầu theo đúng thứ tự.
+3. Không chạy cell final test trước marker `SELECTION_LOCKED=True` và không đổi selection sau khi đã xem test.
+4. Tải notebook đã có toàn bộ output về lại `ml/notebooks/T09_phobert_B.ipynb`.
+5. Chép `comparison_B.csv` và `model_card_B.md` do notebook sinh về đúng vị trí trong branch; không chép model/tokenizer/zip vào Git.
+
+### Output cần xác minh
+
+- Output đủ bốn trial PhoBERT a/b × learning rate và lựa chọn validation.
+- `ml/results/comparison_B.csv` có đủ PhoBERT A/B, SVM/LR/NB A/B trên phone/movie; có thêm baseline dự đoán hằng để công bố lệch nhãn.
+- `ml/model_card_B.md` không còn trạng thái `PENDING_COLAB_EVIDENCE`.
+- Marker `CPU_RELOAD_OK transformers=5.18.0`, kết quả AC-02 thật và mức giảm phone.
+- `MyDrive/thesis_results/phobert_B_best/selection_manifest.json` và model/tokenizer/config.
+- `MyDrive/thesis_results/firefly_phobert_B.zip` mở được và chứa `config.json` đúng `id2label`.

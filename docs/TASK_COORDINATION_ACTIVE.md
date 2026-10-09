@@ -25,15 +25,15 @@ Trước khi áp dụng workflow: giao diện React đầy đủ (`giao-dien-v1`
 Overall Status: IN_PROGRESS
 Phase: T09 — Train PhoBERT phần B
 Current Active Task: T09
-Next Task: T09 IN_PROGRESS
+Next Task: T09 CLAUDE_REVIEW
 Ngày bắt đầu sản phẩm: 05/10/2026 · Hạn: 01/11/2026
 ```
 
 ## 5. Current Active Task
-**T09 — Train PhoBERT phần B: IN_PROGRESS.** PO đã authorize `APPROVED / READY_FOR_HANDOFF` ngày 09/10/2026. Pre-flight PASS: đúng branch `task/T09-phobert-B`, working tree sạch, baseline `6c4b8de` trùng `master` và chứa merge T08 `778675e`; đủ movie train/test, phone train/dev/test, checkpoint research PhoBERT A và ba baseline A. T09 `READY_FOR_HANDOFF → IN_PROGRESS`.
+**T09 — Train PhoBERT phần B: CLAUDE_REVIEW.** Hai clean-run Colab T4 từ runtime mới cho cùng selection/metrics và cùng hash checkpoint/config/manifest. PhoBERT B config b, lr 2e-5, epoch 3: movie F1 neg `0.917526` > A `0.857143`; phone F1 neg `0.917153`, giảm `0.002783`. CPU reload Transformers 5.18.0, Drive checkpoint/ZIP, comparison/model card, reproducibility, scope và security gate đều có evidence. Blocker 0, Open Required Fixes phía implementer 0; chờ Claude review độc lập.
 
 ## 6. Current Task Record
-`docs/tasks/T09.md` là Task Record đã được PO authorize. Codex tạo notebook và kiểm tra phần local/CPU; Tín chạy GPU trên Colab, cung cấp output thật và xác minh artifact Drive. Chưa có evidence Colab thì không ghi AC PASS và không chuyển `CLAUDE_REVIEW`.
+`docs/tasks/T09.md` là Task Record đã được PO authorize. Codex đã tạo notebook/kiểm tra local; Tín hoàn tất hai clean-run GPU và lưu evidence trên Drive. Codex đã đối chiếu run1/run2, artifact và kết quả, ghi AC-01→AC-06 DEV PASS trong implementation report rồi chuyển `CLAUDE_REVIEW`. Chưa có Claude review thì không tự approve/merge/đóng T09 hoặc mở T10.
 
 ## 7. Roadmap và trạng thái
 
@@ -48,7 +48,7 @@ Ngày bắt đầu sản phẩm: 05/10/2026 · Hạn: 01/11/2026
 | T06 | Kiểm duyệt có người duyệt (đổi schema) | Web | 2 | — | [T06.md](tasks/T06.md) | DONE / CLOSED (Claude Round 2 PASS_WITH_TODO; PO APPROVED; AC 8/8; hồi quy 7/7; RF-01 CLOSED; RF mở 0; TODO 6/6 dispositioned; merge `81330c2`; T06_MERGE_VERIFIED) |
 | T07 | Đa mô hình và trang So sánh mô hình | Web + ML | 2 | T01 | [T07.md](tasks/T07.md) | DONE / CLOSED (Claude Round 2 PASS_WITH_TODO; AC 8/8; hồi quy 7/7; DoD MET; RF-01 CLOSED; RF mở 0; blocker 0; TODO 6/6 dispositioned; merge `434a489`; tag `admin-v1`; T07_MERGE_VERIFIED) |
 | T08 | Đo lệch miền điện thoại → phim | ML | 3 | T02, T03 | [T08.md](tasks/T08.md) | DONE / CLOSED (Claude PASS_WITH_TODO; PO APPROVED; AC 5/5 PASS; DoD MET; RF 0; blocker 0; TODO 5/5 dispositioned, deferred chưa RESOLVED; merge `778675e`; T08_MERGE_VERIFIED) |
-| T09 | Train PhoBERT phần B | ML | 3 | T08 | [T09.md](tasks/T09.md) | IN_PROGRESS (PO AUTHORIZED; chờ implementation + Colab evidence) |
+| T09 | Train PhoBERT phần B | ML | 3 | T08 | [T09.md](tasks/T09.md) | CLAUDE_REVIEW (AC 6/6 DEV PASS; 2 clean-run; blocker 0) |
 | T10 | Gắn model B vào web | Web | 3 | T07, T09 | [T10.md](tasks/T10.md) | PLANNED |
 | T11 | Kiểm thử tự động và sửa lỗi | Web | 4 | T04–T10 | [T11.md](tasks/T11.md) | PLANNED |
 | T12 | Dữ liệu demo và kịch bản bảo vệ | Web | 4 | T10 | [T12.md](tasks/T12.md) | PLANNED |
@@ -60,6 +60,7 @@ Chuỗi chính: `T00 → T01 → T02` và `T03 → T08 → T09 → T10`. T03 b�
 Nếu trễ: cắt T14 → T15 → rút gọn T05. Không cắt T01–T03, T07–T10.
 
 ## 8. Open Blockers
+- T09: 0 blocker; hai clean-run Colab và Drive evidence đã xác minh; chờ Claude review độc lập.
 - T08: **DONE / CLOSED**, 0 blocker; merge `778675e` đã xác minh (`T08_MERGE_VERIFIED`). TODO 5/5 đã disposition; deferred chưa RESOLVED.
 - T06: 0 blocker; RF-01 CLOSED (Claude Round 2 xác minh 09/10/2026). `PENDING_PO_DATABASE_RESET` **RESOLVED 09/10/2026** — backup giữ nguyên checksum/integrity; database thật mới đủ schema, seed; AC 8/8 DEV PASS và regression real/mock 7/7.
 - T04: 0 technical blockers; SD-01/SD-02 đã được PO phê duyệt hồi tố, không còn chặn merge.
@@ -69,7 +70,7 @@ Nếu trễ: cắt T14 → T15 → rút gọn T05. Không cắt T01–T03, T07�
 - Q2: **RESOLVED 08/10/2026 — NO ALEMBIC / BACKUP_BEFORE_RESET.** Sao lưu và xác minh đúng database trước khi PO tự reset; Codex không tự xóa database thật.
 
 ## 9. Open Required Fixes
-- **Open Required Fixes: 0.** T08 DONE / CLOSED; không có Required Fix, Claude PASS_WITH_TODO, AC 5/5 PASS, blocker 0.
+- **Open Required Fixes: 0 phía implementer.** T09 đang chờ Claude review độc lập; T08 vẫn DONE / CLOSED.
 - T07 RF-01 (Medium) **CLOSED / VERIFIED BY CLAUDE**: fix `06fbd3d` bỏ `min_length=1`; Claude probe độc lập trên uvicorn thật + DB tạm: ba dạng chuỗi rỗng 422 đúng câu tiếng Việt, biên 1.000/1.001, 401/403, contract và health giữ nguyên (12/12). Evidence: `reports/2026-10-09/claude_review_T07_round2_PASS_WITH_TODO_2026-10-09.md`.
 - T06 RF-01 (Medium) **CLOSED / VERIFIED BY CLAUDE**: fix commit `8ef57ad` (`isinstance(value, str)` trước membership); Claude probe độc lập trên DB tạm `action` list/dict/123/true/null/"delete" và 4 ca thêm đều trả 422 đúng câu, dữ liệu không đổi; uvicorn thật cũng trả 422. Evidence: `reports/2026-10-09/claude_review_T06_round2_PASS_WITH_TODO_2026-10-09.md`.
 - T05 RF-01 (High) **CLOSED** — Claude Round 2 xác minh độc lập: fix commit `f5fca8d`; fresh real/mock đều có đủ 9 phim mỗi ngày, hot_week đủ 9, 0 cặp chồng, restart giữ nguyên suất admin/booking. Evidence: `reports/2026-10-08/codex_fix_T05_round1_2026-10-08.md`.
@@ -223,3 +224,4 @@ Nếu trễ: cắt T14 → T15 → rút gọn T05. Không cắt T01–T03, T07�
 | 09/10/2026 | Tín | Merge T08 vào `master` tại `778675e`; merge commit có hai parent `5cf4eb0` và tip T08 `886cba8`; toàn bộ implementation `47e044e`, Claude review `621b75c`, PO report và artifact T08 nằm trong `master` (`T08_MERGE_VERIFIED`). |
 | 09/10/2026 | Codex | Final Closure Sync: T08 → DONE / CLOSED; Overall Status → READY_FOR_NEXT_TASK; Current Active Task → NONE; Next Task → NOT SELECTED / NOT AUTHORIZED. TODO 5/5 đã disposition, deferred chưa RESOLVED; T09 giữ PLANNED / NOT AUTHORIZED. |
 | 09/10/2026 | Tín + Codex | PO authorize T09 `APPROVED / READY_FOR_HANDOFF`; pre-flight PASS: đúng branch `task/T09-phobert-B`, tree sạch, baseline `6c4b8de` trùng `master` và chứa merge T08 `778675e`; đủ dữ liệu movie/phone, checkpoint research PhoBERT A và baseline T08/T01. T09 `READY_FOR_HANDOFF → IN_PROGRESS`. |
+| 09/10/2026 | Tín + Codex | Tín hoàn tất hai clean-run Colab T4 từ runtime mới; Codex xác minh run1/run2, Drive checkpoint/tokenizer/config/ZIP/SHA-256, CPU reload Transformers 5.18.0 và metric tái lập. PhoBERT B config b đạt movie F1 neg `0.917526` > A `0.857143`, phone drop `0.002783`; AC 6/6 DEV PASS, gate/scope/security PASS, blocker 0, Open RF 0. T09 `IN_PROGRESS → CLAUDE_REVIEW`; không mở T10. |

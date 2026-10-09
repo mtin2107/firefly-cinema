@@ -87,13 +87,13 @@ Notebook chuẩn là `ml/notebooks/T09_phobert_B.ipynb`. Notebook fine-tune từ
 
 Đảm bảo các đường dẫn sau tồn tại trước khi chạy:
 
-- `MyDrive/thesis/data/phim/movie_train.csv`
-- `MyDrive/thesis/data/phim/movie_test.csv`
+- `MyDrive/thesis/data/movie/movie_train.csv`
+- `MyDrive/thesis/data/movie/movie_test.csv`
 - `MyDrive/thesis/data/processed/train.csv`, `dev.csv`, `test.csv`
 - `MyDrive/thesis_results/phobert_A_best/`
 - `MyDrive/thesis_results/baselines/` có `svm_A.joblib`, `lr_A.joblib`, `nb_A.joblib`
 
-Nếu dữ liệu/artifact đã nằm trong bản repo được upload lên Colab ở các thư mục ngoài Git tương ứng, notebook ưu tiên bản local đó.
+Nếu dữ liệu/artifact đã nằm trong bản repo được upload lên Colab ở các thư mục ngoài Git tương ứng, notebook ưu tiên bản local đó. Notebook cũng chấp nhận đường dẫn Drive cũ `MyDrive/thesis/data/phim/` nếu hai file movie tồn tại ở đó.
 
 ### Chạy
 

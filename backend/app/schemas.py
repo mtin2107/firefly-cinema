@@ -302,7 +302,7 @@ class AdminCommentAction(BaseModel):
     @field_validator("action", mode="before")
     @classmethod
     def validate_action(cls, value: str) -> str:
-        if value not in {"confirm", "relabel", "hide", "unhide"}:
+        if not isinstance(value, str) or value not in {"confirm", "relabel", "hide", "unhide"}:
             raise PydanticCustomError("comment_action", "Thao tác phải là confirm, relabel, hide hoặc unhide.")
         return value
 

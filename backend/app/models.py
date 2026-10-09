@@ -1,5 +1,5 @@
 from datetime import datetime
-from sqlalchemy import String, Integer, Float, Boolean, Text, DateTime, ForeignKey, UniqueConstraint
+from sqlalchemy import String, Integer, Float, Boolean, Text, DateTime, ForeignKey, UniqueConstraint, CheckConstraint
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from .database import Base
 
@@ -68,6 +68,7 @@ class BookingSeat(Base):
 
 class Comment(Base):
     __tablename__ = "comments"
+    __table_args__ = (CheckConstraint("human_label IN (0, 1) OR human_label IS NULL", name="ck_comments_human_label"),)
     id: Mapped[int] = mapped_column(primary_key=True)
     movie_id: Mapped[int] = mapped_column(ForeignKey("movies.id"), index=True)
     user_id: Mapped[int] = mapped_column(ForeignKey("users.id"))
@@ -75,6 +76,11 @@ class Comment(Base):
     is_negative: Mapped[bool] = mapped_column(Boolean)       # kết quả mô hình
     negative_score: Mapped[float] = mapped_column(Float)     # xác suất tiêu cực 0..1
     model_name: Mapped[str] = mapped_column(String(30))      # "phobert" | "keyword"
+    human_label: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    reviewed_by: Mapped[int | None] = mapped_column(ForeignKey("users.id"), nullable=True)
+    reviewed_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
+    hidden: Mapped[bool] = mapped_column(Boolean, default=False, server_default="0")
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.now)
-    user: Mapped[User] = relationship()
+    user: Mapped[User] = relationship(foreign_keys=[user_id])
+    reviewer: Mapped[User | None] = relationship(foreign_keys=[reviewed_by])
     movie: Mapped[Movie] = relationship()

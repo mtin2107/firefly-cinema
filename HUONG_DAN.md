@@ -98,6 +98,33 @@ Kiểm tra:
 - http://localhost:8000/api/health → `{"status":"ok","classifier":"keyword",...}`
 - http://localhost:8000/docs → trang Swagger, bấm thử từng API được. Ảnh chụp trang này dùng tốt cho chương thiết kế API trong báo cáo.
 
+### 2.1. Cập nhật database cho T06 (chỉ làm một lần)
+
+T06 thêm cột kiểm duyệt vào bảng `comments`. Dự án không dùng Alembic, vì vậy database cũ phải được tạo lại. Việc này làm mất dữ liệu đang có; chỉ PO thực hiện sau khi đã xác minh backup.
+
+1. Tắt backend bằng `Ctrl + C`. Từ thư mục gốc dự án, xác nhận không còn tiến trình nghe cổng 8000:
+   ```powershell
+   Get-NetTCPConnection -LocalPort 8000 -State Listen -ErrorAction SilentlyContinue
+   ```
+   Lệnh không được trả về dòng nào.
+2. Xác nhận bản backup T06 đã được ghi trong report, có checksum SHA-256 và `PRAGMA integrity_check` trả `ok`.
+3. Chỉ khi hai bước trên đạt, PO xóa đúng database thật bằng lệnh:
+   ```powershell
+   Remove-Item -LiteralPath "C:\Projects\firefly-cinema\backend\firefly.db"
+   ```
+4. Khởi động backend để `create_all` tạo schema và seed lại dữ liệu:
+   ```powershell
+   Set-Location "C:\Projects\firefly-cinema\backend"
+   .\venv\Scripts\python.exe -m uvicorn app.main:app --port 8000
+   ```
+5. Trong terminal PowerShell khác, kiểm tra health và schema/dữ liệu mới:
+   ```powershell
+   Invoke-RestMethod "http://localhost:8000/api/health"
+   Set-Location "C:\Projects\firefly-cinema"
+   .\backend\venv\Scripts\python.exe -c "import sqlite3; c=sqlite3.connect(r'backend/firefly.db'); print(c.execute('pragma integrity_check').fetchone()); print([r[1] for r in c.execute('pragma table_info(comments)')]); print(c.execute('select count(*) from comments').fetchone())"
+   ```
+   Kết quả phải có `ok`; danh sách cột phải có `human_label`, `reviewed_by`, `reviewed_at`, `hidden`; số bình luận seed phải lớn hơn 0.
+
 ---
 
 ## Phần 3. Nối giao diện với backend
@@ -201,9 +228,12 @@ Ngưỡng ẩn bình luận chỉnh bằng `NEGATIVE_THRESHOLD` (mặc định 0
 | GET | /api/showtimes/{id} | | Suất chiếu + phim + danh sách ghế đã đặt |
 | POST | /api/bookings | ✔ | Đặt vé `{showtime_id, seats}` |
 | GET | /api/bookings/me | ✔ | Vé của tôi |
-| GET | /api/movies/{id}/comments | | Bình luận của phim (kèm `is_negative`, `negative_score`) |
+| GET | /api/movies/{id}/comments | | Bình luận không bị admin ẩn; kèm nhãn model, `effective_negative`, `reviewed` |
 | POST | /api/movies/{id}/comments | ✔ | Viết bình luận, PhoBERT chấm điểm ngay |
-| GET | /api/admin/comments?label= | ✔ admin | Danh sách kiểm duyệt (`negative` / `normal`) |
+| GET | /api/admin/comments | ✔ admin | Danh sách `{items,total}`; lọc `label`, `reviewed`; phân trang `page`, `page_size` tối đa 100 |
+| PATCH | /api/admin/comments/{id} | ✔ admin | `confirm`, `relabel`, `hide`, `unhide`; relabel nhận `label` 0 hoặc 1 |
+| GET | /api/admin/comments/stats | ✔ admin | Thống kê reviewed/agree/disagree/accuracy và TP/FP/TN/FN |
+| GET | /api/admin/comments/export.csv | ✔ admin | CSV UTF-8 BOM gồm `text,text_norm,label`, chỉ lấy bình luận đã duyệt |
 | GET | /api/admin/movies | ✔ admin | Danh sách phim dành cho quản trị |
 | POST | /api/admin/movies | ✔ admin | Thêm phim |
 | PUT | /api/admin/movies/{id} | ✔ admin | Cập nhật phim |

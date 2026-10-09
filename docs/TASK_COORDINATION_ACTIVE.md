@@ -22,15 +22,15 @@ Trước khi áp dụng workflow: giao diện React đầy đủ (`giao-dien-v1`
 
 ## 4. Current Project Status
 ```
-Overall Status: CLAUDE_REVIEW
-Phase: T00, T01, T02, T03, T04, T05, T06 DONE/CLOSED; T07 CLAUDE_REVIEW
+Overall Status: FIX_LOOP
+Phase: T00, T01, T02, T03, T04, T05, T06 DONE/CLOSED; T07 FIX_LOOP (Round 1)
 Current Active Task: T07 — Đa mô hình và trang So sánh mô hình
-Next Task: T07 CLAUDE_REVIEW
+Next Task: T07 FIX_LOOP — Codex sửa RF-01
 Ngày bắt đầu sản phẩm: 05/10/2026 · Hạn: 01/11/2026
 ```
 
 ## 5. Current Active Task
-**T07 — Đa mô hình và trang So sánh mô hình: CLAUDE_REVIEW (09/10/2026).** Implementation commit `e84820d`; AC-01–AC-08 DEV PASS, hồi quy 7/7 PASS, compile/build/startup/health/security/scope/secret PASS. Đủ PhoBERT/SVM/LR/NB; probe thiếu SVM fallback đúng; 10 câu đối chiếu T02 lệch score tối đa <0,00005; `normalize()` không đổi; browser real/mock responsive đạt. Required Fixes 0, blocker 0, TODO chặn handoff 0. Evidence: `reports/2026-10-09/codex_implementation_T07_2026-10-09.md`.
+**T07 — Đa mô hình và trang So sánh mô hình: FIX_LOOP Round 1 (09/10/2026).** Claude review độc lập: **FAIL** — AC 7/8 PASS, AC-05 FAIL (RF-01 Medium: `{"text": ""}` → 422 câu Pydantic tiếng Anh do `min_length=1` chạy trước validator tiếng Việt). Đã xác minh: health đủ PhoBERT/SVM/LR/NB, thiếu SVM vẫn startup + fallback, `ACTIVE_MODEL=svm` lưu `model_name="svm"`, parity T02 10 câu (lệch ≤ 4,9e-5) và toàn bộ 2.224 câu test khớp tuyệt đối F1 T02 (PhoBERT backend 0,918046), `normalize()` không đổi, trang so sánh real/mock 375px, hồi quy 7/7, scope/secret/gate đạt. Evidence: `reports/2026-10-09/claude_review_T07_FAIL_2026-10-09.md`.
 
 ## 6. Current Task Record
 Task Record hiện hành: `docs/tasks/T07.md`. T06 giữ **DONE / CLOSED**.
@@ -46,7 +46,7 @@ Task Record hiện hành: `docs/tasks/T07.md`. T06 giữ **DONE / CLOSED**.
 | T04 | Quản lý phim (admin) | Web | 2 | — | [T04.md](tasks/T04.md) | DONE / CLOSED (Claude PASS_WITH_TODO; PO APPROVED; AC 7/7; RF 0; blocker 0; SD-01/SD-02 approved retroactively; merge `fced3d7`) |
 | T05 | Quản lý suất chiếu (admin) | Web | 2 | T04 | [T05.md](tasks/T05.md) | DONE / CLOSED (Claude Round 2 PASS_WITH_TODO; AC 8/8 PASS; DoD MET; RF-01 CLOSED; RF mở 0; PO APPROVED; merge `54a3715`; T05_MERGE_VERIFIED) |
 | T06 | Kiểm duyệt có người duyệt (đổi schema) | Web | 2 | — | [T06.md](tasks/T06.md) | DONE / CLOSED (Claude Round 2 PASS_WITH_TODO; PO APPROVED; AC 8/8; hồi quy 7/7; RF-01 CLOSED; RF mở 0; TODO 6/6 dispositioned; merge `81330c2`; T06_MERGE_VERIFIED) |
-| T07 | Đa mô hình và trang So sánh mô hình | Web + ML | 2 | T01 | [T07.md](tasks/T07.md) | CLAUDE_REVIEW (implementation `e84820d`; AC 8/8 DEV PASS; hồi quy 7/7; RF 0; blocker 0) |
+| T07 | Đa mô hình và trang So sánh mô hình | Web + ML | 2 | T01 | [T07.md](tasks/T07.md) | FIX_LOOP (implementation `e84820d`; Claude FAIL: AC 7/8, RF-01 Medium AC-05; hồi quy 7/7) |
 | T08 | Đo lệch miền điện thoại → phim | ML | 3 | T02, T03 | [T08.md](tasks/T08.md) | PLANNED |
 | T09 | Train PhoBERT phần B | ML | 3 | T08 | [T09.md](tasks/T09.md) | PLANNED |
 | T10 | Gắn model B vào web | Web | 3 | T07, T09 | [T10.md](tasks/T10.md) | PLANNED |
@@ -68,7 +68,8 @@ Nếu trễ: cắt T14 → T15 → rút gọn T05. Không cắt T01–T03, T07�
 - Q2: **RESOLVED 08/10/2026 — NO ALEMBIC / BACKUP_BEFORE_RESET.** Sao lưu và xác minh đúng database trước khi PO tự reset; Codex không tự xóa database thật.
 
 ## 9. Open Required Fixes
-- **Open Required Fixes: 0.** T06 RF-01 (Medium) **CLOSED / VERIFIED BY CLAUDE**: fix commit `8ef57ad` (`isinstance(value, str)` trước membership); Claude probe độc lập trên DB tạm `action` list/dict/123/true/null/"delete" và 4 ca thêm đều trả 422 đúng câu, dữ liệu không đổi; uvicorn thật cũng trả 422. Evidence: `reports/2026-10-09/claude_review_T06_round2_PASS_WITH_TODO_2026-10-09.md`.
+- **Open Required Fixes: 1.** T07 RF-01 (Medium) **OPEN**: `backend/app/schemas.py` `AdminPredictIn` — `{"text": ""}` trả 422 `String should have at least 1 character` (tiếng Anh) thay vì "Nội dung cần chấm điểm không được để trống."; AC-05 FAIL. Expected fix: để chuỗi rỗng đi vào validator tiếng Việt, giữ 200/401/403/max_length. Evidence: `reports/2026-10-09/claude_review_T07_FAIL_2026-10-09.md`.
+- T06 RF-01 (Medium) **CLOSED / VERIFIED BY CLAUDE**: fix commit `8ef57ad` (`isinstance(value, str)` trước membership); Claude probe độc lập trên DB tạm `action` list/dict/123/true/null/"delete" và 4 ca thêm đều trả 422 đúng câu, dữ liệu không đổi; uvicorn thật cũng trả 422. Evidence: `reports/2026-10-09/claude_review_T06_round2_PASS_WITH_TODO_2026-10-09.md`.
 - T05 RF-01 (High) **CLOSED** — Claude Round 2 xác minh độc lập: fix commit `f5fca8d`; fresh real/mock đều có đủ 9 phim mỗi ngày, hot_week đủ 9, 0 cặp chồng, restart giữ nguyên suất admin/booking. Evidence: `reports/2026-10-08/codex_fix_T05_round1_2026-10-08.md`.
 
 Đã đóng: T04 RF 0; RF-01, RF-02 của T02 CLOSED (Claude review vòng 2); RF-01 → RF-03 của T00 đã đóng; T01 không có RF.
@@ -125,10 +126,16 @@ Nếu trễ: cắt T14 → T15 → rút gọn T05. Không cắt T01–T03, T07�
 | Claude review T06 r2 | TODO-04 câu chữ khi admin đổi nhãn hoặc model đánh giá tiêu cực | ACCEPT_LATER → T12 |
 | Claude review T06 r2 | TODO-05 dữ liệu kiểm thử trong database trước khi chuẩn bị demo | ACCEPT_LATER → T12 — phải backup, không tự xóa DB |
 | Claude review T06 r2 | TODO-06 Task Record còn ghi PLANNED; API không thêm undo review/audit hide-unhide | ACCEPT_WITH_NOTES — coordination là nguồn trạng thái hoạt động; chấp nhận phạm vi API hiện có |
+| Claude review T07 | TODO-01 (Medium, demo) câu mẫu "lê thê": PhoBERT backend 0,0485 (bình thường), research `phobert_A_best` 0,9602 | Chờ PO — giữ minh họa lệch miền (T08–T10) hoặc thay checkpoint runtime ở task riêng |
+| Claude review T07 | TODO-02 `/api/admin/predict` không cô lập exception từng model (một model lỗi → 500) | Đề xuất T11 |
+| Claude review T07 | TODO-03 health công khai trả lỗi thô (đường dẫn tuyệt đối, `"110"` khi joblib hỏng) | Đề xuất T11/T13 |
+| Claude review T07 | TODO-04 422 thiếu/sai kiểu/quá 1.000 ký tự còn câu Pydantic tiếng Anh | Gộp TODO-01 T06 → T11 |
+| Claude review T07 | TODO-05 health không có trường `ACTIVE_MODEL` được yêu cầu khi fallback | Đề xuất T10 |
+| Claude review T07 | TODO-06 report Codex ghi AC-05 PASS khi chưa thử `""` | Process — ghi đủ ca biên AC |
 
 ## 11. Current Next Step
-1. Claude review độc lập T07 trên `task/T07-da-mo-hinh`, đọc implementation report mới nhất và chạy gate theo `AGENT_RULES.md`.
-2. Codex không tự review/approve/merge/tag/đóng T07 và không mở T08.
+1. Codex sửa RF-01 T07 trên `task/T07-da-mo-hinh` (chỉ `backend/app/schemas.py`), chạy lại gate, viết `codex_fix_T07_round1_*.md`, chuyển `FIX_LOOP` → `CLAUDE_REVIEW`.
+2. Claude review Round 2. Không mở T08; Codex/Claude không approve/merge/tag/đóng T07.
 
 ## 12. Active Timeline
 | Ngày | Ai | Sự kiện |
@@ -196,3 +203,4 @@ Nếu trễ: cắt T14 → T15 → rút gọn T05. Không cắt T01–T03, T07�
 | 09/10/2026 | Codex | Final closure sync: T06 → DONE / CLOSED; Overall Status → READY_FOR_NEXT_TASK; Current Active Task → NONE; Next Task → NOT SELECTED / NOT AUTHORIZED. TODO deferred giữ ở T11/T12, không ghi RESOLVED; T07 giữ PLANNED / NOT AUTHORIZED |
 | 09/10/2026 | Codex | PO authorize T07 `APPROVED / READY_FOR_HANDOFF`; pre-flight PASS: đúng branch, tree sạch, `master` chứa `81330c2`, T01 CLOSED, đủ `svm_A.joblib`/LR/NB, xác định môi trường artifact scikit-learn 1.7.2 + joblib 1.5.2 và hai checkpoint PhoBERT; T07 → `IN_PROGRESS`, T06 giữ DONE/CLOSED. |
 | 09/10/2026 | Codex | T07 implementation `e84820d`: registry PhoBERT/SVM/LR/NB + fallback, admin predict/health, trang so sánh real/mock và tài liệu; AC 8/8 DEV PASS, hồi quy 7/7, full gates/security/scope/secret PASS; RF 0, blocker 0, TODO chặn 0; T07 `IN_PROGRESS` → `CLAUDE_REVIEW`. |
+| 09/10/2026 | Claude | Review T07 độc lập (uvicorn thật trên DB tạm, bản chép joblib đổi tên; DB thật/artifact giữ nguyên checksum): AC-01/02/03/04/06/07/08 PASS — parity T02 10 câu lệch ≤ 4,9e-5 và 2.224 câu test khớp tuyệt đối F1 T02, fallback/`ACTIVE_MODEL=svm` đúng, real/mock 375px, hồi quy 7/7, scope/secret/gate đạt; **FAIL** do RF-01 (Medium, AC-05: `text` rỗng → 422 tiếng Anh). T07 `CLAUDE_REVIEW` → `FIX_LOOP`; 6 TODO không chặn; không mở T08 |

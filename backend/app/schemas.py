@@ -326,7 +326,7 @@ class AdminCommentStats(BaseModel):
 
 
 class AdminPredictIn(BaseModel):
-    text: str = Field(min_length=1, max_length=1000)
+    text: str = Field(max_length=1000)
 
     @field_validator("text")
     @classmethod

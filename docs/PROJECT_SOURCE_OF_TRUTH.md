@@ -1,7 +1,7 @@
 # PROJECT SOURCE OF TRUTH — Firefly Cinema
 
 > Cổng vào duy nhất cho mọi agent. Đọc file này trước, sau đó đọc `TASK_COORDINATION_ACTIVE.md` và Task Record đang làm.
-> Cập nhật: 03/10/2026.
+> Cập nhật: 10/10/2026.
 
 ## 1. Project Snapshot
 
@@ -56,6 +56,16 @@ Không âm thầm trộn hai phiên bản mâu thuẫn. Ghi conflict vào mục 
 | Q2 | Dùng Alembic hay chấp nhận xóa firefly.db khi đổi schema | T06 trở đi | CHỐT: NO ALEMBIC / BACKUP_BEFORE_RESET — RESOLVED 08/10/2026. Phải backup và xác minh checksum/integrity trước khi PO tự thực hiện reset database thật; Codex không được tự xóa/reset `firefly.db`. |
 | Q3 | Model mặc định sau T10: PhoBERT B hay admin chọn | T10 | CHỐT: PhoBERT B mặc định (`ACTIVE_MODEL=phobert_b`); PhoBERT A fallback hoặc chọn qua `.env` (`ACTIVE_MODEL=phobert`) và restart backend; không bổ sung giao diện admin chọn model. PO APPROVED 10/10/2026 |
 | Q4 | Deploy lên mạng hay chỉ chạy máy khi bảo vệ | T12, T13 | MỞ |
+
+### Ngoại lệ T10 cho Q2 — Gate 1
+
+`PO-DECISION-T10-REALDB-A1-GATE1-20261010` — **GATE 1 APPROVED ngày 10/10/2026**:
+
+- PO lựa chọn phương án kỹ thuật A1 cho riêng schema T10: chuẩn bị manual SQLite ALTER để bổ sung duy nhất `comments.model_version VARCHAR(100) NULL`, không dùng Alembic, không reset database theo A1 và phải bảo toàn toàn bộ dữ liệu cũ.
+- Preflight backup/restore/schema/API trên clone đã PASS. Runbook dự thảo nằm tại `HUONG_DAN.md` mục 2.1.
+- Đây là ngoại lệ có kiểm soát cho T10, không thay thế quyết định lịch sử **Q2 RESOLVED 08/10/2026 — NO ALEMBIC / BACKUP_BEFORE_RESET** và không tạo chính sách ALTER mặc định cho task khác.
+- **GATE 2 NOT AUTHORIZED**: chưa được ALTER, reset, migrate, seed, restore/ghi đè hoặc khởi động backend có khả năng ghi vào database thật. Mọi thao tác ghi cần một quyết định PO riêng; Codex không được tự thực hiện migration.
+- Database thật chưa được đánh dấu READY. **Phê duyệt phương án kỹ thuật không đồng nghĩa với phê duyệt thao tác thực thi.**
 
 Khi Tín trả lời, đổi trạng thái thành `CHỐT: <nội dung>, <ngày>`.
 

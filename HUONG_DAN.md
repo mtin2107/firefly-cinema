@@ -98,32 +98,126 @@ Kiểm tra:
 - http://localhost:8000/api/health → `{"status":"ok","classifier":"keyword",...}`
 - http://localhost:8000/docs → trang Swagger, bấm thử từng API được. Ảnh chụp trang này dùng tốt cho chương thiết kế API trong báo cáo.
 
-### 2.1. Cập nhật database cho T06/T10 (chỉ làm khi schema còn thiếu cột)
+### 2.1. Cập nhật database cho T06/T10
 
-T06 thêm các cột kiểm duyệt và T10 thêm `comments.model_version` (nullable). Dự án không dùng Alembic, vì vậy `create_all` không tự thêm cột vào database cũ. Việc tạo lại database làm mất dữ liệu hiện có; chỉ PO thực hiện sau khi đã xác minh backup. Codex không tự xóa hoặc reset `backend/firefly.db`.
+> **DRAFT — GATE 2 NOT AUTHORIZED — DO NOT EXECUTE**
 
-1. Tắt backend bằng `Ctrl + C`. Từ thư mục gốc dự án, xác nhận không còn tiến trình nghe cổng 8000:
+Dự án không dùng Alembic và `create_all` không tự thêm cột vào database cũ. Q2 lịch sử vẫn là `NO ALEMBIC / BACKUP_BEFORE_RESET`. Riêng T10, `PO-DECISION-T10-REALDB-A1-GATE1-20261010` đã phê duyệt **Gate 1** để chuẩn bị phương án A1 bảo toàn dữ liệu: manual ALTER bổ sung duy nhất `comments.model_version VARCHAR(100) NULL`. Gate 1 không cho phép chạy ALTER. Mọi thao tác ghi database thật phải chờ quyết định **Gate 2** riêng của PO.
+
+Hai phương án được phân biệt như sau:
+
+- **A1 — manual ALTER bảo toàn dữ liệu:** ngoại lệ chỉ dành cho T10, không dùng Alembic và không reset database. Technical dry-run đã PASS; Gate 2 chưa được authorize.
+- **A2 — backup rồi reset:** phương án Q2 lịch sử, vẫn dùng cho trường hợp được PO chọn riêng. Reset + seed có thể làm mất dữ liệu người dùng, vé và bình luận cũ.
+
+#### A1 — Giai đoạn 1: Pre-execution gate
+
+Chỉ bắt đầu sau khi có quyết định Gate 2 riêng, ghi rõ thao tác, thời điểm, người thực hiện và rollback.
+
+1. Xác minh repo `C:\Projects\firefly-cinema`, đúng branch/HEAD được PO duyệt và không có thay đổi chưa rõ nguồn gốc.
+2. Xác minh runtime `DATABASE_URL` resolve đúng `C:\Projects\firefly-cinema\backend\firefly.db`. Nếu trỏ nơi khác: **HARD STOP**.
+3. Dừng backend và mọi process có thể ghi DB. Lệnh sau không được trả listener:
+
    ```powershell
    Get-NetTCPConnection -LocalPort 8000 -State Listen -ErrorAction SilentlyContinue
    ```
-   Lệnh không được trả về dòng nào.
-2. Sao chép đúng `backend/firefly.db` vào `backup`, xác minh SHA-256 nguồn/bản sao trùng nhau và `PRAGMA integrity_check` của cả hai trả `ok`.
-3. Chỉ khi hai bước trên đạt, PO xóa đúng database thật bằng lệnh:
-   ```powershell
-   Remove-Item -LiteralPath "C:\Projects\firefly-cinema\backend\firefly.db"
-   ```
-4. Khởi động backend để `create_all` tạo schema và seed lại dữ liệu:
-   ```powershell
-   Set-Location "C:\Projects\firefly-cinema\backend"
-   .\venv\Scripts\python.exe -m uvicorn app.main:app --port 8000
-   ```
-5. Trong terminal PowerShell khác, kiểm tra health và schema/dữ liệu mới:
-   ```powershell
-   Invoke-RestMethod "http://localhost:8000/api/health"
-   Set-Location "C:\Projects\firefly-cinema"
-   .\backend\venv\Scripts\python.exe -c "import sqlite3; c=sqlite3.connect(r'backend/firefly.db'); print(c.execute('pragma integrity_check').fetchone()); print([r[1] for r in c.execute('pragma table_info(comments)')]); print(c.execute('select count(*) from comments').fetchone())"
-   ```
-   Kết quả phải có `ok`; danh sách cột phải có `human_label`, `reviewed_by`, `reviewed_at`, `hidden`, `model_version`; số bình luận seed phải lớn hơn 0.
+
+4. Mở DB ở `mode=ro`, `query_only=ON`; xác minh bảng `comments` đúng schema kỳ vọng và chưa có `model_version`. Nếu cột đã có hoặc schema khác: **HARD STOP**, không tự sửa tiếp.
+5. Xác minh SHA-256, `integrity_check`, `foreign_key_check`, row counts và fingerprints hiện thời. Snapshot preflight lúc 14:50 ngày 10/10/2026 chỉ là evidence lịch sử, không thay fresh gate.
+
+#### A1 — Giai đoạn 2: Fresh consistent backup
+
+1. Tạo thư mục timestamp mới dưới `backup/T10_2026-10-10/`; không ghi đè bất kỳ backup nào.
+2. Dùng SQLite Online Backup API với nguồn mở read-only; không sao chép thô khi có writer/WAL chưa được kiểm soát.
+3. Ghi source path, backup path, thời gian, kích thước và SHA-256.
+4. Trên source và backup, xác minh `integrity_check=ok`, `foreign_key_check` không có dòng, schema/PK/FK/index/constraint, counts và row fingerprints khớp.
+5. Dựng một restore clone riêng từ backup và lặp lại validation. Nếu snapshot không phục hồi được hoặc logic không khớp: **HARD STOP**.
+
+Lệnh tạo backup phải được PO duyệt ở Gate 2. Mẫu dự thảo, chưa chạy:
+
+```powershell
+$executionStamp = Get-Date -Format "yyyyMMdd_HHmmss"
+$freshBackupDir = "C:\Projects\firefly-cinema\backup\T10_2026-10-10\gate2_$executionStamp"
+New-Item -ItemType Directory -Path $freshBackupDir
+$env:T10_GATE2_BACKUP = Join-Path $freshBackupDir "firefly_online_backup.db"
+@'
+import os, sqlite3
+source = "file:C:/Projects/firefly-cinema/backend/firefly.db?mode=ro"
+target = os.environ["T10_GATE2_BACKUP"]
+src = sqlite3.connect(source, uri=True)
+src.execute("PRAGMA query_only=ON")
+dst = sqlite3.connect(target)
+src.backup(dst)
+dst.commit()
+dst.close()
+src.close()
+'@ | C:\Projects\firefly-cinema\backend\venv\Scripts\python.exe -
+Remove-Item Env:T10_GATE2_BACKUP
+```
+
+#### A1 — Giai đoạn 3: Schema change
+
+> **DỰ THẢO CHO PO REVIEW — KHÔNG CHẠY KHI CHƯA CÓ GATE 2**
+
+Chỉ một thay đổi được phép: `ALTER TABLE comments ADD COLUMN model_version VARCHAR(100);`. Không DROP, DELETE, reset, seed hoặc sửa cột khác.
+
+```powershell
+$env:T10_GATE2_REAL_DB = "C:\Projects\firefly-cinema\backend\firefly.db"
+@'
+import os, sqlite3
+path = os.environ["T10_GATE2_REAL_DB"]
+conn = sqlite3.connect(path)
+try:
+    conn.execute("PRAGMA foreign_keys=ON")
+    conn.execute("BEGIN IMMEDIATE")
+    columns = [row[1] for row in conn.execute("PRAGMA table_info(comments)")]
+    if "model_version" in columns:
+        raise RuntimeError("model_version already exists; stop without ALTER")
+    conn.execute("ALTER TABLE comments ADD COLUMN model_version VARCHAR(100)")
+    conn.commit()
+except Exception:
+    conn.rollback()
+    raise
+finally:
+    conn.close()
+'@ | C:\Projects\firefly-cinema\backend\venv\Scripts\python.exe -
+Remove-Item Env:T10_GATE2_REAL_DB
+```
+
+Nếu transaction lỗi: rollback và dừng. Không tự chuyển sang A2.
+
+#### A1 — Giai đoạn 4: Post-schema verification
+
+Trước khi startup backend, mở DB read-only và bắt buộc xác minh:
+
+- `model_version` có kiểu `VARCHAR(100)`, nullable, default `NULL`.
+- Mọi comment cũ có `model_version IS NULL`; ID, content, `model_name`, nhãn và điểm không đổi.
+- Counts và fingerprints toàn bộ cột/bảng gốc khớp snapshot fresh.
+- PK/FK/index/check constraint không đổi.
+- `integrity_check=ok`; `foreign_key_check` không có lỗi.
+
+Bất kỳ sai lệch nào cũng là **HARD STOP**; không startup backend.
+
+#### A1 — Giai đoạn 5: Runtime smoke verification
+
+Chỉ sau Gate 2 và Giai đoạn 4 PASS:
+
+1. Khởi động backend trên database thật.
+2. Kiểm tra `/api/health`, `/api/movies`, GET/POST comments và admin comments.
+3. Xác minh comment mới lưu đúng `model_name`/`model_version`, comment cũ `model_version=NULL` vẫn hiển thị, admin security giữ 401/403/200 và không có HTTP 500 `no such column`.
+4. Chạy lại integrity/FK và đối chiếu dữ liệu gốc.
+
+`_ensure_showtimes` chạy khi startup và có thể bổ sung suất chiếu. Phải lưu snapshot/fingerprint trước startup, ghi riêng các dòng mới hợp lệ và chứng minh không có dòng gốc bị sửa hoặc mất.
+
+#### A1 — Giai đoạn 6: Rollback
+
+1. Dừng backend ngay; bảo toàn database gặp lỗi dưới tên quarantine để điều tra.
+2. Không ghi đè backup gốc. Restore snapshot sang file mới và xác minh integrity, FK, counts, fingerprints.
+3. Chỉ thay thế database thật khi PO authorize restore riêng và mọi validation PASS.
+4. Rollback về snapshot cũ cũng đưa schema trở lại trạng thái chưa có `model_version`; T10 quay lại `PENDING_PO_DB_ACTION`.
+
+#### A2 — Backup trước khi reset (quy trình Q2 lịch sử)
+
+A2 chỉ được chạy khi PO chọn và authorize riêng. Dừng backend, tạo fresh backup đã xác minh như trên, rồi PO mới được xóa đúng `backend/firefly.db` và startup để `create_all` + seed tạo DB mới. Phải chấp nhận rõ rằng reset không tự bảo toàn tài khoản, vé, ghế và bình luận cũ; không import dữ liệu cũ nếu chưa có kế hoạch mapping/transaction/PK-FK validation riêng. Codex không tự xóa/reset database thật.
 
 ---
 

@@ -141,7 +141,7 @@ function createDb() {
   ];
   const comments = sample.map(([movie_id, user_id, content], i) => ({
     id: i + 1, movie_id, user_id, content, ...fakeClassify(content),
-    model_name: "keyword", human_label: null, reviewed_by: null, reviewed_at: null, hidden: false,
+    model_name: "phobert_b", model_version: "phobert-B-2026-10-09-mock", human_label: null, reviewed_by: null, reviewed_at: null, hidden: false,
     created_at: new Date(Date.now() - (i + 1) * 3600 * 1000 * 5).toISOString(),
   }));
   const showtimes = buildShowtimes();
@@ -164,6 +164,7 @@ function load() {
       if (!db.seq.showtime) db.seq.showtime = Math.max(...db.showtimes.map((item) => item.id), 0) + 1;
       db.comments.forEach((comment) => {
         if (!comment.model_name) comment.model_name = "keyword";
+        if (!("model_version" in comment)) comment.model_version = null;
         if (!("human_label" in comment)) comment.human_label = null;
         if (!("reviewed_by" in comment)) comment.reviewed_by = null;
         if (!("reviewed_at" in comment)) comment.reviewed_at = null;
@@ -224,6 +225,7 @@ const commentOut = (c) => ({
 });
 const adminCommentOut = (c) => ({
   ...commentOut(c), movie_title: movieById(c.movie_id).title, model_name: c.model_name,
+  model_version: c.model_version,
   human_label: c.human_label, reviewed_by: c.reviewed_by,
   reviewed_by_name: db.users.find((u) => u.id === c.reviewed_by)?.full_name ?? null,
   reviewed_at: c.reviewed_at, hidden: c.hidden,
@@ -410,7 +412,7 @@ export const mockApi = {
       const text = content.trim();
       if (text.length < 2 || text.length > 1000) throw new ApiError("Bình luận cần từ 2 đến 1000 ký tự.", 400);
       const c = { id: db.seq.comment++, movie_id: Number(movieId), user_id: user.id, content: text,
-        ...fakeClassify(text), model_name: "keyword", human_label: null, reviewed_by: null,
+        ...fakeClassify(text), model_name: "phobert_b", model_version: "phobert-B-2026-10-09-mock", human_label: null, reviewed_by: null,
         reviewed_at: null, hidden: false, created_at: nowIso() };
       db.comments.push(c); save();
       return commentOut(c);
@@ -424,8 +426,8 @@ export const mockApi = {
       if (!value) throw new ApiError("Nội dung cần chấm điểm không được để trống.", 422);
       const prediction = fakeClassify(value);
       return [{
-        model: "mock",
-        version: "keyword-v1",
+        model: "phobert_b",
+        version: "phobert-B-2026-10-09-mock",
         label: prediction.is_negative ? "tieu_cuc" : "binh_thuong",
         score: prediction.negative_score,
         ms: 0.2,

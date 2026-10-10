@@ -129,7 +129,7 @@ export default function AdminComments() {
                 return <tr key={comment.id}>
                   <td><strong>{comment.movie_title}</strong><br /><span className="muted">{comment.user_name} · {relativeTime(comment.created_at)}</span></td>
                   <td className="admin-table__content">{comment.content}</td>
-                  <td><Label negative={comment.is_negative} /><div className="meter"><span className="meter__fill" style={{ width: `${comment.negative_score * 100}%` }} /></div><span className="meter__num">{comment.negative_score.toFixed(2)} · {comment.model_name}</span></td>
+                  <td><Label negative={comment.is_negative} /><div className="meter"><span className="meter__fill" style={{ width: `${comment.negative_score * 100}%` }} /></div><span className="meter__num">{comment.negative_score.toFixed(2)} · {comment.model_name} · {comment.model_version ?? "Chưa có phiên bản"}</span></td>
                   <td>{comment.reviewed ? <><Label negative={comment.human_label === 1} /><small className="moderation-meta">{comment.reviewed_by_name ?? "Không rõ người duyệt"}<br />{comment.reviewed_at ? relativeTime(comment.reviewed_at) : "Chưa có thời gian duyệt"}</small></> : <span className="muted">Chưa duyệt</span>}</td>
                   <td><span className={`label ${comment.hidden ? "label--neg" : "label--ok"}`}>{comment.hidden ? "Đã ẩn" : "Đang hiện"}</span></td>
                   <td><div className="moderation-actions">

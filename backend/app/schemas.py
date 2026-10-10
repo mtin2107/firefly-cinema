@@ -281,6 +281,7 @@ class AdminCommentOut(CommentOut):
     model_config = ConfigDict(protected_namespaces=())
     movie_title: str
     model_name: str
+    model_version: str | None
     human_label: int | None
     reviewed_by: int | None
     reviewed_by_name: str | None

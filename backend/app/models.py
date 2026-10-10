@@ -4,6 +4,11 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 from .database import Base
 
 
+def _active_model_version() -> str:
+    from .classifier import classifier
+    return classifier.version
+
+
 class User(Base):
     __tablename__ = "users"
     id: Mapped[int] = mapped_column(primary_key=True)
@@ -75,7 +80,10 @@ class Comment(Base):
     content: Mapped[str] = mapped_column(Text)
     is_negative: Mapped[bool] = mapped_column(Boolean)       # kết quả mô hình
     negative_score: Mapped[float] = mapped_column(Float)     # xác suất tiêu cực 0..1
-    model_name: Mapped[str] = mapped_column(String(30))      # "phobert" | "keyword"
+    model_name: Mapped[str] = mapped_column(String(30))      # "phobert" | "phobert_b" | "keyword"
+    model_version: Mapped[str | None] = mapped_column(
+        String(100), nullable=True, default=_active_model_version
+    )
     human_label: Mapped[int | None] = mapped_column(Integer, nullable=True)
     reviewed_by: Mapped[int | None] = mapped_column(ForeignKey("users.id"), nullable=True)
     reviewed_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)

@@ -15,8 +15,11 @@ TOKEN_EXPIRE_HOURS = 24
 DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///./firefly.db")
 FRONTEND_ORIGINS = [o.strip() for o in os.getenv("FRONTEND_ORIGIN", "http://localhost:5173").split(",")]
 
-MODEL_DIR = os.getenv("MODEL_DIR", "")
-ACTIVE_MODEL = os.getenv("ACTIVE_MODEL", "phobert").strip().lower()
+MODEL_DIR = os.getenv("MODEL_DIR", "models/phobert-binhluan")
+MODEL_DIR_B = os.getenv("MODEL_DIR_B", "models/phobert-binhluan-B")
+MODEL_VERSION_A = os.getenv("MODEL_VERSION_A", "A-backend").strip()
+MODEL_VERSION_B = os.getenv("MODEL_VERSION_B", "").strip()
+ACTIVE_MODEL = os.getenv("ACTIVE_MODEL", "phobert_b").strip().lower()
 SKLEARN_MODELS = os.getenv(
     "SKLEARN_MODELS",
     "svm:../ml/artifacts/baselines/svm_A.joblib,"

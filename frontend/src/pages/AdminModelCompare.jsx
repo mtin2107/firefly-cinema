@@ -49,6 +49,7 @@ export default function AdminModelCompare() {
       <h1 className="page-title">So sánh mô hình</h1>
       <p className="muted admin__intro">
         Nhập cùng một câu để xem nhãn, điểm tiêu cực và thời gian suy luận của từng mô hình.
+        PhoBERT B là model mặc định; PhoBERT A được giữ để đối chiếu và fallback.
         Điểm SVM là sigmoid của decision function, không phải xác suất đã hiệu chỉnh.
       </p>
 

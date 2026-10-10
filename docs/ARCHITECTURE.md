@@ -177,8 +177,10 @@ Ngoài máy: Google Drive `MyDrive/thesis/data/…`, `MyDrive/thesis_results/…
 - `normalize()` trong `backend/app/classifier.py` là hàm tiền xử lý chuẩn. Notebook đánh giá mọi model phải dùng đúng hàm này.
 - Không sửa `normalize()` khi chưa đo lại F1 trên test và ghi vào model card.
 - Nhãn `1 = tieu_cuc`, ngưỡng mặc định `NEGATIVE_THRESHOLD=0.5`.
-- Thiếu file model ⇒ web vẫn chạy (fallback keyword hoặc bỏ qua model đó), `/api/health` báo lỗi rõ.
-- Registry nạp PhoBERT và các pipeline được khai báo trong `SKLEARN_MODELS`; `ACTIVE_MODEL` chọn model chấm bình luận mới. Nếu model active lỗi, thứ tự fallback là PhoBERT rồi keyword.
+- T10 đăng ký `phobert_b` từ `MODEL_DIR_B` bên cạnh `phobert` (A). Mặc định `ACTIVE_MODEL=phobert_b`; nếu B thiếu hoặc không nạp được thì fallback sang A, sau đó mới tới keyword. `ACTIVE_MODEL=phobert` và restart chọn lại A.
+- PhoBERT active được nạp khi registry khởi tạo; PhoBERT còn lại nạp lười khi trang so sánh gọi và được giải phóng sau inference để tránh giữ đồng thời hai checkpoint trong RAM. Model/tokenizer chỉ đọc file local.
+- Version PhoBERT lấy từ `MODEL_VERSION_A`/`MODEL_VERSION_B`, hoặc `version.txt` trong thư mục model; nếu không có thì dùng fingerprint `config.json`. `/api/health` báo model thực sự active, `active_version`, trạng thái available/loaded và lỗi fallback.
+- `comments.model_version` nullable để giữ dữ liệu cũ; bình luận mới lưu cả tên và version của model thực sự chấm điểm.
 - `POST /api/admin/predict` chạy các model đã nạp trên cùng `normalize()` và chỉ dành cho admin. Điểm SVM là sigmoid của `decision_function`, không phải xác suất đã hiệu chỉnh.
 
 ### 2.7. Quản trị suất chiếu

@@ -98,16 +98,16 @@ Kiểm tra:
 - http://localhost:8000/api/health → `{"status":"ok","classifier":"keyword",...}`
 - http://localhost:8000/docs → trang Swagger, bấm thử từng API được. Ảnh chụp trang này dùng tốt cho chương thiết kế API trong báo cáo.
 
-### 2.1. Cập nhật database cho T06 (chỉ làm một lần)
+### 2.1. Cập nhật database cho T06/T10 (chỉ làm khi schema còn thiếu cột)
 
-T06 thêm cột kiểm duyệt vào bảng `comments`. Dự án không dùng Alembic, vì vậy database cũ phải được tạo lại. Việc này làm mất dữ liệu đang có; chỉ PO thực hiện sau khi đã xác minh backup.
+T06 thêm các cột kiểm duyệt và T10 thêm `comments.model_version` (nullable). Dự án không dùng Alembic, vì vậy `create_all` không tự thêm cột vào database cũ. Việc tạo lại database làm mất dữ liệu hiện có; chỉ PO thực hiện sau khi đã xác minh backup. Codex không tự xóa hoặc reset `backend/firefly.db`.
 
 1. Tắt backend bằng `Ctrl + C`. Từ thư mục gốc dự án, xác nhận không còn tiến trình nghe cổng 8000:
    ```powershell
    Get-NetTCPConnection -LocalPort 8000 -State Listen -ErrorAction SilentlyContinue
    ```
    Lệnh không được trả về dòng nào.
-2. Xác nhận bản backup T06 đã được ghi trong report, có checksum SHA-256 và `PRAGMA integrity_check` trả `ok`.
+2. Sao chép đúng `backend/firefly.db` vào `backup`, xác minh SHA-256 nguồn/bản sao trùng nhau và `PRAGMA integrity_check` của cả hai trả `ok`.
 3. Chỉ khi hai bước trên đạt, PO xóa đúng database thật bằng lệnh:
    ```powershell
    Remove-Item -LiteralPath "C:\Projects\firefly-cinema\backend\firefly.db"
@@ -123,7 +123,7 @@ T06 thêm cột kiểm duyệt vào bảng `comments`. Dự án không dùng Ale
    Set-Location "C:\Projects\firefly-cinema"
    .\backend\venv\Scripts\python.exe -c "import sqlite3; c=sqlite3.connect(r'backend/firefly.db'); print(c.execute('pragma integrity_check').fetchone()); print([r[1] for r in c.execute('pragma table_info(comments)')]); print(c.execute('select count(*) from comments').fetchone())"
    ```
-   Kết quả phải có `ok`; danh sách cột phải có `human_label`, `reviewed_by`, `reviewed_at`, `hidden`; số bình luận seed phải lớn hơn 0.
+   Kết quả phải có `ok`; danh sách cột phải có `human_label`, `reviewed_by`, `reviewed_at`, `hidden`, `model_version`; số bình luận seed phải lớn hơn 0.
 
 ---
 
@@ -173,7 +173,7 @@ Thư mục phải có tối thiểu: `config.json`, `model.safetensors` (hoặc 
 
 ### 4.2. Đưa model vào backend
 
-1. Tải cả thư mục từ Google Drive về, đặt thành `backend/models/phobert-binhluan/`.
+1. Giữ model A tại `backend/models/phobert-binhluan/`; đặt checkpoint B đã xác minh tại `backend/models/phobert-binhluan-B/`.
 2. Cài thư viện ML đã ghim phiên bản (trong venv, PowerShell):
    ```powershell
    pip install torch==2.11.0 --index-url https://download.pytorch.org/whl/cpu
@@ -182,6 +182,9 @@ Thư mục phải có tối thiểu: `config.json`, `model.safetensors` (hoặc 
 3. Sửa `backend/.env`:
    ```
     MODEL_DIR=models/phobert-binhluan
+    MODEL_DIR_B=models/phobert-binhluan-B
+    MODEL_VERSION_A=A-backend
+    MODEL_VERSION_B=phobert-B-2026-10-09
     NEGATIVE_LABEL_ID=1
     USE_WORD_SEGMENT=false
     USE_TEXT_NORM=true
@@ -189,7 +192,7 @@ Thư mục phải có tối thiểu: `config.json`, `model.safetensors` (hoặc 
     - `NEGATIVE_LABEL_ID`: chỉ số của nhãn tiêu cực trong `id2label` bạn in ở 4.1. Ví dụ `{0: "binh_thuong", 1: "tieu_cuc"}` thì để `1`. Model 3 lớp cũng dùng được, chỉ cần trỏ đúng lớp tiêu cực.
     - Model A dùng cột `text_norm`: bật `USE_TEXT_NORM` và để `USE_WORD_SEGMENT=false`. Không tách từ vì dữ liệu train của model A không có dấu gạch dưới nối từ.
 4. Chạy lại backend (`Ctrl + C`, rồi `uvicorn app.main:app --reload --port 8000`).
-5. Mở http://localhost:8000/api/health, phải thấy `"classifier":"phobert"`. Nếu vẫn là `keyword`, xem `classifier_error` để biết lỗi.
+5. Mở http://localhost:8000/api/health, phải thấy `"classifier":"phobert_b"` và `"active_version":"phobert-B-2026-10-09"`. Nếu runtime fallback, xem `classifier_error` để biết lỗi.
 
 ### 4.4. Nạp các mô hình T01 và chọn model chấm bình luận
 
@@ -200,15 +203,24 @@ backend\venv\Scripts\python -m pip install -r backend\requirements-ml.txt
 ```
 
 ```env
-ACTIVE_MODEL=phobert
+ACTIVE_MODEL=phobert_b
 SKLEARN_MODELS=svm:../ml/artifacts/baselines/svm_A.joblib,lr:../ml/artifacts/baselines/lr_A.joblib,nb:../ml/artifacts/baselines/nb_A.joblib
 ```
 
-Khởi động lại backend và kiểm tra `/api/health`: mỗi model có `loaded` và `error`, còn `active_model` là model thực sự dùng. Nếu `ACTIVE_MODEL` không nạp được, backend tự dùng PhoBERT rồi keyword. Trang admin `/quan-tri/so-sanh-mo-hinh` chỉ so sánh model, không thay đổi `ACTIVE_MODEL`.
+Khởi động lại backend và kiểm tra `/api/health`: `active_model` là model thực sự dùng, `active_version` là version tương ứng; mỗi model có `available`, `loaded`, `active` và `error`. Nếu B không nạp được, backend fallback về PhoBERT A rồi keyword và không báo B là active. Muốn quay lại A, đặt `ACTIVE_MODEL=phobert` rồi restart. Trang admin `/quan-tri/so-sanh-mo-hinh` chỉ so sánh model, không thay đổi `ACTIVE_MODEL`.
+
+Chạy parity PhoBERT B:
+
+```powershell
+Set-Location "C:\Projects\firefly-cinema\backend"
+.\venv\Scripts\python.exe scripts\check_model.py --model phobert_b
+```
+
+Kết quả phải là `PARITY=10/10` và `MAX_ABS_DELTA` không quá `0.001`.
 
 ### 4.3. Chấm lại dữ liệu mẫu bằng PhoBERT
 
-Các bình luận mẫu được chấm lúc tạo database. Muốn chấm lại bằng PhoBERT: tắt backend, xóa file `backend/firefly.db`, chạy lại. Cột `model_name` trong bảng `comments` ghi rõ mỗi bình luận được chấm bởi `phobert` hay `keyword`, dùng khi viết phần thực nghiệm.
+Các bình luận mẫu được chấm lúc tạo database. Cột `model_name` và `model_version` ghi model thực tế đã dùng. Không tự xóa database để chấm lại; thực hiện đúng quy trình backup/PO reset ở mục 2.1 nếu thật sự cần tạo lại dữ liệu.
 
 Ngưỡng ẩn bình luận chỉnh bằng `NEGATIVE_THRESHOLD` (mặc định 0.5).
 

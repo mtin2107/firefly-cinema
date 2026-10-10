@@ -1,0 +1,132 @@
+{
+  "schema_version": "1.0",
+  "source": "T10_PO_APPROVED_REFERENCE_BASELINE",
+  "created_date": "2026-10-10",
+  "purpose": "Parity test between direct Transformers reference inference and the T10 backend runtime; not an independent validation of classification quality.",
+  "model": {
+    "identifier": "phobert-B-2026-10-09",
+    "artifact_path": "ml/artifacts/phobert_B_best",
+    "model_class": "RobertaForSequenceClassification",
+    "tokenizer_class": "PhobertTokenizer",
+    "sha256": {
+      "model.safetensors": "0b80947ca8fecffbfaa39373e92d1ed44d638dcb4981ff00da2dd08921d22f4f",
+      "config.json": "3af764b446752118aa33982d7983f52919318373ff3108add0128834f28005da",
+      "selection_manifest.json": "d21786d2354c9ac054155c8975da579cede1fc9d05a18b5949c9716f0fa34035"
+    }
+  },
+  "inference": {
+    "method": "Direct local AutoTokenizer and AutoModelForSequenceClassification load; model.eval(); torch.inference_mode(); softmax(logits)[1]. The backend classifier wrapper was not imported or called.",
+    "normalization": "Verbatim T10 probe copy of the current backend normalize contract: NFC, lowercase, repeated-character reduction, punctuation spacing, and _ABBR token replacement.",
+    "word_segmentation": false,
+    "max_length": 256,
+    "negative_threshold": 0.5,
+    "label_mapping": {
+      "0": "binh_thuong",
+      "1": "tieu_cuc"
+    },
+    "reference_runs": 2,
+    "reference_run_max_abs_delta": 0.0,
+    "environment": {
+      "python": "3.13.2",
+      "torch": "2.11.0+cpu",
+      "transformers": "5.18.0"
+    }
+  },
+  "movie_test_recheck": {
+    "path": "data/phim/movie_test.csv",
+    "sha256": "5af8f616429e325f89bef723e4d0fdf867b7cd7d1c777eb30bb024b18a95c660",
+    "rows": 149,
+    "label_counts": {
+      "0": 48,
+      "1": 101
+    },
+    "f1_negative": 0.9175257731958762,
+    "macro_f1": 0.8818398096748612,
+    "t09_expected_f1_negative": 0.917525773196,
+    "t09_expected_macro_f1": 0.881839809675,
+    "metric_tolerance": 0.001
+  },
+  "score_tolerance": 0.001,
+  "sentences": [
+    {
+      "id": "T10-01",
+      "text": "Phim dài lê thê, xem mà mệt",
+      "source": "T08 special probe / T10 mandatory",
+      "normalized_text": "phim dài lê thê , xem mà mệt",
+      "expected_negative_score": 0.998829185962677,
+      "expected_label": "tieu_cuc"
+    },
+    {
+      "id": "T10-02",
+      "text": "Ko hay như quảng cáo, hơi thất vọng!!!",
+      "source": "ml/model_card_A.md test 1",
+      "normalized_text": "không hay như quảng cáo , hơi thất vọng ! ! !",
+      "expected_negative_score": 0.9992254972457886,
+      "expected_label": "tieu_cuc"
+    },
+    {
+      "id": "T10-03",
+      "text": "Phim dài lê thê, nửa đầu buồn ngủ thật sự.",
+      "source": "ml/model_card_A.md test 2",
+      "normalized_text": "phim dài lê thê , nửa đầu buồn ngủ thật sự .",
+      "expected_negative_score": 0.9989560842514038,
+      "expected_label": "tieu_cuc"
+    },
+    {
+      "id": "T10-04",
+      "text": "Tốtttt quáaaa!!!",
+      "source": "ml/model_card_A.md test 3",
+      "normalized_text": "tốt quáa ! ! !",
+      "expected_negative_score": 0.0011152501683682203,
+      "expected_label": "binh_thuong"
+    },
+    {
+      "id": "T10-05",
+      "text": "Xem tại https://example.com/phim?id=1 nhé",
+      "source": "ml/model_card_A.md test 4",
+      "normalized_text": "xem tại https : //example . com/phim ? id=1 nhé",
+      "expected_negative_score": 0.0015578498132526875,
+      "expected_label": "binh_thuong"
+    },
+    {
+      "id": "T10-06",
+      "text": "khg ổn, đk xem lại",
+      "source": "ml/model_card_A.md test 6",
+      "normalized_text": "không ổn , được xem lại",
+      "expected_negative_score": 0.9991477727890015,
+      "expected_label": "tieu_cuc"
+    },
+    {
+      "id": "T10-07",
+      "text": "Điện thoại/Phim - giá: 100k",
+      "source": "ml/model_card_A.md test 7",
+      "normalized_text": "điện thoại/phim - giá : 100k",
+      "expected_negative_score": 0.001977055100724101,
+      "expected_label": "binh_thuong"
+    },
+    {
+      "id": "T10-08",
+      "text": "hông thik lắm nhưng diễn viên ổn",
+      "source": "ml/model_card_A.md test 8",
+      "normalized_text": "hông thik lắm nhưng diễn viên ổn",
+      "expected_negative_score": 0.9988849759101868,
+      "expected_label": "tieu_cuc"
+    },
+    {
+      "id": "T10-09",
+      "text": "  Mik thấy bthg, cx được.  ",
+      "source": "ml/model_card_A.md test 9 + T10 whitespace",
+      "normalized_text": "mình thấy bthg , cx được .",
+      "expected_negative_score": 0.0012885205214843154,
+      "expected_label": "binh_thuong"
+    },
+    {
+      "id": "T10-10",
+      "text": "Phông cảnh đẹp… nhưng nhạc dở",
+      "source": "ml/model_card_A.md test 10",
+      "normalized_text": "phông cảnh đẹp … nhưng nhạc dở",
+      "expected_negative_score": 0.9991532564163208,
+      "expected_label": "tieu_cuc"
+    }
+  ]
+}

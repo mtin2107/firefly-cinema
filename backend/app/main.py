@@ -57,4 +57,5 @@ def health():
         "classifier_error": classifier.error,
         "models": classifier.health(),
         "active_model": classifier.name,
+        "active_version": classifier.version,
     }

@@ -1,4 +1,7 @@
 """Registry các mô hình phân loại bình luận tiêu cực."""
+import gc
+import hashlib
+import json
 import math
 import os
 import re
@@ -9,6 +12,9 @@ from typing import Protocol
 from .config import (
     ACTIVE_MODEL,
     MODEL_DIR,
+    MODEL_DIR_B,
+    MODEL_VERSION_A,
+    MODEL_VERSION_B,
     NEGATIVE_LABEL_ID,
     NEGATIVE_THRESHOLD,
     SKLEARN_MODELS,
@@ -55,16 +61,47 @@ def _model_path(value: str) -> Path:
 
 
 class PhoBertModel:
-    name = "phobert"
-    version = "A-backend"
-
-    def __init__(self, model_dir: str) -> None:
+    def __init__(self, name: str, model_dir: str, configured_version: str = "") -> None:
+        self.name = name
         self.loaded = False
+        self.available = False
         self.error: str | None = None
         self._path = _model_path(model_dir) if model_dir else None
+        self.version = configured_version or self._read_version()
         if not self._path or not self._path.is_dir():
             self.error = f"Không tìm thấy thư mục model: {model_dir or '(chưa cấu hình)'}"
             return
+        config_path = self._path / "config.json"
+        try:
+            config = json.loads(config_path.read_text(encoding="utf-8"))
+            if config.get("id2label") != {"0": "binh_thuong", "1": "tieu_cuc"}:
+                raise ValueError("id2label phải là 0=binh_thuong, 1=tieu_cuc")
+            if not (self._path / "model.safetensors").is_file():
+                raise FileNotFoundError("Thiếu model.safetensors")
+            self.available = True
+        except Exception as exc:
+            self.error = str(exc)
+            print(f"[classifier] Invalid {self.name}: {self.error!a}")
+
+    def _read_version(self) -> str:
+        if not self._path:
+            return "unknown"
+        version_path = self._path / "version.txt"
+        if version_path.is_file():
+            value = version_path.read_text(encoding="utf-8").strip()
+            if value:
+                return value
+        config_path = self._path / "config.json"
+        if config_path.is_file():
+            digest = hashlib.sha256(config_path.read_bytes()).hexdigest()[:12]
+            return f"config-sha256-{digest}"
+        return "unknown"
+
+    def ensure_loaded(self) -> bool:
+        if self.loaded:
+            return True
+        if not self.available:
+            return False
         try:
             import torch
             from transformers import AutoModelForSequenceClassification, AutoTokenizer
@@ -76,10 +113,21 @@ class PhoBertModel:
             )
             self._model.eval()
             self.loaded = True
-            print(f"[classifier] Loaded phobert from {self._path}")
+            self.error = None
+            print(f"[classifier] Loaded {self.name} from {self._path}")
         except Exception as exc:
             self.error = str(exc)
-            print(f"[classifier] Failed to load phobert: {self.error!a}")
+            self.available = False
+            print(f"[classifier] Failed to load {self.name}: {self.error!a}")
+        return self.loaded
+
+    def release(self) -> None:
+        if not self.loaded:
+            return
+        del self._model
+        del self._tokenizer
+        self.loaded = False
+        gc.collect()
 
     def _prepare(self, text: str) -> str:
         if USE_TEXT_NORM:
@@ -93,6 +141,8 @@ class PhoBertModel:
         return text
 
     def predict(self, text: str) -> tuple[bool, float]:
+        if not self.ensure_loaded():
+            raise RuntimeError(self.error or f"Model {self.name} không khả dụng")
         inputs = self._tokenizer(
             self._prepare(text), return_tensors="pt", truncation=True, max_length=MAX_LENGTH
         )
@@ -154,18 +204,21 @@ class KeywordModel:
 
 class ModelRegistry:
     def __init__(self) -> None:
-        self._models: dict[str, ClassifierModel] = {"phobert": PhoBertModel(MODEL_DIR)}
+        self._models: dict[str, ClassifierModel] = {
+            "phobert": PhoBertModel("phobert", MODEL_DIR, MODEL_VERSION_A),
+            "phobert_b": PhoBertModel("phobert_b", MODEL_DIR_B, MODEL_VERSION_B),
+        }
         for name, path in self._parse_sklearn_models(SKLEARN_MODELS):
             self._models[name] = SklearnModel(name, path)
         self._models["keyword"] = KeywordModel()
         self.requested_active_model = ACTIVE_MODEL
+        self.active = self._select_active(ACTIVE_MODEL)
         requested = self._models.get(ACTIVE_MODEL)
         self.active_error = (
-            requested.error if requested and not requested.loaded
-            else None if requested
+            None if self.active.name == ACTIVE_MODEL
+            else requested.error if requested
             else f"ACTIVE_MODEL không được cấu hình: {ACTIVE_MODEL}"
         )
-        self.active = self._select_active(ACTIVE_MODEL)
 
     @staticmethod
     def _parse_sklearn_models(value: str) -> list[tuple[str, str]]:
@@ -186,7 +239,11 @@ class ModelRegistry:
         candidates = (requested, "phobert", "keyword")
         for name in candidates:
             model = self._models.get(name)
-            if model and model.loaded:
+            if isinstance(model, PhoBertModel):
+                ready = model.ensure_loaded()
+            else:
+                ready = bool(model and model.loaded)
+            if model and ready:
                 if name != requested:
                     print(f"[classifier] ACTIVE_MODEL={requested} unavailable; using {name}")
                 return model
@@ -208,12 +265,26 @@ class ModelRegistry:
         return self.active.predict(text)
 
     def available_models(self) -> list[ClassifierModel]:
-        primary = [model for name, model in self._models.items() if name != "keyword" and model.loaded]
+        primary = [
+            model for name, model in self._models.items()
+            if name != "keyword" and (model.loaded or getattr(model, "available", False))
+        ]
         return primary or [self._models["keyword"]]
+
+    def release_if_inactive(self, model: ClassifierModel) -> None:
+        if model is not self.active and isinstance(model, PhoBertModel):
+            model.release()
 
     def health(self) -> list[dict[str, object]]:
         return [
-            {"name": model.name, "version": model.version, "loaded": model.loaded, "error": model.error}
+            {
+                "name": model.name,
+                "version": model.version,
+                "loaded": model.loaded,
+                "available": model.loaded or getattr(model, "available", False),
+                "active": model is self.active,
+                "error": model.error,
+            }
             for model in self._models.values()
         ]
 

@@ -31,6 +31,7 @@ def to_out(c: Comment) -> dict:
             "is_negative": c.is_negative, "effective_negative": effective_negative, "reviewed": reviewed,
             "negative_score": c.negative_score, "created_at": c.created_at,
             "movie_title": c.movie.title, "model_name": c.model_name,
+            "model_version": c.model_version,
             "human_label": c.human_label, "reviewed_by": c.reviewed_by,
             "reviewed_by_name": c.reviewer.full_name if c.reviewer else None,
             "reviewed_at": c.reviewed_at, "hidden": c.hidden}
@@ -52,7 +53,8 @@ def create_comment(movie_id: int, body: CommentIn, user: User = Depends(get_curr
     text = body.content.strip()
     is_negative, score = classifier.predict(text)  # <-- PhoBERT chấm điểm ở đây
     c = Comment(movie_id=movie_id, user_id=user.id, content=text, is_negative=is_negative,
-                negative_score=score, model_name=classifier.name)
+                negative_score=score, model_name=classifier.name,
+                model_version=classifier.version)
     db.add(c)
     db.commit()
     db.refresh(c)

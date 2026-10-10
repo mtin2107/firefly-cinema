@@ -24,9 +24,9 @@ Trước khi áp dụng workflow: giao diện React đầy đủ (`giao-dien-v1`
 
 ## 4. Current Project Status
 ```
-Overall Status: READY_FOR_HANDOFF
-Phase: T10 — PO AUTHORIZED / READY_FOR_HANDOFF
-Current Active Task: T10 — READY_FOR_HANDOFF
+Overall Status: IN_PROGRESS
+Phase: T10 — IMPLEMENTATION
+Current Active Task: T10 — IN_PROGRESS
 Next Task: T11 — PLANNED / NOT AUTHORIZED
 Ngày bắt đầu sản phẩm: 05/10/2026 · Hạn: 01/11/2026
 ```
@@ -34,9 +34,9 @@ Ngày bắt đầu sản phẩm: 05/10/2026 · Hạn: 01/11/2026
 ## 5. Current Active Task
 **T10 — Gắn model B vào web.**
 
-Status: `PO AUTHORIZED / READY_FOR_HANDOFF`.
+Status: `IN_PROGRESS`.
 
-Chưa triển khai, chưa có implementation commit và chưa có kết quả Acceptance Criteria.
+Pre-flight PASS tại baseline `38f63ee`: đúng nhánh `task/T10-gan-model-B`, working tree sạch, T07/T09 là ancestor, Q2/Q3 và T09 TODO-02 đã RESOLVED. `PO-DECISION-T10-AC01-20261010` đã gỡ blocker evidence bằng reference baseline tạo tại T10; implementation tiếp tục. AC hiện tại vẫn 0/7 PASS cho tới khi có kết quả kiểm thử thật.
 
 ## 6. Current Task Record
 Task Record hiện tại: [`docs/tasks/T10.md`](tasks/T10.md).
@@ -57,7 +57,7 @@ T07 và T09 đã DONE / CLOSED. TODO-02 của T09 đã RESOLVED theo xác nhận
 | T07 | Đa mô hình và trang So sánh mô hình | Web + ML | 2 | T01 | [T07.md](tasks/T07.md) | DONE / CLOSED (Claude Round 2 PASS_WITH_TODO; AC 8/8; hồi quy 7/7; DoD MET; RF-01 CLOSED; RF mở 0; blocker 0; TODO 6/6 dispositioned; merge `434a489`; tag `admin-v1`; T07_MERGE_VERIFIED) |
 | T08 | Đo lệch miền điện thoại → phim | ML | 3 | T02, T03 | [T08.md](tasks/T08.md) | DONE / CLOSED (Claude PASS_WITH_TODO; PO APPROVED; AC 5/5 PASS; DoD MET; RF 0; blocker 0; TODO 5/5 dispositioned, deferred chưa RESOLVED; merge `778675e`; T08_MERGE_VERIFIED) |
 | T09 | Train PhoBERT phần B | ML | 3 | T08 | [T09.md](tasks/T09.md) | DONE / CLOSED (Claude PASS_WITH_TODO; PO APPROVED; AC 6/6; DoD MET theo PO; RF 0; blocker 0; TODO 7/7 dispositioned; TODO-02 RESOLVED 10/10/2026 theo PO, notebook `PO_ATTESTED`; merge `27c364e`; T09_MERGE_VERIFIED) |
-| T10 | Gắn model B vào web | Web | 3 | T07, T09 | [T10.md](tasks/T10.md) | READY_FOR_HANDOFF — PO AUTHORIZED 10/10/2026; Q3 RESOLVED; T09 TODO-02 RESOLVED |
+| T10 | Gắn model B vào web | Web | 3 | T07, T09 | [T10.md](tasks/T10.md) | IN_PROGRESS — PO APPROVED AC-01 amendment; reference baseline T10 đang thực hiện; AC 0/7 PASS |
 | T11 | Kiểm thử tự động và sửa lỗi | Web | 4 | T04–T10 | [T11.md](tasks/T11.md) | PLANNED |
 | T12 | Dữ liệu demo và kịch bản bảo vệ | Web | 4 | T10 | [T12.md](tasks/T12.md) | PLANNED |
 | T13 | Chốt v1.0 và sao lưu | Tất cả | 4 | T11, T12 | [T13.md](tasks/T13.md) | PLANNED |
@@ -69,7 +69,7 @@ Nếu trễ: cắt T14 → T15 → rút gọn T05. Không cắt T01–T03, T07�
 
 ## 8. Open Blockers
 - T09: **DONE / CLOSED**, 0 blocker; merge `27c364e` đã xác minh (`T09_MERGE_VERIFIED`). TODO-02 **RESOLVED 10/10/2026 theo xác nhận PO**; evidence notebook là `PO_ATTESTED`, không phải Claude kiểm tra độc lập.
-- T10: 0 blocker về authorization; Q3 RESOLVED / PO APPROVED 10/10/2026. T10 READY_FOR_HANDOFF, chờ PO commit authority và tạo branch sạch trước khi Codex implementation.
+- T10 AC-01: blocker thiếu expected score lịch sử T09 đã **RESOLVED BY PO DECISION** `PO-DECISION-T10-AC01-20261010`. Baseline được tạo tại T10 bằng reference inference độc lập với backend wrapper trên checkpoint B đã xác minh; parity vẫn phải đạt ≤ `0,001` và movie test 149 câu phải khớp metric T09. Chưa tuyên bố PASS trước khi chạy thật.
 - T08: **DONE / CLOSED**, 0 blocker; merge `778675e` đã xác minh (`T08_MERGE_VERIFIED`). TODO 5/5 đã disposition; deferred chưa RESOLVED.
 - T06: 0 blocker; RF-01 CLOSED (Claude Round 2 xác minh 09/10/2026). `PENDING_PO_DATABASE_RESET` **RESOLVED 09/10/2026** — backup giữ nguyên checksum/integrity; database thật mới đủ schema, seed; AC 8/8 DEV PASS và regression real/mock 7/7.
 - T04: 0 technical blockers; SD-01/SD-02 đã được PO phê duyệt hồi tố, không còn chặn merge.
@@ -158,10 +158,10 @@ Nếu trễ: cắt T14 → T15 → rút gọn T05. Không cắt T01–T03, T07�
 | Claude review T09 | TODO-07 (Info) `T09.md` còn ghi PLANNED | ACCEPT_WITH_NOTES — coordination là nguồn trạng thái |
 
 ## 11. Current Next Step
-1. PO kiểm tra và commit `PROJECT_SOURCE_OF_TRUTH.md` cùng `TASK_COORDINATION_ACTIVE.md` lên master.
-2. PO xác minh working tree sạch và tạo branch `task/T10-gan-model-B` từ master mới nhất.
-3. Codex chạy pre-flight T10; nếu PASS, chuyển `READY_FOR_HANDOFF → IN_PROGRESS`.
-4. Triển khai T10 theo Task Record và workflow Codex → Claude → PO.
+1. Codex tạo và khóa reference baseline T10, tái kiểm tra movie test 149 câu, rồi triển khai T10 theo Task Record đã amend.
+2. Codex chạy đầy đủ AC-01 đến AC-07 và quality gates, cập nhật implementation report.
+3. Nếu tất cả gate đạt, Codex chuyển T10 `IN_PROGRESS → CLAUDE_REVIEW` và commit implementation.
+4. Claude thực hiện independent review; PO review sau khi Claude hoàn tất.
 5. Không merge, không tạo tag `phobert-B` trước khi T10 được PO APPROVED và merge.
 
 ## 12. Active Timeline
@@ -250,3 +250,6 @@ Nếu trễ: cắt T14 → T15 → rút gọn T05. Không cắt T01–T03, T07�
 | 09/10/2026 | Claude (thay Codex, PO ủy quyền) | Final Closure Sync: T09 → DONE / CLOSED; Overall Status → READY_FOR_NEXT_TASK; Current Active Task → NONE; Next Task → NOT SELECTED / NOT AUTHORIZED. TODO-02 PENDING / REQUIRED BEFORE T10; TODO deferred giữ disposition, chưa RESOLVED; T10 giữ PLANNED / NOT AUTHORIZED, không tạo nhánh, không gắn tag |
 | 10/10/2026 | Tín + Codex | T10 pre-flight: PO xác nhận SHA-256 artifact PhoBERT B 4/4 PASS và run1/run2 có `SELECTION_LOCKED=True` trước `FINAL_TEST_COMPLETE=True` (`PO_ATTESTED`, không phải Claude kiểm tra độc lập); Codex tái lập CPU Windows PASS bằng Transformers 5.18.0, movie F1_neg `0.917525773196`, Macro-F1 `0.881839809675`, probe negative score `0.998829185963`. T09 TODO-02 → RESOLVED theo xác nhận PO. Q3 còn MỞ nên T10 giữ PLANNED / NOT AUTHORIZED; không tạo nhánh, không implementation, không gắn tag. |
 | 10/10/2026 | Tín (PO) | Q3 RESOLVED: chọn PhoBERT B mặc định, PhoBERT A fallback hoặc chọn qua `.env` và restart; không bổ sung giao diện admin chọn model. PO AUTHORIZED T10 READY_FOR_HANDOFF. Chờ commit tài liệu authority và tạo branch T10 sạch; implementation chưa bắt đầu. |
+| 10/10/2026 | Codex | T10 pre-flight PASS tại baseline `38f63ee`: đúng nhánh `task/T10-gan-model-B`, working tree sạch, T07 `434a489` và T09 `27c364e` là ancestor; Q2/Q3 và T09 TODO-02 RESOLVED. T10 `READY_FOR_HANDOFF → IN_PROGRESS`. |
+| 10/10/2026 | Codex | T10 dừng trước production implementation do AC-01 thiếu evidence: notebook T09 trong Git không có output và không lưu bộ 10 câu/expected score; manifest, model card và report cũng không có bảng này. Chỉ probe "Phim dài lê thê, xem mà mệt" có score `0.998829185963` ở mức PO xác nhận. T10 `IN_PROGRESS / BLOCKED_PENDING_PO_EVIDENCE`; không tự lấy inference hiện tại làm ground truth. |
+| 10/10/2026 | Tín (PO) | `PO-DECISION-T10-AC01-20261010` APPROVED phương án B: gỡ blocker bằng baseline reference tạo tại T10 qua inference trực tiếp checkpoint B, độc lập với backend classifier wrapper; parity giữ ngưỡng ≤ `0,001` và phải tái kiểm movie test 149 câu so với T09. Không mở lại T09, không đổi checkpoint/model selection, AC-02 đến AC-07 giữ nguyên. T10 tiếp tục `IN_PROGRESS`, AC 0/7 PASS. |

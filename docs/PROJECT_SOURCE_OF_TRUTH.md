@@ -53,8 +53,8 @@ Không âm thầm trộn hai phiên bản mâu thuẫn. Ghi conflict vào mục 
 | # | Câu hỏi | Ảnh hưởng task | Trạng thái |
 |---|---|---|---|
 | Q1 | Nguồn thu bình luận phim và người gán nhãn thứ hai | T03 | CHỐT: nguồn review_site + social là chính, self_written ≤20%; Annotator A = Lê Minh Tín, Annotator B = "Người 1" ẩn danh; 07/10/2026 |
-| Q2 | Dùng Alembic hay chấp nhận xóa `firefly.db` khi đổi schema | T06 trở đi | MỞ |
-| Q3 | Model mặc định sau T10: PhoBERT B hay admin chọn | T10 | MỞ |
+| Q2 | Dùng Alembic hay chấp nhận xóa firefly.db khi đổi schema | T06 trở đi | CHỐT: NO ALEMBIC / BACKUP_BEFORE_RESET — RESOLVED 08/10/2026. Phải backup và xác minh checksum/integrity trước khi PO tự thực hiện reset database thật; Codex không được tự xóa/reset `firefly.db`. |
+| Q3 | Model mặc định sau T10: PhoBERT B hay admin chọn | T10 | CHỐT: PhoBERT B mặc định (`ACTIVE_MODEL=phobert_b`); PhoBERT A fallback hoặc chọn qua `.env` (`ACTIVE_MODEL=phobert`) và restart backend; không bổ sung giao diện admin chọn model. PO APPROVED 10/10/2026 |
 | Q4 | Deploy lên mạng hay chỉ chạy máy khi bảo vệ | T12, T13 | MỞ |
 
 Khi Tín trả lời, đổi trạng thái thành `CHỐT: <nội dung>, <ngày>`.

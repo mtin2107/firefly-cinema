@@ -5,6 +5,7 @@ import json
 import math
 import os
 import re
+import threading
 import unicodedata
 from pathlib import Path
 from typing import Protocol
@@ -63,6 +64,7 @@ def _model_path(value: str) -> Path:
 class PhoBertModel:
     def __init__(self, name: str, model_dir: str, configured_version: str = "") -> None:
         self.name = name
+        self._lifecycle_lock = threading.RLock()
         self.loaded = False
         self.available = False
         self.error: str | None = None
@@ -98,36 +100,38 @@ class PhoBertModel:
         return "unknown"
 
     def ensure_loaded(self) -> bool:
-        if self.loaded:
-            return True
-        if not self.available:
-            return False
-        try:
-            import torch
-            from transformers import AutoModelForSequenceClassification, AutoTokenizer
+        with self._lifecycle_lock:
+            if self.loaded:
+                return True
+            if not self.available:
+                return False
+            try:
+                import torch
+                from transformers import AutoModelForSequenceClassification, AutoTokenizer
 
-            self._torch = torch
-            self._tokenizer = AutoTokenizer.from_pretrained(self._path, local_files_only=True)
-            self._model = AutoModelForSequenceClassification.from_pretrained(
-                self._path, local_files_only=True
-            )
-            self._model.eval()
-            self.loaded = True
-            self.error = None
-            print(f"[classifier] Loaded {self.name} from {self._path}")
-        except Exception as exc:
-            self.error = str(exc)
-            self.available = False
-            print(f"[classifier] Failed to load {self.name}: {self.error!a}")
-        return self.loaded
+                self._torch = torch
+                self._tokenizer = AutoTokenizer.from_pretrained(self._path, local_files_only=True)
+                self._model = AutoModelForSequenceClassification.from_pretrained(
+                    self._path, local_files_only=True
+                )
+                self._model.eval()
+                self.loaded = True
+                self.error = None
+                print(f"[classifier] Loaded {self.name} from {self._path}")
+            except Exception as exc:
+                self.error = str(exc)
+                self.available = False
+                print(f"[classifier] Failed to load {self.name}: {self.error!a}")
+            return self.loaded
 
     def release(self) -> None:
-        if not self.loaded:
-            return
-        del self._model
-        del self._tokenizer
-        self.loaded = False
-        gc.collect()
+        with self._lifecycle_lock:
+            if not self.loaded:
+                return
+            del self._model
+            del self._tokenizer
+            self.loaded = False
+            gc.collect()
 
     def _prepare(self, text: str) -> str:
         if USE_TEXT_NORM:
@@ -141,15 +145,16 @@ class PhoBertModel:
         return text
 
     def predict(self, text: str) -> tuple[bool, float]:
-        if not self.ensure_loaded():
-            raise RuntimeError(self.error or f"Model {self.name} không khả dụng")
-        inputs = self._tokenizer(
-            self._prepare(text), return_tensors="pt", truncation=True, max_length=MAX_LENGTH
-        )
-        with self._torch.no_grad():
-            probs = self._torch.softmax(self._model(**inputs).logits, dim=-1)[0]
-        score = float(probs[NEGATIVE_LABEL_ID])
-        return score >= NEGATIVE_THRESHOLD, round(score, 4)
+        with self._lifecycle_lock:
+            if not self.ensure_loaded():
+                raise RuntimeError(self.error or f"Model {self.name} không khả dụng")
+            inputs = self._tokenizer(
+                self._prepare(text), return_tensors="pt", truncation=True, max_length=MAX_LENGTH
+            )
+            with self._torch.no_grad():
+                probs = self._torch.softmax(self._model(**inputs).logits, dim=-1)[0]
+            score = float(probs[NEGATIVE_LABEL_ID])
+            return score >= NEGATIVE_THRESHOLD, round(score, 4)
 
 
 class SklearnModel:

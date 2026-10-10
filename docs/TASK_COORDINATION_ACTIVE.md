@@ -24,9 +24,9 @@ Trước khi áp dụng workflow: giao diện React đầy đủ (`giao-dien-v1`
 
 ## 4. Current Project Status
 ```
-Overall Status: CLAUDE_REVIEW
-Phase: T10 — INDEPENDENT REVIEW
-Current Active Task: T10 — CLAUDE_REVIEW
+Overall Status: FIX_LOOP
+Phase: T10 — FIX LOOP ROUND 1
+Current Active Task: T10 — FIX_LOOP
 Next Task: T11 — PLANNED / NOT AUTHORIZED
 Ngày bắt đầu sản phẩm: 05/10/2026 · Hạn: 01/11/2026
 ```
@@ -34,9 +34,9 @@ Ngày bắt đầu sản phẩm: 05/10/2026 · Hạn: 01/11/2026
 ## 5. Current Active Task
 **T10 — Gắn model B vào web.**
 
-Status: `CLAUDE_REVIEW`.
+Status: `FIX_LOOP`.
 
-Implementation commit `0e80015`: registry PhoBERT B mặc định + A fallback/lazy comparison, version trong health/predict/comment, schema nullable, mock/UI, baseline T10 và script parity. AC 7/7 DEV PASS; full gates real/mock/security/schema/scope PASS; Required Fixes 0, blocker 0. Chờ Claude independent review.
+Implementation commit `0e80015`. Claude Round 1 (`reports/2026-10-10/claude_review_T10_FAIL_2026-10-10.md`): **FAIL** — AC 7/7 PASS (reference độc lập Δ 0, runtime parity 10/10 max Δ `0,000048`, movie test 149 khớp T09, browser E2E real/mock 7/7), nhưng **RF-01 (Medium)**: lazy-load/release PhoBERT không active bị race khi gọi `/api/admin/predict` đồng thời → 500 `AttributeError`. Codex chỉ sửa RF-01. DB thật chưa có `comments.model_version` (TODO-01, PO ACTION theo Q2).
 
 ## 6. Current Task Record
 Task Record hiện tại: [`docs/tasks/T10.md`](tasks/T10.md).
@@ -57,7 +57,7 @@ T07 và T09 đã DONE / CLOSED. TODO-02 của T09 đã RESOLVED theo xác nhận
 | T07 | Đa mô hình và trang So sánh mô hình | Web + ML | 2 | T01 | [T07.md](tasks/T07.md) | DONE / CLOSED (Claude Round 2 PASS_WITH_TODO; AC 8/8; hồi quy 7/7; DoD MET; RF-01 CLOSED; RF mở 0; blocker 0; TODO 6/6 dispositioned; merge `434a489`; tag `admin-v1`; T07_MERGE_VERIFIED) |
 | T08 | Đo lệch miền điện thoại → phim | ML | 3 | T02, T03 | [T08.md](tasks/T08.md) | DONE / CLOSED (Claude PASS_WITH_TODO; PO APPROVED; AC 5/5 PASS; DoD MET; RF 0; blocker 0; TODO 5/5 dispositioned, deferred chưa RESOLVED; merge `778675e`; T08_MERGE_VERIFIED) |
 | T09 | Train PhoBERT phần B | ML | 3 | T08 | [T09.md](tasks/T09.md) | DONE / CLOSED (Claude PASS_WITH_TODO; PO APPROVED; AC 6/6; DoD MET theo PO; RF 0; blocker 0; TODO 7/7 dispositioned; TODO-02 RESOLVED 10/10/2026 theo PO, notebook `PO_ATTESTED`; merge `27c364e`; T09_MERGE_VERIFIED) |
-| T10 | Gắn model B vào web | Web | 3 | T07, T09 | [T10.md](tasks/T10.md) | CLAUDE_REVIEW — implementation `0e80015`; AC 7/7 DEV PASS; blocker 0 |
+| T10 | Gắn model B vào web | Web | 3 | T07, T09 | [T10.md](tasks/T10.md) | FIX_LOOP — Claude Round 1 FAIL; AC 7/7; RF-01 (Medium) mở |
 | T11 | Kiểm thử tự động và sửa lỗi | Web | 4 | T04–T10 | [T11.md](tasks/T11.md) | PLANNED |
 | T12 | Dữ liệu demo và kịch bản bảo vệ | Web | 4 | T10 | [T12.md](tasks/T12.md) | PLANNED |
 | T13 | Chốt v1.0 và sao lưu | Tất cả | 4 | T11, T12 | [T13.md](tasks/T13.md) | PLANNED |
@@ -69,7 +69,7 @@ Nếu trễ: cắt T14 → T15 → rút gọn T05. Không cắt T01–T03, T07�
 
 ## 8. Open Blockers
 - T09: **DONE / CLOSED**, 0 blocker; merge `27c364e` đã xác minh (`T09_MERGE_VERIFIED`). TODO-02 **RESOLVED 10/10/2026 theo xác nhận PO**; evidence notebook là `PO_ATTESTED`, không phải Claude kiểm tra độc lập.
-- T10: **0 blocker**; `PO-DECISION-T10-AC01-20261010` đã áp dụng. Baseline reference T10 ổn định hai lượt; runtime parity 10/10, max Δ `0,000048`; movie test 149 câu khớp T09; AC 7/7 DEV PASS. Chờ Claude xác minh độc lập.
+- T10: **FIX_LOOP**; Claude Round 1 FAIL vì RF-01 (Medium, race lazy-load/release trong admin predict). AC 7/7 đã Claude xác minh độc lập. PO ACTION: DB thật thiếu `comments.model_version` → bình luận/kiểm duyệt 500 trên DB hiện tại; cần backup-before-reset theo Q2 trước khi chạy/demo trên DB thật.
 - T08: **DONE / CLOSED**, 0 blocker; merge `778675e` đã xác minh (`T08_MERGE_VERIFIED`). TODO 5/5 đã disposition; deferred chưa RESOLVED.
 - T06: 0 blocker; RF-01 CLOSED (Claude Round 2 xác minh 09/10/2026). `PENDING_PO_DATABASE_RESET` **RESOLVED 09/10/2026** — backup giữ nguyên checksum/integrity; database thật mới đủ schema, seed; AC 8/8 DEV PASS và regression real/mock 7/7.
 - T04: 0 technical blockers; SD-01/SD-02 đã được PO phê duyệt hồi tố, không còn chặn merge.
@@ -79,7 +79,8 @@ Nếu trễ: cắt T14 → T15 → rút gọn T05. Không cắt T01–T03, T07�
 - Q2: **RESOLVED 08/10/2026 — NO ALEMBIC / BACKUP_BEFORE_RESET.** Sao lưu và xác minh đúng database trước khi PO tự reset; Codex không tự xóa database thật.
 
 ## 9. Open Required Fixes
-- **Open Required Fixes: 0.** T09 DONE / CLOSED (RF 0); T08 DONE / CLOSED.
+- **Open Required Fixes: 1.** T10 RF-01 (Medium) **OPEN**: `backend/app/classifier.py` + `routers/admin_predict.py` — request song song làm model không active bị `release()` giữa lúc predict → 500 `AttributeError: 'PhoBertModel' object has no attribute '_model'` (3 vòng × 6 request, vòng 1 4/6 lỗi). Expected fix: đồng bộ hóa nạp/suy luận/giải phóng (lock hoặc đếm người dùng). Evidence: `reports/2026-10-10/claude_review_T10_FAIL_2026-10-10.md`.
+- T09 DONE / CLOSED (RF 0); T08 DONE / CLOSED.
 - T07 RF-01 (Medium) **CLOSED / VERIFIED BY CLAUDE**: fix `06fbd3d` bỏ `min_length=1`; Claude probe độc lập trên uvicorn thật + DB tạm: ba dạng chuỗi rỗng 422 đúng câu tiếng Việt, biên 1.000/1.001, 401/403, contract và health giữ nguyên (12/12). Evidence: `reports/2026-10-09/claude_review_T07_round2_PASS_WITH_TODO_2026-10-09.md`.
 - T06 RF-01 (Medium) **CLOSED / VERIFIED BY CLAUDE**: fix commit `8ef57ad` (`isinstance(value, str)` trước membership); Claude probe độc lập trên DB tạm `action` list/dict/123/true/null/"delete" và 4 ca thêm đều trả 422 đúng câu, dữ liệu không đổi; uvicorn thật cũng trả 422. Evidence: `reports/2026-10-09/claude_review_T06_round2_PASS_WITH_TODO_2026-10-09.md`.
 - T05 RF-01 (High) **CLOSED** — Claude Round 2 xác minh độc lập: fix commit `f5fca8d`; fresh real/mock đều có đủ 9 phim mỗi ngày, hot_week đủ 9, 0 cặp chồng, restart giữ nguyên suất admin/booking. Evidence: `reports/2026-10-08/codex_fix_T05_round1_2026-10-08.md`.
@@ -156,11 +157,16 @@ Nếu trễ: cắt T14 → T15 → rút gọn T05. Không cắt T01–T03, T07�
 | Claude review T09 | TODO-05 (Low, process) T08 TODO-04 ghi RESOLVED quá mức (notebook Git chưa có output); TODO-03 chỉ RESOLVED mức code | ACCEPT_WITH_NOTES — đã sửa disposition T08 ở trên; Codex không tự đổi TODO do PO disposition sang RESOLVED |
 | Claude review T09 | TODO-06 (Low) GradScaler API cũ; scheduler step khi optimizer bị skip | ACCEPT_LATER → T15 (hoặc lần train lại kế tiếp); không retrain T09 |
 | Claude review T09 | TODO-07 (Info) `T09.md` còn ghi PLANNED | ACCEPT_WITH_NOTES — coordination là nguồn trạng thái |
+| Claude review T10 r1 | TODO-01 (High, vận hành) DB thật thiếu `comments.model_version` → bình luận/kiểm duyệt 500 | Đề xuất: PO ACTION REQUIRED — backup-before-reset theo Q2 trước khi chạy/demo trên DB thật |
+| Claude review T10 r1 | TODO-02 (Low) `check_model.py` so score runtime đã làm tròn 4 chữ số | Đề xuất: ACCEPT_WITH_NOTES |
+| Claude review T10 r1 | TODO-03 (Low) `CLAUDE.md` và `BOI_CANH_DU_AN.md` mục 7 còn ghi health `classifier: phobert` | Đề xuất: PO cập nhật tài liệu PO-owned |
+| Claude review T10 r1 | TODO-04 (Info) `T10.md` ghi IN_PROGRESS; TODO-05 (Info) mock gắn nhãn `phobert_b` nhưng điểm keyword; TODO-06 (Info) T07 TODO-05 nay đã có `active`/`active_version` | Đề xuất: ACCEPT_WITH_NOTES; T07 TODO-05 có thể RESOLVED |
 
 ## 11. Current Next Step
-1. Claude đọc Task Record đã amend, implementation report và diff `38f63ee...HEAD`, rồi chạy independent review T10.
-2. Nếu Claude FAIL, Codex chỉ sửa Required Fixes trong fix loop; nếu PASS/PASS_WITH_TODO, chuyển PO review theo workflow.
-3. T11 giữ `PLANNED / NOT AUTHORIZED`; không mở task kế tiếp trong bước này.
+1. Codex sửa **chỉ RF-01** trong allowlist T10, chạy lại probe đồng thời (≥ 3 vòng × 6 request đều 200) và gate web, viết `reports/YYYY-MM-DD/codex_fix_T10_round1_YYYY-MM-DD.md`, chuyển `FIX_LOOP → CLAUDE_REVIEW`.
+2. Claude review Round 2.
+3. PO (song song, không chặn fix loop): xử lý TODO-01 — backup + reset DB thật theo `HUONG_DAN.md` 2.1 trước khi chạy/demo trên DB thật.
+4. T11 giữ `PLANNED / NOT AUTHORIZED`. Lưu ý PO: `AGENT_RULES.md` 1.1 cho Claude đặt T11 `READY_FOR_HANDOFF` khi T10 PASS — PO nên chốt trước quyền này.
 4. Không merge, không tạo tag `phobert-B` trước khi T10 được PO APPROVED và merge.
 
 ## 12. Active Timeline
@@ -253,3 +259,4 @@ Nếu trễ: cắt T14 → T15 → rút gọn T05. Không cắt T01–T03, T07�
 | 10/10/2026 | Codex | T10 dừng trước production implementation do AC-01 thiếu evidence: notebook T09 trong Git không có output và không lưu bộ 10 câu/expected score; manifest, model card và report cũng không có bảng này. Chỉ probe "Phim dài lê thê, xem mà mệt" có score `0.998829185963` ở mức PO xác nhận. T10 `IN_PROGRESS / BLOCKED_PENDING_PO_EVIDENCE`; không tự lấy inference hiện tại làm ground truth. |
 | 10/10/2026 | Tín (PO) | `PO-DECISION-T10-AC01-20261010` APPROVED phương án B: gỡ blocker bằng baseline reference tạo tại T10 qua inference trực tiếp checkpoint B, độc lập với backend classifier wrapper; parity giữ ngưỡng ≤ `0,001` và phải tái kiểm movie test 149 câu so với T09. Không mở lại T09, không đổi checkpoint/model selection, AC-02 đến AC-07 giữ nguyên. T10 tiếp tục `IN_PROGRESS`, AC 0/7 PASS. |
 | 10/10/2026 | Codex | Hoàn tất T10 implementation `0e80015`: baseline T10 direct Transformers hai lượt Δ 0; movie test 149 câu khớp T09; runtime parity 10/10 max Δ `0,000048`; B mặc định, A switch/fallback, version persistence/health/admin, DB tạm, real/mock/browser smoke, regression 7/7, scope/secret/large-file PASS. AC 7/7 DEV PASS, RF 0, blocker 0; T10 `IN_PROGRESS → CLAUDE_REVIEW`, T11 giữ `PLANNED / NOT AUTHORIZED`. |
+| 10/10/2026 | Claude | T10 Round 1 independent review: **FAIL**. AC 7/7 PASS (reference Transformers độc lập Δ 0 với baseline, runtime parity 10/10 max Δ `0,000048`, movie test 149 khớp T09, uvicorn thật B/A/missing-B/broken-B, 401/403/200, browser E2E real + mock 7/7, mobile). RF-01 (Medium) race lazy-load/release admin predict → 500 khi gọi đồng thời. DB thật chưa có `model_version` (TODO-01 PO ACTION). T10 `CLAUDE_REVIEW → FIX_LOOP`; T11 giữ `PLANNED / NOT AUTHORIZED`. Probe tạm còn 0. |

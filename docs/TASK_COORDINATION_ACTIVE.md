@@ -16,23 +16,23 @@ Repo `C:\Projects\firefly-cinema`, nhánh `master`. Chi tiết: `PROJECT_SOURCE_
 - Mỗi task một nhánh `task/Txx-ten-ngan`, commit `[Txx] mô tả`. Chỉ Tín merge.
 
 ## 3. Latest Completed Task Summary
-**T10 — Gắn model B vào web: DONE / CLOSED (11/10/2026).** Claude Final PASS_WITH_TODO, PO APPROVED_WITH_NOTES, AC 7/7 PASS, Technical DoD MET, Required Fixes 0; Gate 2 ALTER_COMMITTED, Postverify/Clone Smoke Attempt 2/Hash Reconciliation/DEV Final QA PASS; fast-forward merge và annotated tag `phobert-B` tại release commit `857a8272a9c307734e713a2b5cdae12f8f60bb95` đã được xác minh. Line-ending reconciliation PASS; database thật được bảo toàn. F-TODO-01/03 đã xử lý; F-TODO-02/04/05/06/07 giữ nguyên disposition ACCEPT_LATER.
+**T11 — Kiểm thử tự động và sửa lỗi: DONE / CLOSED (11/10/2026).** Claude Final PASS_WITH_TODO, PO APPROVED_WITH_NOTES, AC 6/6 PASS, independent pytest 28/28 PASS, browser regression 7/7 PASS, Technical DoD MET, Required Fixes 0; RF-01/RF-02/RF-03 CLOSED / VERIFIED BY CLAUDE. Scope exception sidecar `.gitignore` APPROVED / VERIFIED. Merge commit `06dd44f0d845fecea829b82c48ff2f5a8dbab984` trên `master` đã được xác minh; toàn bộ TODO disposition của PO được giữ nguyên.
 
-Trước đó: **T09 — Train PhoBERT phần B: DONE / CLOSED (09/10/2026)**, merge `27c364e`; **T08 — Đo lệch miền điện thoại → phim: DONE / CLOSED (09/10/2026)**, merge `778675e`.
+Trước đó: **T10 — Gắn model B vào web: DONE / CLOSED (11/10/2026)**, merge/tag release `857a8272`; **T09 — Train PhoBERT phần B: DONE / CLOSED (09/10/2026)**, merge `27c364e`.
 
 Trước khi áp dụng workflow: giao diện React đầy đủ (`giao-dien-v1`), backend FastAPI + SQLite, PhoBERT A gắn vào backend, F1 test 0,918 (`phobert-v1`).
 
 ## 4. Current Project Status
 ```
-Overall Status: PO_APPROVED / PENDING_PO_MERGE
-Phase: T11 — Kiểm thử tự động và sửa lỗi
-Current Active Task: T11 — PO_APPROVED / PENDING_PO_MERGE
-Next Task: T12 — PLANNED / NOT AUTHORIZED
+Overall Status: READY_FOR_NEXT_TASK
+Phase: T11 — DONE / CLOSED
+Current Active Task: NONE
+Next Task: NOT SELECTED / NOT AUTHORIZED
 Ngày bắt đầu sản phẩm: 05/10/2026 · Hạn: 01/11/2026
 ```
 
 ## 5. Current Active Task
-**T11 — Kiểm thử tự động và sửa lỗi: PO_APPROVED / PENDING_PO_MERGE.** PO ngày 11/10/2026 ghi nhận **APPROVED_WITH_NOTES**, chấp nhận Claude Round 3 **PASS_WITH_TODO**; AC 6/6 PASS, pytest 28/28, browser regression 7/7, Technical DoD MET, RF-01/02/03 CLOSED và Required Fix mở 0. Scope exception `.gitignore` đã **PO AUTHORIZED / VERIFIED** với đúng rule `/backend/*.db.showtime-seed.json`. Chỉ PO được merge; T11 chưa DONE/CLOSED.
+**NONE.** T11 đã **DONE / CLOSED** sau khi PO merge thành công vào `master` tại `06dd44f0d845fecea829b82c48ff2f5a8dbab984`. Claude Final **PASS_WITH_TODO**; PO **APPROVED_WITH_NOTES**; AC 6/6 PASS; Technical DoD MET; Required Fixes 0; scope exception sidecar `.gitignore` APPROVED / VERIFIED. T12 chưa được authorize.
 
 T10 giữ nguyên **DONE / CLOSED**. Runtime backend trên database thật vẫn bị cấm nếu chưa có checkpoint/backup và authorization riêng của PO; T11 chỉ dùng SQLite tạm.
 
@@ -56,8 +56,8 @@ T07 và T09 đã DONE / CLOSED. TODO-02 của T09 đã RESOLVED theo xác nhận
 | T08 | Đo lệch miền điện thoại → phim | ML | 3 | T02, T03 | [T08.md](tasks/T08.md) | DONE / CLOSED (Claude PASS_WITH_TODO; PO APPROVED; AC 5/5 PASS; DoD MET; RF 0; blocker 0; TODO 5/5 dispositioned, deferred chưa RESOLVED; merge `778675e`; T08_MERGE_VERIFIED) |
 | T09 | Train PhoBERT phần B | ML | 3 | T08 | [T09.md](tasks/T09.md) | DONE / CLOSED (Claude PASS_WITH_TODO; PO APPROVED; AC 6/6; DoD MET theo PO; RF 0; blocker 0; TODO 7/7 dispositioned; TODO-02 RESOLVED 10/10/2026 theo PO, notebook `PO_ATTESTED`; merge `27c364e`; T09_MERGE_VERIFIED) |
 | T10 | Gắn model B vào web | Web | 3 | T07, T09 | [T10.md](tasks/T10.md) | DONE / CLOSED — PO APPROVED_WITH_NOTES; Claude Final PASS_WITH_TODO; AC 7/7; Technical DoD MET; RF 0; fast-forward merge + annotated tag `phobert-B` VERIFIED tại `857a8272` |
-| T11 | Kiểm thử tự động và sửa lỗi | Web | 4 | T04–T10 | [T11.md](tasks/T11.md) | PO_APPROVED / PENDING_PO_MERGE (APPROVED_WITH_NOTES; AC 6/6; DoD MET; RF mở 0) |
-| T12 | Dữ liệu demo và kịch bản bảo vệ | Web | 4 | T10 | [T12.md](tasks/T12.md) | PLANNED |
+| T11 | Kiểm thử tự động và sửa lỗi | Web | 4 | T04–T10 | [T11.md](tasks/T11.md) | DONE / CLOSED — Claude PASS_WITH_TODO; PO APPROVED_WITH_NOTES; AC 6/6; DoD MET; RF 0; merge `06dd44f0` VERIFIED |
+| T12 | Dữ liệu demo và kịch bản bảo vệ | Web | 4 | T10 | [T12.md](tasks/T12.md) | PLANNED / NOT AUTHORIZED |
 | T13 | Chốt v1.0 và sao lưu | Tất cả | 4 | T11, T12 | [T13.md](tasks/T13.md) | PLANNED |
 | T14 | *(tùy chọn)* Hủy vé, đổi mật khẩu | Web | dư | — | [T14.md](tasks/T14.md) | PLANNED |
 | T15 | *(tùy chọn)* Thử nghiệm có tách từ | ML | dư | T09 | [T15.md](tasks/T15.md) | PLANNED |
@@ -66,7 +66,7 @@ Chuỗi chính: `T00 → T01 → T02` và `T03 → T08 → T09 → T10`. T03 b�
 Nếu trễ: cắt T14 → T15 → rút gọn T05. Không cắt T01–T03, T07–T10.
 
 ## 8. Open Blockers
-- T11: **0 blocker**; PO_APPROVED / PENDING_PO_MERGE. TODO-R3-01 **RESOLVED_BEFORE_MERGE** bằng scope exception PO AUTHORIZED / VERIFIED cho `/backend/*.db.showtime-seed.json`. Backend thật vẫn chưa được phép khởi động trong bước này.
+- T11: **DONE / CLOSED**, 0 blocker; merge `06dd44f0` VERIFIED. TODO-R3-01 **RESOLVED_BEFORE_MERGE** bằng scope exception PO AUTHORIZED / VERIFIED cho `/backend/*.db.showtime-seed.json`. Startup database thật vẫn yêu cầu PO runtime authorization riêng, backup/checkpoint và quy trình đã duyệt.
 - T09: **DONE / CLOSED**, 0 blocker; merge `27c364e` đã xác minh (`T09_MERGE_VERIFIED`). TODO-02 **RESOLVED 10/10/2026 theo xác nhận PO**; evidence notebook là `PO_ATTESTED`, không phải Claude kiểm tra độc lập.
 - T10: **DONE / CLOSED**, 0 blocker kỹ thuật; RF-01 CLOSED / VERIFIED BY CLAUDE. Gate 2 **EXECUTED / ALTER_COMMITTED**; Postverify PASS; 559 dòng gốc bảo toàn; Credential Precheck V2 PASS; Clone Smoke Attempt 1 FAIL / ARCHIVED; Attempt 2 PASS; Hash Reconciliation PASS; DEV Final QA PASS; Claude Final PASS_WITH_TODO; PO APPROVED_WITH_NOTES; fast-forward merge và annotated tag `phobert-B` VERIFIED. Real backend startup vẫn cần authorization riêng của PO; T11 không được dùng database thật.
 - T08: **DONE / CLOSED**, 0 blocker; merge `778675e` đã xác minh (`T08_MERGE_VERIFIED`). TODO 5/5 đã disposition; deferred chưa RESOLVED.
@@ -78,6 +78,7 @@ Nếu trễ: cắt T14 → T15 → rút gọn T05. Không cắt T01–T03, T07�
 - Q2: **RESOLVED 08/10/2026 — NO ALEMBIC / BACKUP_BEFORE_RESET.** Sao lưu và xác minh đúng database trước khi PO tự reset; Codex không tự xóa database thật.
 
 ## 9. Open Required Fixes
+- **T11: 0 Required Fix mở; task DONE / CLOSED.**
 - **T11 RF-01 (Medium) CLOSED / VERIFIED BY CLAUDE (Round 2):** xóa một suất hoặc cả ngày không bị tái tạo, kể cả với Session mới.
 - **T11 RF-02 (Medium) CLOSED / VERIFIED BY CLAUDE (Round 2):** ngày rolling có suất admin vẫn seed phim thiếu, không overlap (có cleanup), suất admin giữ nguyên; phim mới `now_showing` được cấp lịch.
 - **T11 RF-03 (High) CLOSED / VERIFIED BY CLAUDE (Round 3):** DB mới (bảng `movies` rỗng) ghi nguyên tử state rỗng trước mọi commit; reset với sidecar cũ/hỏng seed đủ lịch, vé, ghế; DB hiện hữu vẫn giữ thao tác xóa; sidecar hỏng trên DB hiện hữu dừng an toàn. Restore DB+sidecar khác snapshot là giới hạn đã công bố (HUONG_DAN 2.1 điểm 5).
@@ -178,9 +179,10 @@ Nếu trễ: cắt T14 → T15 → rút gọn T05. Không cắt T01–T03, T07�
 | Claude review T11 R1 | TODO-04 cleanup evidence runtime | **DEFER_CLEANUP_AFTER_CLOSURE** — không xóa trong pre-merge |
 
 ## 11. Current Next Step
-1. PO merge `task/T11-kiem-thu` vào `master`; chỉ PO thực hiện.
-2. Sau merge, xác minh commit/ancestry rồi mới làm Final Closure Sync riêng; T11 chưa DONE/CLOSED.
-3. T12 giữ `PLANNED / NOT AUTHORIZED`; Q4 (deploy) giữ MỞ.
+1. T11 đã DONE / CLOSED; không còn Current Active Task.
+2. Next Task: NOT SELECTED / NOT AUTHORIZED.
+3. T12 giữ `PLANNED / NOT AUTHORIZED`; Q4 **OPEN** — PO chưa quyết định deploy hay demo local.
+4. Khi PO chọn task tiếp theo, phải có authorization riêng; không suy diễn từ closure T11.
 
 ## 12. Active Timeline
 | Ngày | Ai | Sự kiện |
@@ -291,3 +293,5 @@ Nếu trễ: cắt T14 → T15 → rút gọn T05. Không cắt T01–T03, T07�
 | 11/10/2026 | Codex | Fix Round 3 `062b9a8`: RF-03 stale sidecar được reset nguyên tử chỉ khi bảng `movies` rỗng; DB mới seed đủ lịch/vé/ghế, DB hiện hữu giữ dấu xóa. Focused 9/9, full 28/28 cả môi trường không torch/model, compile/build/scope/security PASS; DB thật chỉ đọc hash, không startup. RF-03 DEV FIXED; T11 `FIX_LOOP → CLAUDE_REVIEW / ROUND 3 PENDING`; AC-06 vẫn PENDING runtime authorization. |
 | 11/10/2026 | Claude | Independent Review T11 Round 3: **PASS_WITH_TODO**. RF-03 CLOSED / VERIFIED BY CLAUDE (probe reset 8 bước, sidecar hỏng DB mới/hiện hữu, crash giữa publish và commit, restart nhiều lần); RF-01/02 không hồi quy; pytest 28/28 cả không torch/model. PO cấp Runtime Authorization Round 3 trong chat; Claude chạy lại AC-06 với PhoBERT B thật + SQLite tạm, checkpoint/restore DB+sidecar PASS, checklist 7/7; DB thật/model giữ nguyên hash. T11 `CLAUDE_REVIEW → PO_REVIEW`. T12 không mở (Q4 MỞ). |
 | 11/10/2026 | Tín (PO) + Codex recording | PO **APPROVED_WITH_NOTES**: chấp nhận Claude Round 3 PASS_WITH_TODO, AC 6/6, Technical DoD MET, RF mở 0. Scope exception `.gitignore` PO AUTHORIZED / VERIFIED; TODO 10/10 dispositioned. T11 `PO_APPROVED / PENDING_PO_MERGE`; chỉ PO merge. T12 giữ PLANNED / NOT AUTHORIZED, Q4 giữ OPEN. |
+| 11/10/2026 | Tín (PO) | Merge T11 vào `master` tại `06dd44f0d845fecea829b82c48ff2f5a8dbab984`; tip `task/T11-kiem-thu` `3c21055` là ancestor, PO report và sidecar `.gitignore` exception đã nằm trong master (`T11_MERGE_VERIFIED`). |
+| 11/10/2026 | Codex | Final Closure Sync: T11 → DONE / CLOSED; Overall Status → READY_FOR_NEXT_TASK; Current Active Task → NONE; Next Task → NOT SELECTED / NOT AUTHORIZED. T12 giữ PLANNED / NOT AUTHORIZED; Q4 giữ OPEN; TODO T11 và runtime authorization database thật giữ nguyên. |

@@ -24,15 +24,15 @@ Trước khi áp dụng workflow: giao diện React đầy đủ (`giao-dien-v1`
 
 ## 4. Current Project Status
 ```
-Overall Status: CLAUDE_REVIEW
+Overall Status: FIX_LOOP
 Phase: T11 — Kiểm thử tự động và sửa lỗi
-Current Active Task: T11 — CLAUDE_REVIEW
+Current Active Task: T11 — FIX_LOOP
 Next Task: T12 — PLANNED / NOT AUTHORIZED
 Ngày bắt đầu sản phẩm: 05/10/2026 · Hạn: 01/11/2026
 ```
 
 ## 5. Current Active Task
-**T11 — Kiểm thử tự động và sửa lỗi: CLAUDE_REVIEW / ROUND 2 PENDING.** Fix implementation `b06b74e`: RF-01 dùng sidecar nguyên tử gắn đúng file SQLite để giữ dấu ngày/movie đã seed kể cả khi xóa sạch ngày; RF-02 seed phim còn thiếu khi ngày rolling đã có suất admin, giữ phân bổ công bằng và chống conflict. Phim chuyển `upcoming → now_showing` vẫn được cấp lịch. Focused 6/6, full pytest 25/25 cả venv dự án và source cô lập không torch/model, compile/build real+mock/scope/security PASS; DB thật không được khởi động và giữ nguyên hash. RF-01/RF-02 DEV FIXED, chờ Claude xác minh độc lập.
+**T11 — Kiểm thử tự động và sửa lỗi: FIX_LOOP.** Claude Round 2 ngày 11/10/2026: **FAIL** (`reports/2026-10-11/claude_review_T11_round2_FAIL_2026-10-11.md`), HEAD `70e2c93`. RF-01, RF-02 **CLOSED / VERIFIED BY CLAUDE** (6 test seed fail trên Round 1, pass trên HEAD; probe sidecar hỏng/sai version/thiếu/ghi nguyên tử/đường dẫn tương đối PASS). **RF-03 (High) OPEN:** reset DB theo HUONG_DAN/Q2 (xóa `firefly.db`) để lại sidecar cũ nên DB mới có 0/99 suất. Pytest 25/25 cả venv không torch/model; build real/mock PASS. AC-06 PENDING (chưa có PO runtime authorization cho Round 2).
 
 T10 giữ nguyên **DONE / CLOSED**. Runtime backend trên database thật vẫn bị cấm nếu chưa có checkpoint/backup và authorization riêng của PO; T11 chỉ dùng SQLite tạm.
 
@@ -56,7 +56,7 @@ T07 và T09 đã DONE / CLOSED. TODO-02 của T09 đã RESOLVED theo xác nhận
 | T08 | Đo lệch miền điện thoại → phim | ML | 3 | T02, T03 | [T08.md](tasks/T08.md) | DONE / CLOSED (Claude PASS_WITH_TODO; PO APPROVED; AC 5/5 PASS; DoD MET; RF 0; blocker 0; TODO 5/5 dispositioned, deferred chưa RESOLVED; merge `778675e`; T08_MERGE_VERIFIED) |
 | T09 | Train PhoBERT phần B | ML | 3 | T08 | [T09.md](tasks/T09.md) | DONE / CLOSED (Claude PASS_WITH_TODO; PO APPROVED; AC 6/6; DoD MET theo PO; RF 0; blocker 0; TODO 7/7 dispositioned; TODO-02 RESOLVED 10/10/2026 theo PO, notebook `PO_ATTESTED`; merge `27c364e`; T09_MERGE_VERIFIED) |
 | T10 | Gắn model B vào web | Web | 3 | T07, T09 | [T10.md](tasks/T10.md) | DONE / CLOSED — PO APPROVED_WITH_NOTES; Claude Final PASS_WITH_TODO; AC 7/7; Technical DoD MET; RF 0; fast-forward merge + annotated tag `phobert-B` VERIFIED tại `857a8272` |
-| T11 | Kiểm thử tự động và sửa lỗi | Web | 4 | T04–T10 | [T11.md](tasks/T11.md) | CLAUDE_REVIEW (Round 2 pending) |
+| T11 | Kiểm thử tự động và sửa lỗi | Web | 4 | T04–T10 | [T11.md](tasks/T11.md) | FIX_LOOP (Claude Round 2 FAIL; RF-03 mở) |
 | T12 | Dữ liệu demo và kịch bản bảo vệ | Web | 4 | T10 | [T12.md](tasks/T12.md) | PLANNED |
 | T13 | Chốt v1.0 và sao lưu | Tất cả | 4 | T11, T12 | [T13.md](tasks/T13.md) | PLANNED |
 | T14 | *(tùy chọn)* Hủy vé, đổi mật khẩu | Web | dư | — | [T14.md](tasks/T14.md) | PLANNED |
@@ -66,7 +66,7 @@ Chuỗi chính: `T00 → T01 → T02` và `T03 → T08 → T09 → T10`. T03 b�
 Nếu trễ: cắt T14 → T15 → rút gọn T05. Không cắt T01–T03, T07–T10.
 
 ## 8. Open Blockers
-- T11: **0 blocker**; RF-01/RF-02 DEV FIXED tại `b06b74e`, chờ Claude Round 2 verification. DB thật không được khởi động trong Fix Round 2 và giữ nguyên hash.
+- T11: **0 blocker**; FIX_LOOP với RF-03 (High) mở. AC-06 PENDING PO runtime authorization cho code cuối. `*.showtime-seed.json` chưa có trong `.gitignore` (ngoài allowlist, chờ PO).
 - T09: **DONE / CLOSED**, 0 blocker; merge `27c364e` đã xác minh (`T09_MERGE_VERIFIED`). TODO-02 **RESOLVED 10/10/2026 theo xác nhận PO**; evidence notebook là `PO_ATTESTED`, không phải Claude kiểm tra độc lập.
 - T10: **DONE / CLOSED**, 0 blocker kỹ thuật; RF-01 CLOSED / VERIFIED BY CLAUDE. Gate 2 **EXECUTED / ALTER_COMMITTED**; Postverify PASS; 559 dòng gốc bảo toàn; Credential Precheck V2 PASS; Clone Smoke Attempt 1 FAIL / ARCHIVED; Attempt 2 PASS; Hash Reconciliation PASS; DEV Final QA PASS; Claude Final PASS_WITH_TODO; PO APPROVED_WITH_NOTES; fast-forward merge và annotated tag `phobert-B` VERIFIED. Real backend startup vẫn cần authorization riêng của PO; T11 không được dùng database thật.
 - T08: **DONE / CLOSED**, 0 blocker; merge `778675e` đã xác minh (`T08_MERGE_VERIFIED`). TODO 5/5 đã disposition; deferred chưa RESOLVED.
@@ -78,8 +78,9 @@ Nếu trễ: cắt T14 → T15 → rút gọn T05. Không cắt T01–T03, T07�
 - Q2: **RESOLVED 08/10/2026 — NO ALEMBIC / BACKUP_BEFORE_RESET.** Sao lưu và xác minh đúng database trước khi PO tự reset; Codex không tự xóa database thật.
 
 ## 9. Open Required Fixes
-- **T11 RF-01 (Medium) DEV FIXED / PENDING CLAUDE VERIFICATION:** sidecar nguyên tử theo file SQLite giữ dấu ngày/movie đã seed; test Session mới xác nhận xóa sạch ngày vẫn giữ 0 suất.
-- **T11 RF-02 (Medium) DEV FIXED / PENDING CLAUDE VERIFICATION:** ngày rolling có suất admin vẫn seed phim còn thiếu, không đổi suất admin/booking và không overlap; phim chuyển `upcoming → now_showing` vẫn được cấp lịch.
+- **T11 RF-01 (Medium) CLOSED / VERIFIED BY CLAUDE (Round 2):** xóa một suất hoặc cả ngày không bị tái tạo, kể cả với Session mới.
+- **T11 RF-02 (Medium) CLOSED / VERIFIED BY CLAUDE (Round 2):** ngày rolling có suất admin vẫn seed phim thiếu, không overlap (có cleanup), suất admin giữ nguyên; phim mới `now_showing` được cấp lịch.
+- **T11 RF-03 (High) OPEN:** sidecar `<db>.showtime-seed.json` chỉ gắn theo đường dẫn; xóa `firefly.db` để reset (HUONG_DAN 232/346/347, Q2) thì DB mới đọc sidecar cũ và có 0 suất, 0 vé mẫu. Cần: DB mới bỏ qua/ghi đè sidecar cũ, test tái hiện, cập nhật HUONG_DAN (reset + backup/restore cặp DB+sidecar) và CHANGELOG.
 - T10 RF-01 (Medium) **CLOSED / VERIFIED BY CLAUDE** (Round 2): per-model `RLock` bao nạp/suy luận/giải phóng; 116 request admin predict đồng thời hai chiều + 8 request trộn comment/predict, 0 lỗi; fallback/security/AC 7/7 giữ nguyên. Evidence: `reports/2026-10-10/claude_review_T10_round2_PASS_WITH_TODO_2026-10-10.md`.
 - T09 DONE / CLOSED (RF 0); T08 DONE / CLOSED.
 - T07 RF-01 (Medium) **CLOSED / VERIFIED BY CLAUDE**: fix `06fbd3d` bỏ `min_length=1`; Claude probe độc lập trên uvicorn thật + DB tạm: ba dạng chuỗi rỗng 422 đúng câu tiếng Việt, biên 1.000/1.001, 401/403, contract và health giữ nguyên (12/12). Evidence: `reports/2026-10-09/claude_review_T07_round2_PASS_WITH_TODO_2026-10-09.md`.
@@ -167,9 +168,9 @@ Nếu trễ: cắt T14 → T15 → rút gọn T05. Không cắt T01–T03, T07�
 | Claude Final T10 | F-TODO-07 các TODO Round 2 và G2-R4-01…04 | **ACCEPT_LATER — HISTORICAL DISPOSITIONS PRESERVED**; không tự mở lại |
 
 ## 11. Current Next Step
-1. Claude Round 2 xác minh độc lập RF-01/RF-02, sidecar isolation/atomicity, rolling 5 ngày, admin showtime/conflict và phim chuyển `now_showing` trên SQLite tạm.
-2. Chạy lại pytest và browser regression nếu Runtime Authorization T11 áp dụng cho Round 2; không dùng database thật nếu chưa có authorization riêng.
-3. T11 giữ `CLAUDE_REVIEW`; không mở T12, không tự PASS/PO_APPROVE, merge hoặc đóng T11.
+1. Codex Fix Round 3: chỉ sửa RF-03 trong `backend/app/seed.py`, `backend/tests/test_seed.py`, `HUONG_DAN.md`, `CHANGELOG.md`; không đổi schema; `.gitignore` chỉ sửa khi PO cho phép (TODO-R2-01). Viết `codex_fix_T11_round3_2026-10-11.md`; `FIX_LOOP → CLAUDE_REVIEW`.
+2. PO quyết định runtime authorization cho Claude chạy lại AC-06 (PhoBERT B thật + SQLite tạm) trên code cuối.
+3. Không mở T12, không PO_APPROVE, merge hoặc đóng T11.
 
 ## 12. Active Timeline
 | Ngày | Ai | Sự kiện |
@@ -276,3 +277,4 @@ Nếu trễ: cắt T14 → T15 → rút gọn T05. Không cắt T01–T03, T07�
 | 11/10/2026 | Codex | T11 Runtime AC-06 hoàn tất đúng authorization: SQLite tạm + checkpoint/restore/integrity/FK PASS; PhoBERT B thật active đúng version, không fallback; browser real/mock checklist 7/7; F-01…F-09 PASS; full pytest 22/22 cả trong venv không torch/transformers/model, compile/build/scope/security PASS; DB thật/model artifact giữ nguyên hash. AC 6/6 DEV PASS, blocker/RF mở 0; T11 `IN_PROGRESS → CLAUDE_REVIEW`, không tự review/PO_APPROVE/merge/close và không mở T12. |
 | 11/10/2026 | Claude | Independent Review T11 Round 1: **FAIL**. AC-01/02/03/05 PASS độc lập, AC-06 PASS theo bằng chứng; RF-01, RF-02 (Medium) ở F-02 `seed.py`. T11 `CLAUDE_REVIEW → FIX_LOOP`. Không mở task kế tiếp. |
 | 11/10/2026 | Codex | Fix Round 2 `b06b74e`: thêm sidecar nguyên tử theo file SQLite, sửa RF-01 xóa sạch ngày và RF-02 ngày rolling có suất admin; giữ lịch phim mới chuyển `now_showing`, suất/vé admin và chống conflict. Focused 6/6, full pytest 25/25 cả source không torch/model, compile/build real+mock/scope/security PASS; DB thật không khởi động và giữ nguyên hash. RF-01/RF-02 DEV FIXED; T11 `FIX_LOOP → CLAUDE_REVIEW / ROUND 2 PENDING`. |
+| 11/10/2026 | Claude | Independent Review T11 Round 2: **FAIL**. RF-01, RF-02 CLOSED / VERIFIED BY CLAUDE; RF-03 (High) mới: reset DB với sidecar cũ → 0 suất. Pytest 25/25 (cả không torch/model), build real/mock PASS; AC-06 PENDING. T11 `CLAUDE_REVIEW → FIX_LOOP`. Không mở task kế tiếp. |

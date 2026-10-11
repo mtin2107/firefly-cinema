@@ -77,6 +77,7 @@ def _ensure_showtimes(db: Session, days: int = 5) -> None:
 
 
 def seed(db: Session) -> None:
+    """Tạo dữ liệu mẫu đúng một lần khi database chưa có phim."""
     if not db.scalar(select(func.count()).select_from(Movie)):
         for m in json.loads(DATA.read_text(encoding="utf-8")):
             db.add(Movie(**m))
@@ -106,7 +107,6 @@ def seed(db: Session) -> None:
         db.commit()
         _ensure_showtimes(db)
         _seed_bookings(db)
-    _ensure_showtimes(db)
 
 
 # Số lượt đặt mẫu cho mỗi phim: (trong 7 ngày qua, từ 8 đến 30 ngày trước)

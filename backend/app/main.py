@@ -36,7 +36,31 @@ app.add_middleware(
 async def validation_error(request: Request, exc: RequestValidationError):
     err = exc.errors()[0]
     field = err["loc"][-1]
-    return JSONResponse(status_code=422, content={"detail": f"Trường '{field}' không hợp lệ: {err['msg']}"})
+    error_type = err["type"]
+    custom_prefixes = ("movie_", "showtime_", "comment_", "predict_")
+    if error_type.startswith(custom_prefixes):
+        message = err["msg"]
+    else:
+        messages = {
+            "missing": "Trường này là bắt buộc.",
+            "int_parsing": "Giá trị phải là số nguyên.",
+            "int_type": "Giá trị phải là số nguyên.",
+            "bool_parsing": "Giá trị phải là đúng hoặc sai.",
+            "bool_type": "Giá trị phải là đúng hoặc sai.",
+            "list_type": "Giá trị phải là một danh sách.",
+            "string_type": "Giá trị phải là chuỗi ký tự.",
+            "string_too_short": "Nội dung quá ngắn.",
+            "string_too_long": "Nội dung quá dài.",
+            "literal_error": "Giá trị không thuộc danh sách cho phép.",
+            "extra_forbidden": "Trường này không được hỗ trợ.",
+            "value_error": "Giá trị không đúng định dạng yêu cầu.",
+            "json_invalid": "Nội dung JSON không hợp lệ.",
+        }
+        message = messages.get(error_type, "Giá trị không hợp lệ.")
+    return JSONResponse(
+        status_code=422,
+        content={"detail": f"Trường '{field}' không hợp lệ: {message}"},
+    )
 
 
 app.include_router(auth.router)
@@ -51,11 +75,16 @@ app.include_router(admin_predict.router)
 @app.get("/api/health", tags=["Hệ thống"])
 def health():
     """Kiểm tra backend đang chạy và đang dùng model nào."""
+    models = []
+    for item in classifier.health():
+        public_item = dict(item)
+        public_item["error"] = "Model không khả dụng." if item.get("error") else None
+        models.append(public_item)
     return {
         "status": "ok",
         "classifier": classifier.name,
-        "classifier_error": classifier.error,
-        "models": classifier.health(),
+        "classifier_error": "Model được cấu hình không khả dụng." if classifier.error else None,
+        "models": models,
         "active_model": classifier.name,
         "active_version": classifier.version,
     }

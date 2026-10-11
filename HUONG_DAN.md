@@ -98,6 +98,18 @@ Kiểm tra:
 - http://localhost:8000/api/health → `{"status":"ok","classifier":"keyword",...}`
 - http://localhost:8000/docs → trang Swagger, bấm thử từng API được. Ảnh chụp trang này dùng tốt cho chương thiết kế API trong báo cáo.
 
+### Chạy kiểm thử
+
+Bộ kiểm thử dùng SQLite tạm và classifier giả lập. Nó không đọc hoặc ghi `backend/firefly.db`, không cần thư mục `backend/models/`, `torch` hay file PhoBERT.
+
+```powershell
+Set-Location "C:\Projects\firefly-cinema\backend"
+.\venv\Scripts\python.exe -m pip install -r requirements-dev.txt
+.\venv\Scripts\python.exe -m pytest -q
+```
+
+Mỗi test nhận database riêng trong thư mục tạm. Nếu máy có sẵn model hoặc thư viện ML, cấu hình test vẫn ép đường dẫn model sang vị trí không tồn tại và dùng classifier giả để kết quả không phụ thuộc môi trường cá nhân.
+
 ### 2.1. Cập nhật database cho T06/T10
 
 > **DRAFT — GATE 2 NOT AUTHORIZED — DO NOT EXECUTE**

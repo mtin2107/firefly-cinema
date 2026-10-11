@@ -264,6 +264,14 @@ class BookingOut(BaseModel):
 class CommentIn(BaseModel):
     content: str = Field(min_length=2, max_length=1000)
 
+    @field_validator("content")
+    @classmethod
+    def validate_content(cls, value: str) -> str:
+        value = value.strip()
+        if len(value) < 2:
+            raise PydanticCustomError("comment_content", "Nội dung bình luận không được để trống.")
+        return value
+
 
 class CommentOut(BaseModel):
     id: int

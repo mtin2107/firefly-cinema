@@ -314,7 +314,10 @@ function validateShowtime(payload, excludeId = null) {
 }
 
 function ensureMutableShowtime(showtime) {
-  const tickets = bookedSeats(showtime.id).length;
+  // Ghế trang trí từ seedBooked chỉ dùng cho sơ đồ; chỉ vé người dùng tạo mới khóa CRUD admin.
+  const tickets = db.bookings
+    .filter((booking) => booking.showtime_id === showtime.id)
+    .reduce((count, booking) => count + booking.seats.length, 0);
   if (tickets) throw new ApiError(`Suất chiếu đã có ${tickets} vé, không sửa hay xóa được.`, 409);
 }
 
@@ -383,6 +386,7 @@ export const mockApi = {
       const user = currentUser();
       const st = db.showtimes.find((s) => s.id === Number(showtime_id));
       if (!st) throw new ApiError("Không tìm thấy suất chiếu.", 404);
+      if (movieById(st.movie_id).status === "ended") throw new ApiError("Phim đã chiếu xong, không thể đặt vé.", 400);
       if (!seats.length || seats.length > MAX_SEATS_PER_BOOKING) throw new ApiError(`Chọn từ 1 đến ${MAX_SEATS_PER_BOOKING} ghế.`, 400);
       const taken = bookedSeats(st.id).filter((s) => seats.includes(s));
       if (taken.length) throw new ApiError(`Ghế ${taken.join(", ")} vừa có người đặt. Hãy chọn ghế khác.`, 409);
@@ -486,7 +490,12 @@ export const mockApi = {
       async exportCsv() {
         await wait();
         requireAdmin();
-        const escape = (value) => `"${String(value).replace(/"/g, '""')}"`;
+        const safe = (value) => {
+          const text = String(value);
+          const trimmed = text.trimStart();
+          return text && (/^[\t\r]/.test(text) || /^[=+\-@]/.test(trimmed)) ? `'${text}` : text;
+        };
+        const escape = (value) => `"${safe(value).replace(/"/g, '""')}"`;
         const lines = ["text,text_norm,label", ...db.comments
           .filter((c) => c.human_label === 0 || c.human_label === 1)
           .sort((a, b) => a.id - b.id)

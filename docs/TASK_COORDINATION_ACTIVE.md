@@ -24,9 +24,9 @@ Trước khi áp dụng workflow: giao diện React đầy đủ (`giao-dien-v1`
 
 ## 4. Current Project Status
 ```
-Overall Status: PO_REVIEW / PENDING_PO_DB_ACTION
-Phase: T10 — PO REVIEW
-Current Active Task: T10 — PO_REVIEW / PENDING_PO_DB_ACTION
+Overall Status: PO_APPROVED / CLOSURE_PENDING
+Phase: T10 — PO APPROVED / CLOSURE PENDING
+Current Active Task: T10 — PO_APPROVED / CLOSURE_PENDING
 Next Task: T11 — PLANNED / NOT AUTHORIZED
 Ngày bắt đầu sản phẩm: 05/10/2026 · Hạn: 01/11/2026
 ```
@@ -34,9 +34,9 @@ Ngày bắt đầu sản phẩm: 05/10/2026 · Hạn: 01/11/2026
 ## 5. Current Active Task
 **T10 — Gắn model B vào web.**
 
-Status: `PO_REVIEW / PENDING_PO_DB_ACTION`.
+Status: `PO_APPROVED / CLOSURE_PENDING`.
 
-Implementation commit `0e80015`; fix `ed26454`. Claude Round 1 FAIL (RF-01 race lazy-load/release). **Claude Round 2 (`reports/2026-10-10/claude_review_T10_round2_PASS_WITH_TODO_2026-10-10.md`): PASS_WITH_TODO** — `RF-01 = CLOSED / VERIFIED BY CLAUDE` (per-model `RLock`; uvicorn thật B-active 18/18 + stress 50/50, A-active 18/18 + stress 30/30, 0 lỗi 500/`AttributeError`/deadlock); AC 7/7; RF mở 0; 7 TODO. `PO-DECISION-T10-REALDB-A1-GATE1-20261010`: phương án A1 **GATE 1 APPROVED**, technical dry-run PASS; **GATE 2 NOT AUTHORIZED**. DB thật unchanged, chưa có `comments.model_version`; `REAL_DB_SCHEMA_READINESS = PENDING_PO_GATE2`, TODO-01 vẫn PO ACTION REQUIRED.
+Implementation commit `0e80015`; fix `ed26454`. RF-01 race lazy-load/release đã **CLOSED / VERIFIED BY CLAUDE**. `PO-DECISION-T10-REALDB-A1-GATE2-20261010`: Gate 2 **EXECUTED / ALTER_COMMITTED**; Postverify **PASS**, 559 dòng gốc được bảo toàn. Credential Precheck V2 **PASS**; Clone Smoke Attempt 1 **FAIL / ARCHIVED**; Clone Smoke Attempt 2 **PASS**; Hash Reconciliation **PASS**; DEV Final QA **PASS**. Claude Final (`reports/2026-10-11/claude_review_T10_PASS_WITH_TODO_2026-10-11.md`) **PASS_WITH_TODO**; AC `7/7 PASS`, Technical DoD `MET`, Required Fixes `0`, TODO `7`. PO Review (`reports/2026-10-11/po_review_T10_APPROVED_2026-10-11.md`) **APPROVED_WITH_NOTES**. Closure vẫn **PENDING**; merge/tag/real-backend startup/T11 chưa được authorize.
 
 ## 6. Current Task Record
 Task Record hiện tại: [`docs/tasks/T10.md`](tasks/T10.md).
@@ -57,7 +57,7 @@ T07 và T09 đã DONE / CLOSED. TODO-02 của T09 đã RESOLVED theo xác nhận
 | T07 | Đa mô hình và trang So sánh mô hình | Web + ML | 2 | T01 | [T07.md](tasks/T07.md) | DONE / CLOSED (Claude Round 2 PASS_WITH_TODO; AC 8/8; hồi quy 7/7; DoD MET; RF-01 CLOSED; RF mở 0; blocker 0; TODO 6/6 dispositioned; merge `434a489`; tag `admin-v1`; T07_MERGE_VERIFIED) |
 | T08 | Đo lệch miền điện thoại → phim | ML | 3 | T02, T03 | [T08.md](tasks/T08.md) | DONE / CLOSED (Claude PASS_WITH_TODO; PO APPROVED; AC 5/5 PASS; DoD MET; RF 0; blocker 0; TODO 5/5 dispositioned, deferred chưa RESOLVED; merge `778675e`; T08_MERGE_VERIFIED) |
 | T09 | Train PhoBERT phần B | ML | 3 | T08 | [T09.md](tasks/T09.md) | DONE / CLOSED (Claude PASS_WITH_TODO; PO APPROVED; AC 6/6; DoD MET theo PO; RF 0; blocker 0; TODO 7/7 dispositioned; TODO-02 RESOLVED 10/10/2026 theo PO, notebook `PO_ATTESTED`; merge `27c364e`; T09_MERGE_VERIFIED) |
-| T10 | Gắn model B vào web | Web | 3 | T07, T09 | [T10.md](tasks/T10.md) | PO_REVIEW / PENDING_PO_DB_ACTION — Claude Round 2 PASS_WITH_TODO; AC 7/7; RF-01 CLOSED; RF mở 0; A1 Gate 1 APPROVED; Gate 2 NOT AUTHORIZED |
+| T10 | Gắn model B vào web | Web | 3 | T07, T09 | [T10.md](tasks/T10.md) | PO_APPROVED / CLOSURE_PENDING — Gate 2 ALTER_COMMITTED; Postverify/Clone Smoke Attempt 2/Hash Reconciliation/DEV Final QA PASS; Claude Final PASS_WITH_TODO; AC 7/7; Technical DoD MET; RF 0; PO APPROVED_WITH_NOTES |
 | T11 | Kiểm thử tự động và sửa lỗi | Web | 4 | T04–T10 | [T11.md](tasks/T11.md) | PLANNED / NOT AUTHORIZED |
 | T12 | Dữ liệu demo và kịch bản bảo vệ | Web | 4 | T10 | [T12.md](tasks/T12.md) | PLANNED |
 | T13 | Chốt v1.0 và sao lưu | Tất cả | 4 | T11, T12 | [T13.md](tasks/T13.md) | PLANNED |
@@ -69,7 +69,7 @@ Nếu trễ: cắt T14 → T15 → rút gọn T05. Không cắt T01–T03, T07�
 
 ## 8. Open Blockers
 - T09: **DONE / CLOSED**, 0 blocker; merge `27c364e` đã xác minh (`T09_MERGE_VERIFIED`). TODO-02 **RESOLVED 10/10/2026 theo xác nhận PO**; evidence notebook là `PO_ATTESTED`, không phải Claude kiểm tra độc lập.
-- T10: **PO_REVIEW / PENDING_PO_DB_ACTION**, 0 blocker kỹ thuật trong code; RF-01 CLOSED / VERIFIED BY CLAUDE. Technical dry-run A1 PASS; authorization Gate 1 APPROVED; Gate 2 NOT AUTHORIZED. `T10 REAL_DB_SCHEMA_READINESS = PENDING_PO_GATE2`; database thật UNCHANGED / NOT READY FOR T10 RUNTIME. TODO-01 vẫn PO ACTION REQUIRED. Gate 1 chỉ cho phép chuẩn bị manual ALTER T10, không cho phép thực thi.
+- T10: **PO_APPROVED / CLOSURE_PENDING**, 0 blocker kỹ thuật; RF-01 CLOSED / VERIFIED BY CLAUDE. Gate 2 **EXECUTED / ALTER_COMMITTED**; Postverify PASS; 559 dòng gốc bảo toàn; Credential Precheck V2 PASS; Clone Smoke Attempt 1 FAIL / ARCHIVED; Attempt 2 PASS; Hash Reconciliation PASS; DEV Final QA PASS; Claude Final PASS_WITH_TODO; PO APPROVED_WITH_NOTES. Real backend startup, merge/tag/closure và T11 vẫn cần quyết định PO riêng.
 - T08: **DONE / CLOSED**, 0 blocker; merge `778675e` đã xác minh (`T08_MERGE_VERIFIED`). TODO 5/5 đã disposition; deferred chưa RESOLVED.
 - T06: 0 blocker; RF-01 CLOSED (Claude Round 2 xác minh 09/10/2026). `PENDING_PO_DATABASE_RESET` **RESOLVED 09/10/2026** — backup giữ nguyên checksum/integrity; database thật mới đủ schema, seed; AC 8/8 DEV PASS và regression real/mock 7/7.
 - T04: 0 technical blockers; SD-01/SD-02 đã được PO phê duyệt hồi tố, không còn chặn merge.
@@ -157,20 +157,20 @@ Nếu trễ: cắt T14 → T15 → rút gọn T05. Không cắt T01–T03, T07�
 | Claude review T09 | TODO-05 (Low, process) T08 TODO-04 ghi RESOLVED quá mức (notebook Git chưa có output); TODO-03 chỉ RESOLVED mức code | ACCEPT_WITH_NOTES — đã sửa disposition T08 ở trên; Codex không tự đổi TODO do PO disposition sang RESOLVED |
 | Claude review T09 | TODO-06 (Low) GradScaler API cũ; scheduler step khi optimizer bị skip | ACCEPT_LATER → T15 (hoặc lần train lại kế tiếp); không retrain T09 |
 | Claude review T09 | TODO-07 (Info) `T09.md` còn ghi PLANNED | ACCEPT_WITH_NOTES — coordination là nguồn trạng thái |
-| Claude review T10 r1 | TODO-01 (High, vận hành) DB thật thiếu `comments.model_version` → bình luận/kiểm duyệt 500 | **PO ACTION REQUIRED / OPEN** — A1 Gate 1 APPROVED, Gate 2 NOT AUTHORIZED; `REAL_DB_SCHEMA_READINESS = PENDING_PO_GATE2` |
-| Claude review T10 r1 | TODO-02 (Low) `check_model.py` so score runtime đã làm tròn 4 chữ số | Đề xuất: ACCEPT_WITH_NOTES |
-| Claude review T10 r1 | TODO-03 (Low) `CLAUDE.md` và `BOI_CANH_DU_AN.md` mục 7 còn ghi health `classifier: phobert` | Đề xuất: PO cập nhật tài liệu PO-owned |
-| Claude review T10 r2 | TODO-07 (Low) lock bao cả inference → request cùng model chạy tuần tự; model phụ nạp lại mỗi request admin (~0,6–0,8 s) | Đề xuất: ACCEPT_WITH_NOTES |
-| Claude review T10 r1 | TODO-04 (Info) `T10.md` ghi IN_PROGRESS; TODO-05 (Info) mock gắn nhãn `phobert_b` nhưng điểm keyword; TODO-06 (Info) T07 TODO-05 nay đã có `active`/`active_version` | Đề xuất: ACCEPT_WITH_NOTES; T07 TODO-05 có thể RESOLVED |
+| Claude Final T10 | F-TODO-01 (governance) coordination/authority chưa phản ánh Gate 2 và PO decision | **FIX_NOW → RESOLVED_BY_GOVERNANCE_SYNC khi sync commit thành công**; T10 vẫn chưa CLOSED |
+| Claude Final T10 | F-TODO-02 (vận hành) startup backend thật có thể ghi seed/showtime | **ACCEPT_LATER — PO RUNTIME GATE**; cấm startup nếu chưa có checkpoint/backup và authorization mới |
+| Claude Final T10 | F-TODO-03 Task Record còn `IN_PROGRESS` | **FIX_NOW → RESOLVED_BY_GOVERNANCE_SYNC khi sync commit thành công**; chỉ đổi Current Status thành `PO_APPROVED`, closure vẫn PENDING |
+| Claude Final T10 | F-TODO-04 tài liệu PO-owned còn mô tả default model A | **ACCEPT_LATER — PO-OWNED DOCS**; runtime T10 đã duyệt là `phobert_b` |
+| Claude Final T10 | F-TODO-05 canonical package có `__pycache__/02_fresh_backup.cpython-313.pyc` ngoài hash-set | **ACCEPT_LATER — ARTIFACT PRESERVATION**; giữ nguyên, không cleanup; lần sau dùng `python -B` |
+| Claude Final T10 | F-TODO-06 health có thể trả nguyên văn `classifier_error`/đường dẫn | **ACCEPT_LATER — PROPOSED T11 BACKLOG**; T11 chưa authorize |
+| Claude Final T10 | F-TODO-07 các TODO Round 2 và G2-R4-01…04 | **ACCEPT_LATER — HISTORICAL DISPOSITIONS PRESERVED**; không tự mở lại |
 
 ## 11. Current Next Step
-1. Codex hoàn thành authority/runbook sync cho `PO-DECISION-T10-REALDB-A1-GATE1-20261010`.
-2. PO review diff tài liệu và report authority sync.
-3. PO commit tài liệu được duyệt; Codex không commit tài liệu PO-owned trong lượt Gate 1.
-4. PO xác nhận **Gate 2** bằng quyết định riêng, gồm thao tác, thời điểm, người thực hiện và rollback.
-5. Chỉ sau Gate 2, thực hiện A1 theo runbook được duyệt trong `HUONG_DAN.md` mục 2.1, với fresh backup mới.
-6. Verify database thật và API thực tế; không dùng snapshot preflight 14:50 như bằng chứng hiện thời cho Gate 2.
-7. Tiếp tục PO Review T10; PO mới quyết định merge/tag/closure khi đủ điều kiện. T11 giữ `PLANNED / NOT AUTHORIZED`.
+1. Hoàn tất commit authority/coordination sync sáu file theo amendment V2 và gửi commit hash cho PO.
+2. **HARD STOP** sau commit; PO review governance sync.
+3. Chỉ PO mới quyết định riêng merge vào `master`, tag `phobert-B` và chuyển `PO_APPROVED → DONE → CLOSED`.
+4. Real backend startup cần checkpoint/backup và PO runtime authorization riêng.
+5. T11 giữ `PLANNED / NOT AUTHORIZED`; không tạo branch hoặc bắt đầu implementation.
 
 ## 12. Active Timeline
 | Ngày | Ai | Sự kiện |
@@ -266,3 +266,6 @@ Nếu trễ: cắt T14 → T15 → rút gọn T05. Không cắt T01–T03, T07�
 | 10/10/2026 | Codex | T10 Fix Round 1: sửa duy nhất RF-01 bằng per-model lifecycle `RLock` trong `backend/app/classifier.py`; B-active 18/18 + stress 50/50, A-active 18/18 + stress 30/30 đều HTTP 200, model phụ release và model active giữ loaded; fallback/error/security/parity/movie metric/comment persistence/build real+mock/hồi quy 7/7 đạt trên DB tạm. RF-01 **DEV FIXED / PENDING CLAUDE VERIFICATION**; T10 `FIX_LOOP → CLAUDE_REVIEW / ROUND_2_PENDING`; TODO-01 DB thật giữ `PO ACTION REQUIRED`; T11 giữ `PLANNED / NOT AUTHORIZED`. |
 | 10/10/2026 | Claude | T10 Round 2 independent review: **PASS_WITH_TODO**. RF-01 **CLOSED / VERIFIED BY CLAUDE** (source review per-model `RLock`; uvicorn thật B-active 18/18 + stress 50/50, A-active 18/18 + stress 30/30, trộn comment/predict, 0 lỗi 500/`AttributeError`). AC 7/7 (check_model 10/10 max Δ `0,000048`; reference độc lập Δ 0; movie test khớp T09; fallback missing/broken B, broken A phụ; 401/403/200; browser real/mock cho luồng bị ảnh hưởng + API regression). DB thật vẫn thiếu `model_version` (PENDING_PO_ACTION). T10 `CLAUDE_REVIEW → PO_REVIEW`; T11 giữ `PLANNED / NOT AUTHORIZED`. Probe tạm còn 0. |
 | 10/10/2026 | Tín (PO) | `PO-DECISION-T10-REALDB-A1-GATE1-20261010`: **APPROVED Gate 1 A1**, cho phép chuẩn bị manual ALTER duy nhất `comments.model_version VARCHAR(100) NULL` để bảo toàn dữ liệu; preflight clone PASS. **Gate 2 NOT AUTHORIZED**, DB thật không đổi/không READY; TODO-01 giữ PO ACTION REQUIRED; T10 `PO_REVIEW / PENDING_PO_DB_ACTION`, T11 giữ `PLANNED / NOT AUTHORIZED`. |
+| 11/10/2026 | Tín + Codex | T10 Gate 2 Attempt 2: controlled ALTER `comments.model_version VARCHAR(100) NULL` **COMMITTED** theo `PO-DECISION-T10-REALDB-A1-GATE2-20261010`; Postverify PASS, 559 dòng gốc bảo toàn; Credential Precheck V2 PASS; Clone Smoke Attempt 1 FAIL/ARCHIVED, Attempt 2 PASS; hash reconciliation PASS; DB hash `B3F7DF79…CFE3` được bảo toàn. |
+| 11/10/2026 | Codex + Claude | DEV Final QA PASS; Claude Final Independent Review **PASS_WITH_TODO**; AC 7/7, Technical DoD MET, RF 0, TODO 7; không startup backend thật trong final review. |
+| 11/10/2026 | Tín (PO) | PO Review **APPROVED_WITH_NOTES**; T10 `PO_APPROVED / CLOSURE_PENDING`. F-TODO-01/03 FIX_NOW qua governance sync; F-TODO-02/04/05/06/07 ACCEPT_LATER. Amendment V2 mở allowlist thành sáu file, gồm Claude Final Review. Merge/tag/closure/real-backend startup/T11 đều NOT AUTHORIZED. |

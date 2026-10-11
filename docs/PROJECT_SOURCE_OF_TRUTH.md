@@ -1,7 +1,7 @@
 # PROJECT SOURCE OF TRUTH — Firefly Cinema
 
 > Cổng vào duy nhất cho mọi agent. Đọc file này trước, sau đó đọc `TASK_COORDINATION_ACTIVE.md` và Task Record đang làm.
-> Cập nhật: 10/10/2026.
+> Cập nhật: 11/10/2026.
 
 ## 1. Project Snapshot
 
@@ -66,6 +66,20 @@ Không âm thầm trộn hai phiên bản mâu thuẫn. Ghi conflict vào mục 
 - Đây là ngoại lệ có kiểm soát cho T10, không thay thế quyết định lịch sử **Q2 RESOLVED 08/10/2026 — NO ALEMBIC / BACKUP_BEFORE_RESET** và không tạo chính sách ALTER mặc định cho task khác.
 - **GATE 2 NOT AUTHORIZED**: chưa được ALTER, reset, migrate, seed, restore/ghi đè hoặc khởi động backend có khả năng ghi vào database thật. Mọi thao tác ghi cần một quyết định PO riêng; Codex không được tự thực hiện migration.
 - Database thật chưa được đánh dấu READY. **Phê duyệt phương án kỹ thuật không đồng nghĩa với phê duyệt thao tác thực thi.**
+
+### T10 Gate 2 và PO approval
+
+`PO-DECISION-T10-REALDB-A1-GATE2-20261010` — **GATE 2 EXECUTED / ALTER COMMITTED**:
+
+- Sau authorization và checkpoint riêng của PO, A1 đã bổ sung duy nhất `comments.model_version VARCHAR(100) NULL` bằng controlled ALTER; không dùng Alembic, không reset database.
+- Postverify **PASS**: integrity/FK checks đạt, schema mới nullable đúng yêu cầu và toàn bộ **559 dòng dữ liệu gốc được bảo toàn**.
+- Clone Smoke Attempt 1 `FAIL / ARCHIVED`; Credential Precheck V2 **PASS**; Clone Smoke Attempt 2 **PASS**; hash reconciliation **PASS**.
+- SHA-256 database thật sau ALTER: `B3F7DF79BDA4478412200EA80B8EC15E6B73DA730068A52E11C40136EAC4CFE3`.
+- DEV Final QA **PASS**; Claude Final Independent Review ngày 11/10/2026 **PASS_WITH_TODO**, AC `7/7 PASS`, Technical DoD `MET`, Required Fixes `0`.
+- PO ngày 11/10/2026 quyết định **APPROVED_WITH_NOTES**; T10 ở `PO_APPROVED / CLOSURE_PENDING`. Hai TODO governance `F-TODO-01` và `F-TODO-03` được xử lý bằng đợt sync này; năm TODO còn lại giữ `ACCEPT_LATER` theo PO Review.
+- PO amendment V2 cho phép lưu Claude Final Review như artifact thứ sáu trong cùng commit authority/coordination sync; báo cáo PO và Claude phải giữ nguyên byte-for-byte.
+- PO amendment V3 cho phép ngoại lệ hẹp đối với đúng 12 Markdown hard-break bằng hai dấu cách cuối dòng trong immutable PO Review (dòng 3–7, 19–20, 84–88); năm file còn lại vẫn phải qua whitespace check bình thường. Ngoại lệ không thay đổi hash, nội dung authority hoặc policy whitespace toàn repository.
+- Approval này **không** cấp quyền merge, tag, đóng T10, mở T11 hoặc khởi động backend trên database thật. Các bước đó cần authorization riêng của PO.
 
 Khi Tín trả lời, đổi trạng thái thành `CHỐT: <nội dung>, <ngày>`.
 

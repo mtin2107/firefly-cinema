@@ -98,6 +98,18 @@ Kiểm tra:
 - http://localhost:8000/api/health → `{"status":"ok","classifier":"keyword",...}`
 - http://localhost:8000/docs → trang Swagger, bấm thử từng API được. Ảnh chụp trang này dùng tốt cho chương thiết kế API trong báo cáo.
 
+### Chạy kiểm thử
+
+Bộ kiểm thử dùng SQLite tạm và classifier giả lập. Nó không đọc hoặc ghi `backend/firefly.db`, không cần thư mục `backend/models/`, `torch` hay file PhoBERT.
+
+```powershell
+Set-Location "C:\Projects\firefly-cinema\backend"
+.\venv\Scripts\python.exe -m pip install -r requirements-dev.txt
+.\venv\Scripts\python.exe -m pytest -q
+```
+
+Mỗi test nhận database riêng trong thư mục tạm. Nếu máy có sẵn model hoặc thư viện ML, cấu hình test vẫn ép đường dẫn model sang vị trí không tồn tại và dùng classifier giả để kết quả không phụ thuộc môi trường cá nhân.
+
 ### 2.1. Cập nhật database cho T06/T10
 
 > **DRAFT — GATE 2 NOT AUTHORIZED — DO NOT EXECUTE**
@@ -219,6 +231,16 @@ Chỉ sau Gate 2 và Giai đoạn 4 PASS:
 
 A2 chỉ được chạy khi PO chọn và authorize riêng. Dừng backend, tạo fresh backup đã xác minh như trên, rồi PO mới được xóa đúng `backend/firefly.db` và startup để `create_all` + seed tạo DB mới. Phải chấp nhận rõ rằng reset không tự bảo toàn tài khoản, vé, ghế và bình luận cũ; không import dữ liệu cũ nếu chưa có kế hoạch mapping/transaction/PK-FK validation riêng. Codex không tự xóa/reset database thật.
 
+Từ T11, trạng thái những ngày đã tạo lịch nằm trong sidecar cùng thư mục, tên mặc định là `firefly.db.showtime-seed.json`. Khi database có bảng `movies` rỗng, `seed()` nhận biết đây là lần khởi tạo mới và ghi nguyên tử state rỗng trước khi tạo lại lịch; vì vậy sidecar còn sót không được phép chặn lịch và vé mẫu của DB mới. Với database hiện hữu, sidecar vẫn bảo vệ các suất admin đã xóa khỏi bị tạo lại.
+
+Quy tắc vận hành bắt buộc:
+
+1. Dừng backend trước khi sao lưu, reset hoặc restore để DB và sidecar không bị thay đổi giữa chừng.
+2. Sao lưu và restore `firefly.db` cùng `firefly.db.showtime-seed.json` như một cặp; giữ tên tương ứng với file DB. Xác minh hash, SQLite integrity/FK và số dòng sau restore.
+3. Nếu reset đã được PO cho phép, lưu cả cặp vào backup trước khi loại chúng khỏi đường dẫn chạy. Không chỉ giữ sidecar rồi xem nó như bằng chứng của DB mới.
+4. Nếu sidecar hỏng trên DB hiện hữu, backend dừng seed với lỗi rõ ràng. Không tự xóa sidecar, không tự seed lại và không xóa dữ liệu sản phẩm; khôi phục đúng cặp backup hoặc điều tra rồi xin PO quyết định.
+5. Sidecar hiện không có định danh bền vững nằm trong DB vì T11 không được đổi schema. Do đó phần mềm không thể phát hiện tin cậy mọi trường hợp restore DB cũ với sidecar của snapshot khác. Đây là giới hạn đã biết: luôn restore theo cặp và HARD STOP nếu không chứng minh được chúng cùng snapshot.
+
 ---
 
 ## Phần 3. Nối giao diện với backend
@@ -331,8 +353,8 @@ Ngưỡng ẩn bình luận chỉnh bằng `NEGATIVE_THRESHOLD` (mặc định 0
 | PowerShell chặn `Activate.ps1` | Chạy `Set-ExecutionPolicy -Scope CurrentUser RemoteSigned` một lần, hoặc dùng cmd với `activate.bat` |
 | `Address already in use` | Cổng đang bị chiếm, tắt terminal cũ hoặc đổi `--port 8001` (nhớ sửa `VITE_API_URL`) |
 | Bị đăng xuất sau một ngày | Token hết hạn sau 24 giờ (`TOKEN_EXPIRE_HOURS` trong `app/config.py`) |
-| Sửa `movies.json` mà web không đổi | Dữ liệu mẫu chỉ nạp khi database trống. Xóa `firefly.db` rồi chạy lại |
-| Lỗi `no such column` sau khi cập nhật code | Bảng trong database cũ thiếu cột mới. Xóa `firefly.db` rồi chạy lại để tạo bảng mới |
+| Sửa `movies.json` mà web không đổi | Dữ liệu mẫu chỉ nạp khi database trống. Không tự xóa DB; thực hiện quy trình A2 đã được PO authorize và xử lý `firefly.db` + sidecar như một cặp |
+| Lỗi `no such column` sau khi cập nhật code | Bảng trong database cũ thiếu cột mới. Không tự reset; dùng migration đã duyệt hoặc quy trình A2 với backup DB + sidecar theo cặp |
 
 ---
 

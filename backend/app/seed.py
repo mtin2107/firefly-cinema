@@ -1,4 +1,6 @@
 import json
+import os
+import tempfile
 from datetime import date, datetime, time, timedelta
 from pathlib import Path
 
@@ -14,6 +16,99 @@ from .classifier import classifier
 
 DATA = Path(__file__).parent / "data" / "movies.json"
 TIMES = ["09:30", "13:15", "16:00", "19:30", "22:00"]
+_SEED_STATE_VERSION = 1
+_SEED_STATE_SUFFIX = ".showtime-seed.json"
+
+
+def _empty_seed_state() -> dict:
+    return {"version": _SEED_STATE_VERSION, "days": {}}
+
+
+def _seed_state_path(db: Session) -> Path | None:
+    """Trả sidecar gắn với đúng file SQLite đang được session sử dụng."""
+    bind = db.get_bind()
+    if bind.dialect.name != "sqlite":
+        raise RuntimeError("Showtime seed state chỉ hỗ trợ SQLite.")
+    database = bind.url.database
+    if not database or database == ":memory:":
+        return None
+    database_path = Path(database).resolve()
+    return database_path.with_name(database_path.name + _SEED_STATE_SUFFIX)
+
+
+def _read_seed_state(
+    db: Session, days: list[date], movie_ids: set[int]
+) -> tuple[dict, Path | None]:
+    path = _seed_state_path(db)
+    if path is None:
+        state = db.info.setdefault(
+            "showtime_seed_state", _empty_seed_state()
+        )
+        return state, None
+    if path.exists():
+        try:
+            state = json.loads(path.read_text(encoding="utf-8"))
+            if state.get("version") != _SEED_STATE_VERSION or not isinstance(
+                state.get("days"), dict
+            ):
+                raise ValueError("invalid state shape")
+            for value in state["days"].values():
+                if not isinstance(value, list) or any(
+                    not isinstance(movie_id, int) for movie_id in value
+                ):
+                    raise ValueError("invalid movie ids")
+            return state, path
+        except (OSError, ValueError, TypeError, json.JSONDecodeError) as exc:
+            raise RuntimeError(
+                f"Không thể đọc showtime seed state cho database {path.name}."
+            ) from exc
+
+    # Database hiện hữu chưa có sidecar: coi các ngày từ đầu cửa sổ đến
+    # ngày lịch hiện hữu xa nhất trong cửa sổ là đã được seed. Quy tắc bảo thủ
+    # này giữ các thao tác xóa cũ; ngày rolling mới phía sau vẫn được bổ sung.
+    state = _empty_seed_state()
+    window_start = datetime.combine(days[0], time.min)
+    window_end = datetime.combine(days[-1] + timedelta(days=1), time.min)
+    existing_starts = db.scalars(select(Showtime.start_time).where(
+        Showtime.start_time >= window_start,
+        Showtime.start_time < window_end,
+    )).all()
+    if existing_starts:
+        seeded_through = max(value.date() for value in existing_starts)
+        for day in days:
+            if day <= seeded_through:
+                state["days"][day.isoformat()] = sorted(movie_ids)
+    return state, path
+
+
+def _write_seed_state(path: Path | None, state: dict) -> None:
+    if path is None:
+        return
+    temp_path = None
+    try:
+        fd, temp_name = tempfile.mkstemp(
+            prefix=f".{path.name}.", suffix=".tmp", dir=path.parent
+        )
+        temp_path = Path(temp_name)
+        with os.fdopen(fd, "w", encoding="utf-8", newline="\n") as handle:
+            json.dump(state, handle, ensure_ascii=False, sort_keys=True)
+            handle.write("\n")
+            handle.flush()
+            os.fsync(handle.fileno())
+        os.replace(temp_path, path)
+    finally:
+        if temp_path is not None and temp_path.exists():
+            temp_path.unlink()
+
+
+def _reset_seed_state_for_new_database(db: Session) -> None:
+    """Bỏ state cũ chỉ khi database chưa có phim và đang được khởi tạo mới."""
+    state = _empty_seed_state()
+    path = _seed_state_path(db)
+    if path is None:
+        db.info["showtime_seed_state"] = state
+        return
+    _write_seed_state(path, state)
 
 
 def _ensure_showtimes(db: Session, days: int = 5) -> None:
@@ -21,6 +116,9 @@ def _ensure_showtimes(db: Session, days: int = 5) -> None:
     from .showtime_rules import ROOMS, find_showtime_conflict
 
     movies = db.scalars(select(Movie).where(Movie.status == "now_showing").order_by(Movie.id)).all()
+    window_days = [date.today() + timedelta(days=offset) for offset in range(days)]
+    movie_ids = {movie.id for movie in movies}
+    state, state_path = _read_seed_state(db, window_days, movie_ids)
 
     def add_first_available(movie: Movie, movie_idx: int, day: date, day_idx: int,
                             candidate_indexes: list[int]) -> bool:
@@ -48,36 +146,51 @@ def _ensure_showtimes(db: Session, days: int = 5) -> None:
                 return True
         return False
 
-    for d in range(days):
-        day = date.today() + timedelta(days=d)
+    for d, day in enumerate(window_days):
         day_start = datetime.combine(day, time.min)
         day_end = day_start + timedelta(days=1)
-
-        # Ưu tiên công bằng: mỗi phim đang chiếu có ít nhất một suất trong ngày.
+        handled_movie_ids = set(state["days"].get(day.isoformat(), []))
         existing_movie_ids = set(db.scalars(
             select(Showtime.movie_id).where(
                 Showtime.start_time >= day_start,
                 Showtime.start_time < day_end,
             )
         ).all())
-        for idx, movie in enumerate(movies):
+        target_movies = [movie for movie in movies if movie.id not in handled_movie_ids]
+
+        # Ưu tiên công bằng: mỗi phim mới đi vào ngày seed có ít nhất một suất.
+        for idx, movie in enumerate(target_movies):
             if movie.id in existing_movie_ids:
+                handled_movie_ids.add(movie.id)
                 continue
             preferred = (idx + d) % len(TIMES)
             candidates = [(preferred + step) % len(TIMES) for step in range(len(TIMES))]
             if add_first_available(movie, idx, day, d, candidates):
                 existing_movie_ids.add(movie.id)
+                handled_movie_ids.add(movie.id)
 
-        # Sau suất tối thiểu, lấp thêm lịch mẫu cũ; khi phòng ưu tiên bận thì thử phòng khác.
-        for idx, movie in enumerate(movies):
+        # Chỉ lấp lịch mẫu cho phim chưa từng được xử lý trong ngày. Các suất
+        # seed đã bị admin xóa (kể cả xóa sạch ngày) sẽ không xuất hiện lại.
+        for idx, movie in enumerate(target_movies):
             for i, _ in enumerate(TIMES):
                 if (i + idx + d) % 2 == 0 or i == 3:
-                    add_first_available(movie, idx, day, d, [i])
+                    if add_first_available(movie, idx, day, d, [i]):
+                        existing_movie_ids.add(movie.id)
+            if movie.id in existing_movie_ids:
+                handled_movie_ids.add(movie.id)
+        state["days"][day.isoformat()] = sorted(handled_movie_ids)
     db.commit()
+    _write_seed_state(state_path, state)
 
 
 def seed(db: Session) -> None:
-    if not db.scalar(select(func.count()).select_from(Movie)):
+    """Tạo dữ liệu mẫu lần đầu và duy trì cửa sổ lịch chiếu 5 ngày."""
+    is_new_database = not db.scalar(select(func.count()).select_from(Movie))
+    if is_new_database:
+        # Một database mới có thể dùng lại đúng đường dẫn của file vừa reset.
+        # Làm rỗng sidecar trước mọi commit để lần khởi động kế tiếp vẫn có thể
+        # hoàn tất seed an toàn nếu tiến trình bị ngắt giữa chừng.
+        _reset_seed_state_for_new_database(db)
         for m in json.loads(DATA.read_text(encoding="utf-8")):
             db.add(Movie(**m))
         admin = User(full_name="Quản trị viên", email="admin@firefly.vn", password_hash=hash_password("admin123"), role="admin")

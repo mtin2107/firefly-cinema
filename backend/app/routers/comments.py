@@ -24,6 +24,14 @@ from .movies import get_movie_or_404
 router = APIRouter(prefix="/api", tags=["Bình luận"])
 
 
+def _csv_safe(value: str) -> str:
+    """Ngăn bảng tính thực thi công thức nhưng không sửa nội dung trong database."""
+    stripped = value.lstrip()
+    if value and (value[0] in "\t\r" or stripped.startswith(("=", "+", "-", "@"))):
+        return "'" + value
+    return value
+
+
 def to_out(c: Comment) -> dict:
     reviewed = c.human_label in (0, 1)
     effective_negative = bool(c.human_label) if reviewed else c.is_negative
@@ -138,7 +146,11 @@ def export_admin_comments(_: User = Depends(require_admin), db: Session = Depend
     writer = csv.writer(output, lineterminator="\r\n")
     writer.writerow(["text", "text_norm", "label"])
     for comment in rows:
-        writer.writerow([comment.content, normalize(comment.content), comment.human_label])
+        writer.writerow([
+            _csv_safe(comment.content),
+            _csv_safe(normalize(comment.content)),
+            comment.human_label,
+        ])
     return Response(
         content=output.getvalue().encode("utf-8-sig"),
         media_type="text/csv; charset=utf-8",

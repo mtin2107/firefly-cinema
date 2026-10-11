@@ -43,7 +43,11 @@ def get_current_user(
         raise HTTPException(401, "Phiên đăng nhập đã hết hạn, hãy đăng nhập lại.")
     except jwt.PyJWTError:
         raise HTTPException(401, "Phiên đăng nhập không hợp lệ.")
-    user = db.get(User, int(payload["sub"]))
+    try:
+        user_id = int(payload["sub"])
+    except (KeyError, TypeError, ValueError):
+        raise HTTPException(401, "Phiên đăng nhập không hợp lệ.")
+    user = db.get(User, user_id)
     if user is None:
         raise HTTPException(401, "Tài khoản không tồn tại.")
     return user

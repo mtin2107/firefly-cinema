@@ -24,6 +24,8 @@ def create_booking(body: BookingIn, user: User = Depends(get_current_user), db: 
     st = db.get(Showtime, body.showtime_id)
     if not st:
         raise HTTPException(404, "Không tìm thấy suất chiếu.")
+    if st.movie.status == "ended":
+        raise HTTPException(400, "Phim đã chiếu xong, không thể đặt vé.")
     if st.start_time <= datetime.now():
         raise HTTPException(400, "Suất chiếu này đã bắt đầu.")
     seats = sorted(set(body.seats))

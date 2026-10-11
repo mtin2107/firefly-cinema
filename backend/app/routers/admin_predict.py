@@ -25,7 +25,8 @@ def compare_models(body: AdminPredictIn, _: User = Depends(require_admin)):
                 "score": score,
                 "ms": round(elapsed_ms, 3),
             })
-        except RuntimeError:
+        # Một model phụ lỗi không được làm hỏng kết quả của các model còn lại.
+        except Exception:
             continue
         finally:
             classifier.release_if_inactive(model)

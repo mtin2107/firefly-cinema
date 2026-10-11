@@ -1,10 +1,12 @@
 from datetime import date, datetime, time, timedelta
 
-from sqlalchemy import delete, func, select
-from sqlalchemy.orm import Session
+import pytest
+from sqlalchemy import create_engine, delete, func, select
+from sqlalchemy.orm import Session, sessionmaker
 
+from app.database import Base
 from app.models import Booking, BookingSeat, Movie, Showtime
-from app.seed import _ensure_showtimes, seed
+from app.seed import _ensure_showtimes, _seed_state_path, seed
 from app.showtime_rules import CLEANUP_MINUTES
 
 
@@ -15,6 +17,59 @@ def freeze_today(monkeypatch, value):
             return value
 
     monkeypatch.setattr("app.seed.date", FrozenDate)
+
+
+def test_reset_database_ignores_stale_sidecar_and_reseeds_all_data(
+    tmp_path, monkeypatch
+):
+    today = date(2026, 10, 11)
+    freeze_today(monkeypatch, today)
+    database_path = tmp_path / "reset.db"
+    engine = create_engine(f"sqlite:///{database_path}")
+    Base.metadata.create_all(engine)
+    testing_session = sessionmaker(bind=engine, expire_on_commit=False)
+
+    with testing_session() as first_db:
+        seed(first_db)
+        expected_showtimes = first_db.scalar(
+            select(func.count()).select_from(Showtime)
+        )
+        expected_bookings = first_db.scalar(
+            select(func.count()).select_from(Booking)
+        )
+        expected_booking_seats = first_db.scalar(
+            select(func.count()).select_from(BookingSeat)
+        )
+    engine.dispose()
+
+    sidecar_path = database_path.with_name(
+        database_path.name + ".showtime-seed.json"
+    )
+    assert sidecar_path.exists()
+    database_path.unlink()
+
+    replacement_engine = create_engine(f"sqlite:///{database_path}")
+    Base.metadata.create_all(replacement_engine)
+    replacement_session = sessionmaker(
+        bind=replacement_engine, expire_on_commit=False
+    )
+    try:
+        with replacement_session() as replacement_db:
+            seed(replacement_db)
+            assert replacement_db.scalar(
+                select(func.count()).select_from(Showtime)
+            ) == expected_showtimes
+            assert replacement_db.scalar(
+                select(func.count()).select_from(Booking)
+            ) == expected_bookings
+            assert replacement_db.scalar(
+                select(func.count()).select_from(BookingSeat)
+            ) == expected_booking_seats
+            assert expected_showtimes > 0
+            assert expected_bookings > 0
+            assert expected_booking_seats > 0
+    finally:
+        replacement_engine.dispose()
 
 
 def test_deleted_seed_showtime_is_not_recreated_on_restart(db, movie, monkeypatch):
@@ -51,6 +106,52 @@ def test_deleting_all_showtimes_of_a_day_is_not_reverted(db, movie, monkeypatch)
             Showtime.start_time >= start,
             Showtime.start_time < start + timedelta(days=1),
         )) == 0
+
+
+def test_existing_database_without_sidecar_initializes_state_conservatively(
+    db, movie, monkeypatch
+):
+    today = date(2026, 10, 11)
+    target = today + timedelta(days=2)
+    freeze_today(monkeypatch, today)
+    _ensure_showtimes(db, days=5)
+    state_path = _seed_state_path(db)
+    assert state_path is not None and state_path.exists()
+    state_path.unlink()
+    target_start = datetime.combine(target, time.min)
+    db.execute(delete(Showtime).where(
+        Showtime.start_time >= target_start,
+        Showtime.start_time < target_start + timedelta(days=1),
+    ))
+    db.commit()
+
+    seed(db)
+
+    assert db.scalar(select(func.count()).select_from(Showtime).where(
+        Showtime.start_time >= target_start,
+        Showtime.start_time < target_start + timedelta(days=1),
+    )) == 0
+    assert state_path.exists()
+
+
+def test_corrupt_sidecar_stops_existing_database_without_mutation(
+    db, movie, monkeypatch
+):
+    today = date(2026, 10, 11)
+    freeze_today(monkeypatch, today)
+    _ensure_showtimes(db, days=5)
+    state_path = _seed_state_path(db)
+    assert state_path is not None
+    state_path.write_text("{not-json", encoding="utf-8")
+    before_showtimes = db.scalar(select(func.count()).select_from(Showtime))
+    before_movies = db.scalar(select(func.count()).select_from(Movie))
+
+    with pytest.raises(RuntimeError, match="Không thể đọc showtime seed state"):
+        seed(db)
+
+    assert db.scalar(select(func.count()).select_from(Showtime)) == before_showtimes
+    assert db.scalar(select(func.count()).select_from(Movie)) == before_movies
+    assert state_path.read_text(encoding="utf-8") == "{not-json"
 
 
 def test_seed_appends_new_day_when_calendar_moves(db, movie, monkeypatch):

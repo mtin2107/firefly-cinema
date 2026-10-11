@@ -20,6 +20,10 @@ _SEED_STATE_VERSION = 1
 _SEED_STATE_SUFFIX = ".showtime-seed.json"
 
 
+def _empty_seed_state() -> dict:
+    return {"version": _SEED_STATE_VERSION, "days": {}}
+
+
 def _seed_state_path(db: Session) -> Path | None:
     """Trả sidecar gắn với đúng file SQLite đang được session sử dụng."""
     bind = db.get_bind()
@@ -38,7 +42,7 @@ def _read_seed_state(
     path = _seed_state_path(db)
     if path is None:
         state = db.info.setdefault(
-            "showtime_seed_state", {"version": _SEED_STATE_VERSION, "days": {}}
+            "showtime_seed_state", _empty_seed_state()
         )
         return state, None
     if path.exists():
@@ -62,7 +66,7 @@ def _read_seed_state(
     # Database hiện hữu chưa có sidecar: coi các ngày từ đầu cửa sổ đến
     # ngày lịch hiện hữu xa nhất trong cửa sổ là đã được seed. Quy tắc bảo thủ
     # này giữ các thao tác xóa cũ; ngày rolling mới phía sau vẫn được bổ sung.
-    state = {"version": _SEED_STATE_VERSION, "days": {}}
+    state = _empty_seed_state()
     window_start = datetime.combine(days[0], time.min)
     window_end = datetime.combine(days[-1] + timedelta(days=1), time.min)
     existing_starts = db.scalars(select(Showtime.start_time).where(
@@ -95,6 +99,16 @@ def _write_seed_state(path: Path | None, state: dict) -> None:
     finally:
         if temp_path is not None and temp_path.exists():
             temp_path.unlink()
+
+
+def _reset_seed_state_for_new_database(db: Session) -> None:
+    """Bỏ state cũ chỉ khi database chưa có phim và đang được khởi tạo mới."""
+    state = _empty_seed_state()
+    path = _seed_state_path(db)
+    if path is None:
+        db.info["showtime_seed_state"] = state
+        return
+    _write_seed_state(path, state)
 
 
 def _ensure_showtimes(db: Session, days: int = 5) -> None:
@@ -171,7 +185,12 @@ def _ensure_showtimes(db: Session, days: int = 5) -> None:
 
 def seed(db: Session) -> None:
     """Tạo dữ liệu mẫu lần đầu và duy trì cửa sổ lịch chiếu 5 ngày."""
-    if not db.scalar(select(func.count()).select_from(Movie)):
+    is_new_database = not db.scalar(select(func.count()).select_from(Movie))
+    if is_new_database:
+        # Một database mới có thể dùng lại đúng đường dẫn của file vừa reset.
+        # Làm rỗng sidecar trước mọi commit để lần khởi động kế tiếp vẫn có thể
+        # hoàn tất seed an toàn nếu tiến trình bị ngắt giữa chừng.
+        _reset_seed_state_for_new_database(db)
         for m in json.loads(DATA.read_text(encoding="utf-8")):
             db.add(Movie(**m))
         admin = User(full_name="Quản trị viên", email="admin@firefly.vn", password_hash=hash_password("admin123"), role="admin")

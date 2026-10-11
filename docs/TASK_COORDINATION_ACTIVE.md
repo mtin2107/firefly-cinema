@@ -24,15 +24,15 @@ Trước khi áp dụng workflow: giao diện React đầy đủ (`giao-dien-v1`
 
 ## 4. Current Project Status
 ```
-Overall Status: IN_PROGRESS / BLOCKED_PENDING_PO_RUNTIME_GATE
+Overall Status: IN_PROGRESS
 Phase: T11 — Kiểm thử tự động và sửa lỗi
-Current Active Task: T11 — IN_PROGRESS / BLOCKED_PENDING_PO_RUNTIME_GATE
+Current Active Task: T11 — IN_PROGRESS
 Next Task: T12 — PLANNED / NOT AUTHORIZED
 Ngày bắt đầu sản phẩm: 05/10/2026 · Hạn: 01/11/2026
 ```
 
 ## 5. Current Active Task
-**T11 — Kiểm thử tự động và sửa lỗi: IN_PROGRESS / BLOCKED_PENDING_PO_RUNTIME_GATE.** PO authorize ngày 11/10/2026 theo Task Record `docs/tasks/T11.md`, gồm ngoại lệ cho phép thêm duy nhất `pytest` và `httpx` vào `backend/requirements-dev.txt`. Pre-flight PASS: đúng nhánh `task/T11-kiem-thu`, working tree sạch, release T10 `857a8272a9c307734e713a2b5cdae12f8f60bb95` là ancestor, T04–T10 đều DONE / CLOSED và không có task khác IN_PROGRESS. Trạng thái đã đi qua `PLANNED → READY_FOR_HANDOFF → IN_PROGRESS`. DEV gates ngoài AC-06 đã hoàn tất; AC-06 web với model thật còn PENDING vì chưa có runtime authorization riêng.
+**T11 — Kiểm thử tự động và sửa lỗi: IN_PROGRESS.** PO authorize ngày 11/10/2026 theo Task Record `docs/tasks/T11.md`, gồm ngoại lệ cho phép thêm duy nhất `pytest` và `httpx` vào `backend/requirements-dev.txt`. Pre-flight PASS: đúng nhánh `task/T11-kiem-thu`, working tree sạch, release T10 `857a8272a9c307734e713a2b5cdae12f8f60bb95` là ancestor, T04–T10 đều DONE / CLOSED và không có task khác IN_PROGRESS. Trạng thái đã đi qua `PLANNED → READY_FOR_HANDOFF → IN_PROGRESS`. DEV gates ngoài AC-06 đã hoàn tất; AC-06 web với model thật còn PENDING vì chưa có runtime authorization riêng.
 
 T10 giữ nguyên **DONE / CLOSED**. Runtime backend trên database thật vẫn bị cấm nếu chưa có checkpoint/backup và authorization riêng của PO; T11 chỉ dùng SQLite tạm.
 
@@ -56,7 +56,7 @@ T07 và T09 đã DONE / CLOSED. TODO-02 của T09 đã RESOLVED theo xác nhận
 | T08 | Đo lệch miền điện thoại → phim | ML | 3 | T02, T03 | [T08.md](tasks/T08.md) | DONE / CLOSED (Claude PASS_WITH_TODO; PO APPROVED; AC 5/5 PASS; DoD MET; RF 0; blocker 0; TODO 5/5 dispositioned, deferred chưa RESOLVED; merge `778675e`; T08_MERGE_VERIFIED) |
 | T09 | Train PhoBERT phần B | ML | 3 | T08 | [T09.md](tasks/T09.md) | DONE / CLOSED (Claude PASS_WITH_TODO; PO APPROVED; AC 6/6; DoD MET theo PO; RF 0; blocker 0; TODO 7/7 dispositioned; TODO-02 RESOLVED 10/10/2026 theo PO, notebook `PO_ATTESTED`; merge `27c364e`; T09_MERGE_VERIFIED) |
 | T10 | Gắn model B vào web | Web | 3 | T07, T09 | [T10.md](tasks/T10.md) | DONE / CLOSED — PO APPROVED_WITH_NOTES; Claude Final PASS_WITH_TODO; AC 7/7; Technical DoD MET; RF 0; fast-forward merge + annotated tag `phobert-B` VERIFIED tại `857a8272` |
-| T11 | Kiểm thử tự động và sửa lỗi | Web | 4 | T04–T10 | [T11.md](tasks/T11.md) | IN_PROGRESS / BLOCKED_PENDING_PO_RUNTIME_GATE |
+| T11 | Kiểm thử tự động và sửa lỗi | Web | 4 | T04–T10 | [T11.md](tasks/T11.md) | IN_PROGRESS |
 | T12 | Dữ liệu demo và kịch bản bảo vệ | Web | 4 | T10 | [T12.md](tasks/T12.md) | PLANNED |
 | T13 | Chốt v1.0 và sao lưu | Tất cả | 4 | T11, T12 | [T13.md](tasks/T13.md) | PLANNED |
 | T14 | *(tùy chọn)* Hủy vé, đổi mật khẩu | Web | dư | — | [T14.md](tasks/T14.md) | PLANNED |
@@ -66,7 +66,7 @@ Chuỗi chính: `T00 → T01 → T02` và `T03 → T08 → T09 → T10`. T03 b�
 Nếu trễ: cắt T14 → T15 → rút gọn T05. Không cắt T01–T03, T07–T10.
 
 ## 8. Open Blockers
-- T11: **AC-06 PENDING / BLOCKED_PENDING_PO_RUNTIME_GATE.** Full pytest 20/20, isolated no-torch/no-model 20/20, compile/build real+mock, health DB tạm và scope/security gates PASS. Chưa được phép chạy web với model thật trên database thật; cần checkpoint/backup và PO runtime authorization riêng. Không chuyển `CLAUDE_REVIEW` trước gate này.
+- T11: **AC-06 PENDING PO RUNTIME AUTHORIZATION.** Không khởi động backend/model thật trước quyết định riêng. Phương án T11 dùng SQLite tạm hoàn toàn, không kết nối database thật; không chuyển `CLAUDE_REVIEW` trước khi AC-06 có evidence.
 - T09: **DONE / CLOSED**, 0 blocker; merge `27c364e` đã xác minh (`T09_MERGE_VERIFIED`). TODO-02 **RESOLVED 10/10/2026 theo xác nhận PO**; evidence notebook là `PO_ATTESTED`, không phải Claude kiểm tra độc lập.
 - T10: **DONE / CLOSED**, 0 blocker kỹ thuật; RF-01 CLOSED / VERIFIED BY CLAUDE. Gate 2 **EXECUTED / ALTER_COMMITTED**; Postverify PASS; 559 dòng gốc bảo toàn; Credential Precheck V2 PASS; Clone Smoke Attempt 1 FAIL / ARCHIVED; Attempt 2 PASS; Hash Reconciliation PASS; DEV Final QA PASS; Claude Final PASS_WITH_TODO; PO APPROVED_WITH_NOTES; fast-forward merge và annotated tag `phobert-B` VERIFIED. Real backend startup vẫn cần authorization riêng của PO; T11 không được dùng database thật.
 - T08: **DONE / CLOSED**, 0 blocker; merge `778675e` đã xác minh (`T08_MERGE_VERIFIED`). TODO 5/5 đã disposition; deferred chưa RESOLVED.
@@ -167,7 +167,7 @@ Nếu trễ: cắt T14 → T15 → rút gọn T05. Không cắt T01–T03, T07�
 ## 11. Current Next Step
 1. PO quyết định có cấp runtime gate riêng cho AC-06 hay không; nếu cấp phải nêu checkpoint/backup và phạm vi chạy database/model thật.
 2. Khi được cấp, Codex chạy checklist browser thực với model thật, ghi evidence và chỉ chuyển `IN_PROGRESS → CLAUDE_REVIEW` nếu AC-06 PASS.
-3. Nếu chưa được cấp, T11 giữ `IN_PROGRESS / BLOCKED_PENDING_PO_RUNTIME_GATE`; không tự nhận PASS.
+3. Nếu chưa được cấp, T11 giữ `IN_PROGRESS`; không tự nhận PASS.
 4. Không mở T12, không tự PASS, PO_APPROVE, merge hoặc đóng T11.
 
 ## 12. Active Timeline
@@ -270,3 +270,4 @@ Nếu trễ: cắt T14 → T15 → rút gọn T05. Không cắt T01–T03, T07�
 | 11/10/2026 | Tín (PO) + Codex | PO xác minh fast-forward merge và tự tạo annotated tag `phobert-B` trỏ `857a8272`; line-ending reconciliation PASS. PO authorize Final Closure Sync: T10 → DONE / CLOSED; Overall Status → READY_FOR_NEXT_TASK; Current Active Task → NONE; Next Task → NOT SELECTED / NOT AUTHORIZED. F-TODO-02/04/05/06/07 giữ ACCEPT_LATER; real backend startup và T11 vẫn NOT AUTHORIZED. |
 | 11/10/2026 | Tín (PO) + Codex | PO authorize T11 theo Task Record; cho phép thêm `pytest` và `httpx`, không cho thêm thư viện khác, đổi schema hoặc chạy backend với database thật. Pre-flight PASS trên `task/T11-kiem-thu`: tree sạch, release T10 `857a8272` là ancestor, T04–T10 CLOSED, không có task khác IN_PROGRESS. T11 `PLANNED → READY_FOR_HANDOFF → IN_PROGRESS`; T10 giữ DONE / CLOSED. |
 | 11/10/2026 | Codex | T11 DEV: thêm pytest/TestClient + SQLite tạm + fake classifier; 20/20 test PASS cả trong virtualenv thật sự không torch/transformers/model; 13/13 route-method admin có 401/403; compile, health DB tạm, frontend build real/mock, mock probes, scope/security PASS. Sửa 9 lỗi có tái hiện và CHANGELOG; không đổi schema/normalize/DB thật. AC-06 web model thật PENDING do chưa có runtime authorization; T11 giữ `IN_PROGRESS / BLOCKED_PENDING_PO_RUNTIME_GATE`, chưa chuyển CLAUDE_REVIEW. |
+| 11/10/2026 | Codex | T11 Round 1 bổ sung: scope audit phát hiện `docs/tasks/T11.md` chỉ đổi status ngoài allowlist, đã hoàn nguyên an toàn về master; coordination giữ T11 IN_PROGRESS. Regression xác nhận F-02 ban đầu phá rolling 5 ngày; sửa không schema bằng cách không lấp ngày đã có lịch nhưng seed ngày hoàn toàn mới. Ba test xóa suất/rolling hai phim/bảo toàn suất+vé admin PASS; full suite 22/22, compile/build PASS. Đã chuẩn bị runbook AC-06 dùng SQLite tạm + checkpoint/restore; không startup model/backend thật. AC-06 vẫn PENDING PO runtime authorization. |

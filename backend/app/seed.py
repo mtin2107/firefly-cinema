@@ -53,6 +53,16 @@ def _ensure_showtimes(db: Session, days: int = 5) -> None:
         day_start = datetime.combine(day, time.min)
         day_end = day_start + timedelta(days=1)
 
+        # Một ngày đã có lịch được coi là do admin quản lý. Không lấp lại các
+        # suất bị xóa; chỉ seed ngày hoàn toàn mới khi cửa sổ 5 ngày dịch chuyển.
+        if db.scalar(
+            select(Showtime.id).where(
+                Showtime.start_time >= day_start,
+                Showtime.start_time < day_end,
+            ).limit(1)
+        ) is not None:
+            continue
+
         # Ưu tiên công bằng: mỗi phim đang chiếu có ít nhất một suất trong ngày.
         existing_movie_ids = set(db.scalars(
             select(Showtime.movie_id).where(
@@ -77,7 +87,7 @@ def _ensure_showtimes(db: Session, days: int = 5) -> None:
 
 
 def seed(db: Session) -> None:
-    """Tạo dữ liệu mẫu đúng một lần khi database chưa có phim."""
+    """Tạo dữ liệu mẫu lần đầu và duy trì cửa sổ lịch chiếu 5 ngày."""
     if not db.scalar(select(func.count()).select_from(Movie)):
         for m in json.loads(DATA.read_text(encoding="utf-8")):
             db.add(Movie(**m))
@@ -107,6 +117,7 @@ def seed(db: Session) -> None:
         db.commit()
         _ensure_showtimes(db)
         _seed_bookings(db)
+    _ensure_showtimes(db)
 
 
 # Số lượt đặt mẫu cho mỗi phim: (trong 7 ngày qua, từ 8 đến 30 ngày trước)

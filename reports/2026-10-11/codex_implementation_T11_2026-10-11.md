@@ -1,5 +1,7 @@
 # Codex Implementation Report — T11
 
+> Đính chính Round 1: phần F-02 và trạng thái/scope hiện thời đã được kiểm tra lại trong `codex_fix_T11_round1_2026-10-11.md`. T11 giữ `IN_PROGRESS`; `docs/tasks/T11.md` đã được hoàn nguyên khỏi diff vì nằm ngoài allowlist. Full suite sau regression F-02 là 22 test PASS. AC-06 vẫn PENDING.
+
 - Ngày: 11/10/2026
 - Branch: `task/T11-kiem-thu`
 - Baseline trước triển khai: `712ed73c77e8c44f94de9cfab2fbdc7a6e754c72` (trùng `master` lúc pre-flight)

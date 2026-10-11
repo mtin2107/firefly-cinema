@@ -5,7 +5,7 @@
 ### Fixed
 
 - Chặn đặt vé cho suất thuộc phim đã `ended` ở backend và mock; nguyên nhân là hai luồng chỉ kiểm tra suất tồn tại mà không kiểm tra trạng thái phim; tái hiện bằng probe mock và khóa backend bằng `test_cannot_book_showtime_for_ended_movie`.
-- Không tạo lại suất seed mà admin đã xóa khi backend khởi động lại; nguyên nhân là `seed()` luôn gọi `_ensure_showtimes()` trên database đã có dữ liệu; tái hiện và khóa bằng `test_deleted_seed_showtime_is_not_recreated_on_restart`.
+- Không tạo lại suất seed mà admin đã xóa khi backend khởi động lại, đồng thời vẫn bổ sung ngày mới khi cửa sổ lịch 5 ngày dịch chuyển; nguyên nhân là logic cũ lấp từng suất thiếu nên không phân biệt được ngày đã do admin quản lý; khóa bằng ba regression test về xóa suất, rolling calendar và bảo toàn suất/vé admin.
 - Chuẩn hóa lỗi validation 422 thành câu tiếng Việt, kể cả lỗi sai kiểu do Pydantic sinh ra; nguyên nhân là handler công khai trực tiếp `err['msg']`; tái hiện và khóa bằng các test validation trong `test_admin_features.py` và `test_comments_health.py`.
 - Vô hiệu hóa ô CSV bắt đầu bằng ký tự công thức trong bản export backend và mock, trong khi nội dung gốc vẫn nguyên vẹn; nguyên nhân là ghi thẳng text vào CSV; tái hiện bằng probe mock và khóa backend bằng `test_review_preserves_original_model_result_and_csv_is_safe`.
 - Cô lập lỗi theo từng model tại `/api/admin/predict`; nguyên nhân là endpoint chỉ bắt `RuntimeError`, nên lỗi kiểu khác làm cả request trả 500; tái hiện và khóa bằng `test_predict_isolates_each_model_failure`.

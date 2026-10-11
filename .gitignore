@@ -4,6 +4,7 @@ dist/
 venv/
 __pycache__/
 *.db
+/backend/*.db.showtime-seed.json
 backend/models/
 
 # Du lieu lon, model, ban sao luu nam ngay trong repo (o C) nhung khong dua vao Git

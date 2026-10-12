@@ -20,6 +20,9 @@ async function download(path) {
 }
 
 export const realApi = {
+  chat: {
+    send: (messages) => request("/api/chat", { method: "POST", body: { messages } }),
+  },
   auth: {
     register: (payload) => request("/api/auth/register", { method: "POST", body: payload }),
     login: (payload) => request("/api/auth/login", { method: "POST", body: payload }),

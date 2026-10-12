@@ -361,3 +361,32 @@ class AdminPredictionOut(BaseModel):
     label: Literal["binh_thuong", "tieu_cuc"]
     score: float
     ms: float
+
+
+# ---------- T17 Trợ lý phim (không lưu lịch sử DB) ----------
+class ChatMessage(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    role: Literal["user", "assistant"]
+    content: str = Field(min_length=1, max_length=500)
+
+
+class ChatIn(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    messages: list[ChatMessage] = Field(min_length=1, max_length=10)
+
+    @field_validator("messages")
+    @classmethod
+    def last_must_be_user(cls, messages: list[ChatMessage]) -> list[ChatMessage]:
+        if messages[-1].role != "user":
+            raise PydanticCustomError("chat_last_role", "Tin cuối phải do người dùng gửi.")
+        return messages
+
+
+class ChatMovieOut(BaseModel):
+    id: int
+    title: str
+
+
+class ChatOut(BaseModel):
+    reply: str
+    movies: list[ChatMovieOut] = Field(max_length=5)

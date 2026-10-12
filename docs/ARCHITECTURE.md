@@ -228,3 +228,10 @@ Ngoài máy: Google Drive `MyDrive/thesis/data/…`, `MyDrive/thesis_results/…
 | 08/10/2026 | T04 | Thêm CRUD `/api/admin/movies`, taxonomy backend/frontend đồng bộ và trang `/quan-tri/phim`; không đổi schema |
 | 08/10/2026 | T05 | Thêm CRUD `/api/admin/showtimes`, luật chống chồng phòng dùng chung với seed và trang `/quan-tri/suat-chieu`; không đổi schema |
 | 08/10/2026 | T06 | Thêm nhãn người duyệt/ẩn bình luận, phân trang, thống kê model và CSV; đổi schema comments theo Q2 NO ALEMBIC / BACKUP_BEFORE_RESET |
+
+## T17 — Trợ lý tư vấn phim (12/10/2026)
+
+- `POST /api/chat`: yêu cầu token JWT qua `get_current_user`; chỉ role `user`, không dùng cho admin, guest. Request `messages` 1–10, mỗi tin ≤ 500 ký tự, cuối `user`. Response `{reply: string, movies: [{id, title}]}` tối đa 5 phim được nêu trong phản hồi và đã xuất hiện trong kết quả tool.
+- Mô hình kết nối qua `openai` Python SDK bằng `CHAT_BASE_URL`, `CHAT_API_KEY`, `CHAT_MODEL`, hỗ trợ OpenAI-compatible Gemini/Groq. Client tạo lười; thiếu key chỉ tắt chat, backend/health vẫn hoạt động.
+- Whitelist tool chỉ có `search_movies` (Movie), `get_showtimes` (Movie/Showtime tương lai), `get_price_rules` (quy tắc ghế từ `seats.py`), không `INSERT`/`UPDATE`/`DELETE`; không truy vấn bookings/users/comments trong lớp chatbot. Giới hạn 3 vòng công cụ, thời hạn tổng 30 giây, xử lý 503 an toàn.
+- Quota trong bộ nhớ: 5 lần/phút và 50 lần/ngày cho mỗi user; reset khi restart, không chia sẻ nhiều worker. Chat history chỉ giữ trong React state. `ChatWidget` gắn vào App một lần; `real.js` và `mock.js` cùng API `chat.send(messages)`; không có thay đổi schema và không thêm thư viện frontend.

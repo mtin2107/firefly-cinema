@@ -372,8 +372,14 @@ function mockChat(messages) {
   const plain = (value) => String(value).normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/đ/gi, "d").toLowerCase();
   const question = plain(messages.at(-1).content);
   const titleMatch = db.movies.find((m) => question.includes(plain(m.title)));
+  // "hài" becomes "hai" after normalization; it is a genre, not a price keyword.
+  const wantsComedy = /(?:^|\s)(?:phim hai|the loai hai|hai huoc|phim cuoi)(?:\s|$)/.test(question);
   let films = titleMatch ? [titleMatch] : db.movies.filter((m) => m.status === "now_showing").slice(0, 3);
-  if (question.includes("hai") || question.includes("thuong") || question.includes("vip") || question.includes("gia")) {
+  if (wantsComedy && !titleMatch) {
+    films = db.movies.filter((m) => m.status === "now_showing" &&
+      m.genre.split(",").some((genre) => plain(genre.trim()) === "hai huoc")).slice(0, 3);
+  }
+  if (question.includes("thuong") || question.includes("vip") || question.includes("gia")) {
     if (question.includes("vip") && !titleMatch) films = [];
     const base = titleMatch ? db.showtimes.filter((s) => s.movie_id === titleMatch.id && new Date(s.start_time) > new Date()).slice(0, 2) : [];
     const dates = base.map((s) => `${s.start_time.replace("T", " ").slice(0, 16)}: ${s.price.toLocaleString("vi-VN")}đ`).join("; ");

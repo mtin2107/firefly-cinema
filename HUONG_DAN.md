@@ -420,3 +420,26 @@ Sơ đồ ghế: hàng A–H, mỗi hàng 12 ghế, hàng F–H là VIP (+20.000
 - Danh mục menu (thể loại, quốc gia, năm, chủ đề): `frontend/src/utils/taxonomy.js`. Cách tính các bộ sưu tập hot / top bình luận: hàm `_ranking` trong `backend/app/routers/movies.py`. Chữ trong danh mục phải trùng đúng chữ trong dữ liệu phim
 - Phim mẫu: `backend/app/data/movies.json` (giữ bản sao ở `frontend/src/api/movies.json` cho chế độ mock)
 - Ảnh poster thật: thêm trường `poster_url` cho phim, component `Poster` sẽ tự dùng ảnh thay cho poster vẽ bằng CSS
+
+---
+
+## T17 — Bật trợ lý AI tư vấn phim (không đổi schema)
+
+1. Chỉ sau khi task được review và PO cho phép triển khai: vào https://aistudio.google.com/apikey, tạo API key của dự án. **Không gửi key qua chat, không commit `.env`.** Dùng bản sao `backend/.env.example` làm mẫu và điền các dòng sau trong `backend/.env` hiện có (không ghi đè các biến khác):
+   ```dotenv
+   CHAT_BASE_URL=https://generativelanguage.googleapis.com/v1beta/openai/
+   CHAT_API_KEY=KEY_CUA_BAN_KHONG_COMMIT
+   CHAT_MODEL=gemini-3.8-flash
+   CHAT_RATE_PER_MINUTE=5
+   CHAT_RATE_PER_DAY=50
+   ```
+2. Ở PowerShell trong `C:\Projects\firefly-cinema`:
+   ```powershell
+   backend\venv\Scripts\python -m pip install -r backend\requirements.txt
+   # Chỉ khi đã có backup/checkpoint và PO cho phép dùng DB thật mới khởi động backend thật.
+   # Với gate T17, cấu hình DATABASE_URL trỏ tới SQLite tạm thay vì backend\firefly.db.
+   ```
+3. Không có `CHAT_API_KEY`: backend vẫn chạy và `/api/health` vẫn hoạt động, nhưng `/api/chat` trả `503 Trợ lý chưa được bật.`. Chỉ khách **đã đăng nhập** (role `user`) được chat, mỗi phút 5 tin và mỗi ngày 50 tin (tính theo tài khoản, tính trong bộ nhớ mỗi worker). Các lượt gọi model/công cụ nhiều vòng sẽ dùng chung hạn mức API key của dự án.
+4. Muốn đổi nhà cung cấp (ví dụ Groq) chỉ sửa `CHAT_BASE_URL`, `CHAT_API_KEY` và `CHAT_MODEL` theo tài liệu chính thức của bên đó rồi **restart backend**; không sửa frontend. Khi dùng nhà cung cấp khác phải tự kiểm chứng hỗ trợ `chat.completions` và function calling.
+5. Trong Google AI Studio xem trang **Rate limits** của chính project để đối chiếu RPM/TPM/RPD và model có khả dụng. Đây là hạn mức động theo project, không phải mức cố định trong code. Mức miễn phí có thể thay đổi và nội dung gửi API free tier có thể được nhà cung cấp sử dụng cải thiện sản phẩm. Không nhập thông tin cá nhân vào chatbot.
+6. Trợ lý chỉ truy vấn phim, các suất tương lai, giá ghế; không có chức năng giữ chỗ, đặt vé, thanh toán, lấy thông tin tài khoản hoặc lưu hội thoại vào DB. Nội dung AI có thể sai; khách cần xác nhận giá và suất trước khi đặt.

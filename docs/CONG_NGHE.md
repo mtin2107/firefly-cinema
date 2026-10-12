@@ -137,3 +137,12 @@ T01 dùng `text_norm` và `has_negative` trên đúng split UIT-ViSFD của T00.
 - **SQLite:** gọn, không cần cài đặt, đủ cho quy mô khóa luận. Nhờ SQLAlchemy, có thể chuyển sang PostgreSQL khi triển khai thật.
 - **CSS thuần:** kiểm soát hoàn toàn thiết kế (nền đen, vàng chủ đạo, đỏ phụ) và giảm số thư viện phụ thuộc.
 - **Poster vẽ bằng CSS, phim hư cấu:** tránh vấn đề bản quyền hình ảnh.
+
+## Bổ sung T17 (12/10/2026)
+
+| Thành phần | Công nghệ | Phiên bản | Mục đích |
+|---|---|---|---|
+| Chatbot | Python `openai` SDK | **3.29.0** (ghim trong `backend/requirements.txt`) | Gọi nhà cung cấp API tương thích OpenAI, mặc định Google Gemini |
+| Model AI mặc định | `gemini-3.8-flash` | Tên model API | Function calling để tư vấn phim, lịch chiếu, giá (read-only) |
+
+Cấu hình trong `backend/.env` (không commit): `CHAT_BASE_URL`, `CHAT_API_KEY`, `CHAT_MODEL`, `CHAT_RATE_PER_MINUTE`, `CHAT_RATE_PER_DAY`. Khi không có key backend vẫn hoạt động. Theo tài liệu Google AI (tra cứu 12/10/2026), `gemini-3.8-flash` có gói miễn phí input/output và tương thích OpenAI API. Hạn mức thực tế RPM/TPM/RPD theo từng dự án phải xem tại https://aistudio.google.com/rate-limit; không được coi giới hạn 5/phút, 50/ngày trong ứng dụng là hạn mức Google. Nguồn: https://ai.google.dev/gemini-api/docs/openai ; https://ai.google.dev/gemini-api/docs/pricing ; https://ai.google.dev/gemini-api/docs/rate-limits .

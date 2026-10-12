@@ -32,3 +32,10 @@ SKLEARN_MODELS = os.getenv(
 NEGATIVE_LABEL_ID = int(os.getenv("NEGATIVE_LABEL_ID", "1"))
 USE_WORD_SEGMENT = os.getenv("USE_WORD_SEGMENT", "false").lower() == "true"
 NEGATIVE_THRESHOLD = float(os.getenv("NEGATIVE_THRESHOLD", "0.5"))
+
+# T17 chatbot; keep secrets in backend/.env (never commit the file).
+CHAT_BASE_URL = os.getenv("CHAT_BASE_URL", "https://generativelanguage.googleapis.com/v1beta/openai/").strip()
+CHAT_API_KEY = os.getenv("CHAT_API_KEY", "").strip()
+CHAT_MODEL = os.getenv("CHAT_MODEL", "gemini-3.8-flash").strip()
+CHAT_RATE_PER_MINUTE = max(1, int(os.getenv("CHAT_RATE_PER_MINUTE", "5")))
+CHAT_RATE_PER_DAY = max(1, int(os.getenv("CHAT_RATE_PER_DAY", "50")))

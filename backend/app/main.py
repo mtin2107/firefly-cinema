@@ -8,7 +8,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from .classifier import classifier
 from .config import FRONTEND_ORIGINS
 from .database import Base, engine, SessionLocal
-from .routers import auth, movies, bookings, comments, admin_bookings, admin_movies, admin_predict, admin_showtimes
+from .routers import auth, movies, bookings, comments, admin_bookings, admin_movies, admin_predict, admin_showtimes, chat
 from .seed import seed
 
 
@@ -37,7 +37,7 @@ async def validation_error(request: Request, exc: RequestValidationError):
     err = exc.errors()[0]
     field = err["loc"][-1]
     error_type = err["type"]
-    custom_prefixes = ("movie_", "showtime_", "comment_", "predict_")
+    custom_prefixes = ("movie_", "showtime_", "comment_", "predict_", "chat_")
     if error_type.startswith(custom_prefixes):
         message = err["msg"]
     else:
@@ -71,6 +71,7 @@ app.include_router(admin_movies.router)
 app.include_router(admin_bookings.router)
 app.include_router(admin_showtimes.router)
 app.include_router(admin_predict.router)
+app.include_router(chat.router)
 
 
 @app.get("/api/health", tags=["Hệ thống"])

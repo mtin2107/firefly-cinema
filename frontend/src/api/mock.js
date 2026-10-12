@@ -360,7 +360,41 @@ function ensureMutableShowtime(showtime) {
   if (tickets) throw new ApiError(`Suất chiếu đã có ${tickets} vé, không sửa hay xóa được.`, 409);
 }
 
+// T17 mock chatbot uses existing catalogue and showtimes only, with no provider calls.
+function mockChat(messages) {
+  const user = currentUser();
+  if (user.role === "admin") throw new ApiError("Trợ lý chỉ dành cho khách hàng.", 403);
+  if (!Array.isArray(messages) || messages.length < 1 || messages.length > 10 ||
+      messages.some((m) => !["user", "assistant"].includes(m?.role) || typeof m.content !== "string" ||
+        !m.content.trim() || m.content.length > 500) || messages.at(-1).role !== "user") {
+    throw new ApiError("Tin nhắn không hợp lệ. Hãy nhập tối đa 10 tin, mỗi tin không quá 500 ký tự.", 422);
+  }
+  const plain = (value) => String(value).normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/đ/gi, "d").toLowerCase();
+  const question = plain(messages.at(-1).content);
+  const titleMatch = db.movies.find((m) => question.includes(plain(m.title)));
+  // "hài" becomes "hai" after normalization; it is a genre, not a price keyword.
+  const wantsComedy = /(?:^|\s)(?:phim hai|the loai hai|hai huoc|phim cuoi)(?:\s|$)/.test(question);
+  let films = titleMatch ? [titleMatch] : db.movies.filter((m) => m.status === "now_showing").slice(0, 3);
+  if (wantsComedy && !titleMatch) {
+    films = db.movies.filter((m) => m.status === "now_showing" &&
+      m.genre.split(",").some((genre) => plain(genre.trim()) === "hai huoc")).slice(0, 3);
+  }
+  if (question.includes("thuong") || question.includes("vip") || question.includes("gia")) {
+    if (question.includes("vip") && !titleMatch) films = [];
+    const base = titleMatch ? db.showtimes.filter((s) => s.movie_id === titleMatch.id && new Date(s.start_time) > new Date()).slice(0, 2) : [];
+    const dates = base.map((s) => `${s.start_time.replace("T", " ").slice(0, 16)}: ${s.price.toLocaleString("vi-VN")}đ`).join("; ");
+    return { reply: `${titleMatch ? titleMatch.title + ": " : ""}${dates || "Giá vé thường tùy từng suất chiếu."} Ghế VIP phụ thu ${(totalPrice(["F1"], 0) - totalPrice(["A1"], 0)).toLocaleString("vi-VN")}đ. Xem trang phim để chọn suất.`,
+      movies: films.map(({ id, title }) => ({ id, title })) };
+  }
+  const movieTitles = films.map((m) => m.title).join(", ");
+  return { reply: films.length ? `Các phim bạn có thể xem: ${movieTitles}. Mở trang phim để xem suất chiếu và đặt vé.` : "Hiện chưa có phim phù hợp. Hãy xem danh sách phim trên website.",
+    movies: films.map(({ id, title }) => ({ id, title })) };
+}
+
 export const mockApi = {
+  chat: {
+    async send(messages) { await wait(); return clone(mockChat(messages)); },
+  },
   auth: {
     async register({ full_name, email, password }) {
       await wait();

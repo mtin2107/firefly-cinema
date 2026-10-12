@@ -27,7 +27,7 @@ Trước khi áp dụng workflow: giao diện React đầy đủ (`giao-dien-v1`
 Overall Status: READY_FOR_NEXT_TASK
 Phase: T11 — DONE / CLOSED
 Current Active Task: NONE
-Next Task: NOT SELECTED / NOT AUTHORIZED
+Next Task: T16 — READY_FOR_HANDOFF (PO chọn 12/10/2026), sau đó T17
 Ngày bắt đầu sản phẩm: 05/10/2026 · Hạn: 01/11/2026
 ```
 
@@ -61,6 +61,8 @@ T07 và T09 đã DONE / CLOSED. TODO-02 của T09 đã RESOLVED theo xác nhận
 | T13 | Chốt v1.0 và sao lưu | Tất cả | 4 | T11, T12 | [T13.md](tasks/T13.md) | PLANNED |
 | T14 | *(tùy chọn)* Hủy vé, đổi mật khẩu | Web | dư | — | [T14.md](tasks/T14.md) | PLANNED |
 | T15 | *(tùy chọn)* Thử nghiệm có tách từ | ML | dư | T09 | [T15.md](tasks/T15.md) | PLANNED |
+| T16 | Giữ chỗ có hạn và thanh toán QR (đổi schema) | Web | phát triển thêm | T11 | [T16.md](tasks/T16.md) | READY_FOR_HANDOFF |
+| T17 | Chatbot AI tư vấn phim (Gemini free, chỉ đọc) | Web | phát triển thêm | T16 | [T17.md](tasks/T17.md) | PLANNED |
 
 Chuỗi chính: `T00 → T01 → T02` và `T03 → T08 → T09 → T10`. T03 bắt đầu ngay ngày đầu (song song).
 Nếu trễ: cắt T14 → T15 → rút gọn T05. Không cắt T01–T03, T07–T10.
@@ -180,9 +182,9 @@ Nếu trễ: cắt T14 → T15 → rút gọn T05. Không cắt T01–T03, T07�
 
 ## 11. Current Next Step
 1. T11 đã DONE / CLOSED; không còn Current Active Task.
-2. Next Task: NOT SELECTED / NOT AUTHORIZED.
-3. T12 giữ `PLANNED / NOT AUTHORIZED`; Q4 **OPEN** — PO chưa quyết định deploy hay demo local.
-4. Khi PO chọn task tiếp theo, phải có authorization riêng; không suy diễn từ closure T11.
+2. **Next Task: T16 — READY_FOR_HANDOFF.** PO chọn hướng phát triển thêm ngày 12/10/2026: T16 (giữ chỗ + QR) trước, T17 (chatbot) sau. Task Record do Claude soạn theo yêu cầu của PO trong chat; PO gửi `T16.md` cho ChatGPT/Codex = duyệt.
+3. Tín tạo nhánh `task/T16-giu-cho-thanh-toan` từ `master` rồi gửi prompt bàn giao.
+4. T12/T13: PO báo 12/10/2026 đã hoàn thành và deploy, nhưng `master` (`4f74ff9`) chưa có commit/nhánh T12–T13. Trạng thái giữ nguyên `PLANNED` tới khi PO đồng bộ vào repo; Q4 coi là chờ PO xác nhận.
 
 ## 12. Active Timeline
 | Ngày | Ai | Sự kiện |
@@ -295,3 +297,4 @@ Nếu trễ: cắt T14 → T15 → rút gọn T05. Không cắt T01–T03, T07�
 | 11/10/2026 | Tín (PO) + Codex recording | PO **APPROVED_WITH_NOTES**: chấp nhận Claude Round 3 PASS_WITH_TODO, AC 6/6, Technical DoD MET, RF mở 0. Scope exception `.gitignore` PO AUTHORIZED / VERIFIED; TODO 10/10 dispositioned. T11 `PO_APPROVED / PENDING_PO_MERGE`; chỉ PO merge. T12 giữ PLANNED / NOT AUTHORIZED, Q4 giữ OPEN. |
 | 11/10/2026 | Tín (PO) | Merge T11 vào `master` tại `06dd44f0d845fecea829b82c48ff2f5a8dbab984`; tip `task/T11-kiem-thu` `3c21055` là ancestor, PO report và sidecar `.gitignore` exception đã nằm trong master (`T11_MERGE_VERIFIED`). |
 | 11/10/2026 | Codex | Final Closure Sync: T11 → DONE / CLOSED; Overall Status → READY_FOR_NEXT_TASK; Current Active Task → NONE; Next Task → NOT SELECTED / NOT AUTHORIZED. T12 giữ PLANNED / NOT AUTHORIZED; Q4 giữ OPEN; TODO T11 và runtime authorization database thật giữ nguyên. |
+| 12/10/2026 | Tín + Claude | Thiết kế phát triển thêm: chốt luồng giữ chỗ 30 phút + QR (T16) và chatbot tư vấn Gemini free (T17); Claude soạn `T16.md`, `T17.md` theo yêu cầu PO; T16 → READY_FOR_HANDOFF |

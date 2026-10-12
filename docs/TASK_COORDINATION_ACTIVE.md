@@ -26,15 +26,17 @@ Trước khi áp dụng workflow: giao diện React đầy đủ (`giao-dien-v1`
 
 ## 4. Current Project Status
 ```
-Overall Status: CLAUDE_REVIEW
-Phase: T17 — CLAUDE_REVIEW / INDEPENDENT REVIEW PENDING
+Overall Status: PO_REVIEW
+Phase: T17 — PO_REVIEW (Claude PASS_WITH_TODO; AC-02 PENDING PO_REVIEW)
 Current Active Task: T17 — Chatbot AI tư vấn phim
-Next Task: NOT SELECTED / NOT AUTHORIZED
+Next Task: NOT SELECTED — T12 chờ PO đồng bộ/authorize (xem mục 11)
 Ngày bắt đầu sản phẩm: 05/10/2026 · Hạn: 01/11/2026
 ```
 
 ## 5. Current Active Task
-**T17 — CLAUDE_REVIEW (bàn giao Codex, chưa có kết luận Claude).** Code trên nhánh `task/T17-chatbot-tu-van`; 14/14 focused pytest và 50/50 full pytest PASS (bao gồm T11/T16), compileall và real/mock frontend build PASS; Uvicorn thực với SQLite tạm health `ok`, `classifier: phobert_b`, guest chat 401, user không có key 503. Mock chatbot, kéo thả kiểu AssistiveTouch, responsive 375px và 7/7 checklist hồi quy được PO xác nhận thủ công. Scope PASS; không có file cấm; secret regex scan PASS; `openai==3.29.0` là dependency duy nhất được thêm. Report: `reports/2026-10-12/codex_implementation_T17_2026-10-12.md`.
+**T17 — PO_REVIEW.** Claude review **PASS_WITH_TODO** (13/10/2026): AC 10/11 PASS, **AC-02 PENDING PO_REVIEW** (key Gemini thật), RF 0, TODO 8; pytest độc lập 50/50 (14/14 T17), compileall, uvicorn + SQLite tạm (health `ok`/`phobert_b`, khách 401, không key 503), build real/mock, probe tạm 7/7 (validation, lỗi SDK 429/timeout/auth/kết nối → 503 không lộ key, công cụ độc hại bị chặn, dữ liệu công cụ không chứa thông tin cá nhân), UI mock 375px (bàn phím, Esc, kéo thả, nhớ vị trí, không che "Tiếp tục" ở vị trí mặc định). `firefly.db` không đổi hash. Report: `reports/2026-10-13/claude_review_T17_PASS_WITH_TODO_2026-10-13.md`. TODO-01 (Medium): lọc thể loại so khớp nguyên văn có dấu — PO thử khi làm AC-02.
+
+Trước đó (bàn giao Codex): Code trên nhánh `task/T17-chatbot-tu-van`; 14/14 focused pytest và 50/50 full pytest PASS (bao gồm T11/T16), compileall và real/mock frontend build PASS; Uvicorn thực với SQLite tạm health `ok`, `classifier: phobert_b`, guest chat 401, user không có key 503. Mock chatbot, kéo thả kiểu AssistiveTouch, responsive 375px và 7/7 checklist hồi quy được PO xác nhận thủ công. Scope PASS; không có file cấm; secret regex scan PASS; `openai==3.29.0` là dependency duy nhất được thêm. Report: `reports/2026-10-12/codex_implementation_T17_2026-10-12.md`.
 
 **AC-02 (Gemini với key thật): PENDING PO_REVIEW; không chuyển key vào repo hoặc report.** Hạn mức Gemini Free tại tài khoản AI Studio còn chờ PO kiểm thực tế. Chưa được tự gán PASS/PO_APPROVED/DONE/CLOSED.
 
@@ -65,7 +67,7 @@ T07 và T09 đã DONE / CLOSED. TODO-02 của T09 đã RESOLVED theo xác nhận
 | T14 | *(tùy chọn)* Hủy vé, đổi mật khẩu | Web | dư | — | [T14.md](tasks/T14.md) | PLANNED |
 | T15 | *(tùy chọn)* Thử nghiệm có tách từ | ML | dư | T09 | [T15.md](tasks/T15.md) | PLANNED |
 | T16 | Giữ chỗ có hạn và thanh toán QR (đổi schema) | Web | phát triển thêm | T11 | [T16.md](tasks/T16.md) | DONE / CLOSED — PO APPROVED, merge theo PO; Claude PASS_WITH_TODO, AC 12/12, RF 0, TODO-01..07 preserved |
-| T17 | Chatbot AI tư vấn phim (Gemini free, chỉ đọc) | Web | phát triển thêm | T16 | [T17.md](tasks/T17.md) | CLAUDE_REVIEW — Codex DEV gates completed; independent review pending, AC-02 PO gate |
+| T17 | Chatbot AI tư vấn phim (Gemini free, chỉ đọc) | Web | phát triển thêm | T16 | [T17.md](tasks/T17.md) | PO_REVIEW — Claude PASS_WITH_TODO; AC 10/11 + AC-02 PENDING PO_REVIEW; RF 0; TODO 8 |
 
 Chuỗi chính: `T00 → T01 → T02` và `T03 → T08 → T09 → T10`. T03 bắt đầu ngay ngày đầu (song song).
 Nếu trễ: cắt T14 → T15 → rút gọn T05. Không cắt T01–T03, T07–T10.
@@ -182,16 +184,18 @@ Nếu trễ: cắt T14 → T15 → rút gọn T05. Không cắt T01–T03, T07�
 | Claude review T11 R1 | TODO-02 thiếu health JSON và uvicorn log | **RESOLVED** — evidence Round 3 đã có |
 | Claude review T11 R1 | TODO-03 Starlette TestClient deprecation | **WONT_FIX** — không ảnh hưởng AC |
 | Claude review T11 R1 | TODO-04 cleanup evidence runtime | **DEFER_CLEANUP_AFTER_CLOSURE** — không xóa trong pre-merge |
+| Claude review T17 | TODO-01..08 (lọc thể loại có dấu; nút phim cần tên nguyên văn; mock "phim hài" trả câu giá; nút chat kéo xuống đáy đè mép "Tiếp tục"; model/quota Gemini chưa kiểm; câu 422 chung cho 11 tin; lượt lỗi vẫn trừ hạn mức; DB thật chưa xử lý T16 TODO-01) | **CHỜ PO** — đề xuất trong `reports/2026-10-13/claude_review_T17_PASS_WITH_TODO_2026-10-13.md` mục 9 |
 
 ## 11. Current Next Step
-1. **T17 — CLAUDE_REVIEW.** Claude kiểm tra source/test thực, chạy độc lập full gates, security, permissions, scope, regression và tạo `claude_review_T17_<RESULT>_<YYYY-MM-DD>.md`. Chưa có kết luận PASS từ Claude.
-2. **PO_REVIEW (sau review Claude):** PO thử AC-02 với `CHAT_API_KEY` thật trên môi trường được phép, chốt Gemini Flash/quota thực tế; không đưa key vào log/report. Chỉ PO mới approve/merge T17 vào `master`.
+1. **T17 — PO_REVIEW.** Claude PASS_WITH_TODO 13/10/2026 (`reports/2026-10-13/claude_review_T17_PASS_WITH_TODO_2026-10-13.md`). Tín ghi disposition TODO-01..08 của T17.
+2. **AC-02 (PO_REVIEW):** PO thử AC-02 trên SQLite tạm hoặc DB đã xử lý T16 TODO-01 (TODO-08), thêm câu "Gợi ý phim hài đang chiếu" (TODO-01), với `CHAT_API_KEY` thật trên môi trường được phép, chốt Gemini Flash/quota thực tế; không đưa key vào log/report. Chỉ PO mới approve/merge T17 vào `master`.
 3. **T16 TODO-01..07:** giữ nguyên mọi disposition trong Claude review T16. Không khởi động/reset backend với `firefly.db` thật khi chưa có backup/checkpoint và PO authorization riêng.
-4. **Task kế tiếp:** NOT SELECTED / NOT AUTHORIZED. T12/T13 vẫn PLANNED theo coordination; PO từng báo hoàn thành/deploy 12/10 nhưng chưa có commit/nhánh để xác minh ở bản coordination đầu vào. Q4 chờ PO đồng bộ/ xác nhận.
+4. **Task kế tiếp:** NOT SELECTED. Claude không mở T12 vì T12 `PLANNED / NOT AUTHORIZED` và mâu thuẫn PO báo đã xong/deploy nhưng repo chưa có commit (AGENT_RULES 1.1: bị chặn). T12/T13 vẫn PLANNED theo coordination; PO từng báo hoàn thành/deploy 12/10 nhưng chưa có commit/nhánh để xác minh ở bản coordination đầu vào. Q4 chờ PO đồng bộ/ xác nhận.
 
 ## 12. Active Timeline
 | Ngày | Ai | Sự kiện |
 |---|---|---|
+| 13/10/2026 | Claude | T17 review **PASS_WITH_TODO**: AC 10/11, AC-02 PENDING PO_REVIEW, RF 0, TODO 8; pytest 50/50, uvicorn + SQLite tạm, build real/mock, probe 7/7 (đã xóa), UI mock 375px; `firefly.db` hash không đổi. T17 `CLAUDE_REVIEW → PO_REVIEW`; không mở task kế tiếp (T12 chưa authorize). TODO-01..07 T16 giữ nguyên. |
 | 13/10/2026 | Tín (PO) + Codex | T17 DEV evidence: focused pytest 14/14, full 50/50 gồm T11/T16, compileall, SQLite tạm + uvicorn health/401/503, build REAL/MOCK sau bản vá kéo thả, UI 375px và hồi quy 7/7 PO attested; scope/file/secret checks PASS. AC-02 key thật để PO_REVIEW. |
 | 13/10/2026 | Codex | T17 `IN_PROGRESS → CLAUDE_REVIEW`; chỉ bàn giao cho Claude review độc lập, không tự PASS/approve/merge; giữ nguyên TODO-01..07 T16. |
 | 12/10/2026 | Codex | T16 `READY_FOR_HANDOFF → IN_PROGRESS`; xác nhận đúng nhánh, chỉ dùng SQLite tạm, không xóa/reset database thật và không mở T17. |

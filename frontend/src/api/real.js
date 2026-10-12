@@ -40,6 +40,7 @@ export const realApi = {
   bookings: {
     create: (payload) => request("/api/bookings", { method: "POST", body: payload }),
     mine: () => request("/api/bookings/me"),
+    claimTransfer: (id) => request(`/api/bookings/${id}/transfer-claim`, { method: "POST" }),
   },
   comments: {
     list: (movieId) => request(`/api/movies/${movieId}/comments`),
@@ -48,6 +49,14 @@ export const realApi = {
   },
   admin: {
     predict: (text) => request("/api/admin/predict", { method: "POST", body: { text } }),
+    bookings: {
+      list: (filters = {}) => {
+        const params = new URLSearchParams(Object.entries(filters).filter(([, value]) => value !== undefined && value !== ""));
+        return request(`/api/admin/bookings${params.toString() ? `?${params}` : ""}`);
+      },
+      confirm: (id) => request(`/api/admin/bookings/${id}/confirm`, { method: "POST" }),
+      reject: (id) => request(`/api/admin/bookings/${id}/reject`, { method: "POST" }),
+    },
     comments: {
       list: (filters = {}) => {
         const params = new URLSearchParams(Object.entries(filters).filter(([, value]) => value !== undefined && value !== ""));

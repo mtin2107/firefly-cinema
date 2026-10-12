@@ -7,6 +7,7 @@ from sqlalchemy import select, func
 from sqlalchemy.orm import Session
 
 from ..database import get_db
+from ..booking_rules import expire_holds
 from ..models import Movie, Showtime, Booking, BookingSeat, Comment
 from ..schemas import MovieOut, ShowtimeOut, ShowtimeDetailOut
 
@@ -108,6 +109,8 @@ def movie_showtimes(movie_id: int, db: Session = Depends(get_db)):
 
 @router.get("/showtimes/{showtime_id}", response_model=ShowtimeDetailOut)
 def showtime_detail(showtime_id: int, db: Session = Depends(get_db)):
+    expire_holds(db)
+    db.commit()
     st = db.get(Showtime, showtime_id)
     if not st:
         raise HTTPException(404, "Không tìm thấy suất chiếu.")

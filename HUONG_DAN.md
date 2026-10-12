@@ -243,6 +243,29 @@ Quy tắc vận hành bắt buộc:
 
 ---
 
+### 2.2. T16 — sao lưu và reset database để thêm `bookings.status`
+
+T16 đổi schema. `create_all` không tự thêm cột vào database cũ, nên **PO phải tự sao lưu rồi reset** theo Q2 `NO ALEMBIC / BACKUP_BEFORE_RESET`. Codex và các gate T16 chỉ dùng SQLite tạm, không xóa hay khởi động với `backend\firefly.db` thật.
+
+1. Dừng backend và xác nhận cổng 8000 không còn tiến trình lắng nghe. Xác nhận `DATABASE_URL` thật trỏ đúng `C:\Projects\firefly-cinema\backend\firefly.db`; nếu khác thì dừng.
+2. Tạo thư mục backup timestamp mới. Khi backend đã dừng, sao chép cả `firefly.db` và `firefly.db.showtime-seed.json` (nếu có) thành một cặp, không ghi đè backup cũ.
+3. Ghi SHA-256 của nguồn và bản sao bằng `Get-FileHash`. Mở bản sao DB và xác minh `PRAGMA integrity_check` trả `ok`, `PRAGMA foreign_key_check` không có dòng; ghi lại số dòng từng bảng. Thử mở/đọc bản sao phục hồi trước khi reset.
+4. Chỉ khi các kiểm tra trên PASS và PO chấp nhận dữ liệu runtime cũ không được tự mang sang schema mới, PO mới tự loại đúng hai file `backend\firefly.db` và sidecar khỏi đường dẫn chạy. Không xóa file backup.
+5. PO khởi động backend để tạo database mới, rồi xác minh bảng `bookings` có cột `status VARCHAR(20)`, check constraint 5 trạng thái, seed booking đều là `paid`, `/api/health` hoạt động và `integrity_check`/`foreign_key_check` vẫn PASS.
+6. Nếu bất kỳ bước nào lỗi: dừng backend, giữ database lỗi để điều tra và chỉ restore đúng cặp DB + sidecar sau khi PO cho phép. Không import trực tiếp booking cũ vì schema thiếu `status` và có thể làm sai PK/FK.
+
+Biến thanh toán QR trong `backend/.env`:
+
+```env
+BANK_ID=970436
+BANK_ACCOUNT=<so-tai-khoan>
+BANK_ACCOUNT_NAME=<ten-chu-tai-khoan>
+```
+
+Thiếu bất kỳ biến nào thì web vẫn chạy, `qr_url` là `null` và khách thanh toán tại quầy trước giờ tự hủy. VietQR là dịch vụ ảnh bên ngoài; lỗi tải ảnh không làm mất mã vé.
+
+---
+
 ## Phần 3. Nối giao diện với backend
 
 1. Mở `frontend/.env`, đổi:
@@ -371,6 +394,10 @@ Ngưỡng ẩn bình luận chỉnh bằng `NEGATIVE_THRESHOLD` (mặc định 0
 | GET | /api/showtimes/{id} | | Suất chiếu + phim + danh sách ghế đã đặt |
 | POST | /api/bookings | ✔ | Đặt vé `{showtime_id, seats}` |
 | GET | /api/bookings/me | ✔ | Vé của tôi |
+| POST | /api/bookings/{id}/transfer-claim | ✔ chủ vé | Báo đã chuyển khoản: `held` → `pending_verify` |
+| GET | /api/admin/bookings | ✔ admin | Tối đa 200 vé mới nhất; lọc `status`, `code` |
+| POST | /api/admin/bookings/{id}/confirm | ✔ admin | Xác nhận `held`/`pending_verify` → `paid` |
+| POST | /api/admin/bookings/{id}/reject | ✔ admin | Từ chối và trả ghế: `held`/`pending_verify` → `rejected` |
 | GET | /api/movies/{id}/comments | | Bình luận không bị admin ẩn; kèm nhãn model, `effective_negative`, `reviewed` |
 | POST | /api/movies/{id}/comments | ✔ | Viết bình luận, PhoBERT chấm điểm ngay |
 | POST | /api/admin/predict | Admin | So sánh nhãn, điểm và thời gian của các model đã nạp |

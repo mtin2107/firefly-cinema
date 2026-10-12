@@ -244,7 +244,7 @@ def _seed_bookings(db: Session) -> None:
             col = (n % (COLS // 2)) * 2 + 1
             seats = [f"{row}{col}", f"{row}{col + 1}"]
             days_ago = (i % 6) + 1 if i < week else 8 + (i % 20)
-            b = Booking(user_id=guest.id, showtime_id=st.id, created_at=now - timedelta(days=days_ago),
+            b = Booking(user_id=guest.id, showtime_id=st.id, status="paid", created_at=now - timedelta(days=days_ago),
                         total=sum(seat_price(s, st.price) for s in seats))
             b.seats = [BookingSeat(showtime_id=st.id, seat_code=s) for s in seats]
             db.add(b)

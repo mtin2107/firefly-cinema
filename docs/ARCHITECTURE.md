@@ -2,7 +2,7 @@
 
 > Hợp đồng kỹ thuật mà mọi task phải giữ. Mô tả chi tiết cây thư mục, routes, API, schema xem `BOI_CANH_DU_AN.md` mục 3.
 > Task nào đổi một mục dưới đây phải cập nhật file này trong cùng nhánh và ghi vào report.
-> Cập nhật: 08/10/2026 (T06 — kiểm duyệt có người duyệt).
+> Cập nhật: 12/10/2026 (T16 — giữ chỗ và thanh toán QR).
 
 ## 1. Sơ đồ thành phần
 
@@ -15,9 +15,9 @@ React SPA (Vite, cổng 5173)
                                            └─► mock.js (localStorage "firefly_mockdb_v2")   │
                                                                                             ▼
                                                                     FastAPI (cổng 8000) app/main.py
-                                                                    ├─ routers/ auth · movies · bookings · comments
+                                                                    ├─ routers/ auth · movies · bookings · admin_bookings · comments
                                                                     ├─ security.py (JWT HS256 24h, PBKDF2, require_admin)
-                                                                    ├─ seats.py (luật ghế)
+                                                                    ├─ seats.py (luật ghế) · booking_rules.py (hạn giữ chỗ)
                                                                     ├─ classifier.py (normalize() + PhoBERT / keyword)
                                                                     └─ database.py ─► SQLite backend/firefly.db
 ```
@@ -194,9 +194,18 @@ Ngoài máy: Google Drive `MyDrive/thesis/data/…`, `MyDrive/thesis_results/…
 - `comments` giữ nguyên kết quả model ở `is_negative`, `negative_score`, `model_name`; nhãn người duyệt nằm riêng ở `human_label` (`0` hoặc `1`), kèm `reviewed_by`, `reviewed_at` và cờ `hidden`.
 - Nhãn hiệu lực công khai là `human_label` nếu đã duyệt, ngược lại là `is_negative`; bình luận `hidden=true` không được trả về API công khai.
 - API admin bình luận dùng `require_admin`, hỗ trợ phân trang/lọc trạng thái duyệt, confirm/relabel/hide/unhide, thống kê TP/FP/TN/FN và CSV UTF-8 BOM gồm đúng `text,text_norm,label`.
+
+### 2.9. Giữ chỗ và thanh toán vé
+
+- `bookings.status` chỉ nhận `held`, `pending_verify`, `paid`, `expired`, `rejected`; vé mới là `held`, dữ liệu seed là `paid`.
+- Hạn giữ chỗ bằng giờ chiếu trừ 30 phút. `booking_rules.py` thực hiện hủy lười trước khi đọc sơ đồ ghế, tạo/đọc vé và liệt kê vé admin.
+- Khi vé `held` hết hạn hoặc admin từ chối, các dòng `booking_seats` phải bị xóa để giải phóng ràng buộc `UNIQUE(showtime_id, seat_code)`; dòng `bookings` vẫn giữ làm lịch sử.
+- `pending_verify` và `paid` không tự hết hạn. Mỗi tài khoản chỉ có tối đa một vé `held` cho một suất; 30 phút cuối không nhận đặt online.
+- Mã vé là `FF` cộng ID đệm đủ 5 chữ số. Backend tạo VietQR từ `BANK_ID`, `BANK_ACCOUNT`, `BANK_ACCOUNT_NAME`; thiếu cấu hình thì `qr_url=null`.
+- API mới gồm `POST /api/bookings/{id}/transfer-claim` và nhóm `GET/POST /api/admin/bookings`; mọi endpoint admin dùng `require_admin`. Real và mock giữ cùng cấu trúc JSON.
 - `text_norm` trong CSV luôn dùng `normalize()` hiện hành của backend. Real API và mock API giữ cùng contract.
 
-### 2.9. Bí mật và file lớn
+### 2.10. Bí mật và file lớn
 - Không commit: `.env`, `firefly.db`, `backend/models/`, `venv/`, `node_modules/`, file model, CSV/XLSX lớn.
 
 ## 3. Thay đổi kiến trúc dự kiến theo kế hoạch

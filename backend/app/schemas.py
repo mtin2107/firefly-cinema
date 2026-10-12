@@ -253,11 +253,20 @@ class BookingIn(BaseModel):
 
 class BookingOut(BaseModel):
     id: int
+    code: str
+    status: Literal["held", "pending_verify", "paid", "expired", "rejected"]
+    hold_expires_at: datetime
+    qr_url: str | None
     seats: list[str]
     total: int
     created_at: datetime
     showtime: ShowtimeOut
     movie: MovieOut
+
+
+class AdminBookingOut(BookingOut):
+    customer_name: str
+    customer_email: str
 
 
 # ---------- Bình luận ----------

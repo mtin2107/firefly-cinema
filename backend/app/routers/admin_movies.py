@@ -54,7 +54,7 @@ def delete_movie(movie_id: int, _: User = Depends(require_admin), db: Session = 
     has_booking = db.scalar(
         select(Booking.id)
         .join(Showtime, Booking.showtime_id == Showtime.id)
-        .where(Showtime.movie_id == movie_id)
+        .where(Showtime.movie_id == movie_id, Booking.status.not_in(("expired", "rejected")))
         .limit(1)
     )
     if has_booking is not None:

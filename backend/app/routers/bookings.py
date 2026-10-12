@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timedelta
 
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy import select
@@ -6,6 +6,7 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from ..database import get_db
+from ..booking_rules import HOLD_CUTOFF_MINUTES, booking_out, expire_holds
 from ..models import Booking, BookingSeat, Showtime, User
 from ..schemas import BookingIn, BookingOut
 from ..seats import is_valid_seat, seat_price, MAX_SEATS_PER_BOOKING
@@ -14,20 +15,26 @@ from ..security import get_current_user
 router = APIRouter(prefix="/api/bookings", tags=["Đặt vé"])
 
 
-def to_out(b: Booking) -> dict:
-    return {"id": b.id, "seats": [s.seat_code for s in b.seats], "total": b.total, "created_at": b.created_at,
-            "showtime": b.showtime, "movie": b.showtime.movie}
-
-
 @router.post("", response_model=BookingOut, status_code=201)
 def create_booking(body: BookingIn, user: User = Depends(get_current_user), db: Session = Depends(get_db)):
+    if expire_holds(db):
+        db.commit()
     st = db.get(Showtime, body.showtime_id)
     if not st:
         raise HTTPException(404, "Không tìm thấy suất chiếu.")
     if st.movie.status == "ended":
         raise HTTPException(400, "Phim đã chiếu xong, không thể đặt vé.")
-    if st.start_time <= datetime.now():
-        raise HTTPException(400, "Suất chiếu này đã bắt đầu.")
+    if st.start_time <= datetime.now() + timedelta(minutes=HOLD_CUTOFF_MINUTES):
+        db.commit()
+        raise HTTPException(400, "Suất chiếu sắp bắt đầu, vui lòng mua vé tại quầy.")
+    existing_hold = db.scalar(select(Booking.id).where(
+        Booking.user_id == user.id,
+        Booking.showtime_id == st.id,
+        Booking.status == "held",
+    ).limit(1))
+    if existing_hold is not None:
+        db.commit()
+        raise HTTPException(409, "Bạn đang giữ chỗ cho suất này. Hãy thanh toán vé đang giữ trước khi đặt thêm.")
     seats = sorted(set(body.seats))
     if not 1 <= len(seats) <= MAX_SEATS_PER_BOOKING:
         raise HTTPException(400, f"Chọn từ 1 đến {MAX_SEATS_PER_BOOKING} ghế.")
@@ -40,7 +47,8 @@ def create_booking(body: BookingIn, user: User = Depends(get_current_user), db: 
     if taken:
         raise HTTPException(409, f"Ghế {', '.join(sorted(taken))} vừa có người đặt. Hãy chọn ghế khác.")
 
-    booking = Booking(user_id=user.id, showtime_id=st.id, total=sum(seat_price(s, st.price) for s in seats))
+    booking = Booking(user_id=user.id, showtime_id=st.id,
+                      total=sum(seat_price(s, st.price) for s in seats), status="held")
     booking.seats = [BookingSeat(showtime_id=st.id, seat_code=s) for s in seats]
     db.add(booking)
     try:
@@ -49,10 +57,30 @@ def create_booking(body: BookingIn, user: User = Depends(get_current_user), db: 
         db.rollback()
         raise HTTPException(409, "Có ghế vừa được người khác đặt. Hãy tải lại sơ đồ ghế.")
     db.refresh(booking)
-    return to_out(booking)
+    return booking_out(booking)
 
 
 @router.get("/me", response_model=list[BookingOut])
 def my_bookings(user: User = Depends(get_current_user), db: Session = Depends(get_db)):
+    expire_holds(db)
+    db.commit()
     rows = db.scalars(select(Booking).where(Booking.user_id == user.id).order_by(Booking.id.desc())).all()
-    return [to_out(b) for b in rows]
+    return [booking_out(b) for b in rows]
+
+
+@router.post("/{booking_id}/transfer-claim", response_model=BookingOut)
+def claim_transfer(booking_id: int, user: User = Depends(get_current_user), db: Session = Depends(get_db)):
+    expire_holds(db)
+    booking = db.scalar(select(Booking).where(
+        Booking.id == booking_id, Booking.user_id == user.id
+    ))
+    if booking is None:
+        db.commit()
+        raise HTTPException(404, "Không tìm thấy vé.")
+    if booking.status != "held":
+        db.commit()
+        raise HTTPException(409, "Vé không ở trạng thái có thể báo chuyển khoản.")
+    booking.status = "pending_verify"
+    db.commit()
+    db.refresh(booking)
+    return booking_out(booking)

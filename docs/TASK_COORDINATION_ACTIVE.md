@@ -24,20 +24,20 @@ Trước khi áp dụng workflow: giao diện React đầy đủ (`giao-dien-v1`
 
 ## 4. Current Project Status
 ```
-Overall Status: READY_FOR_NEXT_TASK
-Phase: T11 — DONE / CLOSED
-Current Active Task: NONE
-Next Task: T16 — READY_FOR_HANDOFF (PO chọn 12/10/2026), sau đó T17
+Overall Status: CLAUDE_REVIEW
+Phase: T16 — CLAUDE_REVIEW
+Current Active Task: T16 — Giữ chỗ có hạn và thanh toán QR
+Next Task: NONE — không mở T17 trước kết quả review và quyết định PO
 Ngày bắt đầu sản phẩm: 05/10/2026 · Hạn: 01/11/2026
 ```
 
 ## 5. Current Active Task
-**NONE.** T11 đã **DONE / CLOSED** sau khi PO merge thành công vào `master` tại `06dd44f0d845fecea829b82c48ff2f5a8dbab984`. Claude Final **PASS_WITH_TODO**; PO **APPROVED_WITH_NOTES**; AC 6/6 PASS; Technical DoD MET; Required Fixes 0; scope exception sidecar `.gitignore` APPROVED / VERIFIED. T12 chưa được authorize.
+**T16 — CLAUDE_REVIEW.** Codex đã triển khai giữ chỗ 30 phút và thanh toán QR trên nhánh `task/T16-giu-cho-thanh-toan`: focused 12/12, full pytest 36/36 (gồm 28 test T11), compile, backend health/schema trên SQLite tạm, build real/mock và mock flow đều PASS. DB thật không bị khởi động/reset; report: `reports/2026-10-12/codex_implementation_T16_2026-10-12.md`.
 
 T10 giữ nguyên **DONE / CLOSED**. Runtime backend trên database thật vẫn bị cấm nếu chưa có checkpoint/backup và authorization riêng của PO; T11 chỉ dùng SQLite tạm.
 
 ## 6. Current Task Record
-Task Record hiện tại: [`docs/tasks/T11.md`](tasks/T11.md).
+Task Record hiện tại: [`docs/tasks/T16.md`](tasks/T16.md).
 
 T07 và T09 đã DONE / CLOSED. TODO-02 của T09 đã RESOLVED theo xác nhận PO ngày 10/10/2026; evidence notebook ở mức `PO_ATTESTED`, không phải Claude xác minh độc lập. Q3 đã được PO phê duyệt: PhoBERT B là model mặc định, PhoBERT A được giữ làm fallback hoặc chọn qua `.env` và restart backend; không bổ sung giao diện admin chọn model.
 
@@ -61,7 +61,7 @@ T07 và T09 đã DONE / CLOSED. TODO-02 của T09 đã RESOLVED theo xác nhận
 | T13 | Chốt v1.0 và sao lưu | Tất cả | 4 | T11, T12 | [T13.md](tasks/T13.md) | PLANNED |
 | T14 | *(tùy chọn)* Hủy vé, đổi mật khẩu | Web | dư | — | [T14.md](tasks/T14.md) | PLANNED |
 | T15 | *(tùy chọn)* Thử nghiệm có tách từ | ML | dư | T09 | [T15.md](tasks/T15.md) | PLANNED |
-| T16 | Giữ chỗ có hạn và thanh toán QR (đổi schema) | Web | phát triển thêm | T11 | [T16.md](tasks/T16.md) | READY_FOR_HANDOFF |
+| T16 | Giữ chỗ có hạn và thanh toán QR (đổi schema) | Web | phát triển thêm | T11 | [T16.md](tasks/T16.md) | CLAUDE_REVIEW |
 | T17 | Chatbot AI tư vấn phim (Gemini free, chỉ đọc) | Web | phát triển thêm | T16 | [T17.md](tasks/T17.md) | PLANNED |
 
 Chuỗi chính: `T00 → T01 → T02` và `T03 → T08 → T09 → T10`. T03 bắt đầu ngay ngày đầu (song song).
@@ -181,14 +181,16 @@ Nếu trễ: cắt T14 → T15 → rút gọn T05. Không cắt T01–T03, T07�
 | Claude review T11 R1 | TODO-04 cleanup evidence runtime | **DEFER_CLEANUP_AFTER_CLOSURE** — không xóa trong pre-merge |
 
 ## 11. Current Next Step
-1. T11 đã DONE / CLOSED; không còn Current Active Task.
-2. **Next Task: T16 — READY_FOR_HANDOFF.** PO chọn hướng phát triển thêm ngày 12/10/2026: T16 (giữ chỗ + QR) trước, T17 (chatbot) sau. Task Record do Claude soạn theo yêu cầu của PO trong chat; PO gửi `T16.md` cho ChatGPT/Codex = duyệt.
-3. Tín tạo nhánh `task/T16-giu-cho-thanh-toan` từ `master` rồi gửi prompt bàn giao.
+1. **T16 — CLAUDE_REVIEW.** Claude đọc implementation report và diff thật, chạy gate/probe độc lập theo AC-01..AC-12.
+2. Database thật vẫn cấm startup/reset trong review nếu chưa có authorization riêng; mọi probe dùng SQLite tạm.
+3. Không mở T17; Codex không tự review, PASS, PO_APPROVED hoặc merge.
 4. T12/T13: PO báo 12/10/2026 đã hoàn thành và deploy, nhưng `master` (`4f74ff9`) chưa có commit/nhánh T12–T13. Trạng thái giữ nguyên `PLANNED` tới khi PO đồng bộ vào repo; Q4 coi là chờ PO xác nhận.
 
 ## 12. Active Timeline
 | Ngày | Ai | Sự kiện |
 |---|---|---|
+| 12/10/2026 | Codex | T16 `READY_FOR_HANDOFF → IN_PROGRESS`; xác nhận đúng nhánh, chỉ dùng SQLite tạm, không xóa/reset database thật và không mở T17. |
+| 12/10/2026 | Codex | T16 DEV hoàn tất: focused 12/12, full pytest 36/36 gồm 28 test T11, compile, temp-DB health/schema/integrity, build real/mock và mock flow PASS; AC-01..AC-12 DEV PASS. Ghi quy trình PO backup/reset DB+sidecar trong `HUONG_DAN.md` và report; T16 `IN_PROGRESS → CLAUDE_REVIEW`. Không tự review/PASS, không mở T17. |
 | 03/10/2026 | Tín + Claude | Dựng bộ tài liệu workflow (docs/README, SOURCE_OF_TRUTH, ARCHITECTURE, REQUIREMENTS, AGENT_RULES, file điều phối, mẫu task, reports/) |
 | 03/10/2026 | Claude | Soạn bản nháp Task Record T00–T15 (PLANNED, chờ PO duyệt) |
 | 04/10/2026 | Tín | Chốt quy ước: gửi Txx.md cho ChatGPT = PO duyệt. Commit bộ tài liệu (a9d6155) |

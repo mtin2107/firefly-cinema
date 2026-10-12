@@ -51,11 +51,19 @@ class Showtime(Base):
 
 class Booking(Base):
     __tablename__ = "bookings"
+    __table_args__ = (
+        CheckConstraint(
+            "status IN ('held', 'pending_verify', 'paid', 'expired', 'rejected')",
+            name="ck_bookings_status",
+        ),
+    )
     id: Mapped[int] = mapped_column(primary_key=True)
     user_id: Mapped[int] = mapped_column(ForeignKey("users.id"), index=True)
     showtime_id: Mapped[int] = mapped_column(ForeignKey("showtimes.id"))
     total: Mapped[int] = mapped_column(Integer)
+    status: Mapped[str] = mapped_column(String(20), default="held", server_default="held")
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.now)
+    user: Mapped[User] = relationship()
     showtime: Mapped[Showtime] = relationship()
     seats: Mapped[list["BookingSeat"]] = relationship(back_populates="booking", cascade="all, delete-orphan")
 

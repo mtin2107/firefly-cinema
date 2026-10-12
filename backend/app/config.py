@@ -14,6 +14,9 @@ SECRET_KEY = os.getenv("SECRET_KEY", "doi-chuoi-bi-mat-nay")
 TOKEN_EXPIRE_HOURS = 24
 DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///./firefly.db")
 FRONTEND_ORIGINS = [o.strip() for o in os.getenv("FRONTEND_ORIGIN", "http://localhost:5173").split(",")]
+BANK_ID = os.getenv("BANK_ID", "").strip()
+BANK_ACCOUNT = os.getenv("BANK_ACCOUNT", "").strip()
+BANK_ACCOUNT_NAME = os.getenv("BANK_ACCOUNT_NAME", "").strip()
 
 MODEL_DIR = os.getenv("MODEL_DIR", "models/phobert-binhluan")
 MODEL_DIR_B = os.getenv("MODEL_DIR_B", "models/phobert-binhluan-B")

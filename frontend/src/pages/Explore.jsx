@@ -1,7 +1,8 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { api } from "../api";
 import MovieCard from "../components/MovieCard";
+import { useGridReveal } from "../utils/motion";
 import { ErrorState, Empty, MovieGridSkeleton } from "../components/StateViews";
 import { FILTERS, readFilters } from "../utils/taxonomy";
 
@@ -21,6 +22,7 @@ function titleFor(active, q) {
 export default function Explore() {
   const [params, setParams] = useSearchParams();
   const [movies, setMovies] = useState(null);
+  const gridRef = useRef(null);
   const [error, setError] = useState("");
   const { active, query, q } = readFilters(params);
   const queryKey = JSON.stringify(query);
@@ -31,6 +33,7 @@ export default function Explore() {
   };
   // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(load, [queryKey]);
+  useGridReveal(gridRef, [movies]);
 
   const change = (key, slug) => {
     const next = new URLSearchParams(params);
@@ -69,7 +72,7 @@ export default function Explore() {
         ) : (
           <>
             <p className="muted result-count">{movies.length} phim</p>
-            <div className="movie-grid">{movies.map((m) => <MovieCard key={m.id} movie={m} />)}</div>
+            <div className="movie-grid" ref={gridRef}>{movies.map((m) => <MovieCard key={m.id} movie={m} />)}</div>
           </>
         )}
     </div>

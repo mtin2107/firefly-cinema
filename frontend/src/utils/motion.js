@@ -58,4 +58,21 @@ export function useFlipNavigate() {
   };
 }
 
+// Lưới phim hiện lần lượt khi cuộn tới; chạy lại khi deps đổi (đổi tab, đổi bộ lọc)
+export function useGridReveal(ref, deps) {
+  useGSAP(() => {
+    const mm = gsap.matchMedia();
+    mm.add(MOTION_OK, () => {
+      const cards = gsap.utils.toArray(ref.current?.children ?? []);
+      if (!cards.length) return;
+      gsap.set(cards, { autoAlpha: 0, y: 28 });
+      ScrollTrigger.batch(cards, {
+        start: "top 95%", once: true,
+        onEnter: (batch) => gsap.to(batch, { autoAlpha: 1, y: 0, stagger: 0.06, duration: DUR.slow, ease: EASE.out, overwrite: true }),
+      });
+    });
+    return () => mm.revert();
+  }, { scope: ref, dependencies: deps, revertOnUpdate: true });
+}
+
 export { gsap, useGSAP, ScrollTrigger, SplitText };

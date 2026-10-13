@@ -215,7 +215,7 @@ h1, h2, h3 { margin: 0; line-height: 1.15; }
 .tab--active { color: var(--text); border-bottom-color: var(--yellow); }
 .movie-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 36px 24px; }
 .movie-card__poster { display: block; }
-.movie-card__poster:hover .poster { outline: 2px solid var(--yellow); outline-offset: 3px; }
+.movie-card__poster:hover .poster, .movie-card__poster:focus-visible .poster { outline: 2px solid var(--yellow); outline-offset: 3px; }
 .movie-card__body { padding-top: 12px; display: flex; flex-direction: column; gap: 4px; }
 .movie-card__title { font-size: 1.05rem; font-weight: 700; }
 .movie-card__title a { color: var(--text); }
@@ -609,3 +609,13 @@ h1, h2, h3 { margin: 0; line-height: 1.15; }
 .marquee--skeleton::before { display: none; }
 .loading-firefly { width: 12px; height: 12px; border-radius: 50%; background: #fff3c4; animation: firefly-glow 1.6s ease-in-out infinite;
   box-shadow: 0 0 4px 2px var(--yellow), 0 0 16px 6px rgba(255,199,44,.45); }
+
+/* ---------- T18: thẻ phim 3D ---------- */
+.movie-card__poster { perspective: 900px; }
+.movie-card__poster:focus-visible { outline: 0; }
+.movie-card__poster .poster { transition: box-shadow var(--dur) var(--ease-out); }
+.movie-card__poster:hover .poster { box-shadow: 0 26px 40px -18px rgba(0,0,0,.95), 0 0 30px -8px rgba(255,199,44,.35); }
+.movie-card__poster .poster::before { content: ""; position: absolute; inset: 0; z-index: 1; pointer-events: none; opacity: 0;
+  background: radial-gradient(circle at var(--glare-x, 50%) var(--glare-y, 0%), rgba(255,243,196,.32), transparent 55%);
+  transition: opacity var(--dur); }
+.movie-card__poster:hover .poster::before { opacity: 1; }

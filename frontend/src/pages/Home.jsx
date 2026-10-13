@@ -2,6 +2,7 @@ import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { api } from "../api";
 import MovieCard from "../components/MovieCard";
+import { useGridReveal } from "../utils/motion";
 import Poster from "../components/Poster";
 import AgeBadge from "../components/AgeBadge";
 import { ErrorState, MovieGridSkeleton } from "../components/StateViews";
@@ -17,6 +18,7 @@ export default function Home() {
   const [error, setError] = useState("");
   const [tab, setTab] = useState("now_showing");
   const tabsRef = useRef(null);
+  const gridRef = useRef(null);
   const [ink, setInk] = useState(null);
 
   const load = () => {
@@ -24,6 +26,7 @@ export default function Home() {
     api.movies.list().then(setMovies).catch((e) => setError(e.message));
   };
   useEffect(load, []);
+  useGridReveal(gridRef, [tab, movies]);
 
   // Đo tab đang chọn để gạch vàng trượt tới đúng chỗ
   useLayoutEffect(() => {
@@ -84,7 +87,7 @@ export default function Home() {
           ))}
           {ink && <span className="tabs__ink" style={ink} aria-hidden="true" />}
         </div>
-        <div className="movie-grid">
+        <div className="movie-grid" ref={gridRef}>
           {list.map((m) => <MovieCard key={m.id} movie={m} />)}
         </div>
       </section>

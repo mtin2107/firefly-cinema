@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import Poster from "./Poster";
 
 // Thời gian (ms): giữ poster bao lâu, và hiệu ứng mờ dần bao lâu
@@ -33,13 +34,14 @@ export default function PosterIntro({ movie, onDone }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  return (
+  return createPortal(
     <div className={`intro${leaving ? " intro--leaving" : ""}`} onClick={leave}
       style={{ "--fade": `${FADE_MS}ms` }} aria-hidden="true">
       <div className="intro__bubble">
         <Poster movie={movie} size="xl" />
       </div>
       <p className="intro__title">{movie.title}</p>
-    </div>
+    </div>,
+    document.body,
   );
 }

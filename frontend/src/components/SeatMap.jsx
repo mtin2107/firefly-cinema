@@ -1,15 +1,16 @@
 import { useRef } from "react";
 import { ROWS, COLS, isVip } from "../utils/seats";
-import { gsap, useGSAP, EASE, DUR, prefersReduced } from "../utils/motion";
+import { gsap, useGSAP, EASE, DUR, useReducedMotion } from "../utils/motion";
 
 export default function SeatMap({ booked, selected, onToggle }) {
   const root = useRef(null);
+  const reduced = useReducedMotion();
 
-  // Các hàng ghế hiện lần lượt từ phía màn hình ra
+  // Các hàng ghế hiện lần lượt từ phía màn hình ra; bật giảm chuyển động giữa chừng thì revert về trạng thái cuối
   useGSAP(() => {
-    if (prefersReduced()) return;
+    if (reduced) return;
     gsap.from(root.current.querySelectorAll(".seat-row"), { autoAlpha: 0, y: -18, stagger: 0.04, duration: DUR.slow, ease: EASE.out, clearProps: "all" });
-  });
+  }, { dependencies: [reduced], revertOnUpdate: true });
 
   return (
     <div className="seatmap" ref={root}>

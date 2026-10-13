@@ -1,5 +1,5 @@
 import { useEffect, useRef } from "react";
-import { prefersReduced } from "../utils/motion";
+import { useReducedMotion } from "../utils/motion";
 
 const SLOW_FRAME_MS = 40;   // khung chậm hơn mức này liên tục thì giảm số đốm
 const SLOW_FRAMES = 30;
@@ -14,9 +14,10 @@ const makeFly = () => ({ x: Math.random(), y: Math.random(), r: rand(1, 2.8), vx
 export default function FireflyField({ count = 30, className = "", burstAt }) {
   const canvasRef = useRef(null);
   const state = useRef({ flies: [], sparks: [] });
+  const reduced = useReducedMotion();
 
   useEffect(() => {
-    if (prefersReduced()) return;
+    if (reduced) return;
     const canvas = canvasRef.current;
     const ctx = canvas.getContext("2d");
     const s = state.current;
@@ -66,9 +67,9 @@ export default function FireflyField({ count = 30, className = "", burstAt }) {
     return () => {
       cancelAnimationFrame(raf); ro.disconnect(); io.disconnect();
       document.removeEventListener("visibilitychange", start);
-      s.start = null;
+      s.start = null; s.sparks = [];
     };
-  }, [count]);
+  }, [count, reduced]);
 
   useEffect(() => {
     const s = state.current;
@@ -82,5 +83,6 @@ export default function FireflyField({ count = 30, className = "", burstAt }) {
     s.start();
   }, [burstAt?.key]); // eslint-disable-line react-hooks/exhaustive-deps
 
+  if (reduced) return null; // giảm chuyển động: không có canvas, effect phía trên đã dừng RAF và observer
   return <canvas ref={canvasRef} className={`fireflies ${className}`.trim()} aria-hidden="true" />;
 }

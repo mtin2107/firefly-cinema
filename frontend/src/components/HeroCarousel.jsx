@@ -5,7 +5,7 @@ import AgeBadge from "./AgeBadge";
 import FireflyField from "./FireflyField";
 import { duration } from "../utils/format";
 import {
-  gsap, useGSAP, SplitText, EASE, carouselSlot, ringOffset, wrapIndex, prefersReduced, useFlipNavigate,
+  gsap, useGSAP, SplitText, EASE, carouselSlot, ringOffset, wrapIndex, useReducedMotion, useFlipNavigate,
 } from "../utils/motion";
 
 const AUTOPLAY_S = 6;
@@ -20,9 +20,10 @@ export default function HeroCarousel({ movies }) {
   const slots = useRef([]);
   const titleRef = useRef(null);
   const syncTimer = useRef(null);
-  const paused = useRef({ hover: false, focus: false });
+  const paused = useRef({ hover: false, focus: false, user: false });
+  const [userPaused, setUserPaused] = useState(false);
   const swipe = useRef({ x: null, moved: false });
-  const reduced = prefersReduced();
+  const reduced = useReducedMotion();
   const go = useFlipNavigate();
 
   const next = () => setI((k) => wrapIndex(k + 1, n));
@@ -30,7 +31,12 @@ export default function HeroCarousel({ movies }) {
 
   // Xếp poster lên vòng cung; tween nối tiếp từ vị trí hiện tại nên bấm liên tục không giật
   useGSAP(() => {
-    if (reduced) return;
+    const els = slots.current.filter(Boolean);
+    if (reduced) { // bỏ hẳn 3D, CSS chỉ còn hiện poster đang chọn
+      gsap.killTweensOf(els);
+      gsap.set(els, { clearProps: "transform,opacity,visibility,zIndex" });
+      return;
+    }
     const depth = window.matchMedia("(max-width: 767px)").matches ? 0.5 : 1;
     slots.current.forEach((el, k) => {
       if (!el) return;
@@ -38,7 +44,7 @@ export default function HeroCarousel({ movies }) {
       gsap.set(el, { zIndex });
       gsap.to(el, { ...pose, duration: 0.9, ease: EASE.out, overwrite: "auto" });
     });
-  }, { dependencies: [i, n], scope: root });
+  }, { dependencies: [i, n, reduced], scope: root });
 
   // Tên phim bật sáng từng ký tự như bảng hiệu
   useGSAP(() => {
@@ -49,14 +55,15 @@ export default function HeroCarousel({ movies }) {
       .fromTo(split.chars, { textShadow: "0 0 0px rgba(255,199,44,0)" },
         { textShadow: "0 0 18px rgba(255,199,44,.6)", duration: 0.35, yoyo: true, repeat: 1 }, ">-0.1");
     return () => split.revert();
-  }, { dependencies: [i], scope: root, revertOnUpdate: true });
+  }, { dependencies: [i, reduced], scope: root, revertOnUpdate: true });
 
-  // Tự chuyển phim; dừng khi rê chuột, focus trong hero hoặc tab bị ẩn
+  // Tự chuyển phim; dừng khi người dùng bấm Tạm dừng, rê chuột, focus trong hero hoặc tab bị ẩn
   useEffect(() => {
     if (reduced || n < 2) return;
     const dc = gsap.delayedCall(AUTOPLAY_S, next);
     const sync = () => {
-      const stop = paused.current.hover || paused.current.focus || document.hidden;
+      const { hover, focus, user } = paused.current;
+      const stop = user || hover || focus || document.hidden;
       if (stop) dc.pause(); else dc.resume();
     };
     sync();
@@ -66,6 +73,7 @@ export default function HeroCarousel({ movies }) {
   }, [i, n, reduced]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const setPaused = (key, value) => { paused.current[key] = value; syncTimer.current?.(); };
+  const toggleUserPause = () => { setPaused("user", !userPaused); setUserPaused(!userPaused); };
 
   const onKey = (e) => {
     if (e.key === "ArrowRight") { e.preventDefault(); next(); }
@@ -117,6 +125,13 @@ export default function HeroCarousel({ movies }) {
               <span aria-hidden="true">{String(i + 1).padStart(2, "0")} / {String(n).padStart(2, "0")}</span>
             </span>
             <button type="button" className="hero3d__btn" aria-label="Phim sau" onClick={next}>›</button>
+            {!reduced && (
+              <button type="button" className="hero3d__pause" onClick={toggleUserPause}
+                aria-label={userPaused ? "Tiếp tục tự chuyển phim" : "Tạm dừng tự chuyển phim"}>
+                <span aria-hidden="true">{userPaused ? "▶" : "❚❚"}</span>
+                {userPaused ? "Tiếp tục" : "Tạm dừng"}
+              </button>
+            )}
           </div>
         )}
       </div>

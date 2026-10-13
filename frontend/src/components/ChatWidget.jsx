@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { api } from "../api";
 import { useAuth } from "../context/AuthContext";
 
@@ -27,9 +27,13 @@ function savedPosition() {
 
 export default function ChatWidget() {
   const { user, checking } = useAuth();
+  const { pathname } = useLocation();
   const [open, setOpen] = useState(false);
   const [viewport, setViewport] = useState(viewportSize);
   const [dock, setDock] = useState(savedPosition);
+  // Trang chọn ghế: mặc định đậu ở góc phải thanh tổng tiền (CSS chừa chỗ) để không che ghế; kéo trên trang này thì theo vị trí kéo
+  const seatPage = pathname.startsWith("/dat-ve/");
+  const [movedOnSeatPage, setMovedOnSeatPage] = useState(false);
   const [dragPoint, setDragPoint] = useState(null);
   const drag = useRef(null);
   const suppressPointerClick = useRef(false);
@@ -44,10 +48,13 @@ export default function ChatWidget() {
   const sessionVersion = useRef(0);
   const buttonSize = viewport.width <= 600 ? 46 : 52;
   const freeY = Math.max(0, viewport.height - buttonSize - 2 * EDGE);
-  const launcher = dragPoint || {
+  const launcher = dragPoint || (seatPage && !movedOnSeatPage ? {
+    x: Math.max(EDGE, viewport.width - buttonSize - EDGE),
+    y: EDGE + freeY,
+  } : {
     x: dock.side === "left" ? EDGE : Math.max(EDGE, viewport.width - buttonSize - EDGE),
     y: EDGE + dock.fraction * freeY,
-  };
+  });
   const panelWidth = Math.max(0, Math.min(380, viewport.width - 2 * EDGE));
   const roomAbove = Math.max(0, launcher.y - 12 - EDGE);
   const roomBelow = Math.max(0, viewport.height - (launcher.y + buttonSize) - 12 - EDGE);
@@ -59,6 +66,8 @@ export default function ChatWidget() {
     viewport.width - panelWidth - EDGE,
   );
   const panelTop = panelAbove ? launcher.y - 12 - panelHeight : launcher.y + buttonSize + 12;
+
+  useEffect(() => { setMovedOnSeatPage(false); }, [pathname]);
 
   useEffect(() => {
     const onResize = () => setViewport(viewportSize());
@@ -105,6 +114,7 @@ export default function ChatWidget() {
         fraction: clamp((finish.y - EDGE) / Math.max(1, window.innerHeight - buttonSize - 2 * EDGE), 0, 1),
       };
       setDock(nextDock);
+      if (seatPage) setMovedOnSeatPage(true);
       try { localStorage.setItem(POSITION_KEY, JSON.stringify(nextDock)); }
       catch { /* Remember for this page only if storage is unavailable. */ }
       suppressPointerClick.current = true;

@@ -3,6 +3,7 @@ import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { SplitText } from "gsap/SplitText";
 import { useGSAP } from "@gsap/react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 gsap.registerPlugin(useGSAP, ScrollTrigger, SplitText);
@@ -15,6 +16,20 @@ export const REDUCED = "(prefers-reduced-motion: reduce)";
 export const FINE_POINTER = "(hover: hover) and (pointer: fine)";
 
 export const prefersReduced = () => window.matchMedia?.(REDUCED).matches ?? false;
+
+// Theo dõi "giảm chuyển động" cả khi người dùng đổi lúc trang đang mở; hiệu ứng nào phụ thuộc giá trị này sẽ tự dọn/chạy lại
+export function useReducedMotion() {
+  const [reduced, setReduced] = useState(prefersReduced);
+  useEffect(() => {
+    const mq = window.matchMedia?.(REDUCED);
+    if (!mq) return;
+    const sync = () => setReduced(mq.matches);
+    sync();
+    mq.addEventListener("change", sync);
+    return () => mq.removeEventListener("change", sync);
+  }, []);
+  return reduced;
+}
 
 export const wrapIndex = (i, n) => ((i % n) + n) % n;
 

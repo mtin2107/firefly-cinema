@@ -7,7 +7,7 @@ import CommentSection from "../components/CommentSection";
 import { Loading, ErrorState } from "../components/StateViews";
 import { dayKey, dayLabel, duration, money, timeOf } from "../utils/format";
 import { exploreLink, slugify } from "../utils/taxonomy";
-import { gsap, useGSAP, EASE, DUR, flipFrom, prefersReduced } from "../utils/motion";
+import { gsap, useGSAP, EASE, DUR, flipFrom, prefersReduced, useReducedMotion } from "../utils/motion";
 
 // "Hài, Tâm lý" -> các link tới trang lọc
 const TagLinks = ({ value, filterKey }) => value.split(",").map((x) => x.trim()).filter(Boolean)
@@ -25,6 +25,9 @@ export default function MovieDetail() {
   const fromRef = useRef(location.state?.from ?? null);
   const posterRef = useRef(null);
   const pageRef = useRef(null);
+  const introFor = useRef(null);    // phim đã chạy hiệu ứng vào trang (không chạy lại khi bật/tắt giảm chuyển động)
+  const scrolledFor = useRef(null); // phim đã cuộn tới lịch chiếu
+  const reduced = useReducedMotion();
 
   // Xóa state để tải lại trang (F5) không chạy lại hiệu ứng
   useEffect(() => {
@@ -46,16 +49,25 @@ export default function MovieDetail() {
     .sort((a, b) => a.start_time.localeCompare(b.start_time));
 
   const scrollToShowtimes = () => {
-    if (location.hash === "#lich-chieu") document.getElementById("lich-chieu")?.scrollIntoView({ behavior: prefersReduced() ? "auto" : "smooth" });
+    if (scrolledFor.current === movie?.id || location.hash !== "#lich-chieu") return;
+    scrolledFor.current = movie.id;
+    document.getElementById("lich-chieu")?.scrollIntoView({ behavior: prefersReduced() ? "auto" : "smooth" });
   };
 
-  // Poster bay từ chỗ cũ về chỗ mới (FLIP), chữ trượt vào sau; xong mới cuộn tới lịch chiếu nếu cần
+  // Poster bay từ chỗ cũ về chỗ mới (FLIP), chữ trượt vào sau; xong mới cuộn tới lịch chiếu nếu cần.
+  // Bật giảm chuyển động giữa chừng: revertOnUpdate dọn timeline + parallax, nội dung về trạng thái cuối.
   useGSAP(() => {
     if (!movie) return;
     const from = fromRef.current;
     fromRef.current = null;
-    if (prefersReduced()) { scrollToShowtimes(); return; }
     const poster = posterRef.current;
+    gsap.set(poster, { clearProps: "transform" }); // revert của parallax/scrub không luôn trả transform về trống
+    if (reduced) { scrollToShowtimes(); return; }
+    // Poster trôi chậm hơn chữ khi cuộn (parallax nhẹ)
+    gsap.to(poster, { yPercent: -10, ease: "none",
+      scrollTrigger: { trigger: pageRef.current.querySelector(".detail"), start: "top top", end: "bottom top", scrub: true } });
+    if (introFor.current === movie.id) return;
+    introFor.current = movie.id;
     const tl = gsap.timeline({ onComplete: scrollToShowtimes });
     if (from) {
       window.scrollTo(0, 0);
@@ -65,11 +77,8 @@ export default function MovieDetail() {
     } else {
       tl.from(poster, { autoAlpha: 0, scale: 0.96, duration: DUR.base, ease: EASE.out });
     }
-    // Poster trôi chậm hơn chữ khi cuộn (parallax nhẹ)
-    gsap.to(poster, { yPercent: -10, ease: "none",
-      scrollTrigger: { trigger: pageRef.current.querySelector(".detail"), start: "top top", end: "bottom top", scrub: true } });
     tl.from(pageRef.current.querySelectorAll(".detail__info > *"), { autoAlpha: 0, y: 16, stagger: 0.05, duration: DUR.slow, ease: EASE.out }, from ? "-=0.3" : 0);
-  }, { dependencies: [movie] });
+  }, { dependencies: [movie, reduced], revertOnUpdate: true });
 
   if (error) return <ErrorState message={error} onRetry={load} />;
   if (!movie) return <Loading />;

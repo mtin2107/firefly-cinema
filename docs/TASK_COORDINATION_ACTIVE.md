@@ -31,7 +31,7 @@ Trước khi áp dụng workflow: giao diện React đầy đủ (`giao-dien-v1`
 Overall Status: READY_FOR_NEXT_TASK
 Phase: T17 — DONE / CLOSED (MVP/local only; deployment NOT AUTHORIZED)
 Current Active Task: NONE
-Next Task: NOT SELECTED / NOT AUTHORIZED — T12/T13 status conflict and Q4 pending PO
+Current Active Task (cập nhật 13/10/2026): T18 — IN_PROGRESS trên nhánh `task/T18-giao-dien-chuyen-dong`
 Ngày bắt đầu sản phẩm: 05/10/2026 · Hạn: 01/11/2026
 ```
 
@@ -64,6 +64,7 @@ T07 và T09 đã DONE / CLOSED. TODO-02 của T09 đã RESOLVED theo xác nhận
 | T15 | *(tùy chọn)* Thử nghiệm có tách từ | ML | dư | T09 | [T15.md](tasks/T15.md) | PLANNED |
 | T16 | Giữ chỗ có hạn và thanh toán QR (đổi schema) | Web | phát triển thêm | T11 | [T16.md](tasks/T16.md) | DONE / CLOSED — PO APPROVED, merge theo PO; Claude PASS_WITH_TODO, AC 12/12, RF 0, TODO-01..07 preserved |
 | T17 | Chatbot AI tư vấn phim (Gemini free, chỉ đọc) | Web | phát triển thêm | T16 | [T17.md](tasks/T17.md) | DONE / CLOSED — merged `fb0b43f` (PO tip `b3090bc`), PO APPROVED_WITH_NOTES MVP/local, AC 11/11 (AC-02 PO_ATTESTED), Claude R2 PASS_WITH_TODO, RF 0; TODO-03 FIXED, TODO-01..10 dispositioned; production DB gate T16 TODO-01 remains |
+| T18 | Chuyển động và hiệu ứng 3D cho giao diện (GSAP) | Web | phát triển thêm | T17 | [T18.md](tasks/T18.md) | IN_PROGRESS — PO duyệt spec 13/10/2026; Assignee Claude, Reviewer Codex, PO duyệt thẩm mỹ |
 
 Chuỗi chính: `T00 → T01 → T02` và `T03 → T08 → T09 → T10`. T03 bắt đầu ngay ngày đầu (song song).
 Nếu trễ: cắt T14 → T15 → rút gọn T05. Không cắt T01–T03, T07–T10.

@@ -65,6 +65,9 @@ export default function MovieDetail() {
     } else {
       tl.from(poster, { autoAlpha: 0, scale: 0.96, duration: DUR.base, ease: EASE.out });
     }
+    // Poster trôi chậm hơn chữ khi cuộn (parallax nhẹ)
+    gsap.to(poster, { yPercent: -10, ease: "none",
+      scrollTrigger: { trigger: pageRef.current.querySelector(".detail"), start: "top top", end: "bottom top", scrub: true } });
     tl.from(pageRef.current.querySelectorAll(".detail__info > *"), { autoAlpha: 0, y: 16, stagger: 0.05, duration: DUR.slow, ease: EASE.out }, from ? "-=0.3" : 0);
   }, { dependencies: [movie] });
 
@@ -73,7 +76,7 @@ export default function MovieDetail() {
 
   return (
     <div className="container" ref={pageRef}>
-      <section className="detail">
+      <section className="detail" style={{ "--p-bg": movie.poster_bg }}>
         <div className="detail__poster" ref={posterRef}><Poster movie={movie} size="lg" /></div>
         <div className="detail__info">
           <h1 className="detail__title">{movie.title}</h1>

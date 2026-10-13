@@ -649,3 +649,27 @@ h1, h2, h3 { margin: 0; line-height: 1.15; }
 @media (prefers-reduced-motion: reduce) {
   .seatmap__grid, .screen, .seatmap__grid .seat--chosen { transform: none; }
 }
+
+/* ---------- T18: vé lật, in vé ---------- */
+.ticket-wrap { perspective: 1400px; }
+.ticket { transform-style: preserve-3d; transition: transform var(--dur-slow) var(--ease-in-out); }
+.ticket--flipped { transform: rotateY(180deg); }
+.ticket__face { backface-visibility: hidden; -webkit-backface-visibility: hidden; }
+.ticket__face--front { display: flex; flex: 1; min-width: 0; }
+.ticket__face--back {
+  position: absolute; inset: 0; transform: rotateY(180deg); border-radius: var(--radius);
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px;
+  padding: 20px; background: var(--surface-2); text-align: center;
+}
+.ticket__face--back p { margin: 0; }
+.ticket__code--big { font-size: 2.8rem; text-shadow: 0 0 22px rgba(255,199,44,.45); }
+.ticket__flip { margin-top: 16px; }
+.ticket--print { animation: ticket-print .9s var(--ease-out) backwards; } /* backwards: không giữ transform sau khi xong, để vé mới vẫn lật được */
+@keyframes ticket-print { from { clip-path: inset(0 0 100% 0); transform: translateY(-28px); } }
+.ticket__burst { position: absolute; inset: -40px; width: calc(100% + 80px); height: calc(100% + 80px); z-index: 3; }
+@media (max-width: 600px) { .ticket__face--front { flex-direction: column; } }
+@media (prefers-reduced-motion: reduce) {
+  .ticket--flipped { transform: none; }
+  .ticket--flipped .ticket__face--front { display: none; }
+  .ticket--flipped .ticket__face--back { position: static; transform: none; flex: 1; }
+}

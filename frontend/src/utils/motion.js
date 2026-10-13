@@ -40,10 +40,10 @@ export function flipFrom(from, to) {
 export function carouselSlot(offset, depth = 1) {
   const a = Math.abs(offset);
   return {
-    xPercent: offset * 62 * (depth < 1 ? 0.8 : 1),
+    xPercent: offset * 44 * (depth < 1 ? 0.8 : 1),
     z: -a * 160 * depth,
     rotationY: -offset * 28 * depth,
-    opacity: a > 2 ? 0 : 1 - a * 0.3,
+    opacity: a > 2 ? 0 : 1 - a * 0.35,
     zIndex: 10 - a,
   };
 }

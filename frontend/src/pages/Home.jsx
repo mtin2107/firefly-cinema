@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { api } from "../api";
 import MovieCard from "../components/MovieCard";
@@ -16,12 +16,26 @@ export default function Home() {
   const [movies, setMovies] = useState(null);
   const [error, setError] = useState("");
   const [tab, setTab] = useState("now_showing");
+  const tabsRef = useRef(null);
+  const [ink, setInk] = useState(null);
 
   const load = () => {
     setError("");
     api.movies.list().then(setMovies).catch((e) => setError(e.message));
   };
   useEffect(load, []);
+
+  // Đo tab đang chọn để gạch vàng trượt tới đúng chỗ
+  useLayoutEffect(() => {
+    const measure = () => {
+      const el = tabsRef.current?.querySelector(".tab--active");
+      if (el) setInk({ "--ink-x": `${el.offsetLeft}px`, "--ink-w": `${el.offsetWidth}px` });
+    };
+    measure();
+    document.fonts?.ready.then(measure); // font tiêu đề tải xong thì chữ tab rộng ra
+    window.addEventListener("resize", measure);
+    return () => window.removeEventListener("resize", measure);
+  }, [tab, movies]);
 
   if (error) return <ErrorState message={error} onRetry={load} />;
   if (!movies) return <Loading />;
@@ -56,13 +70,14 @@ export default function Home() {
       )}
 
       <section className="container section">
-        <div className="tabs" role="tablist" aria-label="Danh sách phim">
+        <div className="tabs tabs--ink" role="tablist" aria-label="Danh sách phim" ref={tabsRef}>
           {TABS.map((t) => (
             <button key={t.key} role="tab" aria-selected={tab === t.key}
               className={`tab${tab === t.key ? " tab--active" : ""}`} onClick={() => setTab(t.key)}>
               {t.label}
             </button>
           ))}
+          {ink && <span className="tabs__ink" style={ink} aria-hidden="true" />}
         </div>
         <div className="movie-grid">
           {list.map((m) => <MovieCard key={m.id} movie={m} />)}

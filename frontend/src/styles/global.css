@@ -578,3 +578,23 @@ h1, h2, h3 { margin: 0; line-height: 1.15; }
 .route-fade:has(.summary-bar) { animation-name: route-fade; }
 @keyframes route-in { from { opacity: 0; transform: translateY(12px); } }
 @keyframes route-fade { from { opacity: 0; } }
+
+/* ---------- T18: vi tương tác ---------- */
+.btn { transition: background var(--dur-fast), color var(--dur-fast), border-color var(--dur-fast),
+  transform var(--dur-fast) var(--ease-out), box-shadow var(--dur) var(--ease-out); }
+.btn:active:not(:disabled) { transform: scale(.97); }
+.btn--primary:hover:not(:disabled) { box-shadow: 0 0 24px -4px rgba(255,199,44,.55); }
+.dd__chevron { transition: transform var(--dur) var(--ease-out); }
+.dd__panel { animation: dd-in var(--dur) var(--ease-out) both; }
+@keyframes dd-in { from { opacity: 0; transform: translateY(-6px); } }
+.search { animation: search-in var(--dur) var(--ease-out) both; }
+@keyframes search-in { from { opacity: 0; clip-path: inset(0 0 0 100%); } }
+.chat-panel { animation: chat-in var(--dur) var(--ease-out) both; }
+@keyframes chat-in { from { opacity: 0; transform: scale(.94) translateY(10px); } }
+.tab, .day, .time, .search-btn, .nav__link, .dd__btn { transition: color var(--dur-fast), border-color var(--dur-fast), background var(--dur-fast); }
+/* gạch vàng trượt theo tab đang chọn (chỉ tab có .tabs--ink) */
+.tabs--ink { position: relative; }
+.tabs--ink .tab--active { border-bottom-color: transparent; }
+.tabs__ink { position: absolute; left: 0; bottom: 0; height: 3px; width: var(--ink-w, 0); background: var(--yellow);
+  transform: translateX(var(--ink-x, 0)); transition: transform var(--dur) var(--ease-out), width var(--dur) var(--ease-out);
+  box-shadow: 0 0 12px rgba(255,199,44,.6); }

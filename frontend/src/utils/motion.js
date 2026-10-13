@@ -72,7 +72,7 @@ export function useGridReveal(ref, deps) {
       });
     });
     return () => mm.revert();
-  }, { scope: ref, dependencies: deps, revertOnUpdate: true });
+  }, { dependencies: deps, revertOnUpdate: true });
 }
 
 export { gsap, useGSAP, ScrollTrigger, SplitText };

@@ -249,3 +249,23 @@ Tín (PO) yêu cầu trực tiếp trong chat: (1) giữ lại hiệu ứng ban 
 Lưu ý trạng thái: Codex Round 2 (`bf05ad6`) đã PASS_WITH_TODO trên bản có poster bay. Thay đổi này làm đổi code sau bản đã review, nên chuyển `CODEX_REVIEW` Round 3 chỉ cho phần chênh lệch `bf05ad6..HEAD`.
 
 Phạm vi: frontend và docs, không đụng backend/API/DB. compileall và pytest không bị ảnh hưởng (lần chạy gần nhất ở Fix Round 1: 50/50).
+
+### PO Change Request 2 (13/10/2026): icon đom đóm rõ hơn + lời chào khung chat
+Tín yêu cầu: icon phải nhìn ra con đom đóm, và cần một dòng giới thiệu để khách biết đây là khung chat.
+
+| Thay đổi | Chi tiết |
+|---|---|
+| Icon | `FireflyIcon` (SVG trong `ChatWidget.jsx`): đầu, thân tối, râu, hai cánh trong khẽ đập (`wing-l/r` 1,6 giây), đuôi phát sáng `#fff3c4` kèm quầng vàng nhấp nháy (`tail-glow` 2,4 giây), nghiêng 35° như đang bay. Thay cho đốm sáng tròn ở CR-2. |
+| Lời chào | Bong bóng cạnh nút: "**Chào bạn! Mình là trợ lý Firefly.** Cần gợi ý phim, lịch chiếu hay giá vé? Bấm để chat." Hiện sau 1,5 giây, tự ẩn sau 8 giây, mỗi phiên một lần (`sessionStorage`). Bấm bong bóng thì mở chat; nút × (`aria-label` "Ẩn lời chào") ẩn bong bóng và trả focus về nút chat. Bong bóng nằm phía có chỗ trống (nút ở phải thì bong bóng ở trái), có đuôi chỉ về nút. Không hiện ở `/dat-ve/*` (giữ RF-01, không che thanh tổng tiền), không hiện với admin hay khi chat đang mở/đang kéo. Giảm chuyển động: khối CSS toàn cục tắt animation. |
+
+| Kiểm (mock) | Kết quả |
+|---|---|
+| Trang chủ 535px và Khám phá 1280px | Bong bóng hiện sau khoảng 2 giây, ở bên trái nút; 1280px: x 969 → 1194; `scrollWidth` 1265 ≤ 1280 |
+| Bấm bong bóng | Chat mở (`aria-label` nút thành "Đóng trợ lý"), bong bóng biến mất |
+| Nút × | Ẩn bong bóng, focus về nút chat |
+| Nạp lại trong cùng phiên | Không hiện lại |
+| `/dat-ve/2` | Không hiện |
+| Icon phóng lớn để soát hình | Nhìn rõ con đom đóm: thân, cánh, râu, đuôi sáng |
+| Console / build | Không lỗi; JS gzip ≈ 134,8 KB, CSS gzip ≈ 9,3 KB |
+
+File: `frontend/src/components/ChatWidget.jsx` (chỉ phần trình bày, không đổi gọi API), `frontend/src/styles/global.css`.

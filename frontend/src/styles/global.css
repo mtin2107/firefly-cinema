@@ -717,13 +717,39 @@ h1, h2, h3 { margin: 0; line-height: 1.15; }
 @media (max-width: 1320px) { .summary-bar { padding-right: 72px; } }
 @media (max-width: 600px) { .summary-bar { padding-right: 62px; } }
 
-/* ---------- T18: nút chat là đốm đom đóm (biểu tượng của web, giống logo) ---------- */
-.chat-widget__toggle { display: grid; place-items: center; background: radial-gradient(circle, #1d1704 0%, var(--black) 70%);
-  color: var(--yellow); line-height: 1; transition: box-shadow var(--dur) var(--ease-out), transform var(--dur-fast); }
+/* ---------- T18: nút chat là con đom đóm (biểu tượng của web) + lời chào ---------- */
+.chat-widget__toggle { display: grid; place-items: center; padding: 0; background: radial-gradient(circle at 50% 60%, #2a2106 0%, var(--black) 72%);
+  color: var(--yellow); line-height: 1; transition: box-shadow var(--dur) var(--ease-out); }
 .chat-widget__toggle:hover { box-shadow: 0 8px 28px rgba(0,0,0,.45), 0 0 22px -2px rgba(255,199,44,.55); }
-.chat-firefly { /* cùng kiểu .logo__mark, to hơn cho vừa nút */
-  width: 14px; height: 14px; border-radius: 50%; background: #fff3c4;
-  box-shadow: 0 0 4px 2px var(--yellow), 0 0 16px 6px rgba(255,199,44,.45);
-  animation: firefly-glow 3.2s ease-in-out infinite;
-}
-@media (max-width: 600px) { .chat-firefly { width: 12px; height: 12px; } }
+.chat-firefly { width: 34px; height: 34px; overflow: visible; }
+.chat-firefly__wing { fill: rgba(243,239,228,.32); stroke: rgba(243,239,228,.75); stroke-width: .8; transform-box: fill-box; }
+.chat-firefly__wing--l { transform-origin: 100% 30%; animation: wing-l 1.6s ease-in-out infinite; }
+.chat-firefly__wing--r { transform-origin: 0% 30%; animation: wing-r 1.6s ease-in-out infinite; }
+@keyframes wing-l { 50% { transform: rotate(-14deg); } }
+@keyframes wing-r { 50% { transform: rotate(14deg); } }
+.chat-firefly__body { fill: #3b3225; stroke: #7a6a4a; stroke-width: .6; }
+.chat-firefly__antenna { fill: none; stroke: #a39e92; stroke-width: 1; stroke-linecap: round; }
+.chat-firefly__tail { fill: #fff3c4; animation: tail-glow 2.4s ease-in-out infinite; }
+.chat-firefly__glow { fill: rgba(255,199,44,.45); filter: blur(2.5px); animation: tail-glow 2.4s ease-in-out infinite; }
+@keyframes tail-glow { 0%, 100% { opacity: 1; } 50% { opacity: .35; } }
+@media (max-width: 600px) { .chat-firefly { width: 30px; height: 30px; } }
+
+.chat-teaser { position: absolute; top: 50%; display: flex; align-items: flex-start; gap: 2px; width: max-content; max-width: min(250px, calc(100vw - 90px));
+  padding: 10px 6px 10px 14px; background: var(--surface); border: 1px solid var(--yellow); border-radius: 14px;
+  box-shadow: 0 12px 34px rgba(0,0,0,.6), 0 0 24px -8px rgba(255,199,44,.5); transform: translateY(-50%);
+  animation: teaser-in var(--dur-slow) var(--ease-out) both; }
+.chat-teaser--left { right: calc(100% + 12px); }
+.chat-teaser--right { left: calc(100% + 12px); }
+.chat-teaser::after { /* đuôi bong bóng chỉ về nút */
+  content: ""; position: absolute; top: 50%; width: 10px; height: 10px; background: var(--surface);
+  border: solid var(--yellow); transform: translateY(-50%) rotate(45deg); }
+.chat-teaser--left::after { right: -6px; border-width: 1px 1px 0 0; }
+.chat-teaser--right::after { left: -6px; border-width: 0 0 1px 1px; }
+@keyframes teaser-in { from { opacity: 0; transform: translateY(-50%) scale(.9); } }
+.chat-teaser__open { display: flex; flex-direction: column; gap: 3px; padding: 0; background: none; border: 0; color: var(--text);
+  text-align: left; font-size: .84rem; line-height: 1.4; cursor: pointer; }
+.chat-teaser__open strong { color: var(--yellow); font-size: .88rem; }
+.chat-teaser__close { flex: none; width: 26px; height: 26px; margin-top: -4px; padding: 0; background: none; border: 0; border-radius: 50%;
+  color: var(--muted); font-size: 1.2rem; line-height: 1; cursor: pointer; }
+.chat-teaser__close:hover { color: var(--text); }
+.chat-teaser button:focus-visible { outline: 2px solid var(--yellow); outline-offset: 2px; }

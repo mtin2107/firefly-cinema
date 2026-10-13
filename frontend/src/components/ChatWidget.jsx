@@ -1,7 +1,28 @@
 import { useEffect, useRef, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { api } from "../api";
 import { useAuth } from "../context/AuthContext";
+
+const TEASER_KEY = "firefly_chat_teaser_seen_v1"; // lời chào chỉ hiện một lần mỗi phiên
+const TEASER_DELAY_MS = 1500;
+const TEASER_SHOW_MS = 8000;
+
+// Con đom đóm: thân, râu, hai cánh khẽ đập, đuôi phát sáng nhấp nháy (cùng tinh thần logo)
+function FireflyIcon() {
+  return (
+    <svg className="chat-firefly" viewBox="0 0 32 32" width="32" height="32" aria-hidden="true">
+      <g transform="rotate(35 16 16)">
+        <ellipse className="chat-firefly__glow" cx="16" cy="23" rx="7" ry="7" />
+        <ellipse className="chat-firefly__wing chat-firefly__wing--l" cx="11.5" cy="13" rx="5" ry="7.5" />
+        <ellipse className="chat-firefly__wing chat-firefly__wing--r" cx="20.5" cy="13" rx="5" ry="7.5" />
+        <path className="chat-firefly__antenna" d="M14.5 6.5 Q12 3 9.5 2.5 M17.5 6.5 Q20 3 22.5 2.5" />
+        <ellipse className="chat-firefly__body" cx="16" cy="13" rx="3.2" ry="5.5" />
+        <circle className="chat-firefly__body" cx="16" cy="7" r="2.4" />
+        <ellipse className="chat-firefly__tail" cx="16" cy="21.5" rx="3.6" ry="4.2" />
+      </g>
+    </svg>
+  );
+}
 
 const SAMPLES = ["Tối nay có phim gì?", "Gợi ý phim hài đang chiếu", "Ghế VIP giá bao nhiêu?"];
 const GREETING = { role: "assistant", content: "Xin chào! Tôi có thể tư vấn phim, lịch chiếu và giá vé Firefly Cinema." };
@@ -27,9 +48,14 @@ function savedPosition() {
 
 export default function ChatWidget() {
   const { user, checking } = useAuth();
+  const { pathname } = useLocation();
   const [open, setOpen] = useState(false);
   const [viewport, setViewport] = useState(viewportSize);
   const [dock, setDock] = useState(savedPosition);
+  // Trang chọn ghế: mặc định đậu ở góc phải thanh tổng tiền (CSS chừa chỗ) để không che ghế; kéo trên trang này thì theo vị trí kéo
+  const seatPage = pathname.startsWith("/dat-ve/");
+  const [movedOnSeatPage, setMovedOnSeatPage] = useState(false);
+  const [teaser, setTeaser] = useState(false);
   const [dragPoint, setDragPoint] = useState(null);
   const drag = useRef(null);
   const suppressPointerClick = useRef(false);
@@ -44,10 +70,13 @@ export default function ChatWidget() {
   const sessionVersion = useRef(0);
   const buttonSize = viewport.width <= 600 ? 46 : 52;
   const freeY = Math.max(0, viewport.height - buttonSize - 2 * EDGE);
-  const launcher = dragPoint || {
+  const launcher = dragPoint || (seatPage && !movedOnSeatPage ? {
+    x: Math.max(EDGE, viewport.width - buttonSize - EDGE),
+    y: EDGE + freeY,
+  } : {
     x: dock.side === "left" ? EDGE : Math.max(EDGE, viewport.width - buttonSize - EDGE),
     y: EDGE + dock.fraction * freeY,
-  };
+  });
   const panelWidth = Math.max(0, Math.min(380, viewport.width - 2 * EDGE));
   const roomAbove = Math.max(0, launcher.y - 12 - EDGE);
   const roomBelow = Math.max(0, viewport.height - (launcher.y + buttonSize) - 12 - EDGE);
@@ -59,6 +88,23 @@ export default function ChatWidget() {
     viewport.width - panelWidth - EDGE,
   );
   const panelTop = panelAbove ? launcher.y - 12 - panelHeight : launcher.y + buttonSize + 12;
+
+  useEffect(() => { setMovedOnSeatPage(false); }, [pathname]);
+
+  // Lời chào cạnh nút để khách biết đây là khung chat; không hiện ở trang chọn ghế (tránh che thanh tổng tiền) và với admin
+  const teaserAllowed = !open && !seatPage && !checking && user?.role !== "admin";
+  useEffect(() => {
+    if (!teaserAllowed) { setTeaser(false); return; }
+    let seen = false;
+    try { seen = sessionStorage.getItem(TEASER_KEY) === "1"; } catch { /* storage bị chặn: vẫn hiện một lần */ }
+    if (seen) return;
+    const show = setTimeout(() => {
+      setTeaser(true);
+      try { sessionStorage.setItem(TEASER_KEY, "1"); } catch { /* bỏ qua */ }
+    }, TEASER_DELAY_MS);
+    const hide = setTimeout(() => setTeaser(false), TEASER_DELAY_MS + TEASER_SHOW_MS);
+    return () => { clearTimeout(show); clearTimeout(hide); };
+  }, [teaserAllowed]);
 
   useEffect(() => {
     const onResize = () => setViewport(viewportSize());
@@ -105,6 +151,7 @@ export default function ChatWidget() {
         fraction: clamp((finish.y - EDGE) / Math.max(1, window.innerHeight - buttonSize - 2 * EDGE), 0, 1),
       };
       setDock(nextDock);
+      if (seatPage) setMovedOnSeatPage(true);
       try { localStorage.setItem(POSITION_KEY, JSON.stringify(nextDock)); }
       catch { /* Remember for this page only if storage is unavailable. */ }
       suppressPointerClick.current = true;
@@ -185,6 +232,15 @@ export default function ChatWidget() {
         </form>}
         <small className="chat-panel__privacy">Không nhập thông tin cá nhân vào khung chat.</small>
       </section>}
+      {teaser && !dragPoint && (
+        <div className={`chat-teaser chat-teaser--${launcher.x + buttonSize / 2 <= viewport.width / 2 ? "right" : "left"}`}>
+          <button type="button" className="chat-teaser__open" onClick={() => { setTeaser(false); setOpen(true); }}>
+            <strong>Chào bạn! Mình là trợ lý Firefly.</strong>
+            <span>Cần gợi ý phim, lịch chiếu hay giá vé? Bấm để chat.</span>
+          </button>
+          <button type="button" className="chat-teaser__close" aria-label="Ẩn lời chào" onClick={() => { setTeaser(false); toggle.current?.focus(); }}>×</button>
+        </div>
+      )}
       <button ref={toggle} type="button" className="chat-widget__toggle"
         aria-label={open ? "Đóng trợ lý" : "Mở trợ lý"} aria-expanded={open}
         title="Kéo để di chuyển, chạm để mở trợ lý"
@@ -196,7 +252,7 @@ export default function ChatWidget() {
             return;
           }
           setOpen((old) => !old);
-        }}>{open ? "×" : "✦"}</button>
+        }}>{open ? "×" : <FireflyIcon />}</button>
     </div>
   );
 }

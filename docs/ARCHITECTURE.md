@@ -51,6 +51,8 @@ C:\Projects\firefly-cinema\
 │       │   └── movies.json
 │       ├── context\AuthContext.jsx
 │       ├── components\            giữ nguyên; Header thêm mục menu admin
+│       │   ├── HeroCarousel.jsx       [T18] hero băng chuyền poster 3D
+│       │   └── FireflyField.jsx       [T18] đom đóm canvas (nền hero, bung khi in vé)
 │       ├── pages\
 │       │   ├── Home, Explore, MovieDetail, SeatSelection, Checkout, MyTickets,
 │       │   │   Login, Register, NotFound, AdminComments
@@ -58,7 +60,7 @@ C:\Projects\firefly-cinema\
 │       │   ├── AdminShowtimes.jsx     [T05]  /quan-tri/suat-chieu
 │       │   ├── AdminModelCompare.jsx  [T07]  /quan-tri/so-sanh-mo-hinh
 │       │   └── Account.jsx            [T14]  /tai-khoan
-│       ├── utils\                 format.js, seats.js, taxonomy.js
+│       ├── utils\                 format.js, seats.js, taxonomy.js, motion.js [T18]
 │       └── styles\global.css
 │
 ├── backend\                       ── MÁY CHỦ (FastAPI)

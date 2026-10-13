@@ -28,18 +28,17 @@ Trước khi áp dụng workflow: giao diện React đầy đủ (`giao-dien-v1`
 
 ## 4. Current Project Status
 ```
-Overall Status: READY_FOR_NEXT_TASK
-Phase: T17 — DONE / CLOSED (MVP/local only; deployment NOT AUTHORIZED)
-Current Active Task: NONE
-Current Active Task (cập nhật 13/10/2026): T18 — IN_PROGRESS trên nhánh `task/T18-giao-dien-chuyen-dong`
+Overall Status: PO_APPROVED / PENDING_MERGE
+Phase: T18 — PO_APPROVED (merge pending)
+Current Active Task: T18 — PO_APPROVED / PENDING_MERGE trên nhánh `task/T18-giao-dien-chuyen-dong`
 Ngày bắt đầu sản phẩm: 05/10/2026 · Hạn: 01/11/2026
 ```
 
 ## 5. Current Active Task
-**Current Active Task: NONE.** T17 đã được PO merge vào `master` tại `fb0b43f` và đã xác minh `b3090bc` là ancestor của `master`; trạng thái T17 **DONE / CLOSED**, giới hạn **MVP/local**. Chi tiết kỹ thuật, Gemini AC-02, review, TODO-01..10 và disposition lưu trong các báo cáo T17 tại `reports/2026-10-12/` và `reports/2026-10-13/`. T16 TODO-01 vẫn là deployment/DB gate; không được chạy/reset/migrate `backend/firefly.db` thật khi chưa có PO authorization riêng. T12/T13 chưa được xác nhận trạng thái/commit; Q4 còn mở. **Không tự mở task tiếp theo.**
+**Current Active Task: T18 — PO_APPROVED / PENDING_MERGE.** PO ngày 13/10/2026 xác nhận **APPROVED**, thẩm mỹ **ĐẠT**; Codex Round 3 **PASS_WITH_TODO**, Claude RF-04 **PASS**, AC 11/11 PASS, RF-01 → RF-04 CLOSED, Required Fix mở 0. TODO-01/02 **WONT_FIX**; TODO-03 **ACCEPT_LATER (T13)**; OBS-01 **ACCEPT_LATER (future backlog)**. Evidence: `reports/2026-10-13/po_review_T18_APPROVED_2026-10-13.md`. Không còn blocker cản closure, nhưng T18 chưa DONE/CLOSED cho tới khi PO trực tiếp merge và xác minh trên `master`. T17 giữ **DONE / CLOSED**, giới hạn **MVP/local**. T16 TODO-01 vẫn là deployment/DB gate. **Không mở task tiếp theo.**
 
 ## 6. Current Task Record
-Task Record hiện tại: NONE — task kế tiếp NOT SELECTED / NOT AUTHORIZED.
+Task Record hiện tại: `docs/tasks/T18.md` — PO APPROVED; AC 11/11, RF-01 → RF-04 CLOSED, RF mở 0. Trường `Current Status` trong Task Record còn ghi `CODEX_REVIEW` là lệch hành chính đã ghi trong PO report; không sửa đặc tả. Chờ PO merge nhánh T18 vào `master` rồi xác minh closure.
 
 T07 và T09 đã DONE / CLOSED. TODO-02 của T09 đã RESOLVED theo xác nhận PO ngày 10/10/2026; evidence notebook ở mức `PO_ATTESTED`, không phải Claude xác minh độc lập. Q3 đã được PO phê duyệt: PhoBERT B là model mặc định, PhoBERT A được giữ làm fallback hoặc chọn qua `.env` và restart backend; không bổ sung giao diện admin chọn model.
 
@@ -64,7 +63,7 @@ T07 và T09 đã DONE / CLOSED. TODO-02 của T09 đã RESOLVED theo xác nhận
 | T15 | *(tùy chọn)* Thử nghiệm có tách từ | ML | dư | T09 | [T15.md](tasks/T15.md) | PLANNED |
 | T16 | Giữ chỗ có hạn và thanh toán QR (đổi schema) | Web | phát triển thêm | T11 | [T16.md](tasks/T16.md) | DONE / CLOSED — PO APPROVED, merge theo PO; Claude PASS_WITH_TODO, AC 12/12, RF 0, TODO-01..07 preserved |
 | T17 | Chatbot AI tư vấn phim (Gemini free, chỉ đọc) | Web | phát triển thêm | T16 | [T17.md](tasks/T17.md) | DONE / CLOSED — merged `fb0b43f` (PO tip `b3090bc`), PO APPROVED_WITH_NOTES MVP/local, AC 11/11 (AC-02 PO_ATTESTED), Claude R2 PASS_WITH_TODO, RF 0; TODO-03 FIXED, TODO-01..10 dispositioned; production DB gate T16 TODO-01 remains |
-| T18 | Chuyển động và hiệu ứng 3D cho giao diện (GSAP) | Web | phát triển thêm | T17 | [T18.md](tasks/T18.md) | IN_PROGRESS — PO duyệt spec 13/10/2026; Assignee Claude, Reviewer Codex, PO duyệt thẩm mỹ |
+| T18 | Chuyển động và hiệu ứng 3D cho giao diện (GSAP) | Web | phát triển thêm | T17 | [T18.md](tasks/T18.md) | PO_APPROVED / PENDING_MERGE — thẩm mỹ ĐẠT; Codex R3 PASS_WITH_TODO; Claude RF-04 PASS; AC 11/11; RF 4/4 CLOSED; RF mở 0; TODO/OBS đã disposition; chưa DONE/CLOSED |
 
 Chuỗi chính: `T00 → T01 → T02` và `T03 → T08 → T09 → T10`. T03 bắt đầu ngay ngày đầu (song song).
 Nếu trễ: cắt T14 → T15 → rút gọn T05. Không cắt T01–T03, T07–T10.
@@ -82,6 +81,10 @@ Nếu trễ: cắt T14 → T15 → rút gọn T05. Không cắt T01–T03, T07�
 - Q2: **RESOLVED 08/10/2026 — NO ALEMBIC / BACKUP_BEFORE_RESET.** Sao lưu và xác minh đúng database trước khi PO tự reset; Codex không tự xóa database thật.
 
 ## 9. Open Required Fixes
+- **T18 RF-01 (Medium) CLOSED / VERIFIED BY CODEX (Round 2):** hit-test 96/96 ghế ở 375px và 1280px; chat mặc định không che ghế, tổng tiền hoặc nút Tiếp tục; kéo/mở/đóng đạt.
+- **T18 RF-02 (Medium) CLOSED / VERIFIED BY CODEX (Round 2):** Chrome media emulation thật sau mount `no-preference → reduce → no-preference`; autoplay, 3D, canvas, FLIP, parallax và seat effect cleanup/restore đúng; không nhân đôi timer.
+- **T18 RF-03 (Medium) CLOSED / VERIFIED BY CODEX (Round 2):** nút Tạm dừng/Tiếp tục có focus/keyboard/aria-label; user-pause giữ qua focus và đổi phim thủ công, chỉ resume khi người dùng yêu cầu.
+- **T18 RF-04 (Medium) CLOSED / VERIFIED BY CODEX (Round 3):** PosterIntro portal vào `document.body`; overlay bằng đúng viewport và phủ header khi trang đã cuộn ở 375px/1280px; Xem chi tiết/Đặt vé, click/Esc/timer/reduced-motion đạt; fixed-descendant audit chỉ còn summary bar chủ đích.
 - **T11: 0 Required Fix mở; task DONE / CLOSED.**
 - **T11 RF-01 (Medium) CLOSED / VERIFIED BY CLAUDE (Round 2):** xóa một suất hoặc cả ngày không bị tái tạo, kể cả với Session mới.
 - **T11 RF-02 (Medium) CLOSED / VERIFIED BY CLAUDE (Round 2):** ngày rolling có suất admin vẫn seed phim thiếu, không overlap (có cleanup), suất admin giữ nguyên; phim mới `now_showing` được cấp lịch.
@@ -184,16 +187,26 @@ Nếu trễ: cắt T14 → T15 → rút gọn T05. Không cắt T01–T03, T07�
 | Claude review T17 R2 | TODO-03 | **PO DISPOSITIONED** — xem `reports/2026-10-13/po_review_T17_APPROVED_WITH_NOTES_2026-10-13.md` mục TODO-01..10; các mục ACCEPT_LATER chưa sửa, TODO-03 FIXED/VERIFIED; TODO-08 là deployment gate |
 | Claude review T17 R2 | TODO-09 regex hài lệch khi có dấu câu liền; TODO-10 'gia đình'/'thương' kích hoạt câu giá trên mock | **PO DISPOSITIONED** — xem `reports/2026-10-13/po_review_T17_APPROVED_WITH_NOTES_2026-10-13.md` mục TODO-01..10; các mục ACCEPT_LATER chưa sửa, TODO-03 FIXED/VERIFIED; TODO-08 là deployment gate |
 | Claude review T17 | TODO-01..08 (lọc thể loại có dấu; nút phim cần tên nguyên văn; mock "phim hài" trả câu giá; nút chat kéo xuống đáy đè mép "Tiếp tục"; model/quota Gemini chưa kiểm; câu 422 chung cho 11 tin; lượt lỗi vẫn trừ hạn mức; DB thật chưa xử lý T16 TODO-01) | **PO DISPOSITIONED** — xem `reports/2026-10-13/po_review_T17_APPROVED_WITH_NOTES_2026-10-13.md` mục TODO-01..10; các mục ACCEPT_LATER chưa sửa, TODO-03 FIXED/VERIFIED; TODO-08 là deployment gate |
+| Codex review T18 R2 | TODO-01: D2 bỏ `translateZ` nhẹ cho tên phim MovieCard | **WONT_FIX — PO chấp nhận thẩm mỹ hiện tại** |
+| Codex review T18 R2 | TODO-02: D5 ghế chọn dùng `translateY + scale` thay `translateZ` | **WONT_FIX — PO chấp nhận trade-off hit-test/thẩm mỹ** |
+| Codex review T18 R2 | TODO-03: baseline bundle Claude 80,41 KB không tái lập; Codex master 85,29 KB, delta vẫn đạt | **ACCEPT_LATER (T13)** |
+| Claude review T18 RF-04 | OBS-01: reduced-motion có thể render PosterIntro 1–2 frame trước khi effect gỡ | **ACCEPT_LATER — future backlog; chưa authorize task mới** |
 
 ## 11. Current Next Step
-1. **T17 DONE / CLOSED.** PO merge `fb0b43f` đã xác minh trên `master` và PO approval `b3090bc` là ancestor. Giữ báo cáo PO/Claude T17 làm bằng chứng; không mở lại TODO đã disposition nếu chưa có quyết định mới.
-2. **Current Active Task: NONE / Next Task: NOT SELECTED.** Chưa authorize T12/T13 vì trạng thái/commit chưa thống nhất và Q4 còn mở; PO cần xử lý mâu thuẫn trước khi chọn task tiếp theo.
+1. **T18 PO_APPROVED / PENDING_MERGE:** PO trực tiếp merge nhánh `task/T18-giao-dien-chuyen-dong` vào `master`, sau đó xác minh commit/report/coordination và mới thực hiện closure sync.
+2. **Không mở task kế tiếp.** T18 chưa DONE/CLOSED cho tới khi merge được xác minh; T12/T13 vẫn không được authorize trong luồng này.
 3. **T16 TODO-01 / database production:** Deployment NOT AUTHORIZED. Không reset/migrate hoặc chạy backend trên DB thật nếu chưa có backup/checkpoint và PO runtime authorization riêng.
 4. **Gemini demo:** dùng `CHAT_MODEL=gemini-3.5-flash-lite` hoặc model đã kiểm chứng trong `.env` cục bộ, không commit key; kiểm tra lại quota/Free Tier.
 
 ## 12. Active Timeline
 | Ngày | Ai | Sự kiện |
 |---|---|---|
+| 13/10/2026 | Tín (PO) + Codex recording | PO **APPROVED**, thẩm mỹ **ĐẠT**; Codex R3 PASS_WITH_TODO, Claude RF-04 PASS, AC 11/11, RF-01 → RF-04 CLOSED, RF mở 0. TODO-01/02 WONT_FIX; TODO-03 ACCEPT_LATER (T13); OBS-01 ACCEPT_LATER future backlog. T18 `PO_REVIEW → PO_APPROVED / PENDING_MERGE`; không DONE/CLOSED, không merge/tag hoặc mở task tiếp theo. |
+| 13/10/2026 | Codex | RF-04 fix `490ac8a`: portal PosterIntro vào `document.body`, không sửa route-fade/hiệu ứng/thời gian. Independent Review Round 3 **PASS_WITH_TODO**: AC 11/11; RF-01 → RF-04 CLOSED / VERIFIED; ảnh trước/sau desktop/375px, 96/96 ghế hai viewport, dynamic reduced-motion, trace >14s, compile/build/pytest 50/50, health + SQLite tạm, real/mock regression, scope/secret PASS. T18 `CODEX_REVIEW Round 3 → PO_REVIEW`; giữ TODO-01 → TODO-03; không APPROVE/merge/CLOSED hoặc mở task tiếp theo. |
+| 13/10/2026 | Claude | PO change request 2: icon nút chat vẽ con đom đóm (SVG: thân, cánh đập, râu, đuôi phát sáng) và bong bóng lời chào "Chào bạn! Mình là trợ lý Firefly…" (1 lần/phiên, tự ẩn 8 giây, không hiện ở trang chọn ghế/admin). Gộp vào CODEX_REVIEW Round 3. |
+| 13/10/2026 | Claude | PO change request trong chat sau Codex Round 2: khôi phục PosterIntro nguyên văn từ master, hủy M4 poster bay (xóa `posterRect`/`flipFrom`/`useFlipNavigate`), icon nút chat thành đốm đom đóm giống logo; cập nhật BOI_CANH mục 4 + 7 dòng 1, T18.md (M4 hủy, AC-04/11, R5). Build 134,32 KB gzip. Chuyển CODEX_REVIEW Round 3 cho phần chênh lệch. |
+| 13/10/2026 | Codex | Independent Review T18 Round 2 **PASS_WITH_TODO**: AC 11/11 PASS; RF-01 → RF-03 CLOSED / VERIFIED (96/96 ghế ở 375/1280, dynamic reduced-motion thật, pause control a11y); build `134,47 KB` gzip, compileall, pytest 50/50, uvicorn + SQLite tạm/health, real+mock regression 7/7, trace 10,513s 0 long task, scope/secret/DB hash PASS; probes và DB tạm đã xóa. T18 `CODEX_REVIEW Round 2 → PO_REVIEW`; TODO-01 → TODO-03 giữ nguyên; không APPROVE/merge/CLOSED hoặc mở task tiếp theo. |
+| 13/10/2026 | Codex | Independent Review T18 **FAIL**: AC 8/11 PASS; AC-05/08/10 FAIL; RF-01 chat che ghế mobile, RF-02 reduced-motion động không dừng autoplay/animation lifecycle, RF-03 hero thiếu pause/stop độc lập; compile/build/pytest 50/50/backend SQLite tạm/health/real+mock regression/performance 10,5s/scope/secret PASS; DB thật hash không đổi; probe đã xóa. T18 `CODEX_REVIEW → FIX_LOOP`; không mở task kế tiếp. |
 | 13/10/2026 | Tín (PO) + Codex | T17 final closure sync: merge `fb0b43f` vào `master`, merge parent `c07fc4a` + `b3090bc`, approved tip ancestor PASS, clean working tree, PO `APPROVED_WITH_NOTES` (MVP/local only); AC 11/11 (AC-02 PO_ATTESTED), Claude Round 2 PASS_WITH_TODO, RF 0, TODO-03 FIXED, TODO-01..10 dispositioned. T17 `DONE / CLOSED`, Overall `READY_FOR_NEXT_TASK`, Current Active Task `NONE`, Next Task `NOT SELECTED / NOT AUTHORIZED`; T16 DB gate remains and deployment NOT AUTHORIZED. |
 | 13/10/2026 | Tín (PO) | PO APPROVED_WITH_NOTES T17: AC 11/11 (AC-02 PO_ATTESTED với `gemini-3.5-flash-lite`), Claude R2 PASS_WITH_TODO, RF 0, TODO-03 FIXED/VERIFIED, TODO-01..10 dispositioned; key đã rotate theo PO; chỉ MVP/local, T16 DB gate còn chặn deployment. T17 `PO_REVIEW → PO_APPROVED / PENDING_MERGE`, chưa DONE/CLOSED hoặc merge; task kế tiếp NOT AUTHORIZED. |
 | 13/10/2026 | Claude | T17 Round 2 review `447c941` **PASS_WITH_TODO**: TODO-03 FIXED (probe Vite SSR 12 câu × 2 bộ dữ liệu, đã xóa), RF 0, TODO-09/10 mới (Low, mock); compileall, pytest 14/14 + 50/50, build REAL/MOCK, uvicorn SQLite tạm health/401, scope/secret PASS; `firefly.db` hash không đổi. T17 `CLAUDE_REVIEW Round 2 → PO_REVIEW`; không mở task kế tiếp; TODO-01..07 T16 giữ nguyên. |

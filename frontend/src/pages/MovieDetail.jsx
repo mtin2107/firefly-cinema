@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Link, useLocation, useNavigate, useParams } from "react-router-dom";
 import { api } from "../api";
 import Poster from "../components/Poster";
@@ -8,6 +8,7 @@ import PosterIntro from "../components/PosterIntro";
 import { Loading, ErrorState } from "../components/StateViews";
 import { dayKey, dayLabel, duration, money, timeOf } from "../utils/format";
 import { exploreLink, slugify } from "../utils/taxonomy";
+import { gsap, useGSAP, EASE, DUR, useReducedMotion } from "../utils/motion";
 
 // "Hài, Tâm lý" -> các link tới trang lọc
 const TagLinks = ({ value, filterKey }) => value.split(",").map((x) => x.trim()).filter(Boolean)
@@ -23,6 +24,10 @@ export default function MovieDetail() {
   const navigate = useNavigate();
   // Phim được truyền từ trang trước khi bấm vào -> hiện khung bong bóng poster
   const [intro, setIntro] = useState(location.state?.intro ?? null);
+  const posterRef = useRef(null);
+  const pageRef = useRef(null);
+  const introFor = useRef(null);    // phim đã chạy hiệu ứng vào trang (không chạy lại khi bật/tắt giảm chuyển động)
+  const reduced = useReducedMotion();
 
   // Xóa state để tải lại trang (F5) không hiện lại hiệu ứng
   useEffect(() => {
@@ -47,76 +52,90 @@ export default function MovieDetail() {
     if (movie && location.hash === "#lich-chieu") document.getElementById("lich-chieu")?.scrollIntoView();
   }, [movie, location.hash]);
 
+  // Chữ trượt vào lần lượt, poster trôi chậm hơn khi cuộn (parallax).
+  // Bật giảm chuyển động giữa chừng: revertOnUpdate dọn timeline + parallax, nội dung về trạng thái cuối.
+  useGSAP(() => {
+    if (!movie) return;
+    const poster = posterRef.current;
+    gsap.set(poster, { clearProps: "transform" }); // revert của parallax/scrub không luôn trả transform về trống
+    if (reduced) return;
+    gsap.to(poster, { yPercent: -10, ease: "none",
+      scrollTrigger: { trigger: pageRef.current.querySelector(".detail"), start: "top top", end: "bottom top", scrub: true } });
+    if (introFor.current === movie.id) return;
+    introFor.current = movie.id;
+    gsap.timeline()
+      .from(poster, { autoAlpha: 0, scale: 0.96, duration: DUR.base, ease: EASE.out })
+      .from(pageRef.current.querySelectorAll(".detail__info > *"), { autoAlpha: 0, y: 16, stagger: 0.05, duration: DUR.slow, ease: EASE.out }, 0);
+  }, { dependencies: [movie, reduced], revertOnUpdate: true });
+
+  // Khung bong bóng đứng cùng một vị trí ở mọi nhánh để không bị chạy lại khi dữ liệu tải xong
   const introLayer = intro && <PosterIntro movie={intro} onDone={() => setIntro(null)} />;
 
-  // Đặt khung bong bóng ở cùng một vị trí để không bị chạy lại khi dữ liệu tải xong
-  return <>{introLayer}{renderPage()}</>;
+  if (error) return <>{introLayer}<ErrorState message={error} onRetry={load} /></>;
+  if (!movie) return <>{introLayer}<Loading /></>;
 
-  function renderPage() {
-    if (error) return <ErrorState message={error} onRetry={load} />;
-    if (!movie) return <Loading />;
+  return (
+    <>{introLayer}
+    <div className="container" ref={pageRef}>
+      <section className="detail" style={{ "--p-bg": movie.poster_bg }}>
+        <div className="detail__poster" ref={posterRef}><Poster movie={movie} size="lg" /></div>
+        <div className="detail__info">
+          <h1 className="detail__title">{movie.title}</h1>
+          <p className="detail__meta">
+            <AgeBadge rating={movie.age_rating} />
+            <span>{duration(movie.duration_min)}</span>
+            {movie.score > 0 && <span className="score">★ {movie.score}</span>}
+          </p>
+          <p className="detail__desc">{movie.description}</p>
+          <dl className="facts">
+            <div><dt>Thể loại</dt><dd><TagLinks value={movie.genre} filterKey="the-loai" /></dd></div>
+            <div><dt>Quốc gia</dt><dd><Link to={exploreLink("quoc-gia", slugify(movie.country))}>{movie.country}</Link></dd></div>
+            {movie.formats && <div><dt>Định dạng</dt><dd><TagLinks value={movie.formats} filterKey="chu-de" /></dd></div>}
+            <div><dt>Đạo diễn</dt><dd>{movie.director}</dd></div>
+            <div><dt>Diễn viên</dt><dd>{movie.cast}</dd></div>
+            <div><dt>Khởi chiếu</dt><dd>{new Date(movie.release_date).toLocaleDateString("vi-VN")}</dd></div>
+          </dl>
+        </div>
+      </section>
 
-    return (
-      <div className="container">
-        <section className="detail">
-          <Poster movie={movie} size="lg" />
-          <div className="detail__info">
-            <h1 className="detail__title">{movie.title}</h1>
-            <p className="detail__meta">
-              <AgeBadge rating={movie.age_rating} />
-              <span>{duration(movie.duration_min)}</span>
-              {movie.score > 0 && <span className="score">★ {movie.score}</span>}
-            </p>
-            <p className="detail__desc">{movie.description}</p>
-            <dl className="facts">
-              <div><dt>Thể loại</dt><dd><TagLinks value={movie.genre} filterKey="the-loai" /></dd></div>
-              <div><dt>Quốc gia</dt><dd><Link to={exploreLink("quoc-gia", slugify(movie.country))}>{movie.country}</Link></dd></div>
-              {movie.formats && <div><dt>Định dạng</dt><dd><TagLinks value={movie.formats} filterKey="chu-de" /></dd></div>}
-              <div><dt>Đạo diễn</dt><dd>{movie.director}</dd></div>
-              <div><dt>Diễn viên</dt><dd>{movie.cast}</dd></div>
-              <div><dt>Khởi chiếu</dt><dd>{new Date(movie.release_date).toLocaleDateString("vi-VN")}</dd></div>
-            </dl>
-          </div>
-        </section>
-
-        <section className="section" id="lich-chieu" aria-labelledby="showtime-title">
-          <h2 id="showtime-title" className="section-title">Lịch chiếu</h2>
-          {movie.status === "ended" ? (
-            <p className="muted">Phim đã ngừng chiếu tại rạp.</p>
-          ) : movie.status !== "now_showing" ? (
-            <p className="muted">Phim chưa mở bán vé. Quay lại khi phim khởi chiếu nhé.</p>
-          ) : days.length === 0 ? (
-            <p className="muted">Hiện chưa có suất chiếu nào sắp tới.</p>
-          ) : (
-            <>
-              <div className="days" role="tablist" aria-label="Chọn ngày">
-                {days.map((d) => {
-                  const l = dayLabel(d);
-                  return (
-                    <button key={d} role="tab" aria-selected={d === activeDay}
-                      className={`day${d === activeDay ? " day--active" : ""}`} onClick={() => setDay(d)}>
-                      <span className="day__weekday">{l.weekday}</span>
-                      <span className="day__date">{l.date}</span>
-                    </button>
+      <section className="section" id="lich-chieu" aria-labelledby="showtime-title">
+        <h2 id="showtime-title" className="section-title">Lịch chiếu</h2>
+        {movie.status === "ended" ? (
+          <p className="muted">Phim đã ngừng chiếu tại rạp.</p>
+        ) : movie.status !== "now_showing" ? (
+          <p className="muted">Phim chưa mở bán vé. Quay lại khi phim khởi chiếu nhé.</p>
+        ) : days.length === 0 ? (
+          <p className="muted">Hiện chưa có suất chiếu nào sắp tới.</p>
+        ) : (
+          <>
+            <div className="days" role="tablist" aria-label="Chọn ngày">
+              {days.map((d) => {
+                const l = dayLabel(d);
+                return (
+                  <button key={d} role="tab" aria-selected={d === activeDay}
+                    className={`day${d === activeDay ? " day--active" : ""}`} onClick={() => setDay(d)}>
+                    <span className="day__weekday">{l.weekday}</span>
+                    <span className="day__date">{l.date}</span>
+                  </button>
                   );
-                })}
-              </div>
-              <ul className="times">
-                {todays.map((s) => (
-                  <li key={s.id}>
-                    <Link className="time" to={`/dat-ve/${s.id}`}>
-                      <span className="time__clock">{timeOf(s.start_time)}</span>
-                      <span className="time__info">{s.room}, từ {money(s.price)}</span>
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-            </>
-          )}
-        </section>
+              })}
+            </div>
+            <ul className="times">
+              {todays.map((s) => (
+                <li key={s.id}>
+                  <Link className="time" to={`/dat-ve/${s.id}`}>
+                    <span className="time__clock">{timeOf(s.start_time)}</span>
+                    <span className="time__info">{s.room}, từ {money(s.price)}</span>
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </>
+        )}
+      </section>
 
-        <CommentSection movieId={movie.id} />
-      </div>
-    );
-  }
+      <CommentSection movieId={movie.id} />
+    </div>
+    </>
+  );
 }

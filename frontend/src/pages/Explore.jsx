@@ -1,8 +1,9 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { api } from "../api";
 import MovieCard from "../components/MovieCard";
-import { Loading, ErrorState, Empty } from "../components/StateViews";
+import { useGridReveal } from "../utils/motion";
+import { ErrorState, Empty, MovieGridSkeleton } from "../components/StateViews";
 import { FILTERS, readFilters } from "../utils/taxonomy";
 
 // Tiêu đề trang theo bộ lọc đang chọn
@@ -21,6 +22,7 @@ function titleFor(active, q) {
 export default function Explore() {
   const [params, setParams] = useSearchParams();
   const [movies, setMovies] = useState(null);
+  const gridRef = useRef(null);
   const [error, setError] = useState("");
   const { active, query, q } = readFilters(params);
   const queryKey = JSON.stringify(query);
@@ -31,6 +33,7 @@ export default function Explore() {
   };
   // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(load, [queryKey]);
+  useGridReveal(gridRef, [movies]);
 
   const change = (key, slug) => {
     const next = new URLSearchParams(params);
@@ -60,7 +63,7 @@ export default function Explore() {
       </div>
 
       {error ? <ErrorState message={error} onRetry={load} />
-        : !movies ? <Loading />
+        : !movies ? <MovieGridSkeleton />
         : movies.length === 0 ? (
           <Empty>
             <p>{q ? `Không tìm thấy phim nào có tên chứa "${q}". Thử gõ ngắn hơn hoặc kiểm tra chính tả.` : "Chưa có phim nào khớp với bộ lọc này."}</p>
@@ -69,7 +72,7 @@ export default function Explore() {
         ) : (
           <>
             <p className="muted result-count">{movies.length} phim</p>
-            <div className="movie-grid">{movies.map((m) => <MovieCard key={m.id} movie={m} />)}</div>
+            <div className="movie-grid" ref={gridRef}>{movies.map((m) => <MovieCard key={m.id} movie={m} />)}</div>
           </>
         )}
     </div>

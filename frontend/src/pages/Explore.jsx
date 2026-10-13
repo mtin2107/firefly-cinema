@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { api } from "../api";
 import MovieCard from "../components/MovieCard";
-import { Loading, ErrorState, Empty } from "../components/StateViews";
+import { ErrorState, Empty, MovieGridSkeleton } from "../components/StateViews";
 import { FILTERS, readFilters } from "../utils/taxonomy";
 
 // Tiêu đề trang theo bộ lọc đang chọn
@@ -60,7 +60,7 @@ export default function Explore() {
       </div>
 
       {error ? <ErrorState message={error} onRetry={load} />
-        : !movies ? <Loading />
+        : !movies ? <MovieGridSkeleton />
         : movies.length === 0 ? (
           <Empty>
             <p>{q ? `Không tìm thấy phim nào có tên chứa "${q}". Thử gõ ngắn hơn hoặc kiểm tra chính tả.` : "Chưa có phim nào khớp với bộ lọc này."}</p>

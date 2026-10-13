@@ -4,7 +4,7 @@ import { api } from "../api";
 import MovieCard from "../components/MovieCard";
 import Poster from "../components/Poster";
 import AgeBadge from "../components/AgeBadge";
-import { Loading, ErrorState } from "../components/StateViews";
+import { ErrorState, MovieGridSkeleton } from "../components/StateViews";
 import { duration } from "../utils/format";
 
 const TABS = [
@@ -38,7 +38,12 @@ export default function Home() {
   }, [tab, movies]);
 
   if (error) return <ErrorState message={error} onRetry={load} />;
-  if (!movies) return <Loading />;
+  if (!movies) return (
+    <>
+      <section className="container"><div className="marquee marquee--skeleton skeleton" aria-hidden="true" /></section>
+      <section className="container section"><MovieGridSkeleton /></section>
+    </>
+  );
 
   const showing = movies.filter((m) => m.status === "now_showing");
   const featured = [...showing].sort((a, b) => b.score - a.score)[0];

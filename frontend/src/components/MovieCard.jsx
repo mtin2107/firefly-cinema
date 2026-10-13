@@ -3,16 +3,14 @@ import { Link } from "react-router-dom";
 import Poster from "./Poster";
 import AgeBadge from "./AgeBadge";
 import { duration } from "../utils/format";
-import { gsap, useGSAP, MOTION_OK, FINE_POINTER, useFlipNavigate } from "../utils/motion";
+import { gsap, useGSAP, MOTION_OK, FINE_POINTER } from "../utils/motion";
 
 const TILT_DEG = 8;
 
 export default function MovieCard({ movie }) {
   const showing = movie.status === "now_showing";
   const posterLink = useRef(null);
-  const go = useFlipNavigate();
   const detail = `/phim/${movie.id}`;
-  const fly = (to) => (e) => go(e, to, movie, posterLink.current);
 
   // Poster nghiêng theo chuột, vệt sáng chạy theo góc nghiêng (chỉ máy có chuột)
   useGSAP(() => {
@@ -44,17 +42,17 @@ export default function MovieCard({ movie }) {
 
   return (
     <article className="movie-card">
-      <Link to={detail} state={{ intro: movie }} className="movie-card__poster" ref={posterLink} onClick={fly(detail)}>
+      <Link to={detail} state={{ intro: movie }} className="movie-card__poster" ref={posterLink}>
         <Poster movie={movie} />
       </Link>
       <div className="movie-card__body">
-        <h3 className="movie-card__title"><Link to={detail} state={{ intro: movie }} onClick={fly(detail)}>{movie.title}</Link></h3>
+        <h3 className="movie-card__title"><Link to={detail} state={{ intro: movie }}>{movie.title}</Link></h3>
         <p className="movie-card__meta">
           <AgeBadge rating={movie.age_rating} /> {duration(movie.duration_min)}
         </p>
         <p className="movie-card__meta muted">{movie.genre}</p>
         {showing
-          ? <Link to={`${detail}#lich-chieu`} state={{ intro: movie }} className="btn btn--primary btn--sm btn--block" onClick={fly(`${detail}#lich-chieu`)}>Đặt vé</Link>
+          ? <Link to={`${detail}#lich-chieu`} state={{ intro: movie }} className="btn btn--primary btn--sm btn--block">Đặt vé</Link>
           : movie.status === "coming_soon"
             ? <p className="movie-card__soon">Khởi chiếu {new Date(movie.release_date).toLocaleDateString("vi-VN")}</p>
             : <p className="movie-card__ended">Đã ngừng chiếu</p>}

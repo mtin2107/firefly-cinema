@@ -219,3 +219,33 @@ autoplay, slot 3D, canvas đom đóm, parallax/poster bay, hiện ghế; không 
 Chạy lại gate AGENT_RULES.md 3.1 trên SQLite tạm, không dùng backend/firefly.db thật. Không sửa production code; xóa probe trước gate cuối.
 Tạo reports/<YYYY-MM-DD>/codex_review_T18_<RESULT>_<YYYY-MM-DD>_round2.md và cập nhật file điều phối (PASS → PO_REVIEW, FAIL → FIX_LOOP).
 ```
+
+---
+
+## PO Change Request (13/10/2026, sau Fix Round 1)
+
+Tín (PO) yêu cầu trực tiếp trong chat: (1) giữ lại hiệu ứng ban đầu, bấm vào phim thì poster hiện trong khung bong bóng rồi tắt; (2) đổi icon nút chat thành biểu tượng đom đóm của web.
+
+### Thay đổi
+| # | Nội dung | File |
+|---|---|---|
+| CR-1 | Khôi phục `PosterIntro.jsx` **nguyên văn từ `master`** và CSS `.intro*` (đặt lại đúng chỗ cũ, trước khối "Màn hình nhỏ"). `MovieDetail` hiện lại lớp bong bóng như bản gốc: cùng vị trí trong cây ở mọi nhánh tải/lỗi/xong; xóa `location.state` sau khi vào trang; cuộn `#lich-chieu` ngay khi phim tải xong (đúng effect gốc). Bỏ hẳn M4 poster bay: xóa `posterRect`, `flipFrom`, `useFlipNavigate` khỏi `motion.js`; `MovieCard` và `HeroCarousel` dùng lại `<Link state={{ intro }}>` thường. Trang chi tiết giữ chữ trượt vào + parallax (M9) và hành vi reduce của RF-02. | `PosterIntro.jsx`, `MovieDetail.jsx`, `MovieCard.jsx`, `HeroCarousel.jsx`, `motion.js`, `global.css` |
+| CR-2 | Nút chat: thay ký tự `✦` bằng `<span class="chat-firefly">`, cùng kiểu và cùng nhịp `firefly-glow` với `.logo__mark`. Nút đổi sang nền tối viền vàng để đốm sáng nổi. Đang mở vẫn hiện `×`; `aria-label`, kéo, chạm và vị trí (RF-01) giữ nguyên. | `ChatWidget.jsx` (1 dòng), `global.css` |
+| Docs | `BOI_CANH_DU_AN.md` mục 4: khôi phục gạch đầu dòng PosterIntro gốc, ghi chú icon chat; mục 7 dòng 1 theo PosterIntro. `docs/tasks/T18.md`: M4 ghi ĐÃ HỦY, AC-04/AC-11 sửa theo PO, thêm R5. | docs |
+
+### Kiểm
+| Kiểm | Kết quả |
+|---|---|
+| Bấm poster thẻ phim | `.intro` hiện với tên "Đội Bóng Xóm Chài"; sau khoảng 2,6 giây tự tắt, trang chi tiết đúng phim |
+| "Đặt vé" trên thẻ | Bong bóng hiện; `#lich-chieu` cách đỉnh 80px ngay cả khi bong bóng còn |
+| "Xem chi tiết" ở hero | Bong bóng hiện đúng phim giữa ("Bản Hòa Âm Mùa Hạ"); phím Esc tắt |
+| Vào thẳng `/phim/3` | Không có bong bóng |
+| Icon chat | DOM `<span class="chat-firefly" aria-hidden="true">`, animation `firefly-glow`; ảnh chụp: vòng tròn tối viền vàng, giữa là đốm sáng |
+| Console | Không lỗi |
+| Build | OK, JS gzip 134,32 KB, CSS gzip 8,79 KB |
+| Self-check `motion.js` | `motion ok` (bỏ ca `flipFrom`) |
+| Hit-test ghế (RF-01) | Vị trí nút chat không đổi so với Fix Round 1 (chỉ đổi nội dung bên trong nút) |
+
+Lưu ý trạng thái: Codex Round 2 (`bf05ad6`) đã PASS_WITH_TODO trên bản có poster bay. Thay đổi này làm đổi code sau bản đã review, nên chuyển `CODEX_REVIEW` Round 3 chỉ cho phần chênh lệch `bf05ad6..HEAD`.
+
+Phạm vi: frontend và docs, không đụng backend/API/DB. compileall và pytest không bị ảnh hưởng (lần chạy gần nhất ở Fix Round 1: 50/50).

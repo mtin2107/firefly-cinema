@@ -446,6 +446,31 @@ h1, h2, h3 { margin: 0; line-height: 1.15; }
 
 
 
+/* ---------- Khung bong bóng poster khi bấm vào phim ---------- */
+.intro {
+  position: fixed; inset: 0; z-index: 50; cursor: pointer;
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 22px;
+  padding: 24px; background: rgba(0, 0, 0, .8); backdrop-filter: blur(10px);
+  animation: intro-in .3s ease-out both;
+}
+.intro--leaving { animation: intro-out var(--fade, 600ms) ease-in forwards; }
+.intro__bubble {
+  width: min(320px, 68vw); border-radius: 32px; overflow: hidden;
+  box-shadow: 0 0 0 2px var(--yellow), 0 0 0 10px rgba(255,199,44,.12), 0 0 60px 10px rgba(255,199,44,.3);
+  animation: bubble-pop .55s cubic-bezier(.2, 1.4, .4, 1) both;
+}
+.intro__bubble .poster { width: 100%; border-radius: 0; padding: 22px; }
+.intro__bubble .poster__title { font-size: 2.7rem; }
+.intro__bubble .poster__genre { font-size: .9rem; }
+.intro__title {
+  margin: 0; max-width: 24ch; text-align: center;
+  font-family: var(--font-display); font-weight: 800; text-transform: uppercase; font-size: 1.6rem;
+  animation: intro-in .4s .2s ease-out both;
+}
+@keyframes intro-in { from { opacity: 0; } }
+@keyframes intro-out { to { opacity: 0; transform: scale(1.05); } }
+@keyframes bubble-pop { from { opacity: 0; transform: scale(.6); } }
+
 /* ---------- Màn hình nhỏ ---------- */
 @media (max-width: 1100px) {
   .header__inner { flex-wrap: wrap; gap: 10px 16px; padding-top: 12px; padding-bottom: 12px; }
@@ -691,3 +716,14 @@ h1, h2, h3 { margin: 0; line-height: 1.15; }
 /* nút chat đậu ở góc phải dưới, nằm trong thanh cố định này nên không bao giờ che ghế */
 @media (max-width: 1320px) { .summary-bar { padding-right: 72px; } }
 @media (max-width: 600px) { .summary-bar { padding-right: 62px; } }
+
+/* ---------- T18: nút chat là đốm đom đóm (biểu tượng của web, giống logo) ---------- */
+.chat-widget__toggle { display: grid; place-items: center; background: radial-gradient(circle, #1d1704 0%, var(--black) 70%);
+  color: var(--yellow); line-height: 1; transition: box-shadow var(--dur) var(--ease-out), transform var(--dur-fast); }
+.chat-widget__toggle:hover { box-shadow: 0 8px 28px rgba(0,0,0,.45), 0 0 22px -2px rgba(255,199,44,.55); }
+.chat-firefly { /* cùng kiểu .logo__mark, to hơn cho vừa nút */
+  width: 14px; height: 14px; border-radius: 50%; background: #fff3c4;
+  box-shadow: 0 0 4px 2px var(--yellow), 0 0 16px 6px rgba(255,199,44,.45);
+  animation: firefly-glow 3.2s ease-in-out infinite;
+}
+@media (max-width: 600px) { .chat-firefly { width: 12px; height: 12px; } }

@@ -5,7 +5,7 @@ import AgeBadge from "./AgeBadge";
 import FireflyField from "./FireflyField";
 import { duration } from "../utils/format";
 import {
-  gsap, useGSAP, SplitText, EASE, carouselSlot, ringOffset, wrapIndex, useReducedMotion, useFlipNavigate,
+  gsap, useGSAP, SplitText, EASE, carouselSlot, ringOffset, wrapIndex, useReducedMotion,
 } from "../utils/motion";
 
 const AUTOPLAY_S = 6;
@@ -24,7 +24,6 @@ export default function HeroCarousel({ movies }) {
   const [userPaused, setUserPaused] = useState(false);
   const swipe = useRef({ x: null, moved: false });
   const reduced = useReducedMotion();
-  const go = useFlipNavigate();
 
   const next = () => setI((k) => wrapIndex(k + 1, n));
   const prev = () => setI((k) => wrapIndex(k - 1, n));
@@ -87,11 +86,9 @@ export default function HeroCarousel({ movies }) {
     swipe.current.moved = true;
     if (dx < 0) next(); else prev();
   };
-  const activeSlot = () => slots.current[i];
-  const onSlotClick = (e, k, movie) => {
+  const onSlotClick = (e, k) => {
     if (swipe.current.moved) { e.preventDefault(); swipe.current.moved = false; return; }
-    if (k !== i) { e.preventDefault(); setI(k); return; }
-    go(e, `/phim/${movie.id}`, movie, e.currentTarget);
+    if (k !== i) { e.preventDefault(); setI(k); } // poster bên cạnh: đưa ra giữa; poster giữa: Link mở trang phim
   };
 
   return (
@@ -112,10 +109,8 @@ export default function HeroCarousel({ movies }) {
         </p>
         <p className="marquee__desc">{m.description}</p>
         <div className="marquee__actions">
-          <Link className="btn btn--primary btn--lg" to={`/phim/${m.id}#lich-chieu`} state={{ intro: m }}
-            onClick={(e) => go(e, `/phim/${m.id}#lich-chieu`, m, activeSlot())}>Đặt vé</Link>
-          <Link className="btn btn--ghost btn--lg" to={`/phim/${m.id}`} state={{ intro: m }}
-            onClick={(e) => go(e, `/phim/${m.id}`, m, activeSlot())}>Xem chi tiết</Link>
+          <Link className="btn btn--primary btn--lg" to={`/phim/${m.id}#lich-chieu`} state={{ intro: m }}>Đặt vé</Link>
+          <Link className="btn btn--ghost btn--lg" to={`/phim/${m.id}`} state={{ intro: m }}>Xem chi tiết</Link>
         </div>
         {n > 1 && (
           <div className="hero3d__nav">
@@ -142,7 +137,7 @@ export default function HeroCarousel({ movies }) {
             className={`hero3d__slot${k === i ? " hero3d__slot--active" : ""}`}
             ref={(el) => { slots.current[k] = el; }}
             tabIndex={k === i ? 0 : -1} aria-hidden={k !== i || undefined}
-            onClick={(e) => onSlotClick(e, k, mv)}>
+            onClick={(e) => onSlotClick(e, k)}>
             <Poster movie={mv} size="lg" />
           </Link>
         ))}

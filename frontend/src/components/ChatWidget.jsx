@@ -206,7 +206,7 @@ export default function ChatWidget() {
             return;
           }
           setOpen((old) => !old);
-        }}>{open ? "×" : "✦"}</button>
+        }}>{open ? "×" : <span className="chat-firefly" aria-hidden="true" />}</button>
     </div>
   );
 }

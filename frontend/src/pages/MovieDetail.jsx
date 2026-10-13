@@ -4,10 +4,11 @@ import { api } from "../api";
 import Poster from "../components/Poster";
 import AgeBadge from "../components/AgeBadge";
 import CommentSection from "../components/CommentSection";
+import PosterIntro from "../components/PosterIntro";
 import { Loading, ErrorState } from "../components/StateViews";
 import { dayKey, dayLabel, duration, money, timeOf } from "../utils/format";
 import { exploreLink, slugify } from "../utils/taxonomy";
-import { gsap, useGSAP, EASE, DUR, flipFrom, prefersReduced, useReducedMotion } from "../utils/motion";
+import { gsap, useGSAP, EASE, DUR, useReducedMotion } from "../utils/motion";
 
 // "Hài, Tâm lý" -> các link tới trang lọc
 const TagLinks = ({ value, filterKey }) => value.split(",").map((x) => x.trim()).filter(Boolean)
@@ -21,15 +22,14 @@ export default function MovieDetail() {
   const [error, setError] = useState("");
   const [day, setDay] = useState(null);
   const navigate = useNavigate();
-  // Vị trí poster ở trang trước (thẻ phim/hero) -> poster bay từ đó sang
-  const fromRef = useRef(location.state?.from ?? null);
+  // Phim được truyền từ trang trước khi bấm vào -> hiện khung bong bóng poster
+  const [intro, setIntro] = useState(location.state?.intro ?? null);
   const posterRef = useRef(null);
   const pageRef = useRef(null);
   const introFor = useRef(null);    // phim đã chạy hiệu ứng vào trang (không chạy lại khi bật/tắt giảm chuyển động)
-  const scrolledFor = useRef(null); // phim đã cuộn tới lịch chiếu
   const reduced = useReducedMotion();
 
-  // Xóa state để tải lại trang (F5) không chạy lại hiệu ứng
+  // Xóa state để tải lại trang (F5) không hiện lại hiệu ứng
   useEffect(() => {
     if (location.state?.intro) navigate(`${location.pathname}${location.hash}`, { replace: true, state: null });
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -48,42 +48,34 @@ export default function MovieDetail() {
   const todays = showtimes.filter((s) => dayKey(s.start_time) === activeDay)
     .sort((a, b) => a.start_time.localeCompare(b.start_time));
 
-  const scrollToShowtimes = () => {
-    if (scrolledFor.current === movie?.id || location.hash !== "#lich-chieu") return;
-    scrolledFor.current = movie.id;
-    document.getElementById("lich-chieu")?.scrollIntoView({ behavior: prefersReduced() ? "auto" : "smooth" });
-  };
+  useEffect(() => {
+    if (movie && location.hash === "#lich-chieu") document.getElementById("lich-chieu")?.scrollIntoView();
+  }, [movie, location.hash]);
 
-  // Poster bay từ chỗ cũ về chỗ mới (FLIP), chữ trượt vào sau; xong mới cuộn tới lịch chiếu nếu cần.
+  // Chữ trượt vào lần lượt, poster trôi chậm hơn khi cuộn (parallax).
   // Bật giảm chuyển động giữa chừng: revertOnUpdate dọn timeline + parallax, nội dung về trạng thái cuối.
   useGSAP(() => {
     if (!movie) return;
-    const from = fromRef.current;
-    fromRef.current = null;
     const poster = posterRef.current;
     gsap.set(poster, { clearProps: "transform" }); // revert của parallax/scrub không luôn trả transform về trống
-    if (reduced) { scrollToShowtimes(); return; }
-    // Poster trôi chậm hơn chữ khi cuộn (parallax nhẹ)
+    if (reduced) return;
     gsap.to(poster, { yPercent: -10, ease: "none",
       scrollTrigger: { trigger: pageRef.current.querySelector(".detail"), start: "top top", end: "bottom top", scrub: true } });
     if (introFor.current === movie.id) return;
     introFor.current = movie.id;
-    const tl = gsap.timeline({ onComplete: scrollToShowtimes });
-    if (from) {
-      window.scrollTo(0, 0);
-      const r = poster.getBoundingClientRect();
-      tl.from(poster, { ...flipFrom(from, { x: r.left, y: r.top, w: r.width, h: r.height }),
-        transformOrigin: "0 0", duration: DUR.slow, ease: EASE.out });
-    } else {
-      tl.from(poster, { autoAlpha: 0, scale: 0.96, duration: DUR.base, ease: EASE.out });
-    }
-    tl.from(pageRef.current.querySelectorAll(".detail__info > *"), { autoAlpha: 0, y: 16, stagger: 0.05, duration: DUR.slow, ease: EASE.out }, from ? "-=0.3" : 0);
+    gsap.timeline()
+      .from(poster, { autoAlpha: 0, scale: 0.96, duration: DUR.base, ease: EASE.out })
+      .from(pageRef.current.querySelectorAll(".detail__info > *"), { autoAlpha: 0, y: 16, stagger: 0.05, duration: DUR.slow, ease: EASE.out }, 0);
   }, { dependencies: [movie, reduced], revertOnUpdate: true });
 
-  if (error) return <ErrorState message={error} onRetry={load} />;
-  if (!movie) return <Loading />;
+  // Khung bong bóng đứng cùng một vị trí ở mọi nhánh để không bị chạy lại khi dữ liệu tải xong
+  const introLayer = intro && <PosterIntro movie={intro} onDone={() => setIntro(null)} />;
+
+  if (error) return <>{introLayer}<ErrorState message={error} onRetry={load} /></>;
+  if (!movie) return <>{introLayer}<Loading /></>;
 
   return (
+    <>{introLayer}
     <div className="container" ref={pageRef}>
       <section className="detail" style={{ "--p-bg": movie.poster_bg }}>
         <div className="detail__poster" ref={posterRef}><Poster movie={movie} size="lg" /></div>
@@ -144,5 +136,6 @@ export default function MovieDetail() {
 
       <CommentSection movieId={movie.id} />
     </div>
+    </>
   );
 }

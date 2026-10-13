@@ -23,6 +23,13 @@
   --radius: 8px;
   --container: 1180px;
 
+  /* T18: nhịp chuyển động dùng chung (khớp utils/motion.js) */
+  --ease-out: cubic-bezier(.22, 1, .36, 1);
+  --ease-in-out: cubic-bezier(.65, 0, .35, 1);
+  --dur-fast: 150ms;
+  --dur: 300ms;
+  --dur-slow: 600ms;
+
   box-sizing: border-box;
   padding-top: env(safe-area-inset-top, 0px);
   padding-bottom: env(safe-area-inset-bottom, 0px);
@@ -563,3 +570,11 @@ h1, h2, h3 { margin: 0; line-height: 1.15; }
   .chat-widget { width: 46px; height: 46px; }
 }
 @media (prefers-reduced-motion: reduce) { .chat-widget, .chat-panel { animation: none; transition: none; } }
+
+
+/* ---------- T18: chuyển trang ---------- */
+.route-fade { animation: route-in var(--dur) var(--ease-out) both; }
+/* trang có thanh cố định (chọn ghế): chỉ mờ, vì transform làm thanh fixed nhảy theo khung */
+.route-fade:has(.summary-bar) { animation-name: route-fade; }
+@keyframes route-in { from { opacity: 0; transform: translateY(12px); } }
+@keyframes route-fade { from { opacity: 0; } }

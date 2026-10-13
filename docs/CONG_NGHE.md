@@ -36,8 +36,9 @@ Luồng xử lý một bình luận:
 | Giao diện, màu sắc | **CSS thuần** | — | Một file `global.css`, màu khai báo bằng biến CSS, không dùng thư viện UI |
 | Font | **Google Fonts** | — | Big Shoulders Display và Be Vietnam Pro, cả hai hỗ trợ tiếng Việt |
 | Gọi API | **Fetch API** có sẵn của trình duyệt | — | Không cần cài thêm thư viện như axios |
+| Chuyển động | **GSAP** + **@gsap/react** | 3.15.0 / 2.1.2 | Hero băng chuyền 3D, poster bay, lưới hiện dần (ScrollTrigger), chữ bật sáng (SplitText). Giấy phép Standard miễn phí. PO duyệt 13/10/2026 (T18) |
 
-Giao diện chỉ phụ thuộc 3 thư viện (`react`, `react-dom`, `react-router-dom`), nên nhẹ và dễ giải thích.
+Giao diện phụ thuộc 5 thư viện (`react`, `react-dom`, `react-router-dom`, và từ T18 `gsap`, `@gsap/react` cho chuyển động).
 
 Lớp API có hai chế độ, chọn bằng `VITE_USE_MOCK` trong `frontend/.env`:
 - `real.js`: gọi backend thật.

@@ -199,9 +199,10 @@ NEGATIVE_THRESHOLD=0.5
 
 - **Màu**: nền đen `#000000`, bề mặt `#121212` / `#1c1c1c`, đường kẻ `#2e2e2e`, **vàng chủ đạo `#ffc72c`** (nút chính, ghế đang chọn, logo, tab đang chọn), **đỏ phụ `#d7263d`** (bình luận tiêu cực, lỗi, nhãn T18), chữ `#f3efe4`, chữ phụ `#a39e92`.
 - **Font**: `Big Shoulders Display` (tiêu đề, viết hoa) + `Be Vietnam Pro` (nội dung). Cả hai đều hỗ trợ tiếng Việt.
-- **Điểm nhấn duy nhất**: hero dạng bảng hiệu rạp, viền bóng đèn chấm chấm phát sáng. Logo là đốm sáng đom đóm nhấp nháy nhẹ. Các phần còn lại giữ tiết chế.
+- **Điểm nhấn duy nhất**: hero dạng bảng hiệu rạp, viền bóng đèn chấm chấm phát sáng có một cung đèn chạy vòng; bên trong là băng chuyền poster 3D tối đa 5 phim đang chiếu điểm cao nhất (tự chuyển 6 giây, dừng khi rê chuột/focus/tab ẩn, có nút Trước/Sau, phím ←/→, vuốt), tên phim bật sáng từng ký tự, đom đóm trôi phía sau. Logo là đốm sáng đom đóm nhấp nháy nhẹ. Các phần còn lại giữ tiết chế. *(T18, PO duyệt 13/10/2026)*
 - **Poster** vẽ bằng CSS từ `poster_bg`/`poster_fg` (phim đều là phim hư cấu, tránh vấn đề bản quyền ảnh). Nếu phim có `poster_url` thì dùng ảnh.
-- **Hiệu ứng PosterIntro**: bấm poster, tên phim, "Xem chi tiết" hoặc "Đặt vé" thì poster hiện trong khung bong bóng viền vàng, giữ 1,8 giây rồi mờ dần trong 0,6 giây. Truyền qua `state={{ intro: movie }}` của `<Link>`. Bấm bất kỳ đâu hoặc Esc để bỏ qua; tự tắt khi máy bật chế độ giảm chuyển động.
+- **Poster bay sang trang chi tiết** (thay PosterIntro từ T18): bấm poster, tên phim, "Xem chi tiết" hoặc "Đặt vé" trên thẻ phim/hero thì poster bay từ chỗ cũ về vị trí trên trang chi tiết (khoảng 0,6 giây), chữ trượt vào sau; link có `#lich-chieu` cuộn tới lịch chiếu khi bay xong. Truyền qua `state={{ intro, from }}` của `<Link>`; vào thẳng URL thì chỉ mờ dần vào.
+- **Chuyển động (T18)**: dùng GSAP + CSS 3D, token `--ease-*`/`--dur-*` trong `:root` và `utils/motion.js`. Mỗi trang tối đa một điểm nhấn 3D: thẻ phim nghiêng theo chuột (chỉ máy có chuột), sơ đồ ghế phối cảnh phòng chiếu, vé lật 2 mặt (trừ vé đang giữ chỗ có QR). Trang admin, đăng nhập, đăng ký không có 3D. Bật giảm chuyển động thì không 3D, không bay, không tự chuyển, không đom đóm.
 - **Header**: Đang chiếu, Sắp chiếu, Thể loại ▾ (23 mục, 3 cột), Quốc gia ▾, Năm phát hành ▾, Chủ đề ▾ (Phim hot trong tuần/tháng, Top bình luận, Đánh giá cao, Lồng tiếng, Phụ đề), kính lúp tìm kiếm, menu tài khoản (Vé của tôi, Kiểm duyệt bình luận, Đăng xuất). Dưới 1100px gom thành nút "Menu".
 - **Văn phong**: tiếng Việt, câu ngắn, viết hoa chữ đầu câu. Nút ghi đúng hành động ("Đặt vé", "Gửi bình luận"). Thông báo lỗi nói rõ chuyện gì xảy ra và cách sửa, không xin lỗi.
 - **Chất lượng tối thiểu**: responsive tới màn hình điện thoại, focus bàn phím nhìn thấy được, tôn trọng `prefers-reduced-motion`, mọi trang có đủ trạng thái loading / rỗng / lỗi (dùng `StateViews`).
@@ -253,7 +254,7 @@ NEGATIVE_THRESHOLD=0.5
 
 ## 7. Checklist hồi quy (chạy sau mọi task web)
 
-1. Trang chủ hiện phim, hiệu ứng poster chạy khi bấm "Xem chi tiết" và "Đặt vé".
+1. Trang chủ hiện phim, hero băng chuyền chạy; bấm "Xem chi tiết" và "Đặt vé" thì poster bay sang trang chi tiết.
 2. Menu Thể loại / Chủ đề và ô tìm kiếm (thử "meo muop") ra kết quả đúng.
 3. Đăng ký tài khoản mới; chưa đăng nhập mà bấm giờ chiếu thì bị đưa sang trang đăng nhập, đăng nhập xong quay lại đúng trang.
 4. Đặt vé 2 ghế; mở lại suất đó thấy 2 ghế đã xám; "Vé của tôi" có vé mới.

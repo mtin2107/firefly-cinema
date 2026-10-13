@@ -29,13 +29,13 @@ Trước khi áp dụng workflow: giao diện React đầy đủ (`giao-dien-v1`
 ## 4. Current Project Status
 ```
 Overall Status: FIX_LOOP
-Phase: T18 — FIX_LOOP (Codex independent review FAIL)
-Current Active Task: T18 — FIX_LOOP trên nhánh `task/T18-giao-dien-chuyen-dong`
+Phase: T18 — CODEX_REVIEW Round 2 (Claude Fix Round 1 xong, chờ Codex xác minh)
+Current Active Task: T18 — CODEX_REVIEW (Round 2) trên nhánh `task/T18-giao-dien-chuyen-dong`
 Ngày bắt đầu sản phẩm: 05/10/2026 · Hạn: 01/11/2026
 ```
 
 ## 5. Current Active Task
-**Current Active Task: T18 — FIX_LOOP.** Codex independent review ngày 13/10/2026 kết luận **FAIL**: AC 8/11 PASS, AC-05/08/10 FAIL; RF-01 chat che ghế mobile, RF-02 reduced-motion không phản ứng khi đổi động, RF-03 hero thiếu pause/stop độc lập. Evidence: `reports/2026-10-13/codex_review_T18_FAIL_2026-10-13.md`. T17 giữ **DONE / CLOSED**, giới hạn **MVP/local**. T16 TODO-01 vẫn là deployment/DB gate; không được chạy/reset/migrate `backend/firefly.db` thật khi chưa có PO authorization riêng. **Không mở task tiếp theo.**
+**Current Active Task: T18 — CODEX_REVIEW Round 2.** Claude Fix Round 1 (commit `4b9b122`) đã sửa RF-01 → RF-03, chờ Codex xác minh; chi tiết ở mục `Fix Round 1` của `reports/2026-10-13/claude_implementation_T18_2026-10-13.md`. Trước đó, Codex independent review ngày 13/10/2026 kết luận **FAIL**: AC 8/11 PASS, AC-05/08/10 FAIL; RF-01 chat che ghế mobile, RF-02 reduced-motion không phản ứng khi đổi động, RF-03 hero thiếu pause/stop độc lập. Evidence: `reports/2026-10-13/codex_review_T18_FAIL_2026-10-13.md`. T17 giữ **DONE / CLOSED**, giới hạn **MVP/local**. T16 TODO-01 vẫn là deployment/DB gate; không được chạy/reset/migrate `backend/firefly.db` thật khi chưa có PO authorization riêng. **Không mở task tiếp theo.**
 
 ## 6. Current Task Record
 Task Record hiện tại: `docs/tasks/T18.md` — Claude fix đúng RF-01 → RF-03; Codex review lại độc lập. TODO không được tự mở rộng vào fix loop.
@@ -63,7 +63,7 @@ T07 và T09 đã DONE / CLOSED. TODO-02 của T09 đã RESOLVED theo xác nhận
 | T15 | *(tùy chọn)* Thử nghiệm có tách từ | ML | dư | T09 | [T15.md](tasks/T15.md) | PLANNED |
 | T16 | Giữ chỗ có hạn và thanh toán QR (đổi schema) | Web | phát triển thêm | T11 | [T16.md](tasks/T16.md) | DONE / CLOSED — PO APPROVED, merge theo PO; Claude PASS_WITH_TODO, AC 12/12, RF 0, TODO-01..07 preserved |
 | T17 | Chatbot AI tư vấn phim (Gemini free, chỉ đọc) | Web | phát triển thêm | T16 | [T17.md](tasks/T17.md) | DONE / CLOSED — merged `fb0b43f` (PO tip `b3090bc`), PO APPROVED_WITH_NOTES MVP/local, AC 11/11 (AC-02 PO_ATTESTED), Claude R2 PASS_WITH_TODO, RF 0; TODO-03 FIXED, TODO-01..10 dispositioned; production DB gate T16 TODO-01 remains |
-| T18 | Chuyển động và hiệu ứng 3D cho giao diện (GSAP) | Web | phát triển thêm | T17 | [T18.md](tasks/T18.md) | FIX_LOOP — Codex review FAIL 13/10/2026; AC-05/08/10 FAIL; RF-01 → RF-03 mở; không mở task tiếp theo |
+| T18 | Chuyển động và hiệu ứng 3D cho giao diện (GSAP) | Web | phát triển thêm | T17 | [T18.md](tasks/T18.md) | CODEX_REVIEW Round 2 — Claude Fix Round 1 `4b9b122` 13/10/2026 sửa RF-01 → RF-03 (chờ Codex xác minh); Round 1 Codex FAIL AC-05/08/10; không mở task tiếp theo |
 
 Chuỗi chính: `T00 → T01 → T02` và `T03 → T08 → T09 → T10`. T03 bắt đầu ngay ngày đầu (song song).
 Nếu trễ: cắt T14 → T15 → rút gọn T05. Không cắt T01–T03, T07–T10.
@@ -81,9 +81,9 @@ Nếu trễ: cắt T14 → T15 → rút gọn T05. Không cắt T01–T03, T07�
 - Q2: **RESOLVED 08/10/2026 — NO ALEMBIC / BACKUP_BEFORE_RESET.** Sao lưu và xác minh đúng database trước khi PO tự reset; Codex không tự xóa database thật.
 
 ## 9. Open Required Fixes
-- **T18 RF-01 (Medium) OPEN:** ở 375px nút chat fixed che một ghế trong vùng thao tác (Codex: C9; Claude: D9); phải bảo đảm hit-test toàn bộ ghế đạt ở 375/1280 mà không cần người dùng kéo chat làm workaround.
-- **T18 RF-02 (Medium) OPEN:** bật `prefers-reduced-motion: reduce` khi trang đã mount không dừng hero autoplay; cần lifecycle media query cho GSAP/delayedCall/RAF/parallax, không nhân đôi timer khi đổi lại preference.
-- **T18 RF-03 (Medium) OPEN:** hero tự cập nhật mỗi 6 giây nhưng thiếu control pause/stop độc lập; hover/focus-only không đạt accessibility SC 2.2.2. Cần nút Tạm dừng/Tiếp tục truy cập được.
+- **T18 RF-01 (Medium) FIXED — CHỜ CODEX XÁC MINH (Fix Round 1 `4b9b122`):** ở 375px nút chat fixed che một ghế trong vùng thao tác (Codex: C9; Claude: D9); phải bảo đảm hit-test toàn bộ ghế đạt ở 375/1280 mà không cần người dùng kéo chat làm workaround.
+- **T18 RF-02 (Medium) FIXED — CHỜ CODEX XÁC MINH (Fix Round 1 `4b9b122`):** bật `prefers-reduced-motion: reduce` khi trang đã mount không dừng hero autoplay; cần lifecycle media query cho GSAP/delayedCall/RAF/parallax, không nhân đôi timer khi đổi lại preference.
+- **T18 RF-03 (Medium) FIXED — CHỜ CODEX XÁC MINH (Fix Round 1 `4b9b122`):** hero tự cập nhật mỗi 6 giây nhưng thiếu control pause/stop độc lập; hover/focus-only không đạt accessibility SC 2.2.2. Cần nút Tạm dừng/Tiếp tục truy cập được.
 - **T11: 0 Required Fix mở; task DONE / CLOSED.**
 - **T11 RF-01 (Medium) CLOSED / VERIFIED BY CLAUDE (Round 2):** xóa một suất hoặc cả ngày không bị tái tạo, kể cả với Session mới.
 - **T11 RF-02 (Medium) CLOSED / VERIFIED BY CLAUDE (Round 2):** ngày rolling có suất admin vẫn seed phim thiếu, không overlap (có cleanup), suất admin giữ nguyên; phim mới `now_showing` được cấp lịch.
@@ -188,7 +188,7 @@ Nếu trễ: cắt T14 → T15 → rút gọn T05. Không cắt T01–T03, T07�
 | Claude review T17 | TODO-01..08 (lọc thể loại có dấu; nút phim cần tên nguyên văn; mock "phim hài" trả câu giá; nút chat kéo xuống đáy đè mép "Tiếp tục"; model/quota Gemini chưa kiểm; câu 422 chung cho 11 tin; lượt lỗi vẫn trừ hạn mức; DB thật chưa xử lý T16 TODO-01) | **PO DISPOSITIONED** — xem `reports/2026-10-13/po_review_T17_APPROVED_WITH_NOTES_2026-10-13.md` mục TODO-01..10; các mục ACCEPT_LATER chưa sửa, TODO-03 FIXED/VERIFIED; TODO-08 là deployment gate |
 
 ## 11. Current Next Step
-1. **T18 FIX_LOOP:** Claude sửa đúng RF-01 → RF-03 theo `reports/2026-10-13/codex_review_T18_FAIL_2026-10-13.md`, chạy lại gate bằng SQLite tạm và bàn giao Codex review vòng 2. Không tự xử lý TODO-01 → TODO-03.
+1. **T18 CODEX_REVIEW Round 2:** Claude đã sửa RF-01 → RF-03 (`4b9b122`), chạy lại gate trên SQLite tạm. Codex review vòng 2 theo prompt ở mục `Fix Round 1` của report Claude. TODO-01 → TODO-03 chưa xử lý (ngoài phạm vi fix).
 2. **Không mở task kế tiếp.** T18 chưa qua review; T12/T13 vẫn không được authorize trong luồng này.
 3. **T16 TODO-01 / database production:** Deployment NOT AUTHORIZED. Không reset/migrate hoặc chạy backend trên DB thật nếu chưa có backup/checkpoint và PO runtime authorization riêng.
 4. **Gemini demo:** dùng `CHAT_MODEL=gemini-3.5-flash-lite` hoặc model đã kiểm chứng trong `.env` cục bộ, không commit key; kiểm tra lại quota/Free Tier.

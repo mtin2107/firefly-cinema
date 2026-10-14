@@ -31,6 +31,8 @@ def list_admin_movies(_: User = Depends(require_admin), db: Session = Depends(ge
 
 @router.post("", response_model=MovieOut, status_code=201)
 def create_movie(body: MovieIn, _: User = Depends(require_admin), db: Session = Depends(get_db)):
+    if not body.poster_url:
+        raise HTTPException(422, "Hãy chọn ảnh poster hoặc dán đường dẫn poster.")
     movie = Movie(**_values(body), score=0)
     db.add(movie)
     db.commit()

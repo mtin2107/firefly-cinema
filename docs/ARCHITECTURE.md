@@ -237,3 +237,11 @@ Ngoài máy: Google Drive `MyDrive/thesis/data/…`, `MyDrive/thesis_results/…
 - Mô hình kết nối qua `openai` Python SDK bằng `CHAT_BASE_URL`, `CHAT_API_KEY`, `CHAT_MODEL`, hỗ trợ OpenAI-compatible Gemini/Groq. Client tạo lười; thiếu key chỉ tắt chat, backend/health vẫn hoạt động.
 - Whitelist tool chỉ có `search_movies` (Movie), `get_showtimes` (Movie/Showtime tương lai), `get_price_rules` (quy tắc ghế từ `seats.py`), không `INSERT`/`UPDATE`/`DELETE`; không truy vấn bookings/users/comments trong lớp chatbot. Giới hạn 3 vòng công cụ, thời hạn tổng 30 giây, xử lý 503 an toàn.
 - Quota trong bộ nhớ: 5 lần/phút và 50 lần/ngày cho mỗi user; reset khi restart, không chia sẻ nhiều worker. Chat history chỉ giữ trong React state. `ChatWidget` gắn vào App một lần; `real.js` và `mock.js` cùng API `chat.send(messages)`; không có thay đổi schema và không thêm thư viện frontend.
+
+
+## T19 — Upload poster (13/10/2026)
+- `POST /api/admin/posters` chỉ admin (`require_admin`), nhận JSON `{filename, data}` (base64 thuần), tối đa 2 MiB; phân loại JPG/PNG/WebP theo magic bytes; tên lưu `uuid4.hex`, không dùng filename do người gửi cung cấp.
+- `UPLOAD_DIR` mặc định `backend/uploads` (đường dẫn tương đối từ `backend`), mount FastAPI StaticFiles `/uploads`. Ảnh trả URL `/uploads/posters/<32hex>.<ext>`; `backend/uploads/` ngoài Git.
+- Validator phim giữ URL ngoài http(s), cho phép thêm đường dẫn poster nội bộ chặt chẽ; **chỉ router POST tạo phim** buộc có poster, PUT sửa phim cũ vẫn cho phép trống. Không đổi schema (`movies.poster_url` hiện có).
+- Frontend lưu file base64 qua `api.admin.posters.upload`, ưu tiên upload thay vì link nếu đồng thời có cả hai; `Poster` ghép `API_URL` khi đường dẫn bắt đầu `/uploads/`. Mock dùng cùng JSON `{poster_url}`, trả data URL, giới hạn 500 KiB do localStorage. Hai ô màu poster vẫn tồn tại.
+- Không xóa file khi sửa/xóa phim (file mồ côi được chấp nhận trong phạm vi khóa luận). Lưu trữ trên ổ đĩa không bền vững có thể mất ảnh khi môi trường triển khai reset.

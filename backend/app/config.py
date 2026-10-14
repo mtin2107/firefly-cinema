@@ -13,6 +13,8 @@ if _env.exists():
 SECRET_KEY = os.getenv("SECRET_KEY", "doi-chuoi-bi-mat-nay")
 TOKEN_EXPIRE_HOURS = 24
 DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///./firefly.db")
+_upload_dir = Path(os.getenv("UPLOAD_DIR", "uploads"))
+UPLOAD_DIR = _upload_dir if _upload_dir.is_absolute() else Path(__file__).resolve().parent.parent / _upload_dir
 FRONTEND_ORIGINS = [o.strip() for o in os.getenv("FRONTEND_ORIGIN", "http://localhost:5173").split(",")]
 BANK_ID = os.getenv("BANK_ID", "").strip()
 BANK_ACCOUNT = os.getenv("BANK_ACCOUNT", "").strip()

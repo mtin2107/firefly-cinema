@@ -51,6 +51,9 @@ export const realApi = {
       request(`/api/movies/${movieId}/comments`, { method: "POST", body: { content } }),
   },
   admin: {
+    posters: {
+      upload: (payload) => request("/api/admin/posters", { method: "POST", body: payload }),
+    },
     predict: (text) => request("/api/admin/predict", { method: "POST", body: { text } }),
     bookings: {
       list: (filters = {}) => {

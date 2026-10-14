@@ -23,7 +23,9 @@ def test_movie_with_booking_cannot_be_deleted(client, auth_headers, showtime, us
 
 
 def test_admin_movie_crud(client, auth_headers, movie_payload):
-    created = client.post("/api/admin/movies", headers=auth_headers["admin"], json=movie_payload)
+    # New movies need a poster; keep the original payload for the edit test.
+    create_payload = dict(movie_payload, poster_url="https://example.com/poster.jpg")
+    created = client.post("/api/admin/movies", headers=auth_headers["admin"], json=create_payload)
     assert created.status_code == 201
     movie_id = created.json()["id"]
     updated_payload = dict(movie_payload, title="Phim đã sửa")

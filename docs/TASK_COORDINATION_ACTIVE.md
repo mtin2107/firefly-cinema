@@ -30,19 +30,17 @@ Trước khi áp dụng workflow: giao diện React đầy đủ (`giao-dien-v1`
 
 ## 4. Current Project Status
 ```
-Overall Status: READY_FOR_NEXT_TASK
-Phase: T18 — DONE / CLOSED
-Current Active Task: NONE
+Overall Status: IN_PROGRESS / T19_CLAUDE_REVIEW
+Phase: T19 — Claude Independent Review
+Current Active Task: T19
 Ngày bắt đầu sản phẩm: 05/10/2026 · Hạn: 01/11/2026
 ```
 
 ## 5. Current Active Task
-**Current Active Task: NONE.** T18 đã **DONE / CLOSED** sau PO APPROVED và merge `fc10d34` được xác minh trên `master`. Codex Round 3 **PASS_WITH_TODO**, Claude RF-04 **PASS**, AC 11/11 PASS, RF 4/4 CLOSED, Required Fix mở 0, blocker 0; toàn bộ TODO/OBS đã disposition. **Next Task: NOT SELECTED / NOT AUTHORIZED.** T17 giữ **DONE / CLOSED**, giới hạn **MVP/local**. T16 TODO-01 vẫn là deployment/DB gate.
+**T19 — Tải ảnh poster từ máy khi thêm/sửa phim: CLAUDE_REVIEW / PENDING_INDEPENDENT_REVIEW.** T18 CLOSED/merged. Codex implementation hoàn tất trên nhánh `task/T19-tai-anh-poster`: focused 16/16, full pytest 65/65, compileall, Vite build, health PhoBERT B, real UI 7/7, mock UI 7/7, hồi quy 7/7 (browser do PO xác nhận). Scope/secret gate PASS trước khi handoff; ngoại lệ test cũ `backend/tests/test_admin_features.py` được PO duyệt trong chat. Đổi schema: Không. **Không tự gán Claude PASS hoặc PO APPROVED.** Báo cáo: `reports/2026-10-14/codex_implementation_T19_2026-10-14.md`.
 
 ## 6. Current Task Record
-Không có Task Record đang hoạt động. T18 đã DONE / CLOSED; `docs/tasks/T18.md` được giữ làm hồ sơ lịch sử, với lệch hành chính trường `Current Status` đã được ghi trong PO report và không làm thay đổi đặc tả/nghiệm thu.
-
-T07 và T09 đã DONE / CLOSED. TODO-02 của T09 đã RESOLVED theo xác nhận PO ngày 10/10/2026; evidence notebook ở mức `PO_ATTESTED`, không phải Claude xác minh độc lập. Q3 đã được PO phê duyệt: PhoBERT B là model mặc định, PhoBERT A được giữ làm fallback hoặc chọn qua `.env` và restart backend; không bổ sung giao diện admin chọn model.
+[docs/tasks/T19.md](tasks/T19.md) (tệp PO có ở máy, chưa được Git theo dõi lúc bàn giao).
 
 ## 7. Roadmap và trạng thái
 | ID | Task | Loại | Tuần | Phụ thuộc | Task Record | Trạng thái |
@@ -67,10 +65,14 @@ T07 và T09 đã DONE / CLOSED. TODO-02 của T09 đã RESOLVED theo xác nhận
 | T17 | Chatbot AI tư vấn phim (Gemini free, chỉ đọc) | Web | phát triển thêm | T16 | [T17.md](tasks/T17.md) | DONE / CLOSED — merged `fb0b43f` (PO tip `b3090bc`), PO APPROVED_WITH_NOTES MVP/local, AC 11/11 (AC-02 PO_ATTESTED), Claude R2 PASS_WITH_TODO, RF 0; TODO-03 FIXED, TODO-01..10 dispositioned; production DB gate T16 TODO-01 remains |
 | T18 | Chuyển động và hiệu ứng 3D cho giao diện (GSAP) | Web | phát triển thêm | T17 | [T18.md](tasks/T18.md) | DONE / CLOSED — merge `fc10d34` VERIFIED; PO APPROVED, thẩm mỹ ĐẠT; Codex R3 PASS_WITH_TODO; Claude RF-04 PASS; AC 11/11; RF 4/4 CLOSED; RF mở 0; blocker 0; TODO/OBS đã disposition |
 
+| T19 | Tải ảnh poster từ máy khi thêm/sửa phim | Web | phát triển thêm | T18 | [T19.md](tasks/T19.md) | CLAUDE_REVIEW / PENDING_INDEPENDENT_REVIEW — DEV gates đạt; chờ Claude review độc lập |
+
 Chuỗi chính: `T00 → T01 → T02` và `T03 → T08 → T09 → T10`. T03 bắt đầu ngay ngày đầu (song song).
 Nếu trễ: cắt T14 → T15 → rút gọn T05. Không cắt T01–T03, T07–T10.
 
 ## 8. Open Blockers
+- **T19 GATE-BLOCKER-01: RESOLVED 14/10/2026.** PO chạy môi trường repository Windows với SQLite tạm và UPLOAD_DIR tạm; compileall=0, frontend build=0, full pytest 65/65, health OK; browser real/mock và hồi quy PO xác nhận đạt. Không tác động DB thật.
+- **T19 GATE-BLOCKER-02: RESOLVED 14/10/2026.** PO phê duyệt ngoại lệ sửa duy nhất `backend/tests/test_admin_features.py` để CREATE có poster hợp lệ nhưng PUT vẫn giữ dữ liệu không poster; focused 16/16, full pytest 65/65 PASS. Không thay `conftest.py`.
 - T18: **DONE / CLOSED**, 0 blocker; merge `fc10d34` VERIFIED. TODO-01/02 WONT_FIX; TODO-03 ACCEPT_LATER → T13; OBS-01 ACCEPT_LATER → Future Backlog.
 - T11: **DONE / CLOSED**, 0 blocker; merge `06dd44f0` VERIFIED. TODO-R3-01 **RESOLVED_BEFORE_MERGE** bằng scope exception PO AUTHORIZED / VERIFIED cho `/backend/*.db.showtime-seed.json`. Startup database thật vẫn yêu cầu PO runtime authorization riêng, backup/checkpoint và quy trình đã duyệt.
 - T09: **DONE / CLOSED**, 0 blocker; merge `27c364e` đã xác minh (`T09_MERGE_VERIFIED`). TODO-02 **RESOLVED 10/10/2026 theo xác nhận PO**; evidence notebook là `PO_ATTESTED`, không phải Claude kiểm tra độc lập.
@@ -196,12 +198,13 @@ Nếu trễ: cắt T14 → T15 → rút gọn T05. Không cắt T01–T03, T07�
 | Claude review T18 RF-04 | OBS-01: reduced-motion có thể render PosterIntro 1–2 frame trước khi effect gỡ | **ACCEPT_LATER — future backlog; chưa authorize task mới** |
 
 ## 11. Current Next Step
-1. **Next Task: NOT SELECTED / NOT AUTHORIZED.** Chờ PO chọn và authorize task tiếp theo; không tự mở T19 hoặc task khác.
-2. **T18 DONE / CLOSED:** không còn hành động closure; TODO-03 theo dõi ở T13 khi T13 được PO authorize, OBS-01 ở Future Backlog.
-3. **T16 TODO-01 / database production:** Deployment NOT AUTHORIZED. Không reset/migrate hoặc chạy backend trên DB thật nếu chưa có backup/checkpoint và PO runtime authorization riêng.
-4. **Gemini demo:** dùng `CHAT_MODEL=gemini-3.5-flash-lite` hoặc model đã kiểm chứng trong `.env` cục bộ, không commit key; kiểm tra lại quota/Free Tier.
+1. **Claude:** độc lập review T19 trên nhánh `task/T19-tai-anh-poster`, đọc `docs/tasks/T19.md`, report mới nhất 14/10, source và tests; xác minh AC-01..AC-11, scope và bảo mật, chạy full gates trên DB/UPLOAD_DIR tạm; đưa `PASS`/`PASS_WITH_TODO`/`FAIL` và report review. **Không để Codex tự review.**
+2. **Tín (PO):** chỉ review/approve sau khi Claude PASS hoặc PASS_WITH_TODO và disposition các TODO. Chỉ PO merge `master`, không tự mở task kế tiếp ở bước Codex.
+3. `docs/tasks/T19.md` là Task Record PO đã cung cấp, vẫn untracked trên máy trước triển khai; không tự đưa vào commit do ngoài T19 allowlist. Claude có thể đọc file làm việc này, PO quản trị tracking riêng nếu cần. Không commit `backend/uploads/`, không chạm production DB; giữ nguyên T16 runtime gate.
 
 ## 12. Active Timeline
+| 14/10/2026 | Tín (PO) + Codex | T19: focused pytest 16/16; full pytest 65/65; compileall và frontend build exit 0; `/api/health` OK (`phobert_b`), DB/upload tạm; PO xác nhận real 7/7, mock 7/7, hồi quy 7/7. PO duyệt ngoại lệ `backend/tests/test_admin_features.py` và áp dụng fix, mọi test cũ đạt. Git scope/security PASS theo preflight trước handoff. Codex `IN_PROGRESS → CLAUDE_REVIEW`; Claude review chưa thực hiện. |
+| 13/10/2026 | PO + Codex | PO giao T19 và xác minh nhánh task/T19-tai-anh-poster, T18 CLOSED/merged; Codex bắt đầu triển khai trên ZIP source allowlist, ghi nhận full-gate blocker và xung đột test CRUD cũ; T19 READY_FOR_HANDOFF → IN_PROGRESS / BLOCKED_PENDING_T19_FULL_GATES, chưa CLAUDE_REVIEW. |
 | Ngày | Ai | Sự kiện |
 |---|---|---|
 | 13/10/2026 | Tín (PO) + Codex verification | PO merge T18 vào `master` tại `fc10d34a1b65524cac69bcbd4d533f6ea995b8fe`; merge có parent `fdaa7ac` và tip T18 `2fd010d`; nhánh T18 cùng fix RF-04 `490ac8a` là ancestor, PO report có trong master, không conflict/staged change. Closure sync: T18 → **DONE / CLOSED**; Latest Completed Task → T18; Current Active Task → NONE; Overall → READY_FOR_NEXT_TASK; Next Task → NOT SELECTED / NOT AUTHORIZED. |

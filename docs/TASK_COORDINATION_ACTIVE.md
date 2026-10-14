@@ -30,14 +30,14 @@ Trước khi áp dụng workflow: giao diện React đầy đủ (`giao-dien-v1`
 
 ## 4. Current Project Status
 ```
-Overall Status: IN_PROGRESS / T19_CLAUDE_REVIEW
-Phase: T19 — Claude Independent Review
+Overall Status: IN_PROGRESS / T19_PO_REVIEW
+Phase: T19 — PO Review (Claude PASS_WITH_TODO)
 Current Active Task: T19
 Ngày bắt đầu sản phẩm: 05/10/2026 · Hạn: 01/11/2026
 ```
 
 ## 5. Current Active Task
-**T19 — Tải ảnh poster từ máy khi thêm/sửa phim: CLAUDE_REVIEW / PENDING_INDEPENDENT_REVIEW.** T18 CLOSED/merged. Codex implementation hoàn tất trên nhánh `task/T19-tai-anh-poster`: focused 16/16, full pytest 65/65, compileall, Vite build, health PhoBERT B, real UI 7/7, mock UI 7/7, hồi quy 7/7 (browser do PO xác nhận). Scope/secret gate PASS trước khi handoff; ngoại lệ test cũ `backend/tests/test_admin_features.py` được PO duyệt trong chat. Đổi schema: Không. **Không tự gán Claude PASS hoặc PO APPROVED.** Báo cáo: `reports/2026-10-14/codex_implementation_T19_2026-10-14.md`.
+**T19 — Tải ảnh poster từ máy khi thêm/sửa phim: PO_REVIEW.** Claude Independent Review **PASS_WITH_TODO** (15/10/2026, commit `7c85db1`): AC 11/11 PASS, Required Fixes 0, TODO-01..04 (Low), OBS-01..04, blocker 0; full pytest 65/65, focused 16/16, probe 6/6 (đã xóa), compileall/build exit 0, health `phobert_b`, real + mock browser và hồi quy 7/7 do Claude tự chạy trên SQLite/UPLOAD_DIR tạm; `firefly.db` hash không đổi. Báo cáo: `reports/2026-10-14/claude_review_T19_PASS_WITH_TODO_2026-10-14.md`. Chờ PO disposition TODO và quyết định; không merge/đóng. Lịch sử bàn giao Codex: T18 CLOSED/merged. Codex implementation hoàn tất trên nhánh `task/T19-tai-anh-poster`: focused 16/16, full pytest 65/65, compileall, Vite build, health PhoBERT B, real UI 7/7, mock UI 7/7, hồi quy 7/7 (browser do PO xác nhận). Scope/secret gate PASS trước khi handoff; ngoại lệ test cũ `backend/tests/test_admin_features.py` được PO duyệt trong chat. Đổi schema: Không. **Không tự gán Claude PASS hoặc PO APPROVED.** Báo cáo: `reports/2026-10-14/codex_implementation_T19_2026-10-14.md`.
 
 ## 6. Current Task Record
 [docs/tasks/T19.md](tasks/T19.md) (tệp PO có ở máy, chưa được Git theo dõi lúc bàn giao).
@@ -65,7 +65,7 @@ Ngày bắt đầu sản phẩm: 05/10/2026 · Hạn: 01/11/2026
 | T17 | Chatbot AI tư vấn phim (Gemini free, chỉ đọc) | Web | phát triển thêm | T16 | [T17.md](tasks/T17.md) | DONE / CLOSED — merged `fb0b43f` (PO tip `b3090bc`), PO APPROVED_WITH_NOTES MVP/local, AC 11/11 (AC-02 PO_ATTESTED), Claude R2 PASS_WITH_TODO, RF 0; TODO-03 FIXED, TODO-01..10 dispositioned; production DB gate T16 TODO-01 remains |
 | T18 | Chuyển động và hiệu ứng 3D cho giao diện (GSAP) | Web | phát triển thêm | T17 | [T18.md](tasks/T18.md) | DONE / CLOSED — merge `fc10d34` VERIFIED; PO APPROVED, thẩm mỹ ĐẠT; Codex R3 PASS_WITH_TODO; Claude RF-04 PASS; AC 11/11; RF 4/4 CLOSED; RF mở 0; blocker 0; TODO/OBS đã disposition |
 
-| T19 | Tải ảnh poster từ máy khi thêm/sửa phim | Web | phát triển thêm | T18 | [T19.md](tasks/T19.md) | CLAUDE_REVIEW / PENDING_INDEPENDENT_REVIEW — DEV gates đạt; chờ Claude review độc lập |
+| T19 | Tải ảnh poster từ máy khi thêm/sửa phim | Web | phát triển thêm | T18 | [T19.md](tasks/T19.md) | PO_REVIEW — Claude PASS_WITH_TODO; AC 11/11; RF 0; TODO 4 Low; pytest 65/65 |
 
 Chuỗi chính: `T00 → T01 → T02` và `T03 → T08 → T09 → T10`. T03 bắt đầu ngay ngày đầu (song song).
 Nếu trễ: cắt T14 → T15 → rút gọn T05. Không cắt T01–T03, T07–T10.
@@ -198,11 +198,12 @@ Nếu trễ: cắt T14 → T15 → rút gọn T05. Không cắt T01–T03, T07�
 | Claude review T18 RF-04 | OBS-01: reduced-motion có thể render PosterIntro 1–2 frame trước khi effect gỡ | **ACCEPT_LATER — future backlog; chưa authorize task mới** |
 
 ## 11. Current Next Step
-1. **Claude:** độc lập review T19 trên nhánh `task/T19-tai-anh-poster`, đọc `docs/tasks/T19.md`, report mới nhất 14/10, source và tests; xác minh AC-01..AC-11, scope và bảo mật, chạy full gates trên DB/UPLOAD_DIR tạm; đưa `PASS`/`PASS_WITH_TODO`/`FAIL` và report review. **Không để Codex tự review.**
-2. **Tín (PO):** chỉ review/approve sau khi Claude PASS hoặc PASS_WITH_TODO và disposition các TODO. Chỉ PO merge `master`, không tự mở task kế tiếp ở bước Codex.
+1. **Tín (PO):** review T19 theo `reports/2026-10-14/claude_review_T19_PASS_WITH_TODO_2026-10-14.md`, disposition TODO-01..04 và OBS-01..04, ra quyết định PO. Chỉ PO merge `master`. Kiểm tra tiến trình uvicorn đang chiếm cổng 8001 (không do Claude khởi động).
+2. **Task kế tiếp:** Claude **không** đặt READY_FOR_HANDOFF — T12 vẫn `PLANNED / NOT AUTHORIZED`, Q4 MỞ. PO tự chọn sau khi đóng T19.
 3. `docs/tasks/T19.md` là Task Record PO đã cung cấp, vẫn untracked trên máy trước triển khai; không tự đưa vào commit do ngoài T19 allowlist. Claude có thể đọc file làm việc này, PO quản trị tracking riêng nếu cần. Không commit `backend/uploads/`, không chạm production DB; giữ nguyên T16 runtime gate.
 
 ## 12. Active Timeline
+| 15/10/2026 | Claude | T19 Independent Review **PASS_WITH_TODO** trên `7c85db1`: AC 11/11, RF 0, TODO-01..04 Low (giới hạn kích thước body upload, file mồ côi/thông báo lỗi khi tạo phim lỗi, regex/thông báo client, assert test), OBS-01..04. Focused 16/16, probe 6/6 (đã xóa), full pytest 65/65, compileall/build 0, uvicorn 8003 + SQLite/UPLOAD_DIR tạm health `phobert_b`; real (khác origin) + mock browser và hồi quy 7/7 do Claude chạy; scope đúng allowlist + ngoại lệ `test_admin_features.py`; `backend/uploads` không tồn tại, `firefly.db` hash không đổi. T19 `CLAUDE_REVIEW → PO_REVIEW`; không mở task kế tiếp (T12 chưa authorize). |
 | 14/10/2026 | Tín (PO) + Codex | T19: focused pytest 16/16; full pytest 65/65; compileall và frontend build exit 0; `/api/health` OK (`phobert_b`), DB/upload tạm; PO xác nhận real 7/7, mock 7/7, hồi quy 7/7. PO duyệt ngoại lệ `backend/tests/test_admin_features.py` và áp dụng fix, mọi test cũ đạt. Git scope/security PASS theo preflight trước handoff. Codex `IN_PROGRESS → CLAUDE_REVIEW`; Claude review chưa thực hiện. |
 | 13/10/2026 | PO + Codex | PO giao T19 và xác minh nhánh task/T19-tai-anh-poster, T18 CLOSED/merged; Codex bắt đầu triển khai trên ZIP source allowlist, ghi nhận full-gate blocker và xung đột test CRUD cũ; T19 READY_FOR_HANDOFF → IN_PROGRESS / BLOCKED_PENDING_T19_FULL_GATES, chưa CLAUDE_REVIEW. |
 | Ngày | Ai | Sự kiện |

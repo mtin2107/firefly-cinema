@@ -8,7 +8,7 @@
 ## Phạm vi đã triển khai
 
 - Tạo notebook `ml/notebooks/T15_word_segment.ipynb` cho cặp đối chứng có/không tách từ.
-- `underthesea==6.8.4` chỉ được cài trong Colab; không thêm dependency backend.
+- `underthesea==9.5.0` chỉ được cài trong Colab; phiên bản này hỗ trợ Python 3.13 hiện hành của Colab; không thêm dependency backend.
 - Không sửa `normalize()`, không sửa `backend/` hoặc `frontend/`.
 - Hai biến thể cùng model khởi tạo, split, seed và siêu tham số; phone/movie test chỉ đọc sau marker `SELECTION_LOCKED`.
 - Notebook tự đo thời gian tiền xử lý tăng thêm, ghi `ml/results/word_segment.csv`, cập nhật mục T15 trong model card A và ghi lại report này sau khi có số thật.

@@ -1,0 +1,5 @@
+variant,test_set,precision_neg,recall_neg,f1_neg,macro_f1,preprocess_ms_per_sentence,additional_segmentation_ms_per_sentence,seed,max_length,batch_size,learning_rate,max_epochs,best_epoch
+without_segmentation,phone,0.894419,0.954143,0.923316,0.909237,0.025772,0.0,42,256,8,2e-05,5,4
+without_segmentation,movie,0.934066,0.841584,0.885417,0.838935,0.025772,0.0,42,256,8,2e-05,5,4
+with_segmentation,phone,0.90625,0.933226,0.91954,0.907043,1.738582,1.712811,42,256,8,2e-05,5,5
+with_segmentation,movie,0.952381,0.792079,0.864865,0.821813,1.738582,1.712811,42,256,8,2e-05,5,5

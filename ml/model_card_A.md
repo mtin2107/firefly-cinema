@@ -94,9 +94,18 @@ Một câu đổi nhãn. Đây là khác biệt có tác động tới sản ph�
 - Không dùng test để chọn siêu tham số. Mọi notebook đánh giá sau phải dùng đúng split cố định và cùng logic `normalize()` đã chốt, hoặc ghi rõ thí nghiệm khác biệt.
 - Dữ liệu ViSFD dùng cho nghiên cứu; cần trích dẫn SA2SL (Phan và cộng sự, 2021). Việc sử dụng thương mại cần kiểm tra lại quyền dữ liệu.
 
-## T15 — Thử nghiệm tách từ (đang chờ chạy Colab)
+## T15 — Thử nghiệm tách từ (15/10/2026)
 
-Notebook `ml/notebooks/T15_word_segment.ipynb` huấn luyện cặp đối chứng chỉ khác tiền xử lý: `normalize(text)` và `word_segment(normalize(text))`. Hai bản cùng khởi tạo từ `vinai/phobert-base-v2`, dùng seed 42 và recipe T09 (`max_length=256`, batch 8, learning rate 2e-5, weight decay 0,01, warmup 10%, tối đa 5 epoch, early stopping patience 2), cùng split phone train/dev chính thức. Kết quả và khuyến nghị tích hợp chỉ được ghi sau hai clean-run Colab có sai lệch F1 không quá 0,001; chưa thay model web.
+Notebook `ml/notebooks/T15_word_segment.ipynb` huấn luyện cặp đối chứng chỉ khác tiền xử lý: `normalize(text)` và `word_segment(normalize(text))`. Hai bản cùng khởi tạo từ `vinai/phobert-base-v2`, dùng seed 42 và recipe T09 (`max_length=256`, batch 8, learning rate 2e-5, weight decay 0,01, warmup 10%, tối đa 5 epoch, early stopping patience 2), cùng split phone train/dev chính thức và FP32 deterministic.
+
+| Biến thể | Test | F1 tiêu cực | Macro-F1 |
+|---|---|---:|---:|
+| Không tách từ | Phone | 0,923316 | 0,909237 |
+| Không tách từ | Movie | 0,885417 | 0,838935 |
+| Có tách từ | Phone | 0,919540 | 0,907043 |
+| Có tách từ | Movie | 0,864865 | 0,821813 |
+
+Tách từ làm F1 tiêu cực giảm `0,003776` trên phone và giảm `0,020552` trên movie, đồng thời tăng tiền xử lý `1,712811 ms/câu`. Hai clean-run FP32 từ runtime mới cho kết quả giống hệt (`max delta = 0,0`). Vì vậy không nên đưa bản tách từ vào web ở thời điểm này; model web và `normalize()` giữ nguyên.
 
 ## Benchmark so sánh T02 (05/10/2026)
 

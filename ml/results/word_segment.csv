@@ -1,0 +1,1 @@
+variant,test_set,precision_neg,recall_neg,f1_neg,macro_f1,preprocess_ms_per_sentence,additional_segmentation_ms_per_sentence,seed,max_length,batch_size,learning_rate,max_epochs,best_epoch

@@ -62,7 +62,7 @@ Không có task đang active. Task record kế tiếp: [docs/tasks/T20.md](tasks
 | T12 | Dữ liệu demo và kịch bản bảo vệ | Web | 4 | T10, T20 | [T12.md](tasks/T12.md) | PLANNED — thứ tự 3; cập nhật 15/10 (dữ liệu cho T21, poster thật, Q4 mặc định chạy máy) |
 | T13 | Chốt v1.0 và sao lưu | Tất cả | 4 | T12, T14, T15, T20, T21 | [T13.md](tasks/T13.md) | PLANNED — thứ tự 6, **task cuối cùng** |
 | T14 | Hủy vé giữ chỗ, đổi mật khẩu | Web | 4 | T20 | [T14.md](tasks/T14.md) | PLANNED — thứ tự 5; PO chọn làm 15/10 |
-| T15 | Thử nghiệm có tách từ | ML | 4 | T09 | [T15.md](tasks/T15.md) | READY_FOR_HANDOFF — song song (Colab); PO chọn làm 15/10; xong trước T13 |
+| T15 | Thử nghiệm có tách từ | ML | 4 | T09 | [T15.md](tasks/T15.md) | IN_PROGRESS — notebook/cấu trúc kết quả đã chuẩn bị; chờ 2 clean-run Colab và số F1 thật; song song T20 |
 | T16 | Giữ chỗ có hạn và thanh toán QR (đổi schema) | Web | phát triển thêm | T11 | [T16.md](tasks/T16.md) | DONE / CLOSED — PO APPROVED, merge theo PO; Claude PASS_WITH_TODO, AC 12/12, RF 0, TODO-01..07 preserved |
 | T17 | Chatbot AI tư vấn phim (Gemini free, chỉ đọc) | Web | phát triển thêm | T16 | [T17.md](tasks/T17.md) | DONE / CLOSED — merged `fb0b43f` (PO tip `b3090bc`), PO APPROVED_WITH_NOTES MVP/local, AC 11/11 (AC-02 PO_ATTESTED), Claude R2 PASS_WITH_TODO, RF 0; TODO-03 FIXED, TODO-01..10 dispositioned; production DB gate T16 TODO-01 remains |
 | T18 | Chuyển động và hiệu ứng 3D cho giao diện (GSAP) | Web | phát triển thêm | T17 | [T18.md](tasks/T18.md) | DONE / CLOSED — merge `fc10d34` VERIFIED; PO APPROVED, thẩm mỹ ĐẠT; Codex R3 PASS_WITH_TODO; Claude RF-04 PASS; AC 11/11; RF 4/4 CLOSED; RF mở 0; blocker 0; TODO/OBS đã disposition |

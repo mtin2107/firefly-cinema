@@ -23,6 +23,19 @@ class SlidingWindowRateLimiter:
                 raise HTTPException(429, message)
             events.append(now)
 
+    def is_blocked(self, key: Hashable, *, limit: int, seconds: float) -> bool:
+        now = time.monotonic()
+        with self._lock:
+            events = self._events.get(key)
+            if not events:
+                return False
+            while events and now - events[0] >= seconds:
+                events.popleft()
+            if not events:
+                self._events.pop(key, None)
+                return False
+            return len(events) >= limit
+
     def clear(self, key: Hashable) -> None:
         with self._lock:
             self._events.pop(key, None)

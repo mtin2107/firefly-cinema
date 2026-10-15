@@ -28,6 +28,8 @@ def register(body: RegisterIn, db: Session = Depends(get_db)):
 @router.post("/login", response_model=TokenOut)
 def login(body: LoginIn, db: Session = Depends(get_db)):
     email = body.email.lower()
+    if _login_failures.is_blocked(email, limit=5, seconds=300):
+        raise HTTPException(429, _LOGIN_LIMIT_MESSAGE)
     user = db.scalar(select(User).where(User.email == email))
     if not user or not verify_password(body.password, user.password_hash):
         _login_failures.hit(email, limit=5, seconds=300, message=_LOGIN_LIMIT_MESSAGE)

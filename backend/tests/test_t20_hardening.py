@@ -50,6 +50,28 @@ def test_login_sixth_failure_is_limited_and_correct_login_works_after_window(
     assert client.post("/api/auth/login", json=payload).status_code == 200
 
 
+def test_correct_password_is_blocked_during_login_lock_window(
+    client, users, monkeypatch
+):
+    from app import rate_limit
+
+    clock = [2000.0]
+    monkeypatch.setattr(rate_limit.time, "monotonic", lambda: clock[0])
+    payload = {"email": users[0].email, "password": "sai-mat-khau"}
+    for _ in range(5):
+        assert client.post("/api/auth/login", json=payload).status_code == 401
+
+    payload["password"] = "secret1"
+    blocked = client.post("/api/auth/login", json=payload)
+    assert blocked.status_code == 429
+    assert blocked.json()["detail"] == (
+        "Bạn đăng nhập sai quá nhiều lần. Hãy thử lại sau 5 phút."
+    )
+
+    clock[0] += 301
+    assert client.post("/api/auth/login", json=payload).status_code == 200
+
+
 def test_seed_uses_admin_password_from_environment(db, monkeypatch, fake_classifier):
     from app import seed as seed_module
 

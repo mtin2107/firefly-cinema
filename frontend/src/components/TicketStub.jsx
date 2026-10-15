@@ -57,9 +57,9 @@ export default function TicketStub({ movie, showtime, seats, total, code, status
               {qrUrl ? <img className="ticket-payment__qr" src={qrUrl} alt={`Mã QR thanh toán vé ${code}`} />
                 : <p className="muted">Chưa cấu hình thanh toán QR. Vui lòng thanh toán tại quầy trước giờ tự hủy.</p>}
               {qrUrl && <div><p>Quét QR để chuyển khoản.</p><p><strong>Nội dung chuyển khoản: {code}</strong></p></div>}
-              <button type="button" className="btn btn--primary btn--sm" onClick={onClaim} disabled={claiming}>
+              {qrUrl && <button type="button" className="btn btn--primary btn--sm" onClick={onClaim} disabled={claiming}>
                 {claiming ? "Đang gửi..." : "Tôi đã chuyển khoản"}
-              </button>
+              </button>}
             </div>}
             {flippable && (
               <button type="button" className="btn btn--ghost btn--sm ticket__flip" onClick={() => flip(true)}>Lật vé</button>

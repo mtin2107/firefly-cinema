@@ -8,6 +8,7 @@ from .config import BANK_ACCOUNT, BANK_ACCOUNT_NAME, BANK_ID
 from .models import Booking, BookingSeat, Showtime
 
 HOLD_CUTOFF_MINUTES = 30
+HOLD_MINUTES = 15
 BOOKING_STATUSES = {"held", "pending_verify", "paid", "expired", "rejected"}
 
 
@@ -16,11 +17,18 @@ def booking_code(booking_id: int) -> str:
 
 
 def hold_expires_at(booking: Booking) -> datetime:
-    return booking.showtime.start_time - timedelta(minutes=HOLD_CUTOFF_MINUTES)
+    return min(
+        booking.created_at + timedelta(minutes=HOLD_MINUTES),
+        booking.showtime.start_time - timedelta(minutes=HOLD_CUTOFF_MINUTES),
+    )
+
+
+def transfer_payment_enabled() -> bool:
+    return all((BANK_ID, BANK_ACCOUNT, BANK_ACCOUNT_NAME))
 
 
 def qr_url(booking: Booking) -> str | None:
-    if booking.status != "held" or not all((BANK_ID, BANK_ACCOUNT, BANK_ACCOUNT_NAME)):
+    if booking.status != "held" or not transfer_payment_enabled():
         return None
     query = urlencode({
         "amount": booking.total,
@@ -50,12 +58,9 @@ def release_booking_seats(db: Session, booking_id: int) -> None:
 
 
 def expire_holds(db: Session, now: datetime | None = None) -> int:
-    cutoff = (now or datetime.now()) + timedelta(minutes=HOLD_CUTOFF_MINUTES)
-    expired = db.scalars(
-        select(Booking)
-        .join(Showtime, Booking.showtime_id == Showtime.id)
-        .where(Booking.status == "held", Showtime.start_time <= cutoff)
-    ).all()
+    current = now or datetime.now()
+    held = db.scalars(select(Booking).where(Booking.status == "held")).all()
+    expired = [booking for booking in held if hold_expires_at(booking) <= current]
     for booking in expired:
         release_booking_seats(db, booking.id)
         booking.status = "expired"

@@ -11,6 +11,10 @@ const SAMPLES = [
 ];
 
 const LABELS = { tieu_cuc: "Tiêu cực", binh_thuong: "Bình thường" };
+const MODEL_NAMES = {
+  phobert: "PhoBERT A", phobert_b: "PhoBERT B", svm: "SVM",
+  lr: "Logistic Regression", nb: "Naive Bayes",
+};
 
 export default function AdminModelCompare() {
   const [text, setText] = useState("");
@@ -82,7 +86,7 @@ export default function AdminModelCompare() {
                   <thead><tr><th>Mô hình</th><th>Phiên bản</th><th>Nhãn</th><th>Điểm</th><th>Thời gian</th></tr></thead>
                   <tbody>{results.map((result) => (
                     <tr key={`${result.model}-${result.version}`}>
-                      <td><strong>{result.model}</strong></td>
+                      <td><strong>{MODEL_NAMES[result.model] ?? result.model}</strong></td>
                       <td>{result.version}</td>
                       <td><span className={`label ${result.label === "tieu_cuc" ? "label--neg" : "label--ok"}`}>
                         {LABELS[result.label] ?? result.label}

@@ -21,7 +21,10 @@ def test_new_booking_contract_and_one_hold_per_showtime(client, auth_headers, sh
     body = response.json()
     assert body["status"] == "held"
     assert body["code"] == f"FF{body['id']:05d}"
-    assert datetime.fromisoformat(body["hold_expires_at"]) == showtime.start_time - timedelta(minutes=30)
+    created_at = datetime.fromisoformat(body["created_at"])
+    assert datetime.fromisoformat(body["hold_expires_at"]) == min(
+        created_at + timedelta(minutes=15), showtime.start_time - timedelta(minutes=30)
+    )
 
     detail = client.get(f"/api/showtimes/{showtime.id}").json()
     assert detail["booked_seats"] == ["A1", "F1"]
@@ -54,7 +57,12 @@ def test_expired_hold_releases_unique_seat_for_another_user(
     assert second.status_code == 201
 
 
-def test_pending_and_paid_are_not_expired(client, auth_headers, showtime, db):
+def test_pending_and_paid_are_not_expired(client, auth_headers, showtime, db, monkeypatch):
+    from app import booking_rules
+
+    monkeypatch.setattr(booking_rules, "BANK_ID", "970436")
+    monkeypatch.setattr(booking_rules, "BANK_ACCOUNT", "123456789")
+    monkeypatch.setattr(booking_rules, "BANK_ACCOUNT_NAME", "LE MINH TIN")
     held = _create(client, auth_headers["user"], showtime).json()
     claim = client.post(
         f"/api/bookings/{held['id']}/transfer-claim", headers=auth_headers["user"]
@@ -84,7 +92,12 @@ def test_last_thirty_minutes_are_blocked(client, auth_headers, showtime, db):
     assert response.json()["detail"] == "Suất chiếu sắp bắt đầu, vui lòng mua vé tại quầy."
 
 
-def test_transfer_claim_ownership_and_invalid_state(client, auth_headers, showtime, db):
+def test_transfer_claim_ownership_and_invalid_state(client, auth_headers, showtime, db, monkeypatch):
+    from app import booking_rules
+
+    monkeypatch.setattr(booking_rules, "BANK_ID", "970436")
+    monkeypatch.setattr(booking_rules, "BANK_ACCOUNT", "123456789")
+    monkeypatch.setattr(booking_rules, "BANK_ACCOUNT_NAME", "LE MINH TIN")
     booking = _create(client, auth_headers["user"], showtime).json()
     other = User(full_name="Người khác", email="other@example.com",
                  password_hash=hash_password("secret1"), role="user")

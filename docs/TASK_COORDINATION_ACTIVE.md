@@ -16,7 +16,7 @@ Repo `C:\Projects\firefly-cinema`, nhánh `master`. Chi tiết: `PROJECT_SOURCE_
 - Mỗi task một nhánh `task/Txx-ten-ngan`, commit `[Txx] mô tả`. Chỉ Tín merge.
 
 ## 3. Latest Completed Task Summary
-**T19 — Tải ảnh poster từ máy khi thêm/sửa phim: DONE / CLOSED (15/10/2026, chờ merge).** PO APPROVED sau khi tự chạy thử thêm phim bằng ảnh từ máy, sửa poster và chọn file sai; Claude `PASS_WITH_TODO`, AC 11/11 PASS, Required Fixes 0, blocker 0; toàn bộ TODO-01..04 và OBS-01..04 đã disposition trong `reports/2026-10-15/po_review_T19_APPROVED_2026-10-15.md`. Merge vào `master` vẫn PENDING và do PO thực hiện.
+**T19 — Tải ảnh poster từ máy khi thêm/sửa phim: DONE / CLOSED — merge c3f70df VERIFIED.** PO APPROVED sau khi tự chạy thử thêm phim bằng ảnh từ máy, sửa poster và chọn file sai; Claude `PASS_WITH_TODO`, AC 11/11 PASS, Required Fixes 0, blocker 0; toàn bộ TODO-01..04 và OBS-01..04 đã disposition trong `reports/2026-10-15/po_review_T19_APPROVED_2026-10-15.md`.
 
 **T18 — Chuyển động và hiệu ứng 3D: DONE / CLOSED (13/10/2026).** PO APPROVED, thẩm mỹ ĐẠT; Codex Round 3 `PASS_WITH_TODO`, Claude RF-04 `PASS`; AC 11/11 PASS, RF-01 → RF-04 CLOSED, Required Fix mở 0, blocker 0. TODO-01/02 WONT_FIX; TODO-03 ACCEPT_LATER → T13; OBS-01 ACCEPT_LATER → Future Backlog. Merge commit `fc10d34a1b65524cac69bcbd4d533f6ea995b8fe` trên `master` đã được xác minh; nhánh T18 và fix `490ac8a` đều là ancestor. Không mở task tiếp theo.
 
@@ -32,14 +32,14 @@ Trước khi áp dụng workflow: giao diện React đầy đủ (`giao-dien-v1`
 
 ## 4. Current Project Status
 ```
-Overall Status: READY_FOR_HANDOFF
-Phase: T19 DONE / CLOSED (chờ merge); chuẩn bị T20 và T15
-Current Active Task: NONE — kế tiếp T20 (READY_FOR_HANDOFF sau khi merge) và T15 (song song)
+Overall Status: CLAUDE_REVIEW
+Phase: T19 DONE / CLOSED — merge c3f70df VERIFIED; T20 đã triển khai, chờ Claude review; T15 READY_FOR_HANDOFF (song song)
+Current Active Task: T20 — CLAUDE_REVIEW
 Ngày bắt đầu sản phẩm: 05/10/2026 · Hạn: 01/11/2026
 ```
 
 ## 5. Current Active Task
-**NONE.** T19 đã được PO APPROVED và ghi nhận **DONE / CLOSED (chờ merge)**. Task kế tiếp: **T20 — READY_FOR_HANDOFF sau khi T19 được merge vào `master`**; **T15 — READY_FOR_HANDOFF**, được chạy song song trên Colab theo ngoại lệ task ML.
+**T20 — CLAUDE_REVIEW.** Codex đã hoàn tất implementation và gate trên nhánh `task/T20-gia-co`; report: `reports/2026-10-15/codex_implementation_T20_2026-10-15.md`. Chờ Claude review độc lập. T15 vẫn **READY_FOR_HANDOFF**, được phép chạy song song trên Colab theo ngoại lệ task ML.
 
 ## 6. Current Task Record
 Không có task đang active. Task record kế tiếp: [docs/tasks/T20.md](tasks/T20.md) và [docs/tasks/T15.md](tasks/T15.md).
@@ -67,8 +67,8 @@ Không có task đang active. Task record kế tiếp: [docs/tasks/T20.md](tasks
 | T17 | Chatbot AI tư vấn phim (Gemini free, chỉ đọc) | Web | phát triển thêm | T16 | [T17.md](tasks/T17.md) | DONE / CLOSED — merged `fb0b43f` (PO tip `b3090bc`), PO APPROVED_WITH_NOTES MVP/local, AC 11/11 (AC-02 PO_ATTESTED), Claude R2 PASS_WITH_TODO, RF 0; TODO-03 FIXED, TODO-01..10 dispositioned; production DB gate T16 TODO-01 remains |
 | T18 | Chuyển động và hiệu ứng 3D cho giao diện (GSAP) | Web | phát triển thêm | T17 | [T18.md](tasks/T18.md) | DONE / CLOSED — merge `fc10d34` VERIFIED; PO APPROVED, thẩm mỹ ĐẠT; Codex R3 PASS_WITH_TODO; Claude RF-04 PASS; AC 11/11; RF 4/4 CLOSED; RF mở 0; blocker 0; TODO/OBS đã disposition |
 
-| T19 | Tải ảnh poster từ máy khi thêm/sửa phim | Web | phát triển thêm | T18 | [T19.md](tasks/T19.md) | DONE / CLOSED (chờ merge) — PO APPROVED 15/10; Claude PASS_WITH_TODO; AC 11/11; RF 0; TODO/OBS đã disposition |
-| T20 | Gia cố bảo mật, giữ chỗ, sửa lỗi giao diện | Web | 4 | T19 | [T20.md](tasks/T20.md) | READY_FOR_HANDOFF — thứ tự 2; bắt đầu sau khi T19 merge |
+| T19 | Tải ảnh poster từ máy khi thêm/sửa phim | Web | phát triển thêm | T18 | [T19.md](tasks/T19.md) | DONE / CLOSED — merge `c3f70df` VERIFIED; PO APPROVED 15/10; Claude PASS_WITH_TODO; AC 11/11; RF 0; TODO/OBS đã disposition |
+| T20 | Gia cố bảo mật, giữ chỗ, sửa lỗi giao diện | Web | 4 | T19 | [T20.md](tasks/T20.md) | CLAUDE_REVIEW — implementation/gate hoàn tất, chờ review độc lập |
 | T21 | Thống kê cảm xúc bình luận theo phim | Web | 4 | T20, T12 | [T21.md](tasks/T21.md) | PLANNED — thứ tự 4 |
 
 Chuỗi chính: `T00 → T01 → T02` và `T03 → T08 → T09 → T10`. T03 bắt đầu ngay ngày đầu (song song).

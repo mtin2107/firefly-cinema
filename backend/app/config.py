@@ -10,7 +10,12 @@ if _env.exists():
             key, value = line.split("=", 1)
             os.environ.setdefault(key.strip(), value.strip())
 
-SECRET_KEY = os.getenv("SECRET_KEY", "doi-chuoi-bi-mat-nay")
+_DEFAULT_SECRET_KEY = "doi-chuoi-bi-mat-nay"
+SECRET_KEY = os.getenv("SECRET_KEY", "").strip()
+if not SECRET_KEY or SECRET_KEY == _DEFAULT_SECRET_KEY or len(SECRET_KEY) < 32:
+    raise RuntimeError(
+        "SECRET_KEY không hợp lệ. Hãy cấu hình khóa bí mật khác mặc định và dài ít nhất 32 ký tự."
+    )
 TOKEN_EXPIRE_HOURS = 24
 DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///./firefly.db")
 _upload_dir = Path(os.getenv("UPLOAD_DIR", "uploads"))
@@ -38,6 +43,7 @@ NEGATIVE_THRESHOLD = float(os.getenv("NEGATIVE_THRESHOLD", "0.5"))
 # T17 chatbot; keep secrets in backend/.env (never commit the file).
 CHAT_BASE_URL = os.getenv("CHAT_BASE_URL", "https://generativelanguage.googleapis.com/v1beta/openai/").strip()
 CHAT_API_KEY = os.getenv("CHAT_API_KEY", "").strip()
-CHAT_MODEL = os.getenv("CHAT_MODEL", "gemini-3.8-flash").strip()
+CHAT_MODEL = os.getenv("CHAT_MODEL", "gemini-3.5-flash-lite").strip()
 CHAT_RATE_PER_MINUTE = max(1, int(os.getenv("CHAT_RATE_PER_MINUTE", "5")))
 CHAT_RATE_PER_DAY = max(1, int(os.getenv("CHAT_RATE_PER_DAY", "50")))
+ADMIN_PASSWORD = os.getenv("ADMIN_PASSWORD", "").strip()

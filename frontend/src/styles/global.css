@@ -209,7 +209,7 @@ h1, h2, h3 { margin: 0; line-height: 1.15; }
 .poster--lg .poster__genre { font-size: .85rem; }
 
 /* ---------- Tabs, lưới phim ---------- */
-.tabs { display: flex; gap: 28px; border-bottom: 1px solid var(--line); margin-bottom: 28px; overflow-x: auto; }
+.tabs { display: flex; gap: 28px; border-bottom: 1px solid var(--line); margin-bottom: 28px; overflow-x: auto; overflow-y: hidden; }
 .tab { background: none; border: 0; color: var(--muted); padding: 10px 0; cursor: pointer; font-family: var(--font-display); font-weight: 800; font-size: 1.5rem; text-transform: uppercase; border-bottom: 3px solid transparent; margin-bottom: -1px; white-space: nowrap; }
 .tab:hover { color: var(--text); }
 .tab--active { color: var(--text); border-bottom-color: var(--yellow); }
@@ -260,7 +260,7 @@ h1, h2, h3 { margin: 0; line-height: 1.15; }
 .screen { position: relative; height: 56px; margin: 0 auto 28px; max-width: 640px; text-align: center; }
 .screen::before { content: ""; position: absolute; left: 0; right: 0; top: 0; height: 40px; border-top: 4px solid var(--yellow); border-radius: 50% 50% 0 0 / 100% 100% 0 0; box-shadow: 0 -10px 30px -6px rgba(255,199,44,.55); }
 .screen span { position: relative; top: 18px; color: var(--muted); font-size: .85rem; }
-.seatmap__scroll { overflow-x: auto; padding-bottom: 8px; }
+.seatmap__scroll { overflow-x: auto; overflow-y: hidden; padding-bottom: 8px; }
 .seatmap__grid { display: flex; flex-direction: column; gap: 8px; width: max-content; margin: 0 auto; }
 .seat-row { display: flex; align-items: center; gap: 6px; }
 .seat-row > .seat:nth-of-type(6) { margin-right: 22px; } /* lối đi giữa */
@@ -682,7 +682,7 @@ h1, h2, h3 { margin: 0; line-height: 1.15; }
 }
 
 /* ---------- T18: vé lật, in vé ---------- */
-.ticket-wrap { perspective: 1400px; }
+.ticket-wrap { perspective: 1400px; overflow: clip; }
 .ticket { transform-style: preserve-3d; transition: transform var(--dur-slow) var(--ease-in-out); }
 .ticket--flipped { transform: rotateY(180deg); }
 .ticket__face { backface-visibility: hidden; -webkit-backface-visibility: hidden; }

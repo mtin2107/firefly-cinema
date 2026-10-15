@@ -16,7 +16,7 @@ Repo `C:\Projects\firefly-cinema`, nhánh `master`. Chi tiết: `PROJECT_SOURCE_
 - Mỗi task một nhánh `task/Txx-ten-ngan`, commit `[Txx] mô tả`. Chỉ Tín merge.
 
 ## 3. Latest Completed Task Summary
-**T19 — Tải ảnh poster từ máy khi thêm/sửa phim: DONE / CLOSED (15/10/2026, chờ merge).** PO APPROVED sau khi tự chạy thử thêm phim bằng ảnh từ máy, sửa poster và chọn file sai; Claude `PASS_WITH_TODO`, AC 11/11 PASS, Required Fixes 0, blocker 0; toàn bộ TODO-01..04 và OBS-01..04 đã disposition trong `reports/2026-10-15/po_review_T19_APPROVED_2026-10-15.md`. Merge vào `master` vẫn PENDING và do PO thực hiện.
+**T19 — Tải ảnh poster từ máy khi thêm/sửa phim: DONE / CLOSED — merge c3f70df VERIFIED.** PO APPROVED sau khi tự chạy thử thêm phim bằng ảnh từ máy, sửa poster và chọn file sai; Claude `PASS_WITH_TODO`, AC 11/11 PASS, Required Fixes 0, blocker 0; toàn bộ TODO-01..04 và OBS-01..04 đã disposition trong `reports/2026-10-15/po_review_T19_APPROVED_2026-10-15.md`.
 
 **T18 — Chuyển động và hiệu ứng 3D: DONE / CLOSED (13/10/2026).** PO APPROVED, thẩm mỹ ĐẠT; Codex Round 3 `PASS_WITH_TODO`, Claude RF-04 `PASS`; AC 11/11 PASS, RF-01 → RF-04 CLOSED, Required Fix mở 0, blocker 0. TODO-01/02 WONT_FIX; TODO-03 ACCEPT_LATER → T13; OBS-01 ACCEPT_LATER → Future Backlog. Merge commit `fc10d34a1b65524cac69bcbd4d533f6ea995b8fe` trên `master` đã được xác minh; nhánh T18 và fix `490ac8a` đều là ancestor. Không mở task tiếp theo.
 
@@ -32,14 +32,14 @@ Trước khi áp dụng workflow: giao diện React đầy đủ (`giao-dien-v1`
 
 ## 4. Current Project Status
 ```
-Overall Status: READY_FOR_HANDOFF
-Phase: T19 DONE / CLOSED (chờ merge); chuẩn bị T20 và T15
-Current Active Task: NONE — kế tiếp T20 (READY_FOR_HANDOFF sau khi merge) và T15 (song song)
+Overall Status: CLAUDE_REVIEW
+Phase: T19 DONE / CLOSED — merge c3f70df VERIFIED; T20 Fix Round 1 đã triển khai, chờ Claude review Round 2; T15 READY_FOR_HANDOFF (song song)
+Current Active Task: T20 — CLAUDE_REVIEW
 Ngày bắt đầu sản phẩm: 05/10/2026 · Hạn: 01/11/2026
 ```
 
 ## 5. Current Active Task
-**NONE.** T19 đã được PO APPROVED và ghi nhận **DONE / CLOSED (chờ merge)**. Task kế tiếp: **T20 — READY_FOR_HANDOFF sau khi T19 được merge vào `master`**; **T15 — READY_FOR_HANDOFF**, được chạy song song trên Colab theo ngoại lệ task ML.
+**T20 — CLAUDE_REVIEW / ROUND 2 PENDING.** Codex đã sửa RF-01 và chạy lại gate trên nhánh `task/T20-gia-co`; report: `reports/2026-10-16/codex_fix_T20_round1_2026-10-16.md`. Chờ Claude xác minh độc lập. T15 vẫn **READY_FOR_HANDOFF**, được phép chạy song song trên Colab theo ngoại lệ task ML.
 
 ## 6. Current Task Record
 Không có task đang active. Task record kế tiếp: [docs/tasks/T20.md](tasks/T20.md) và [docs/tasks/T15.md](tasks/T15.md).
@@ -59,7 +59,7 @@ Không có task đang active. Task record kế tiếp: [docs/tasks/T20.md](tasks
 | T09 | Train PhoBERT phần B | ML | 3 | T08 | [T09.md](tasks/T09.md) | DONE / CLOSED (Claude PASS_WITH_TODO; PO APPROVED; AC 6/6; DoD MET theo PO; RF 0; blocker 0; TODO 7/7 dispositioned; TODO-02 RESOLVED 10/10/2026 theo PO, notebook `PO_ATTESTED`; merge `27c364e`; T09_MERGE_VERIFIED) |
 | T10 | Gắn model B vào web | Web | 3 | T07, T09 | [T10.md](tasks/T10.md) | DONE / CLOSED — PO APPROVED_WITH_NOTES; Claude Final PASS_WITH_TODO; AC 7/7; Technical DoD MET; RF 0; fast-forward merge + annotated tag `phobert-B` VERIFIED tại `857a8272` |
 | T11 | Kiểm thử tự động và sửa lỗi | Web | 4 | T04–T10 | [T11.md](tasks/T11.md) | DONE / CLOSED — Claude PASS_WITH_TODO; PO APPROVED_WITH_NOTES; AC 6/6; DoD MET; RF 0; merge `06dd44f0` VERIFIED |
-| T12 | Dữ liệu demo và kịch bản bảo vệ | Web | 4 | T10, T20 | [T12.md](tasks/T12.md) | PLANNED — thứ tự 3; cập nhật 15/10 (dữ liệu cho T21, poster thật, Q4 mặc định chạy máy) |
+| T12 | Dữ liệu demo và kịch bản bảo vệ | Web | 4 | T10, T20 | [T12.md](tasks/T12.md) | READY_FOR_HANDOFF — sau khi PO merge T20; prompt ở cuối `reports/2026-10-16/claude_review_T20_round2_PASS_WITH_TODO_2026-10-16.md` |
 | T13 | Chốt v1.0 và sao lưu | Tất cả | 4 | T12, T14, T15, T20, T21 | [T13.md](tasks/T13.md) | PLANNED — thứ tự 6, **task cuối cùng** |
 | T14 | Hủy vé giữ chỗ, đổi mật khẩu | Web | 4 | T20 | [T14.md](tasks/T14.md) | PLANNED — thứ tự 5; PO chọn làm 15/10 |
 | T15 | Thử nghiệm có tách từ | ML | 4 | T09 | [T15.md](tasks/T15.md) | READY_FOR_HANDOFF — song song (Colab); PO chọn làm 15/10; xong trước T13 |
@@ -67,8 +67,8 @@ Không có task đang active. Task record kế tiếp: [docs/tasks/T20.md](tasks
 | T17 | Chatbot AI tư vấn phim (Gemini free, chỉ đọc) | Web | phát triển thêm | T16 | [T17.md](tasks/T17.md) | DONE / CLOSED — merged `fb0b43f` (PO tip `b3090bc`), PO APPROVED_WITH_NOTES MVP/local, AC 11/11 (AC-02 PO_ATTESTED), Claude R2 PASS_WITH_TODO, RF 0; TODO-03 FIXED, TODO-01..10 dispositioned; production DB gate T16 TODO-01 remains |
 | T18 | Chuyển động và hiệu ứng 3D cho giao diện (GSAP) | Web | phát triển thêm | T17 | [T18.md](tasks/T18.md) | DONE / CLOSED — merge `fc10d34` VERIFIED; PO APPROVED, thẩm mỹ ĐẠT; Codex R3 PASS_WITH_TODO; Claude RF-04 PASS; AC 11/11; RF 4/4 CLOSED; RF mở 0; blocker 0; TODO/OBS đã disposition |
 
-| T19 | Tải ảnh poster từ máy khi thêm/sửa phim | Web | phát triển thêm | T18 | [T19.md](tasks/T19.md) | DONE / CLOSED (chờ merge) — PO APPROVED 15/10; Claude PASS_WITH_TODO; AC 11/11; RF 0; TODO/OBS đã disposition |
-| T20 | Gia cố bảo mật, giữ chỗ, sửa lỗi giao diện | Web | 4 | T19 | [T20.md](tasks/T20.md) | READY_FOR_HANDOFF — thứ tự 2; bắt đầu sau khi T19 merge |
+| T19 | Tải ảnh poster từ máy khi thêm/sửa phim | Web | phát triển thêm | T18 | [T19.md](tasks/T19.md) | DONE / CLOSED — merge `c3f70df` VERIFIED; PO APPROVED 15/10; Claude PASS_WITH_TODO; AC 11/11; RF 0; TODO/OBS đã disposition |
+| T20 | Gia cố bảo mật, giữ chỗ, sửa lỗi giao diện | Web | 4 | T19 | [T20.md](tasks/T20.md) | PO_REVIEW — Claude Round 2 PASS_WITH_TODO 16/10 (tip `8693e39`); AC 11/11; RF-01 CLOSED; RF mở 0; TODO-01..03 Low; pytest 81/81 |
 | T21 | Thống kê cảm xúc bình luận theo phim | Web | 4 | T20, T12 | [T21.md](tasks/T21.md) | PLANNED — thứ tự 4 |
 
 Chuỗi chính: `T00 → T01 → T02` và `T03 → T08 → T09 → T10`. T03 bắt đầu ngay ngày đầu (song song).
@@ -210,6 +210,9 @@ Nếu trễ: cắt T14 → T15 → rút gọn T05. Không cắt T01–T03, T07�
 3. `docs/tasks/T19.md` là Task Record PO đã cung cấp, vẫn untracked trên máy trước triển khai; không tự đưa vào commit do ngoài T19 allowlist. Claude có thể đọc file làm việc này, PO quản trị tracking riêng nếu cần. Không commit `backend/uploads/`, không chạm production DB; giữ nguyên T16 runtime gate.
 
 ## 12. Active Timeline
+| 16/10/2026 | Claude | T20 Round 2 **PASS_WITH_TODO** trên `8693e39`: RF-01 CLOSED / VERIFIED BY CLAUDE (uvicorn thật: 5 sai → đúng mật khẩu 429, email viết hoa 429, tài khoản khác 200; pytest nhánh sau 301 giây). compileall 0, pytest 81/81, build PASS; scope fix đúng 3 file; bản sao report T15 đã dọn khỏi working tree. AC 11/11, RF mở 0, TODO-01..03 Low. T20 `CLAUDE_REVIEW → PO_REVIEW`; T12 → `READY_FOR_HANDOFF` (lộ trình cuối). |
+| 16/10/2026 | Codex | T20 Fix Round 1: sửa RF-01 bằng kiểm tra trạng thái khóa trước `verify_password`; probe SQLite tạm `5 sai → đúng mật khẩu 429 → +301 giây 200`; focused 16/16, full pytest 81/81, compileall/build đạt. Bản report T15 untracked trùng nhánh T15 sau chuẩn hóa CRLF/LF và đã xóa, không commit. T20 `FIX_LOOP → CLAUDE_REVIEW / ROUND 2 PENDING`; không tự review/PASS hoặc mở task kế tiếp. |
+| 16/10/2026 | Claude | T20 Independent Review **FAIL** trên `e9c117b`: scope 22 file trong allowlist; compileall 0, pytest 80/80, build PASS; uvicorn thật + SQLite tạm, real/mock browser. AC 10/11 PASS (SECRET_KEY guard, giữ 15 phút, tối đa 2 vé, chặn transfer-claim không QR, 3 bình luận/phút, chatbot tìm "phim hài" đúng, 5 lỗi UI). **RF-01 High:** limiter đăng nhập chỉ chạy khi sai mật khẩu → đúng mật khẩu khi đang bị khóa vẫn 200, dò mật khẩu không bị chặn. TODO-01..03 Low. T20 `CLAUDE_REVIEW → FIX_LOOP`. Report: `reports/2026-10-16/claude_review_T20_FAIL_2026-10-16.md`. |
 | 15/10/2026 | Claude | T19 Independent Review **PASS_WITH_TODO** trên `7c85db1`: AC 11/11, RF 0, TODO-01..04 Low (giới hạn kích thước body upload, file mồ côi/thông báo lỗi khi tạo phim lỗi, regex/thông báo client, assert test), OBS-01..04. Focused 16/16, probe 6/6 (đã xóa), full pytest 65/65, compileall/build 0, uvicorn 8003 + SQLite/UPLOAD_DIR tạm health `phobert_b`; real (khác origin) + mock browser và hồi quy 7/7 do Claude chạy; scope đúng allowlist + ngoại lệ `test_admin_features.py`; `backend/uploads` không tồn tại, `firefly.db` hash không đổi. T19 `CLAUDE_REVIEW → PO_REVIEW`; không mở task kế tiếp (T12 chưa authorize). |
 | 14/10/2026 | Tín (PO) + Codex | T19: focused pytest 16/16; full pytest 65/65; compileall và frontend build exit 0; `/api/health` OK (`phobert_b`), DB/upload tạm; PO xác nhận real 7/7, mock 7/7, hồi quy 7/7. PO duyệt ngoại lệ `backend/tests/test_admin_features.py` và áp dụng fix, mọi test cũ đạt. Git scope/security PASS theo preflight trước handoff. Codex `IN_PROGRESS → CLAUDE_REVIEW`; Claude review chưa thực hiện. |
 | 13/10/2026 | PO + Codex | PO giao T19 và xác minh nhánh task/T19-tai-anh-poster, T18 CLOSED/merged; Codex bắt đầu triển khai trên ZIP source allowlist, ghi nhận full-gate blocker và xung đột test CRUD cũ; T19 READY_FOR_HANDOFF → IN_PROGRESS / BLOCKED_PENDING_T19_FULL_GATES, chưa CLAUDE_REVIEW. |

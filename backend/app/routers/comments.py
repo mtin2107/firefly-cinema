@@ -10,6 +10,7 @@ from sqlalchemy.orm import Session
 from ..classifier import classifier, normalize
 from ..database import get_db
 from ..models import Comment, User
+from ..rate_limit import SlidingWindowRateLimiter
 from ..schemas import (
     AdminCommentAction,
     AdminCommentOut,
@@ -22,6 +23,8 @@ from ..security import get_current_user, require_admin
 from .movies import get_movie_or_404
 
 router = APIRouter(prefix="/api", tags=["Bình luận"])
+_comment_limits = SlidingWindowRateLimiter()
+_COMMENT_LIMIT_MESSAGE = "Bạn bình luận quá nhanh. Hãy thử lại sau ít phút."
 
 
 def _csv_safe(value: str) -> str:
@@ -59,6 +62,7 @@ def create_comment(movie_id: int, body: CommentIn, user: User = Depends(get_curr
                    db: Session = Depends(get_db)):
     get_movie_or_404(db, movie_id)
     text = body.content.strip()
+    _comment_limits.hit(user.id, limit=3, seconds=60, message=_COMMENT_LIMIT_MESSAGE)
     is_negative, score = classifier.predict(text)  # <-- PhoBERT chấm điểm ở đây
     c = Comment(movie_id=movie_id, user_id=user.id, content=text, is_negative=is_negative,
                 negative_score=score, model_name=classifier.name,

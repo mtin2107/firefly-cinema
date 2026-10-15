@@ -6,7 +6,9 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from ..database import get_db
-from ..booking_rules import HOLD_CUTOFF_MINUTES, booking_out, expire_holds
+from ..booking_rules import (
+    HOLD_CUTOFF_MINUTES, booking_out, expire_holds, transfer_payment_enabled,
+)
 from ..models import Booking, BookingSeat, Showtime, User
 from ..schemas import BookingIn, BookingOut
 from ..seats import is_valid_seat, seat_price, MAX_SEATS_PER_BOOKING
@@ -35,6 +37,12 @@ def create_booking(body: BookingIn, user: User = Depends(get_current_user), db: 
     if existing_hold is not None:
         db.commit()
         raise HTTPException(409, "Bạn đang giữ chỗ cho suất này. Hãy thanh toán vé đang giữ trước khi đặt thêm.")
+    held_count = len(db.scalars(select(Booking.id).where(
+        Booking.user_id == user.id, Booking.status == "held"
+    )).all())
+    if held_count >= 2:
+        db.commit()
+        raise HTTPException(409, "Bạn đang giữ 2 vé chưa thanh toán. Hãy thanh toán hoặc chờ vé hết hạn.")
     seats = sorted(set(body.seats))
     if not 1 <= len(seats) <= MAX_SEATS_PER_BOOKING:
         raise HTTPException(400, f"Chọn từ 1 đến {MAX_SEATS_PER_BOOKING} ghế.")
@@ -80,6 +88,9 @@ def claim_transfer(booking_id: int, user: User = Depends(get_current_user), db: 
     if booking.status != "held":
         db.commit()
         raise HTTPException(409, "Vé không ở trạng thái có thể báo chuyển khoản.")
+    if not transfer_payment_enabled():
+        db.commit()
+        raise HTTPException(409, "Rạp chưa bật thanh toán chuyển khoản.")
     booking.status = "pending_verify"
     db.commit()
     db.refresh(booking)

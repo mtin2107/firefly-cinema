@@ -56,6 +56,8 @@ def confirm_booking(
     _: User = Depends(require_admin),
     db: Session = Depends(get_db),
 ):
+    expire_holds(db)
+    db.commit()
     booking = _booking_or_404(db, booking_id)
     if booking.status not in {"held", "pending_verify"}:
         raise HTTPException(409, "Vé không ở trạng thái có thể xác nhận thanh toán.")
@@ -71,6 +73,8 @@ def reject_booking(
     _: User = Depends(require_admin),
     db: Session = Depends(get_db),
 ):
+    expire_holds(db)
+    db.commit()
     booking = _booking_or_404(db, booking_id)
     if booking.status not in {"held", "pending_verify"}:
         raise HTTPException(409, "Vé không ở trạng thái có thể từ chối thanh toán.")

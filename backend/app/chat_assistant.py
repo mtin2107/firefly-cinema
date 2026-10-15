@@ -12,6 +12,7 @@ from .config import CHAT_API_KEY, CHAT_BASE_URL, CHAT_MODEL
 from .models import Movie, Showtime
 from .routers.movies import _plain, _split
 from .seats import VIP_ROWS, VIP_SURCHARGE
+from .taxonomy import GENRES
 
 logger = logging.getLogger(__name__)
 _LOCAL_TZ = ZoneInfo("Asia/Ho_Chi_Minh")
@@ -33,7 +34,10 @@ SYSTEM_PROMPT = (
 
 TOOLS = [
     {"type": "function", "function": {
-        "name": "search_movies", "description": "Tìm phim theo tên không dấu, thể loại, trạng thái chiếu; chỉ dữ liệu công khai.",
+        "name": "search_movies", "description": (
+            "Tìm phim theo tên không dấu, thể loại, trạng thái chiếu; chỉ dữ liệu công khai. "
+            f"Thể loại hợp lệ: {', '.join(GENRES)}."
+        ),
         "parameters": {"type": "object", "properties": {
             "keyword": {"type": "string"}, "genre": {"type": "string"},
             "status": {"type": "string", "enum": ["now_showing", "coming_soon", "ended"]},
@@ -62,7 +66,8 @@ def search_movies(db: Session, *, keyword=None, genre=None, status=None):
     if keyword:
         rows = [m for m in rows if _plain(str(keyword).strip()) in _plain(m.title)]
     if genre:
-        rows = [m for m in rows if str(genre).strip() in _split(m.genre)]
+        wanted = _plain(str(genre).strip())
+        rows = [m for m in rows if any(wanted in _plain(value) for value in _split(m.genre))]
     return [{
         "id": m.id, "title": m.title, "genre": m.genre,
         "duration_min": m.duration_min, "age_rating": m.age_rating,

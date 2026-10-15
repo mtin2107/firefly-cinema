@@ -33,7 +33,10 @@ const POSITION_KEY = "firefly_chat_launcher_position_v1";
 const EDGE = 10;
 const DRAG_THRESHOLD = 8;
 const clamp = (value, min, max) => Math.min(Math.max(value, min), Math.max(min, max));
-const viewportSize = () => ({ width: window.innerWidth, height: window.innerHeight });
+const viewportSize = () => ({
+  width: document.documentElement.clientWidth,
+  height: document.documentElement.clientHeight,
+});
 
 function savedPosition() {
   try {
@@ -113,9 +116,10 @@ export default function ChatWidget() {
   }, []);
 
   function pointWithinViewport(x, y) {
+    const { width, height } = viewportSize();
     return {
-      x: clamp(x, EDGE, window.innerWidth - buttonSize - EDGE),
-      y: clamp(y, EDGE, window.innerHeight - buttonSize - EDGE),
+      x: clamp(x, EDGE, width - buttonSize - EDGE),
+      y: clamp(y, EDGE, height - buttonSize - EDGE),
     };
   }
 
@@ -146,9 +150,10 @@ export default function ChatWidget() {
     const dy = event.clientY - current.startY;
     if (current.moved || Math.hypot(dx, dy) >= DRAG_THRESHOLD) {
       const finish = pointWithinViewport(current.launcherX + dx, current.launcherY + dy);
+      const { width, height } = viewportSize();
       const nextDock = {
-        side: finish.x + buttonSize / 2 <= window.innerWidth / 2 ? "left" : "right",
-        fraction: clamp((finish.y - EDGE) / Math.max(1, window.innerHeight - buttonSize - 2 * EDGE), 0, 1),
+        side: finish.x + buttonSize / 2 <= width / 2 ? "left" : "right",
+        fraction: clamp((finish.y - EDGE) / Math.max(1, height - buttonSize - 2 * EDGE), 0, 1),
       };
       setDock(nextDock);
       if (seatPage) setMovedOnSeatPage(true);
@@ -194,6 +199,8 @@ export default function ChatWidget() {
       setError(reason?.message || "Không gửi được tin nhắn. Hãy thử lại.");
     } finally { if (version === sessionVersion.current) setBusy(false); }
   }
+
+  if (!checking && user?.role === "admin") return null;
 
   return (
     <div className={`chat-widget${dragPoint ? " chat-widget--dragging" : ""}`}

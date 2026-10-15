@@ -1,4 +1,5 @@
 import json
+import logging
 import os
 import tempfile
 from datetime import date, datetime, time, timedelta
@@ -13,6 +14,9 @@ from .models import User, Movie, Showtime, Comment, Booking, BookingSeat
 from .seats import ROWS, COLS, seat_price
 from .security import hash_password
 from .classifier import classifier
+from .config import ADMIN_PASSWORD
+
+logger = logging.getLogger(__name__)
 
 DATA = Path(__file__).parent / "data" / "movies.json"
 TIMES = ["09:30", "13:15", "16:00", "19:30", "22:00"]
@@ -193,7 +197,10 @@ def seed(db: Session) -> None:
         _reset_seed_state_for_new_database(db)
         for m in json.loads(DATA.read_text(encoding="utf-8")):
             db.add(Movie(**m))
-        admin = User(full_name="Quản trị viên", email="admin@firefly.vn", password_hash=hash_password("admin123"), role="admin")
+        admin_password = ADMIN_PASSWORD or "admin123"
+        if not ADMIN_PASSWORD:
+            logger.warning("ADMIN_PASSWORD chưa được cấu hình; đang dùng mật khẩu admin mặc định cho máy dev.")
+        admin = User(full_name="Quản trị viên", email="admin@firefly.vn", password_hash=hash_password(admin_password), role="admin")
         demo = User(full_name="Nguyễn Văn Demo", email="demo@firefly.vn", password_hash=hash_password("123456"))
         db.add_all([admin, demo])
         db.flush()

@@ -12,7 +12,7 @@ os.environ["MODEL_DIR"] = "tests/__missing__/phobert-a"
 os.environ["MODEL_DIR_B"] = "tests/__missing__/phobert-b"
 os.environ["SKLEARN_MODELS"] = ""
 os.environ["ACTIVE_MODEL"] = "phobert_b"
-os.environ["SECRET_KEY"] = "t11-test-secret"
+os.environ["SECRET_KEY"] = "t20-test-secret-key-at-least-32-characters"
 
 from app.database import Base, get_db  # noqa: E402
 from app.main import app  # noqa: E402
@@ -88,6 +88,10 @@ def fake_classifier(monkeypatch):
 
 @pytest.fixture
 def client(db, fake_classifier):
+    from app.routers import auth, comments
+
+    auth._login_failures.clear_all()
+    comments._comment_limits.clear_all()
     def override_db():
         yield db
 

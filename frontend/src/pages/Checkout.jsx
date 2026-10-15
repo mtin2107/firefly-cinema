@@ -26,9 +26,12 @@ export default function Checkout() {
   const { movie, showtime } = data;
   const seats = sortSeats(state.seats);
   const total = totalPrice(seats, showtime.price);
-  const holdUntil = new Date(new Date(showtime.start_time).getTime() - 30 * 60 * 1000);
+  const holdUntil = new Date(Math.min(
+    Date.now() + 15 * 60 * 1000,
+    new Date(showtime.start_time).getTime() - 30 * 60 * 1000,
+  ));
   const holdTime = holdUntil.toLocaleTimeString("vi-VN", { hour: "2-digit", minute: "2-digit" });
-  const holdDate = holdUntil.toLocaleDateString("vi-VN", { day: "2-digit", month: "2-digit" });
+  const holdDate = holdUntil.toLocaleDateString("vi-VN", { day: "2-digit", month: "2-digit", year: "numeric" });
 
   const confirm = async () => {
     setSubmitting(true); setSubmitError("");
@@ -56,7 +59,7 @@ export default function Checkout() {
         </tbody>
       </table>
 
-      <p className="muted">Vé giữ chỗ sẽ tự hủy lúc {holdTime} ngày {holdDate} nếu chưa thanh toán (30 phút trước giờ chiếu). Thanh toán qua QR để giữ ghế chắc chắn, hoặc trả tại quầy trước giờ hủy.</p>
+      <p className="muted">Vé giữ chỗ sẽ tự hủy lúc {holdTime} ngày {holdDate} nếu chưa thanh toán (sau tối đa 15 phút hoặc 30 phút trước giờ chiếu). Thanh toán qua QR để giữ ghế chắc chắn, hoặc trả tại quầy trước giờ hủy.</p>
       {submitError && <p className="notice notice--error" role="alert">{submitError}</p>}
 
       <div className="actions">

@@ -12,10 +12,20 @@ const DB_KEY = "firefly_mockdb_v2";
 const ROOMS = ["Phòng 1", "Phòng 2", "Phòng 3", "Phòng 4"];
 const CLEANUP_MINUTES = 15;
 const HOLD_CUTOFF_MINUTES = 30;
+const HOLD_MINUTES = 15;
 const MOCK_BANK = { id: "970436", account: "123456789", name: "FIREFLY CINEMA DEMO" };
 const wait = (ms = 250) => new Promise((r) => setTimeout(r, ms));
 const clone = (x) => JSON.parse(JSON.stringify(x));
 const nowIso = () => new Date().toISOString();
+const commentUsage = new Map();
+
+function checkCommentLimit(userId) {
+  const now = Date.now();
+  const recent = (commentUsage.get(userId) ?? []).filter((value) => now - value < 60000);
+  if (recent.length >= 3) throw new ApiError("Bạn bình luận quá nhanh. Hãy thử lại sau ít phút.", 429);
+  recent.push(now);
+  commentUsage.set(userId, recent);
+}
 
 // Bộ lọc từ khóa thay cho PhoBERT khi chạy mock
 const NEGATIVE_WORDS = ["dở", "chán", "tệ", "phí tiền", "nhảm", "thất vọng", "rác", "kém", "buồn ngủ", "xàm", "lừa"];
@@ -221,14 +231,17 @@ const movieById = (id) => {
 const bookingCode = (id) => `FF${String(id).padStart(5, "0")}`;
 const holdExpiresAt = (booking) => {
   const showtime = db.showtimes.find((item) => item.id === booking.showtime_id);
-  return new Date(new Date(showtime.start_time).getTime() - HOLD_CUTOFF_MINUTES * 60000).toISOString();
+  return new Date(Math.min(
+    new Date(booking.created_at).getTime() + HOLD_MINUTES * 60000,
+    new Date(showtime.start_time).getTime() - HOLD_CUTOFF_MINUTES * 60000,
+  )).toISOString();
 };
 function expireHolds() {
   let changed = false;
-  const cutoff = Date.now() + HOLD_CUTOFF_MINUTES * 60000;
+  const now = Date.now();
   db.bookings.forEach((booking) => {
     const showtime = db.showtimes.find((item) => item.id === booking.showtime_id);
-    if (booking.status === "held" && showtime && new Date(showtime.start_time).getTime() <= cutoff) {
+    if (booking.status === "held" && showtime && new Date(holdExpiresAt(booking)).getTime() <= now) {
       booking.status = "expired";
       booking.seats = [];
       changed = true;
@@ -490,6 +503,9 @@ export const mockApi = {
       if (db.bookings.some((item) => item.user_id === user.id && item.showtime_id === st.id && item.status === "held")) {
         throw new ApiError("Bạn đang giữ chỗ cho suất này. Hãy thanh toán vé đang giữ trước khi đặt thêm.", 409);
       }
+      if (db.bookings.filter((item) => item.user_id === user.id && item.status === "held").length >= 2) {
+        throw new ApiError("Bạn đang giữ 2 vé chưa thanh toán. Hãy thanh toán hoặc chờ vé hết hạn.", 409);
+      }
       if (!seats.length || seats.length > MAX_SEATS_PER_BOOKING) throw new ApiError(`Chọn từ 1 đến ${MAX_SEATS_PER_BOOKING} ghế.`, 400);
       const taken = bookedSeats(st.id).filter((s) => seats.includes(s));
       if (taken.length) throw new ApiError(`Ghế ${taken.join(", ")} vừa có người đặt. Hãy chọn ghế khác.`, 409);
@@ -510,6 +526,7 @@ export const mockApi = {
       const booking = db.bookings.find((item) => item.id === Number(id) && item.user_id === user.id);
       if (!booking) throw new ApiError("Không tìm thấy vé.", 404);
       if (booking.status !== "held") throw new ApiError("Vé không ở trạng thái có thể báo chuyển khoản.", 409);
+      if (!MOCK_BANK.id || !MOCK_BANK.account || !MOCK_BANK.name) throw new ApiError("Rạp chưa bật thanh toán chuyển khoản.", 409);
       booking.status = "pending_verify";
       save();
       return clone(bookingOut(booking));
@@ -527,6 +544,7 @@ export const mockApi = {
       movieById(movieId);
       const text = content.trim();
       if (text.length < 2 || text.length > 1000) throw new ApiError("Bình luận cần từ 2 đến 1000 ký tự.", 400);
+      checkCommentLimit(user.id);
       const c = { id: db.seq.comment++, movie_id: Number(movieId), user_id: user.id, content: text,
         ...fakeClassify(text), model_name: "phobert_b", model_version: "phobert-B-2026-10-09-mock", human_label: null, reviewed_by: null,
         reviewed_at: null, hidden: false, created_at: nowIso() };
@@ -575,6 +593,7 @@ export const mockApi = {
       async confirm(id) {
         await wait();
         requireAdmin();
+        expireHolds();
         const booking = db.bookings.find((item) => item.id === Number(id));
         if (!booking) throw new ApiError("Không tìm thấy vé.", 404);
         if (!["held", "pending_verify"].includes(booking.status)) throw new ApiError("Vé không ở trạng thái có thể xác nhận thanh toán.", 409);
@@ -585,6 +604,7 @@ export const mockApi = {
       async reject(id) {
         await wait();
         requireAdmin();
+        expireHolds();
         const booking = db.bookings.find((item) => item.id === Number(id));
         if (!booking) throw new ApiError("Không tìm thấy vé.", 404);
         if (!["held", "pending_verify"].includes(booking.status)) throw new ApiError("Vé không ở trạng thái có thể từ chối thanh toán.", 409);

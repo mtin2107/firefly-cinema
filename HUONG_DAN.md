@@ -88,8 +88,12 @@ source venv/bin/activate
 ```bash
 pip install -r requirements.txt
 cp .env.example .env        # Windows (cmd): copy .env.example .env
+# PowerShell: tạo khóa rồi dán kết quả vào SECRET_KEY trong backend/.env
+python -c "import secrets; print(secrets.token_urlsafe(48))"
 uvicorn app.main:app --reload --port 8000
 ```
+
+`SECRET_KEY` bắt buộc khác chuỗi mặc định cũ và dài ít nhất 32 ký tự; backend sẽ từ chối khởi động nếu khóa trống hoặc yếu. Có thể đặt `ADMIN_PASSWORD` trong `backend/.env` trước lần tạo database mới; nếu để trống, dữ liệu dev vẫn dùng `admin123` và backend ghi cảnh báo. Không commit `backend/.env`.
 
 Lần chạy đầu tiên backend tự tạo file `firefly.db` (SQLite), tạo bảng và thêm dữ liệu mẫu (21 phim gồm đang chiếu, sắp chiếu và đã chiếu, lượt đặt vé mẫu để xếp hạng phim hot, suất chiếu 5 ngày tới, 2 tài khoản như bảng trên, vài bình luận).
 

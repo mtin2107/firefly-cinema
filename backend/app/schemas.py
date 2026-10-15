@@ -181,6 +181,8 @@ class MovieIn(BaseModel):
         if value is None or not value.strip():
             return None
         value = value.strip()
+        if re.fullmatch(r"/uploads/posters/[0-9a-f]{32}\.(jpg|png|webp)", value):
+            return value
         parsed = urlparse(value)
         if parsed.scheme not in {"http", "https"} or not parsed.netloc:
             raise PydanticCustomError("movie_poster_url", "Đường dẫn poster phải bắt đầu bằng http:// hoặc https://.")

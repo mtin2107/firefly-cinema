@@ -753,3 +753,8 @@ h1, h2, h3 { margin: 0; line-height: 1.15; }
   color: var(--muted); font-size: 1.2rem; line-height: 1; cursor: pointer; }
 .chat-teaser__close:hover { color: var(--text); }
 .chat-teaser button:focus-visible { outline: 2px solid var(--yellow); outline-offset: 2px; }
+
+/* T19: chọn poster từ máy; giữ nguyên bảng màu dự án. */
+.movie-form__poster-upload { gap: .5rem; }
+.movie-form__poster-upload input[type="file"] { max-width: 100%; }
+.movie-form__poster-selected { display: flex; align-items: center; flex-wrap: wrap; gap: .75rem; overflow-wrap: anywhere; }

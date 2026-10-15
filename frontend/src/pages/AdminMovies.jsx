@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { api } from "../api";
 import Poster from "../components/Poster";
 import { Empty, ErrorState, Loading } from "../components/StateViews";
@@ -19,7 +19,7 @@ const EMPTY_FORM = {
 const split = (value) => value.split(",").map((item) => item.trim()).filter(Boolean);
 const statusLabel = (value) => STATUS_OPTIONS.find((item) => item.value === value)?.label ?? value;
 
-function validate(form) {
+function validate(form, editingId, selectedPoster) {
   const errors = {};
   if (!form.title.trim()) errors.title = "Tên phim không được để trống.";
   else if (form.title.trim().length > 200) errors.title = "Tên phim không được dài quá 200 ký tự.";
@@ -28,7 +28,8 @@ function validate(form) {
   if (!form.release_date) errors.release_date = "Hãy nhập ngày phát hành hợp lệ.";
   if (!/^#[0-9a-f]{6}$/i.test(form.poster_bg)) errors.poster_bg = "Màu nền phải có dạng #rrggbb.";
   if (!/^#[0-9a-f]{6}$/i.test(form.poster_fg)) errors.poster_fg = "Màu chữ phải có dạng #rrggbb.";
-  if (form.poster_url && !/^https?:\/\//i.test(form.poster_url)) errors.poster_url = "Đường dẫn poster phải bắt đầu bằng http:// hoặc https://.";
+  if (!editingId && !selectedPoster && !form.poster_url.trim()) errors.poster_url = "Hãy chọn ảnh poster hoặc dán đường dẫn poster.";
+  if (!selectedPoster && form.poster_url && !/^(https?:\/\/|\/uploads\/posters\/[0-9a-f]{32}\.(jpg|png|webp)$|data:image\/(jpeg|png|webp);base64,)/i.test(form.poster_url)) errors.poster_url = "Đường dẫn poster phải bắt đầu bằng http:// hoặc https://.";
   return errors;
 }
 
@@ -41,6 +42,47 @@ export default function AdminMovies() {
   const [actionError, setActionError] = useState("");
   const [notice, setNotice] = useState("");
   const [saving, setSaving] = useState(false);
+  const [selectedPoster, setSelectedPoster] = useState(null);
+  const fileInputRef = useRef(null);
+  const fileRequestRef = useRef(0);
+
+  const clearPosterSelection = () => {
+    fileRequestRef.current += 1;
+    setSelectedPoster(null);
+    if (fileInputRef.current) fileInputRef.current.value = "";
+    setFieldErrors((current) => ({ ...current, poster_file: "" }));
+  };
+
+  const selectPoster = (event) => {
+    const file = event.target.files?.[0];
+    clearPosterSelection();
+    if (!file) return;
+    const requestId = fileRequestRef.current;
+    if (!["image/jpeg", "image/png", "image/webp"].includes(file.type)) {
+      setFieldErrors((current) => ({ ...current, poster_file: "Chỉ nhận ảnh JPG, PNG hoặc WebP." }));
+      return;
+    }
+    if (file.size > 2 * 1024 * 1024) {
+      setFieldErrors((current) => ({ ...current, poster_file: "Ảnh poster tối đa 2 MB." }));
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = () => {
+      if (requestId !== fileRequestRef.current) return;
+      const dataUrl = reader.result;
+      if (typeof dataUrl !== "string" || !dataUrl.startsWith("data:")) {
+        setFieldErrors((current) => ({ ...current, poster_file: "Ảnh poster không hợp lệ." }));
+        return;
+      }
+      setSelectedPoster({ filename: file.name, dataUrl });
+      setFieldErrors((current) => ({ ...current, poster_url: "", poster_file: "" }));
+      setActionError("");
+    };
+    reader.onerror = () => {
+      if (requestId === fileRequestRef.current) setFieldErrors((current) => ({ ...current, poster_file: "Không đọc được ảnh poster. Hãy chọn lại ảnh." }));
+    };
+    reader.readAsDataURL(file);
+  };
 
   const load = () => {
     setLoadError("");
@@ -65,12 +107,14 @@ export default function AdminMovies() {
 
   const resetForm = () => {
     setForm(EMPTY_FORM);
+    clearPosterSelection();
     setEditingId(null);
     setFieldErrors({});
     setActionError("");
   };
 
   const startEdit = (movie) => {
+    clearPosterSelection();
     setEditingId(movie.id);
     setForm({
       title: movie.title,
@@ -96,7 +140,7 @@ export default function AdminMovies() {
 
   const submit = async (event) => {
     event.preventDefault();
-    const errors = validate(form);
+    const errors = validate(form, editingId, selectedPoster);
     setFieldErrors(errors);
     if (Object.keys(errors).length) return;
     setSaving(true);
@@ -104,6 +148,11 @@ export default function AdminMovies() {
     setNotice("");
     const payload = { ...form, duration_min: Number(form.duration_min), poster_url: form.poster_url || null };
     try {
+      if (selectedPoster) {
+        const data = selectedPoster.dataUrl.split(",")[1];
+        const uploaded = await api.admin.posters.upload({ filename: selectedPoster.filename, data });
+        payload.poster_url = uploaded.poster_url; // ảnh chọn từ máy luôn được ưu tiên
+      }
       if (editingId) await api.admin.movies.update(editingId, payload);
       else await api.admin.movies.create(payload);
       setNotice(editingId ? "Đã cập nhật phim." : "Đã thêm phim mới.");
@@ -112,6 +161,7 @@ export default function AdminMovies() {
       setMovies(next);
     } catch (error) {
       setActionError(error.message);
+      if (selectedPoster) setFieldErrors((current) => ({ ...current, poster_file: error.message }));
     } finally {
       setSaving(false);
     }
@@ -131,7 +181,7 @@ export default function AdminMovies() {
     }
   };
 
-  const preview = { ...form, genre: form.genre.join(", ") };
+  const preview = { ...form, poster_url: selectedPoster?.dataUrl || form.poster_url, genre: form.genre.join(", ") };
 
   return (
     <div className="container admin-movies">
@@ -178,7 +228,13 @@ export default function AdminMovies() {
               <label className="field"><span>Diễn viên</span><input value={form.cast} maxLength={255} onChange={(event) => update("cast", event.target.value)} /></label>
             </div>
             <label className="field"><span>Mô tả</span><textarea rows="4" value={form.description} onChange={(event) => update("description", event.target.value)} /></label>
-            <label className="field"><span>Đường dẫn poster (không bắt buộc)</span><input type="url" placeholder="https://..." value={form.poster_url} onChange={(event) => update("poster_url", event.target.value)} aria-invalid={Boolean(fieldErrors.poster_url)} />{fieldErrors.poster_url && <span className="field__error">{fieldErrors.poster_url}</span>}</label>
+            <label className="field"><span>{editingId ? "Đường dẫn poster (không bắt buộc)" : "Đường dẫn poster (hoặc chọn ảnh từ máy) *"}</span><input type="url" placeholder="https://..." value={form.poster_url} onChange={(event) => update("poster_url", event.target.value)} aria-invalid={Boolean(fieldErrors.poster_url)} />{fieldErrors.poster_url && <span className="field__error">{fieldErrors.poster_url}</span>}</label>
+            <div className="field movie-form__poster-upload">
+              <label htmlFor="movie-poster-file">Chọn ảnh poster từ máy</label>
+              <input ref={fileInputRef} id="movie-poster-file" type="file" accept="image/jpeg,image/png,image/webp" onChange={selectPoster} aria-invalid={Boolean(fieldErrors.poster_file)} aria-describedby={fieldErrors.poster_file ? "movie-poster-file-error" : undefined} />
+              {selectedPoster && <div className="movie-form__poster-selected"><span>Đã chọn: {selectedPoster.filename}</span><button type="button" className="btn btn--ghost btn--sm" onClick={clearPosterSelection}>Bỏ ảnh đã chọn</button></div>}
+              {fieldErrors.poster_file && <span id="movie-poster-file-error" className="field__error" role="alert">{fieldErrors.poster_file}</span>}
+            </div>
             <div className="movie-form__row movie-form__colors">
               <label className="field"><span>Màu nền poster *</span><div className="color-input"><input type="color" value={form.poster_bg} onChange={(event) => update("poster_bg", event.target.value)} /><input value={form.poster_bg} onChange={(event) => update("poster_bg", event.target.value)} /></div>{fieldErrors.poster_bg && <span className="field__error">{fieldErrors.poster_bg}</span>}</label>
               <label className="field"><span>Màu chữ poster *</span><div className="color-input"><input type="color" value={form.poster_fg} onChange={(event) => update("poster_fg", event.target.value)} /><input value={form.poster_fg} onChange={(event) => update("poster_fg", event.target.value)} /></div>{fieldErrors.poster_fg && <span className="field__error">{fieldErrors.poster_fg}</span>}</label>

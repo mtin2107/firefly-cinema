@@ -443,3 +443,11 @@ Sơ đồ ghế: hàng A–H, mỗi hàng 12 ghế, hàng F–H là VIP (+20.000
 4. Muốn đổi nhà cung cấp (ví dụ Groq) chỉ sửa `CHAT_BASE_URL`, `CHAT_API_KEY` và `CHAT_MODEL` theo tài liệu chính thức của bên đó rồi **restart backend**; không sửa frontend. Khi dùng nhà cung cấp khác phải tự kiểm chứng hỗ trợ `chat.completions` và function calling.
 5. Trong Google AI Studio xem trang **Rate limits** của chính project để đối chiếu RPM/TPM/RPD và model có khả dụng. Đây là hạn mức động theo project, không phải mức cố định trong code. Mức miễn phí có thể thay đổi và nội dung gửi API free tier có thể được nhà cung cấp sử dụng cải thiện sản phẩm. Không nhập thông tin cá nhân vào chatbot.
 6. Trợ lý chỉ truy vấn phim, các suất tương lai, giá ghế; không có chức năng giữ chỗ, đặt vé, thanh toán, lấy thông tin tài khoản hoặc lưu hội thoại vào DB. Nội dung AI có thể sai; khách cần xác nhận giá và suất trước khi đặt.
+
+
+## T19 — Gắn poster ảnh từ máy (không đổi schema)
+Đăng nhập quản trị, mở **Quản lý phim**. Có thể nhập **Đường dẫn poster** hoặc bấm **Chọn ảnh poster từ máy** (JPG, PNG, WebP tối đa 2 MB). Ảnh được xem trước ngay và có nút **Bỏ ảnh đã chọn**. Nếu cả hai được nhập thì ảnh tải từ máy được ưu tiên. **Thêm phim mới bắt buộc poster**; sửa phim cũ vẫn có thể giữ trống. Hai ô màu làm poster dự phòng vẫn được giữ.
+
+Backend nhận JSON base64 tại `POST /api/admin/posters` (không dùng multipart), trả URL `/uploads/posters/<uuid>.<jpg|png|webp>`. Ảnh được lưu trong `backend/uploads/posters/`, không đưa vào Git. Biến `UPLOAD_DIR=uploads` trong `backend/.env` chọn thư mục ảnh (đường dẫn tương đối tính từ `backend`, hoặc tuyệt đối); cần khởi động lại backend sau khi đổi. Cấp quyền ghi cho thư mục và sao lưu ảnh cùng SQLite khi cần chuyển máy. Ảnh cũ không được tự xóa khi đổi poster/xóa phim.
+
+Khi kiểm thử, **không chạy backend với `backend/firefly.db` thật**. Đặt `DATABASE_URL` trỏ SQLite tạm, `UPLOAD_DIR` trỏ thư mục tạm, và giữ các biến đó khi khởi động/pytest. Mock có giới hạn riêng **500 KB** để tránh làm đầy localStorage; dùng `VITE_USE_MOCK=true` để thử.

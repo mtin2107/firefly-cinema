@@ -288,6 +288,28 @@ function ranking(collection) {
   return rank;
 }
 
+const POSTER_PATH = /^\/uploads\/posters\/[0-9a-f]{32}\.(jpg|png|webp)$/;
+const POSTER_DATA_URL = /^data:image\/(jpeg|png|webp);base64,[A-Za-z0-9+/]+={0,2}$/;
+
+function decodePosterBase64(data) {
+  if (typeof data !== "string" || !data || data.length % 4 !== 0 || !/^[A-Za-z0-9+/]+={0,2}$/.test(data)) {
+    throw new ApiError("Ảnh poster không hợp lệ.", 422);
+  }
+  try {
+    return atob(data);
+  } catch {
+    throw new ApiError("Ảnh poster không hợp lệ.", 422);
+  }
+}
+
+function posterMime(binary) {
+  const codes = [...binary.slice(0, 12)].map((ch) => ch.charCodeAt(0));
+  if (codes[0] === 0xff && codes[1] === 0xd8 && codes[2] === 0xff) return "image/jpeg";
+  if ([137, 80, 78, 71, 13, 10, 26, 10].every((v, i) => codes[i] === v)) return "image/png";
+  if ([82, 73, 70, 70].every((v, i) => codes[i] === v) && [87, 69, 66, 80].every((v, i) => codes[i + 8] === v)) return "image/webp";
+  throw new ApiError("Chỉ nhận ảnh JPG, PNG hoặc WebP.", 422);
+}
+
 function validateMovie(payload) {
   const value = {
     ...payload,
@@ -317,10 +339,10 @@ function validateMovie(payload) {
   const badFormat = value.formats.find((item) => !FORMAT_LABELS.includes(item));
   if (badFormat) fail(`Định dạng không hợp lệ: ${badFormat}.`);
   if (!/^#[0-9a-f]{6}$/.test(value.poster_bg) || !/^#[0-9a-f]{6}$/.test(value.poster_fg)) fail("Màu poster phải có dạng #rrggbb.");
-  if (value.poster_url) {
+  if (value.poster_url && !POSTER_PATH.test(value.poster_url) && !POSTER_DATA_URL.test(value.poster_url)) {
     try {
       const url = new URL(value.poster_url);
-      if (!["http:", "https:"].includes(url.protocol)) fail("Đường dẫn poster phải bắt đầu bằng http:// hoặc https://.");
+      if (!["http:", "https:"].includes(url.protocol) || !url.host) fail("Đường dẫn poster phải bắt đầu bằng http:// hoặc https://.");
     } catch { fail("Đường dẫn poster phải bắt đầu bằng http:// hoặc https://."); }
   }
   return value;
@@ -513,6 +535,16 @@ export const mockApi = {
     },
   },
   admin: {
+    posters: {
+      async upload({ filename, data }) {
+        await wait();
+        requireAdmin();
+        const binary = decodePosterBase64(data);
+        if (binary.length > 500 * 1024) throw new ApiError("Ảnh poster tối đa 500 KB.", 422);
+        const mime = posterMime(binary); // không tin filename; cùng logic với backend
+        return { poster_url: `data:${mime};base64,${data}` };
+      },
+    },
     async predict(text) {
       await wait(600);
       requireAdmin();
@@ -638,6 +670,7 @@ export const mockApi = {
         await wait();
         if (currentUser().role !== "admin") throw new ApiError("Chỉ quản trị viên mới xem được trang này.", 403);
         const value = validateMovie(payload);
+        if (!value.poster_url) throw new ApiError("Hãy chọn ảnh poster hoặc dán đường dẫn poster.", 422);
         const movie = { id: db.seq.movie++, ...value, genre: value.genre.join(", "), formats: value.formats.join(", "), score: 0 };
         db.movies.push(movie); save();
         return clone(movie);

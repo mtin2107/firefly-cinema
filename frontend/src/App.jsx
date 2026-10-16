@@ -15,6 +15,7 @@ import AdminMovies from "./pages/AdminMovies";
 import AdminShowtimes from "./pages/AdminShowtimes";
 import AdminModelCompare from "./pages/AdminModelCompare";
 import AdminBookings from "./pages/AdminBookings";
+import AdminSentiment from "./pages/AdminSentiment";
 import NotFound from "./pages/NotFound";
 import Explore from "./pages/Explore";
 
@@ -42,6 +43,7 @@ export default function App() {
               <Route path="/quan-tri/suat-chieu" element={<AdminShowtimes />} />
               <Route path="/quan-tri/binh-luan" element={<AdminComments />} />
               <Route path="/quan-tri/so-sanh-mo-hinh" element={<AdminModelCompare />} />
+              <Route path="/quan-tri/thong-ke" element={<AdminSentiment />} />
             </Route>
             <Route path="*" element={<NotFound />} />
           </Routes>

@@ -51,6 +51,7 @@ export const realApi = {
       request(`/api/movies/${movieId}/comments`, { method: "POST", body: { content } }),
   },
   admin: {
+    sentiment: (days = 30) => request(`/api/admin/sentiment?days=${days}`),
     posters: {
       upload: (payload) => request("/api/admin/posters", { method: "POST", body: payload }),
     },

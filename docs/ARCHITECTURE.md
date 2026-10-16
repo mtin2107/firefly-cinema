@@ -196,6 +196,7 @@ Ngoài máy: Google Drive `MyDrive/thesis/data/…`, `MyDrive/thesis_results/…
 - `comments` giữ nguyên kết quả model ở `is_negative`, `negative_score`, `model_name`; nhãn người duyệt nằm riêng ở `human_label` (`0` hoặc `1`), kèm `reviewed_by`, `reviewed_at` và cờ `hidden`.
 - Nhãn hiệu lực công khai là `human_label` nếu đã duyệt, ngược lại là `is_negative`; bình luận `hidden=true` không được trả về API công khai.
 - API admin bình luận dùng `require_admin`, hỗ trợ phân trang/lọc trạng thái duyệt, confirm/relabel/hide/unhide, thống kê TP/FP/TN/FN và CSV UTF-8 BOM gồm đúng `text,text_norm,label`.
+- `GET /api/admin/sentiment?days=30` dùng `require_admin`, nhận `days` từ 1 đến 365 và tổng hợp bằng SQL `GROUP BY`. Cả `summary`, `movies`, `daily` dùng nhãn hiệu lực (`human_label` nếu đã duyệt, nếu chưa dùng `is_negative`) và tính cả bình luận đã ẩn. Khoảng ngày gồm hôm nay cùng `days - 1` ngày trước: mốc đầu 00:00 ngày đầu được tính, mốc cuối 00:00 ngày mai không được tính, theo giờ địa phương như `created_at` đang lưu; `daily` luôn đủ đúng số ngày và lấp ngày trống bằng 0.
 
 ### 2.9. Giữ chỗ và thanh toán vé
 

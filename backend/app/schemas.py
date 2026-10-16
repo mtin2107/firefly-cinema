@@ -345,6 +345,36 @@ class AdminCommentStats(BaseModel):
     fn: int
 
 
+class SentimentSummary(BaseModel):
+    model_config = ConfigDict(protected_namespaces=())
+    total: int
+    negative: int
+    negative_ratio: float
+    reviewed: int
+    model_human_accuracy: float
+
+
+class SentimentMovie(BaseModel):
+    movie_id: int
+    title: str
+    total: int
+    negative: int
+    negative_ratio: float
+    avg_negative_score: float
+
+
+class SentimentDaily(BaseModel):
+    date: str
+    total: int
+    negative: int
+
+
+class AdminSentimentOut(BaseModel):
+    summary: SentimentSummary
+    movies: list[SentimentMovie]
+    daily: list[SentimentDaily]
+
+
 class AdminPredictIn(BaseModel):
     text: str = Field(max_length=1000)
 

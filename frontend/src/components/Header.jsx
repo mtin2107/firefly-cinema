@@ -80,6 +80,7 @@ export default function Header() {
                 {user.role === "admin" && <li><NavLink to="/quan-tri/suat-chieu">Quản lý suất chiếu</NavLink></li>}
                 {user.role === "admin" && <li><NavLink to="/quan-tri/binh-luan">Kiểm duyệt bình luận</NavLink></li>}
                 {user.role === "admin" && <li><NavLink to="/quan-tri/so-sanh-mo-hinh">So sánh mô hình</NavLink></li>}
+                {user.role === "admin" && <li><NavLink to="/quan-tri/thong-ke">Thống kê cảm xúc</NavLink></li>}
                 <li><button type="button" className="dd__item-btn" onClick={() => { logout(); navigate("/"); }}>Đăng xuất</button></li>
               </ul>
             </Dropdown>

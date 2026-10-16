@@ -590,6 +590,65 @@ export const mockApi = {
     },
   },
   admin: {
+    async sentiment(days = 30) {
+      await wait();
+      requireAdmin();
+      const range = Number(days);
+      if (!Number.isInteger(range) || range < 1 || range > 365) {
+        throw new ApiError("Số ngày thống kê phải từ 1 đến 365.", 422);
+      }
+      const dateKey = (value) => {
+        const date = new Date(value);
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, "0");
+        const day = String(date.getDate()).padStart(2, "0");
+        return `${year}-${month}-${day}`;
+      };
+      const today = new Date();
+      const dates = Array.from({ length: range }, (_, index) => {
+        const date = new Date(today.getFullYear(), today.getMonth(), today.getDate() - (range - 1 - index));
+        return dateKey(date);
+      });
+      const allowedDates = new Set(dates);
+      const rows = db.comments.filter((comment) => allowedDates.has(dateKey(comment.created_at)));
+      const effectiveNegative = (comment) => comment.human_label === 0 || comment.human_label === 1
+        ? comment.human_label === 1 : Boolean(comment.is_negative);
+      const reviewed = rows.filter((comment) => comment.human_label === 0 || comment.human_label === 1);
+      const negative = rows.filter(effectiveNegative).length;
+      const movieGroups = new Map();
+      rows.forEach((comment) => {
+        const group = movieGroups.get(comment.movie_id) ?? { total: 0, negative: 0, score: 0 };
+        group.total += 1;
+        group.negative += effectiveNegative(comment) ? 1 : 0;
+        group.score += comment.negative_score;
+        movieGroups.set(comment.movie_id, group);
+      });
+      const movies = [...movieGroups.entries()].map(([movieId, group]) => ({
+        movie_id: movieId,
+        title: movieById(movieId).title,
+        total: group.total,
+        negative: group.negative,
+        negative_ratio: group.negative / group.total,
+        avg_negative_score: group.score / group.total,
+      })).sort((a, b) => b.negative_ratio - a.negative_ratio || b.total - a.total
+        || a.title.localeCompare(b.title, "vi") || a.movie_id - b.movie_id);
+      const daily = dates.map((date) => {
+        const dateRows = rows.filter((comment) => dateKey(comment.created_at) === date);
+        return { date, total: dateRows.length, negative: dateRows.filter(effectiveNegative).length };
+      });
+      const agree = reviewed.filter((comment) => Boolean(comment.is_negative) === (comment.human_label === 1)).length;
+      return clone({
+        summary: {
+          total: rows.length,
+          negative,
+          negative_ratio: rows.length ? negative / rows.length : 0,
+          reviewed: reviewed.length,
+          model_human_accuracy: reviewed.length ? agree / reviewed.length : 0,
+        },
+        movies,
+        daily,
+      });
+    },
     posters: {
       async upload({ filename, data }) {
         await wait();

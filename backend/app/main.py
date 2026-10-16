@@ -9,7 +9,7 @@ from fastapi.staticfiles import StaticFiles
 from .classifier import classifier
 from .config import FRONTEND_ORIGINS, UPLOAD_DIR
 from .database import Base, engine, SessionLocal
-from .routers import auth, movies, bookings, comments, admin_bookings, admin_movies, admin_predict, admin_showtimes, admin_posters, chat
+from .routers import auth, movies, bookings, comments, admin_bookings, admin_movies, admin_predict, admin_sentiment, admin_showtimes, admin_posters, chat
 from .seed import seed
 
 
@@ -73,6 +73,7 @@ app.include_router(admin_posters.router)
 app.include_router(admin_bookings.router)
 app.include_router(admin_showtimes.router)
 app.include_router(admin_predict.router)
+app.include_router(admin_sentiment.router)
 app.include_router(chat.router)
 
 

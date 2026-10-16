@@ -8,7 +8,7 @@ import { ApiError } from "./http";
 import { ROWS, COLS, totalPrice, MAX_SEATS_PER_BOOKING } from "../utils/seats";
 import { AGE_RATINGS, COUNTRY_LABELS, FORMAT_LABELS, GENRE_LABELS } from "../utils/taxonomy";
 
-const DB_KEY = "firefly_mockdb_v2";
+const DB_KEY = "firefly_mockdb_v3";
 const ROOMS = ["Phòng 1", "Phòng 2", "Phòng 3", "Phòng 4"];
 const CLEANUP_MINUTES = 15;
 const HOLD_CUTOFF_MINUTES = 30;
@@ -137,30 +137,67 @@ function createDb() {
     { id: 1, full_name: "Quản trị viên", email: "admin@firefly.vn", password: "admin123", role: "admin" },
     { id: 2, full_name: "Nguyễn Văn Demo", email: "demo@firefly.vn", password: "123456", role: "user" },
   ];
+  // [movie, nội dung, ngày lùi, giờ lùi, duyệt]; đồng bộ demo_comments.json.
   const sample = [
-    [1, 2, "Xem xong muốn gọi điện về cho mẹ liền. Cảnh cuối trên toa tàu quá đẹp."],
-    [1, 2, "Phim dài lê thê, nửa đầu buồn ngủ thật sự, phí tiền vé."],
-    [4, 2, "Con mình 6 tuổi xem cười suốt, đoạn ở chợ Bến Thành dễ thương lắm."],
-    [2, 2, "Kịch bản nhảm, hù dọa toàn tiếng động lớn, thất vọng."],
-    [3, 2, "Cảnh lũ quay rất thật, âm thanh rạp này nghe đã."],
-    [9, 2, "Nhạc phim hay muốn khóc, xem xong về nghe lại cả tối."],
-    [9, 2, "Hình ảnh đẹp, đoạn diễn cuối nổi da gà."],
-    [10, 2, "Kỹ xạo ổn nhưng kịch bản hơi kém, đoạn giữa xàm quá."],
-    [8, 2, "Không khí ngột ngạt đúng chất, coi xong không dám đi tàu đêm."],
-    [12, 2, "Phục trang đẹp, chuyện tình cảm động."],
-    [5, 2, "Hài nhạt, cười được đúng hai lần, khá thất vọng."],
-    [18, 2, "Mấy bé đá bóng dễ thương, cả rạp vỗ tay đoạn cuối."],
+    [1, "Cảnh cuối trên toa tàu đẹp và ấm áp, xem xong chỉ muốn gọi về cho mẹ.", 0, 2, "confirm"],
+    [1, "Diễn xuất tự nhiên, câu chuyện gia đình kể nhẹ nhàng mà vẫn xúc động.", 2, 4],
+    [1, "Phần hình ảnh rất thơ, riêng đoạn giữa hơi chậm một chút.", 5, 1],
+    [1, "Phim dài lê thê, nửa đầu buồn ngủ thật sự, phí tiền vé.", 9, 3],
+    [1, "Nhạc nền vừa đủ, không lấn át lời thoại và kết phim có dư âm.", 14, 5],
+    [2, "Kịch bản nhảm, hù dọa chỉ dựa vào tiếng động lớn nên rất thất vọng.", 1, 1, "confirm"],
+    [2, "Tưởng đáng sợ lắm, ai ngờ mình ngủ ngon được nửa phim, thật tuyệt vời.", 3, 6, "opposite"],
+    [2, "Nhân vật xử lý vô lý, đoạn cuối đoán được từ quá sớm.", 6, 2],
+    [2, "Âm thanh quá to nhưng không tạo được cảm giác sợ, xem khá mệt.", 10, 7],
+    [2, "Poster hấp dẫn hơn nội dung, bỏ phí một ý tưởng có tiềm năng.", 15, 4],
+    [3, "Cảnh cứu hộ giữa dòng nước quay rất thật, âm thanh trong rạp nghe đã.", 0, 8],
+    [3, "Nhịp phim chắc, các thành viên trong đội đều có vai trò rõ ràng.", 4, 3, "confirm"],
+    [3, "Đoạn mở đầu hơi nhiều lời giải thích nhưng về sau cuốn hơn hẳn.", 7, 5],
+    [3, "Một vài cảnh kỹ xảo nước còn giả, bù lại diễn xuất rất thuyết phục.", 11, 2],
+    [3, "Kết thúc vội và thiếu cảm xúc, mình thấy khá thất vọng.", 16, 6],
+    [4, "Con mình cười suốt, chú mèo đáng yêu và màu phim rất tươi.", 1, 5],
+    [4, "Một bộ phim gia đình dễ thương, người lớn xem cùng trẻ nhỏ vẫn vui.", 3, 2, "confirm"],
+    [4, "Đoạn ở chợ Bến Thành nhiều chi tiết vui, lồng tiếng nghe tự nhiên.", 8, 4],
+    [4, "Cốt truyện đơn giản nhưng kể duyên, bé nhà mình muốn xem lại.", 12, 1],
+    [4, "Nhạc vui tai, hình ảnh sáng và thông điệp về gia đình rất vừa vặn.", 14, 8],
+    [5, "Hài nhạt, cười được đúng hai lần, càng về cuối càng chán.", 2, 3, "confirm"],
+    [5, "Đúng là một đêm không ngủ, vì mình cứ chờ mãi xem khi nào phim mới hay.", 4, 7, "opposite"],
+    [5, "Các mảng miếng lặp lại, nhân vật nói nhiều mà câu chuyện không tiến lên.", 6, 5],
+    [5, "Dàn diễn viên có duyên nhưng kịch bản rời rạc và đoạn kết quá gượng.", 10, 2],
+    [5, "Có vài câu thoại vui, xem giải trí cuối tuần cũng tạm ổn.", 13, 6],
+    [9, "Nhạc phim hay, đoạn biểu diễn cuối làm mình nổi da gà.", 0, 6],
+    [9, "Màu sắc đẹp và tình bạn của nhóm được xây dựng rất chân thành.", 5, 8, "confirm"],
+    [9, "Bài hát chính bắt tai nhưng hai bài ở giữa hơi giống nhau.", 7, 1],
+    [9, "Nửa đầu chậm và vài đoạn hội thoại dài khiến mình buồn ngủ.", 11, 4],
+    [9, "Kết phim trọn vẹn, phần hòa âm ở rạp nghe rất đã.", 16, 2],
   ];
-  const comments = sample.map(([movie_id, user_id, content], i) => ({
-    id: i + 1, movie_id, user_id, content, ...fakeClassify(content),
-    model_name: "phobert_b", model_version: "phobert-B-2026-10-09-mock", human_label: null, reviewed_by: null, reviewed_at: null, hidden: false,
-    created_at: new Date(Date.now() - (i + 1) * 3600 * 1000 * 5).toISOString(),
-  }));
+  const comments = sample.map(([movie_id, content, daysAgo, hoursAgo, review], i) => {
+    const prediction = fakeClassify(content);
+    const createdAt = new Date(Date.now() - (daysAgo * 24 + hoursAgo) * 3600 * 1000);
+    const humanLabel = review === "confirm" ? Number(prediction.is_negative)
+      : review === "opposite" ? Number(!prediction.is_negative) : null;
+    return {
+      id: i + 1, movie_id, user_id: 2, content, ...prediction,
+      model_name: "phobert_b", model_version: "phobert-B-demo-mock",
+      human_label: humanLabel, reviewed_by: humanLabel === null ? null : 1,
+      reviewed_at: humanLabel === null ? null : new Date(createdAt.getTime() + 3600000).toISOString(),
+      hidden: false, created_at: createdAt.toISOString(),
+    };
+  });
   const showtimes = buildShowtimes();
+  const bookings = [
+    { id: 1, user_id: 2, showtime_id: showtimes[0].id, seats: ["A1", "A2"],
+      total: totalPrice(["A1", "A2"], showtimes[0].price), status: "paid",
+      created_at: new Date(Date.now() - 2 * 86400000).toISOString() },
+    { id: 2, user_id: 2, showtime_id: showtimes[1].id, seats: ["A3", "A4"],
+      total: totalPrice(["A3", "A4"], showtimes[1].price), status: "pending_verify",
+      created_at: new Date(Date.now() - 4 * 60000).toISOString() },
+    { id: 3, user_id: 2, showtime_id: showtimes[2].id, seats: [], total: 0, status: "expired",
+      created_at: new Date(Date.now() - (HOLD_MINUTES + 1) * 60000).toISOString() },
+  ];
   return {
-    users, movies: clone(MOVIES), comments, bookings: [], showtimes,
+    users, movies: clone(MOVIES), comments, bookings, showtimes,
     adminShowtimeIds: [],
-    seq: { user: 3, movie: Math.max(...MOVIES.map((m) => m.id)) + 1, comment: 100, booking: 1, showtime: Math.max(...showtimes.map((item) => item.id), 0) + 1 },
+    seq: { user: 3, movie: Math.max(...MOVIES.map((m) => m.id)) + 1, comment: 31, booking: 4, showtime: Math.max(...showtimes.map((item) => item.id), 0) + 1 },
   };
 }
 
@@ -568,14 +605,27 @@ export const mockApi = {
       requireAdmin();
       const value = String(text ?? "").trim();
       if (!value) throw new ApiError("Nội dung cần chấm điểm không được để trống.", 422);
-      const prediction = fakeClassify(value);
-      return [{
-        model: "phobert_b",
-        version: "phobert-B-2026-10-09-mock",
-        label: prediction.is_negative ? "tieu_cuc" : "binh_thuong",
-        score: prediction.negative_score,
-        ms: 0.2,
-      }];
+      const predictionB = fakeClassify(value);
+      const isLeTheSample = normalizeComment(value).includes("dài lê thê");
+      const predictionA = isLeTheSample
+        ? { is_negative: false, negative_score: 0.0485 }
+        : predictionB;
+      return [
+        {
+          model: "phobert",
+          version: "phobert-A-demo-mock",
+          label: predictionA.is_negative ? "tieu_cuc" : "binh_thuong",
+          score: predictionA.negative_score,
+          ms: 0.2,
+        },
+        {
+          model: "phobert_b",
+          version: "phobert-B-demo-mock",
+          label: predictionB.is_negative ? "tieu_cuc" : "binh_thuong",
+          score: predictionB.negative_score,
+          ms: 0.2,
+        },
+      ];
     },
     bookings: {
       async list(filters = {}) {

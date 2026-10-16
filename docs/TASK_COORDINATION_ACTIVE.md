@@ -32,17 +32,17 @@ Trước khi áp dụng workflow: giao diện React đầy đủ (`giao-dien-v1`
 
 ## 4. Current Project Status
 ```
-Overall Status: CLAUDE_REVIEW
-Phase: T19 DONE / CLOSED — merge c3f70df VERIFIED; T20 Fix Round 1 đã triển khai, chờ Claude review Round 2; T15 READY_FOR_HANDOFF (song song)
-Current Active Task: T20 — CLAUDE_REVIEW
+Overall Status: PO_REVIEW
+Phase: T12 Claude Round 2 PASS_WITH_TODO, chờ PO review (AC-02); T21 READY_FOR_HANDOFF
+Current Active Task: T12 — PO_REVIEW
 Ngày bắt đầu sản phẩm: 05/10/2026 · Hạn: 01/11/2026
 ```
 
 ## 5. Current Active Task
-**T20 — CLAUDE_REVIEW / ROUND 2 PENDING.** Codex đã sửa RF-01 và chạy lại gate trên nhánh `task/T20-gia-co`; report: `reports/2026-10-16/codex_fix_T20_round1_2026-10-16.md`. Chờ Claude xác minh độc lập. T15 vẫn **READY_FOR_HANDOFF**, được phép chạy song song trên Colab theo ngoại lệ task ML.
+**T12 — PO_REVIEW.** Claude Round 2 **PASS_WITH_TODO** trên `1ca55f9`: RF-01, RF-02 CLOSED / VERIFIED BY CLAUDE (probe uvicorn giữ DB tạm → reset từ chối bằng tiếng Việt, DB và sidecar không đổi). AC-01/03/04/05 PASS, AC-02 chờ PO. TODO-01 (Medium, PO quyết định trước AC-02), TODO-02..04 Low. Report: `reports/2026-10-16/claude_review_T12_round2_PASS_WITH_TODO_2026-10-16.md`.
 
 ## 6. Current Task Record
-Không có task đang active. Task record kế tiếp: [docs/tasks/T20.md](tasks/T20.md) và [docs/tasks/T15.md](tasks/T15.md).
+Task record đang active: [docs/tasks/T12.md](tasks/T12.md).
 
 ## 7. Roadmap và trạng thái
 | ID | Task | Loại | Tuần | Phụ thuộc | Task Record | Trạng thái |
@@ -59,7 +59,7 @@ Không có task đang active. Task record kế tiếp: [docs/tasks/T20.md](tasks
 | T09 | Train PhoBERT phần B | ML | 3 | T08 | [T09.md](tasks/T09.md) | DONE / CLOSED (Claude PASS_WITH_TODO; PO APPROVED; AC 6/6; DoD MET theo PO; RF 0; blocker 0; TODO 7/7 dispositioned; TODO-02 RESOLVED 10/10/2026 theo PO, notebook `PO_ATTESTED`; merge `27c364e`; T09_MERGE_VERIFIED) |
 | T10 | Gắn model B vào web | Web | 3 | T07, T09 | [T10.md](tasks/T10.md) | DONE / CLOSED — PO APPROVED_WITH_NOTES; Claude Final PASS_WITH_TODO; AC 7/7; Technical DoD MET; RF 0; fast-forward merge + annotated tag `phobert-B` VERIFIED tại `857a8272` |
 | T11 | Kiểm thử tự động và sửa lỗi | Web | 4 | T04–T10 | [T11.md](tasks/T11.md) | DONE / CLOSED — Claude PASS_WITH_TODO; PO APPROVED_WITH_NOTES; AC 6/6; DoD MET; RF 0; merge `06dd44f0` VERIFIED |
-| T12 | Dữ liệu demo và kịch bản bảo vệ | Web | 4 | T10, T20 | [T12.md](tasks/T12.md) | READY_FOR_HANDOFF — nhánh `task/T12-demo` từ master sau merge T20 + T15; prompt ở cuối `reports/2026-10-16/claude_review_T20_round2_PASS_WITH_TODO_2026-10-16.md` |
+| T12 | Dữ liệu demo và kịch bản bảo vệ | Web | 4 | T10, T20 | [T12.md](tasks/T12.md) | PO_REVIEW — Claude Round 2 PASS_WITH_TODO; RF 0 mở; AC-02 chờ PO |
 | T13 | Chốt v1.0 và sao lưu | Tất cả | 4 | T12, T14, T15, T20, T21 | [T13.md](tasks/T13.md) | PLANNED — thứ tự 6, **task cuối cùng** |
 | T14 | Hủy vé giữ chỗ, đổi mật khẩu | Web | 4 | T20 | [T14.md](tasks/T14.md) | PLANNED — thứ tự 5; PO chọn làm 15/10 |
 | T15 | Thử nghiệm có tách từ | ML | 4 | T09 | [T15.md](tasks/T15.md) | DONE / CLOSED — PO approved trong chat 16/10, merge vào `master`; Claude PASS_WITH_TODO; TODO-01 PO_ATTESTED (bằng chứng tái lập trên Drive), TODO-02..04 ACCEPT_LATER → T13 |
@@ -69,7 +69,7 @@ Không có task đang active. Task record kế tiếp: [docs/tasks/T20.md](tasks
 
 | T19 | Tải ảnh poster từ máy khi thêm/sửa phim | Web | phát triển thêm | T18 | [T19.md](tasks/T19.md) | DONE / CLOSED — merge `c3f70df` VERIFIED; PO APPROVED 15/10; Claude PASS_WITH_TODO; AC 11/11; RF 0; TODO/OBS đã disposition |
 | T20 | Gia cố bảo mật, giữ chỗ, sửa lỗi giao diện | Web | 4 | T19 | [T20.md](tasks/T20.md) | DONE / CLOSED — PO merge `55a9b04` VERIFIED; Claude Round 2 PASS_WITH_TODO; AC 11/11; RF-01 CLOSED; TODO-01..03 Low |
-| T21 | Thống kê cảm xúc bình luận theo phim | Web | 4 | T20, T12 | [T21.md](tasks/T21.md) | PLANNED — thứ tự 4 |
+| T21 | Thống kê cảm xúc bình luận theo phim | Web | 4 | T20, T12 | [T21.md](tasks/T21.md) | READY_FOR_HANDOFF — nhánh `task/T21-thong-ke-cam-xuc` từ master sau merge T12; prompt cuối `claude_review_T12_round2_PASS_WITH_TODO_2026-10-16.md` |
 
 Chuỗi chính: `T00 → T01 → T02` và `T03 → T08 → T09 → T10`. T03 bắt đầu ngay ngày đầu (song song).
 
@@ -205,13 +205,17 @@ Nếu trễ: cắt T14 → T15 → rút gọn T05. Không cắt T01–T03, T07�
 | Claude review T18 RF-04 | OBS-01: reduced-motion có thể render PosterIntro 1–2 frame trước khi effect gỡ | **ACCEPT_LATER — future backlog; chưa authorize task mới** |
 
 ## 11. Current Next Step
-1. **Tín (PO):** review T19 theo `reports/2026-10-14/claude_review_T19_PASS_WITH_TODO_2026-10-14.md`, disposition TODO-01..04 và OBS-01..04, ra quyết định PO. Chỉ PO merge `master`. Kiểm tra tiến trình uvicorn đang chiếm cổng 8001 (không do Claude khởi động).
-2. **Task kế tiếp:** Claude **không** đặt READY_FOR_HANDOFF — T12 vẫn `PLANNED / NOT AUTHORIZED`, Q4 MỞ. PO tự chọn sau khi đóng T19.
-3. `docs/tasks/T19.md` là Task Record PO đã cung cấp, vẫn untracked trên máy trước triển khai; không tự đưa vào commit do ngoài T19 allowlist. Claude có thể đọc file làm việc này, PO quản trị tracking riêng nếu cần. Không commit `backend/uploads/`, không chạm production DB; giữ nguyên T16 runtime gate.
+1. **Tín (PO):** review T12: chạy AC-02 (trọn kịch bản hai lần từ lúc khởi động máy, ghi giờ), quyết định TODO-01..04, merge `task/T12-demo` vào `master`.
+2. **Tín:** tạo nhánh `task/T21-thong-ke-cam-xuc` từ master rồi gửi Codex prompt T21 ở cuối `reports/2026-10-16/claude_review_T12_round2_PASS_WITH_TODO_2026-10-16.md`.
+3. Lộ trình cuối 15/10/2026 giữ nguyên: T21 → T14 → T13.
 
 ## 12. Active Timeline
 | Ngày | Ai | Sự kiện |
 |---|---|---|
+| 16/10/2026 | Claude | T12 Round 2 **PASS_WITH_TODO** trên `1ca55f9`: RF-01 CLOSED (DB mới thiếu ADMIN_PASSWORD → admin123 + cảnh báo; reset_demo vẫn bắt buộc biến), RF-02 CLOSED (uvicorn giữ DB tạm → reset/reset-demo.bat từ chối bằng tiếng Việt, exit 2/1, sha256 DB + sidecar không đổi; tắt backend → reset đạt 21/99/143/30). compileall 0, pytest 81/81, build đạt. T12 `CLAUDE_REVIEW → PO_REVIEW`; T21 → `READY_FOR_HANDOFF`. |
+| 16/10/2026 | Codex | T12 Fix Round 1: RF-01 khôi phục fallback `admin123` + cảnh báo theo T20 trong seed thường, reset demo vẫn bắt buộc `ADMIN_PASSWORD`; RF-02 thêm preflight rename DB trước mọi xóa và phục hồi best-effort độc lập. Probe uvicorn/DB tạm: exit 2 tiếng Việt, DB+sidecar tồn tại và hash không đổi; hai reset cùng 21/99/143/30, seed 3,83/3,85 s; compile, health, pytest 81/81, build real/mock và mock flow đạt. TODO-01..03 không xử lý. T12 `FIX_LOOP → CLAUDE_REVIEW / ROUND 2 PENDING`. |
+| 16/10/2026 | Claude | T12 review **FAIL** trên `23df507`: scope 9/9 file trong allowlist; reset 2 lần trên DB tạm cùng 21/99/143/30, seed 3,91/3,96 s; A/B câu "lê thê" xác nhận bằng model thật (A bình thường 0,0485, B tiêu cực 0,999); compileall 0, pytest 81/81, build đạt. RF-01 Medium (bỏ fallback `admin123` trái T20), RF-02 Medium (reset khi backend mở → PermissionError, sidecar mất). TODO-01..03. T12 `CLAUDE_REVIEW → FIX_LOOP`. |
+| 16/10/2026 | Codex | T12 implementation hoàn tất: reset chỉ nhận SQLite local, backup/restore an toàn, 30 bình luận/6 phim/17 ngày, vé paid/pending_verify/expired, launcher và kịch bản 6:30, mock parity. Hai reset cùng 21/99/143/30, seed 4,21/4,23 giây; model thật câu “lê thê”: A bình thường 0,0485, B tiêu cực 0,9990; compile, health DB tạm, pytest 81/81, build real/mock, launcher và hồi quy 7/7 đạt. T12 `IN_PROGRESS → CLAUDE_REVIEW`; AC-02 chờ PO, không mở T21. |
 | 16/10/2026 | Tín (PO) + Claude | PO merge T20 (`55a9b04`) và T15 vào `master` (T15 PO approved trong chat). Bản `merge --squash` T15 lỗi trên nhánh T12 (dấu xung đột bị stage) đã được bỏ, merge lại đúng trên master; xung đột nhật ký giữ cả hai phía, đưa tiêu đề bảng Active Timeline lên đầu. T15, T20 → DONE / CLOSED; T12 READY_FOR_HANDOFF. |
 | 16/10/2026 | Claude | T20 Round 2 **PASS_WITH_TODO** trên `8693e39`: RF-01 CLOSED / VERIFIED BY CLAUDE (uvicorn thật: 5 sai → đúng mật khẩu 429, email viết hoa 429, tài khoản khác 200; pytest nhánh sau 301 giây). compileall 0, pytest 81/81, build PASS; scope fix đúng 3 file; bản sao report T15 đã dọn khỏi working tree. AC 11/11, RF mở 0, TODO-01..03 Low. T20 `CLAUDE_REVIEW → PO_REVIEW`; T12 → `READY_FOR_HANDOFF` (lộ trình cuối). |
 | 16/10/2026 | Codex | T20 Fix Round 1: sửa RF-01 bằng kiểm tra trạng thái khóa trước `verify_password`; probe SQLite tạm `5 sai → đúng mật khẩu 429 → +301 giây 200`; focused 16/16, full pytest 81/81, compileall/build đạt. Bản report T15 untracked trùng nhánh T15 sau chuẩn hóa CRLF/LF và đã xóa, không commit. T20 `FIX_LOOP → CLAUDE_REVIEW / ROUND 2 PENDING`; không tự review/PASS hoặc mở task kế tiếp. |

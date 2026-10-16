@@ -15,10 +15,12 @@ from .seats import ROWS, COLS, seat_price
 from .security import hash_password
 from .classifier import classifier
 from .config import ADMIN_PASSWORD
+from .booking_rules import HOLD_MINUTES
 
 logger = logging.getLogger(__name__)
 
 DATA = Path(__file__).parent / "data" / "movies.json"
+DEMO_COMMENTS = Path(__file__).parent / "data" / "demo_comments.json"
 TIMES = ["09:30", "13:15", "16:00", "19:30", "22:00"]
 _SEED_STATE_VERSION = 1
 _SEED_STATE_SUFFIX = ".showtime-seed.json"
@@ -204,25 +206,34 @@ def seed(db: Session) -> None:
         demo = User(full_name="Nguyễn Văn Demo", email="demo@firefly.vn", password_hash=hash_password("123456"))
         db.add_all([admin, demo])
         db.flush()
-        samples = [
-            (1, "Xem xong muốn gọi điện về cho mẹ liền. Cảnh cuối trên toa tàu quá đẹp."),
-            (1, "Phim dài lê thê, nửa đầu buồn ngủ thật sự, phí tiền vé."),
-            (4, "Con mình 6 tuổi xem cười suốt, đoạn ở chợ Bến Thành dễ thương lắm."),
-            (2, "Kịch bản nhảm, hù dọa toàn tiếng động lớn, thất vọng."),
-            (3, "Cảnh lũ quay rất thật, âm thanh rạp này nghe đã."),
-            (9, "Nhạc phim hay muốn khóc, xem xong về nghe lại cả tối."),
-            (9, "Hình ảnh đẹp, đoạn diễn cuối nổi da gà."),
-            (10, "Kỹ xạo ổn nhưng kịch bản hơi kém, đoạn giữa xàm quá."),
-            (8, "Không khí ngột ngạt đúng chất, coi xong không dám đi tàu đêm."),
-            (12, "Phục trang đẹp, chuyện tình cảm động."),
-            (5, "Hài nhạt, cười được đúng hai lần, khá thất vọng."),
-            (18, "Mấy bé đá bóng dễ thương, cả rạp vỗ tay đoạn cuối."),
-        ]
-        for i, (movie_id, text) in enumerate(samples):
+        samples = json.loads(DEMO_COMMENTS.read_text(encoding="utf-8"))
+        now = datetime.now()
+        for sample in samples:
+            text = sample["content"]
             neg, score = classifier.predict(text)
-            db.add(Comment(movie_id=movie_id, user_id=demo.id, content=text, is_negative=neg,
-                           negative_score=score, model_name=classifier.name,
-                           created_at=datetime.now() - timedelta(hours=5 * (i + 1))))
+            review = sample.get("review")
+            human_label = None
+            reviewed_by = None
+            reviewed_at = None
+            if review == "confirm":
+                human_label = int(neg)
+            elif review == "opposite":
+                human_label = int(not neg)
+            if human_label is not None:
+                reviewed_by = admin.id
+                reviewed_at = now - timedelta(
+                    days=sample["days_ago"], hours=max(sample.get("hours_ago", 0) - 1, 0)
+                )
+            db.add(Comment(
+                movie_id=sample["movie_id"], user_id=demo.id, content=text,
+                is_negative=neg, negative_score=score, model_name=classifier.name,
+                model_version=classifier.version, human_label=human_label,
+                reviewed_by=reviewed_by, reviewed_at=reviewed_at,
+                hidden=sample.get("hidden", False),
+                created_at=now - timedelta(
+                    days=sample["days_ago"], hours=sample.get("hours_ago", 0)
+                ),
+            ))
         db.commit()
         _ensure_showtimes(db)
         _seed_bookings(db)
@@ -255,4 +266,23 @@ def _seed_bookings(db: Session) -> None:
                         total=sum(seat_price(s, st.price) for s in seats))
             b.seats = [BookingSeat(showtime_id=st.id, seat_code=s) for s in seats]
             db.add(b)
+    demo = db.scalar(select(User).where(User.email == "demo@firefly.vn"))
+    demo_showtimes = db.scalars(select(Showtime).order_by(Showtime.start_time, Showtime.id).limit(3)).all()
+    if demo is not None and len(demo_showtimes) == 3:
+        examples = [
+            (demo_showtimes[0], "paid", ["A1", "A2"], now - timedelta(days=2)),
+            (demo_showtimes[1], "pending_verify", ["A3", "A4"], now - timedelta(minutes=4)),
+            # Vé hết hạn đã nhả ghế; không seed một vé held cũ rồi chờ request dọn.
+            (demo_showtimes[2], "expired", [], now - timedelta(minutes=HOLD_MINUTES + 1)),
+        ]
+        for showtime, status, seats, created_at in examples:
+            booking = Booking(
+                user_id=demo.id, showtime_id=showtime.id, status=status,
+                created_at=created_at,
+                total=sum(seat_price(seat, showtime.price) for seat in seats),
+            )
+            booking.seats = [
+                BookingSeat(showtime_id=showtime.id, seat_code=seat) for seat in seats
+            ]
+            db.add(booking)
     db.commit()

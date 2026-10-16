@@ -32,14 +32,14 @@ Trước khi áp dụng workflow: giao diện React đầy đủ (`giao-dien-v1`
 
 ## 4. Current Project Status
 ```
-Overall Status: CLAUDE_REVIEW
-Phase: T14 implementation hoàn tất, chờ Claude review độc lập
-Current Active Task: T14 — CLAUDE_REVIEW
+Overall Status: PO_REVIEW
+Phase: T14 Claude review PASS_WITH_TODO, chờ PO review; T13 READY_FOR_HANDOFF (task cuối)
+Current Active Task: T14 — PO_REVIEW
 Ngày bắt đầu sản phẩm: 05/10/2026 · Hạn: 01/11/2026
 ```
 
 ## 5. Current Active Task
-**T14 — CLAUDE_REVIEW.** Implementation hoàn tất trên baseline `5c10522`: hủy held và trả ghế, đổi họ tên/mật khẩu, real/mock parity, pytest 95/95, compile/health SQLite tạm/build real+mock PASS, hồi quy 7/7. Đổi schema: Không. Report: `reports/2026-10-16/codex_implementation_T14_2026-10-16.md`.
+**T14 — PO_REVIEW.** Claude **PASS_WITH_TODO** trên `4eb0538`: AC 5/5, RF 0; pytest 95/95, build đạt; probe API (404/409/401/400/422, ghế trả lại), giao diện real + mock, 375 px đạt. TODO-01 Medium (change-password không giới hạn số lần thử), TODO-02 Medium (mã vé dùng lại sau khi hủy vé có id lớn nhất), TODO-03/04 Low. Report: `reports/2026-10-16/claude_review_T14_PASS_WITH_TODO_2026-10-16.md`.
 
 ## 6. Current Task Record
 Task record đang active: [docs/tasks/T14.md](tasks/T14.md).
@@ -60,8 +60,8 @@ Task record đang active: [docs/tasks/T14.md](tasks/T14.md).
 | T10 | Gắn model B vào web | Web | 3 | T07, T09 | [T10.md](tasks/T10.md) | DONE / CLOSED — PO APPROVED_WITH_NOTES; Claude Final PASS_WITH_TODO; AC 7/7; Technical DoD MET; RF 0; fast-forward merge + annotated tag `phobert-B` VERIFIED tại `857a8272` |
 | T11 | Kiểm thử tự động và sửa lỗi | Web | 4 | T04–T10 | [T11.md](tasks/T11.md) | DONE / CLOSED — Claude PASS_WITH_TODO; PO APPROVED_WITH_NOTES; AC 6/6; DoD MET; RF 0; merge `06dd44f0` VERIFIED |
 | T12 | Dữ liệu demo và kịch bản bảo vệ | Web | 4 | T10, T20 | [T12.md](tasks/T12.md) | DONE / CLOSED — PO duyệt, merge `0a717e9`; TODO-01: PO chưa quyết định — giữ mở, xử lý trước T13 |
-| T13 | Chốt v1.0 và sao lưu | Tất cả | 4 | T12, T14, T15, T20, T21 | [T13.md](tasks/T13.md) | PLANNED — thứ tự 6, **task cuối cùng** |
-| T14 | Hủy vé giữ chỗ, đổi mật khẩu | Web | 4 | T20 | [T14.md](tasks/T14.md) | CLAUDE_REVIEW — DEV AC 5/5 PASS; pytest 95/95; compile/health DB tạm/build real+mock PASS; hồi quy 7/7; đổi schema Không |
+| T13 | Chốt v1.0 và sao lưu | Tất cả | 4 | T12, T14, T15, T20, T21 | [T13.md](tasks/T13.md) | READY_FOR_HANDOFF — nhánh `task/T13-v1` từ master sau merge T14; PO quyết T12 TODO-01, T14 TODO-01/02 trước; prompt cuối `claude_review_T14_PASS_WITH_TODO_2026-10-16.md` |
+| T14 | Hủy vé giữ chỗ, đổi mật khẩu | Web | 4 | T20 | [T14.md](tasks/T14.md) | PO_REVIEW — Claude PASS_WITH_TODO; AC 5/5; RF 0 |
 | T15 | Thử nghiệm có tách từ | ML | 4 | T09 | [T15.md](tasks/T15.md) | DONE / CLOSED — PO approved trong chat 16/10, merge vào `master`; Claude PASS_WITH_TODO; TODO-01 PO_ATTESTED (bằng chứng tái lập trên Drive), TODO-02..04 ACCEPT_LATER → T13 |
 | T16 | Giữ chỗ có hạn và thanh toán QR (đổi schema) | Web | phát triển thêm | T11 | [T16.md](tasks/T16.md) | DONE / CLOSED — PO APPROVED, merge theo PO; Claude PASS_WITH_TODO, AC 12/12, RF 0, TODO-01..07 preserved |
 | T17 | Chatbot AI tư vấn phim (Gemini free, chỉ đọc) | Web | phát triển thêm | T16 | [T17.md](tasks/T17.md) | DONE / CLOSED — merged `fb0b43f` (PO tip `b3090bc`), PO APPROVED_WITH_NOTES MVP/local, AC 11/11 (AC-02 PO_ATTESTED), Claude R2 PASS_WITH_TODO, RF 0; TODO-03 FIXED, TODO-01..10 dispositioned; production DB gate T16 TODO-01 remains |
@@ -205,13 +205,14 @@ Nếu trễ: cắt T14 → T15 → rút gọn T05. Không cắt T01–T03, T07�
 | Claude review T18 RF-04 | OBS-01: reduced-motion có thể render PosterIntro 1–2 frame trước khi effect gỡ | **ACCEPT_LATER — future backlog; chưa authorize task mới** |
 
 ## 11. Current Next Step
-1. **Claude:** review độc lập T14 trên nhánh `task/T14-huy-ve-tai-khoan`; không sửa production code.
-2. **Tín (PO):** quyết định TODO-01 của T12 trước T13.
-3. Lộ trình cuối 15/10/2026 giữ nguyên: T14 → T13.
+1. **Tín (PO):** review và merge `task/T14-huy-ve-tai-khoan` vào `master`.
+2. **Tín:** quyết trước T13 (T13 cấm sửa code): T12 TODO-01 (câu khen bị che trên phim 1), T14 TODO-01 (giới hạn thử mật khẩu), T14 TODO-02 (mã vé dùng lại). Mục nào cần sửa code thì mở fix nhỏ trước T13.
+3. **Tín:** tạo `task/T13-v1` và gửi Codex prompt T13 ở mục 10 của `reports/2026-10-16/claude_review_T14_PASS_WITH_TODO_2026-10-16.md` (điền hash merge T14 và các quyết định).
 
 ## 12. Active Timeline
 | Ngày | Ai | Sự kiện |
 |---|---|---|
+| 16/10/2026 | Claude | T14 review **PASS_WITH_TODO** trên `4eb0538`: scope 15/15 file trong allowlist; compileall 0, pytest 95/95, build đạt; probe API: vé người khác/không tồn tại 404, paid/pending_verify/expired 409, không token 401, hủy held 200 và ghế trống lại; đổi mật khẩu cũ 401/mới 200; giao diện real (1 nút Hủy vé ở vé held, Header đổi tên ngay), 375 px, mock đạt. TODO-01 Medium (change-password không giới hạn thử), TODO-02 Medium (mã vé FF00144 được dùng lại sau khi hủy), TODO-03/04 Low. T14 `CLAUDE_REVIEW → PO_REVIEW`; T13 → `READY_FOR_HANDOFF`. |
 | 16/10/2026 | Codex | T14 implementation hoàn tất: hủy vé held đúng ownership và trả ghế bằng helper hiện có; đổi họ tên/mật khẩu; trang tài khoản và Header cập nhật ngay; real/mock parity; pytest 95/95, compile/health SQLite tạm/build real+mock PASS, API thật và mock smoke PASS, hồi quy 7/7, scope/secret PASS. Đổi schema Không; token cũ không bị thu hồi được ghi là hạn chế. T14 `IN_PROGRESS → CLAUDE_REVIEW`; không tự review/PASS hoặc mở T13. |
 | 16/10/2026 | Tín (PO) + Codex | PO xác nhận T21 đã duyệt và merge vào `master` tại `5c10522`; T21 → DONE / CLOSED, TODO-02/03/05 Low còn mở. T12 TODO-01 chưa được PO quyết định, giữ mở và xử lý trước T13. Nhánh T14 đúng baseline; T14 `READY_FOR_HANDOFF → IN_PROGRESS`. |
 | 16/10/2026 | Claude | T21 Round 2 **PASS_WITH_TODO** trên `8745c65` (fix TODO-01 theo yêu cầu PO): scope 2 file frontend + report + điều phối; đo 1280/768/375 px × 7/30/90 ngày: 0 nhãn đè nhau (vòng 1: 17 ở 30 ngày), chữ 11 px, vừa khung (90 ngày ở 375 px cuộn trong khung), trang không tràn, tự co khi đổi cỡ; bấm nhanh 90→7 giữ đúng 7 ngày (TODO-04 CLOSED); mock đạt; build đạt, pytest 85/85. T21 `CLAUDE_REVIEW → PO_REVIEW`; T14 giữ `READY_FOR_HANDOFF`. |

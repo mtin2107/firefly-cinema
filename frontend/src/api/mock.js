@@ -483,6 +483,28 @@ export const mockApi = {
       return { access_token: tokenFor(user), user: publicUser(user) };
     },
     async me() { await wait(100); return publicUser(currentUser()); },
+    async updateMe({ full_name }) {
+      await wait();
+      const user = currentUser();
+      const value = String(full_name ?? "").trim();
+      if (value.length < 2 || value.length > 100) {
+        throw new ApiError("Họ tên cần từ 2 đến 100 ký tự.", 422);
+      }
+      user.full_name = value;
+      save();
+      return clone(publicUser(user));
+    },
+    async changePassword({ current_password, new_password }) {
+      await wait();
+      const user = currentUser();
+      if (String(new_password ?? "").length < 6 || new_password.length > 100) {
+        throw new ApiError("Mật khẩu mới cần từ 6 đến 100 ký tự.", 422);
+      }
+      if (user.password !== current_password) throw new ApiError("Mật khẩu hiện tại không đúng.", 400);
+      user.password = new_password;
+      save();
+      return { detail: "Đã đổi mật khẩu." };
+    },
   },
   movies: {
     async list(filters = {}) {
@@ -555,6 +577,19 @@ export const mockApi = {
       expireHolds();
       const user = currentUser();
       return clone(db.bookings.filter((b) => b.user_id === user.id).sort((a, b) => b.id - a.id).map(bookingOut));
+    },
+    async remove(id) {
+      await wait();
+      expireHolds();
+      const user = currentUser();
+      const booking = db.bookings.find((item) => item.id === Number(id) && item.user_id === user.id);
+      if (!booking) throw new ApiError("Không tìm thấy vé.", 404);
+      if (booking.status !== "held") {
+        throw new ApiError("Chỉ hủy được vé đang giữ chỗ chưa thanh toán.", 409);
+      }
+      db.bookings = db.bookings.filter((item) => item.id !== booking.id);
+      save();
+      return { detail: "Đã hủy vé." };
     },
     async claimTransfer(id) {
       await wait();

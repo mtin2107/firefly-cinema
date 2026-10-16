@@ -27,6 +27,8 @@ export const realApi = {
     register: (payload) => request("/api/auth/register", { method: "POST", body: payload }),
     login: (payload) => request("/api/auth/login", { method: "POST", body: payload }),
     me: () => request("/api/auth/me"),
+    updateMe: (payload) => request("/api/auth/me", { method: "PATCH", body: payload }),
+    changePassword: (payload) => request("/api/auth/change-password", { method: "POST", body: payload }),
   },
   movies: {
     // filters: { status, genre, country, year, year_before, age_rating, format, collection, q } — bỏ trống trường nào thì không lọc trường đó
@@ -43,6 +45,7 @@ export const realApi = {
   bookings: {
     create: (payload) => request("/api/bookings", { method: "POST", body: payload }),
     mine: () => request("/api/bookings/me"),
+    remove: (id) => request(`/api/bookings/${id}`, { method: "DELETE" }),
     claimTransfer: (id) => request(`/api/bookings/${id}/transfer-claim`, { method: "POST" }),
   },
   comments: {

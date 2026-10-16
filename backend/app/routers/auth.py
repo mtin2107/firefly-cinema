@@ -5,7 +5,7 @@ from sqlalchemy.orm import Session
 from ..database import get_db
 from ..models import User
 from ..rate_limit import SlidingWindowRateLimiter
-from ..schemas import RegisterIn, LoginIn, TokenOut, UserOut
+from ..schemas import ChangePasswordIn, LoginIn, RegisterIn, TokenOut, UpdateProfileIn, UserOut
 from ..security import hash_password, verify_password, create_token, get_current_user
 
 router = APIRouter(prefix="/api/auth", tags=["Tài khoản"])
@@ -41,3 +41,28 @@ def login(body: LoginIn, db: Session = Depends(get_db)):
 @router.get("/me", response_model=UserOut)
 def me(user: User = Depends(get_current_user)):
     return user
+
+
+@router.patch("/me", response_model=UserOut)
+def update_me(
+    body: UpdateProfileIn,
+    user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    user.full_name = body.full_name
+    db.commit()
+    db.refresh(user)
+    return user
+
+
+@router.post("/change-password")
+def change_password(
+    body: ChangePasswordIn,
+    user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    if not verify_password(body.current_password, user.password_hash):
+        raise HTTPException(400, "Mật khẩu hiện tại không đúng.")
+    user.password_hash = hash_password(body.new_password)
+    db.commit()
+    return {"detail": "Đã đổi mật khẩu."}

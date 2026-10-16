@@ -1,0 +1,37 @@
+[
+  {"movie_id": 1, "content": "Cảnh cuối trên toa tàu đẹp và ấm áp, xem xong chỉ muốn gọi về cho mẹ.", "days_ago": 0, "hours_ago": 2, "review": "confirm"},
+  {"movie_id": 1, "content": "Diễn xuất tự nhiên, câu chuyện gia đình kể nhẹ nhàng mà vẫn xúc động.", "days_ago": 2, "hours_ago": 4},
+  {"movie_id": 1, "content": "Phần hình ảnh rất thơ, riêng đoạn giữa hơi chậm một chút.", "days_ago": 5, "hours_ago": 1},
+  {"movie_id": 1, "content": "Phim dài lê thê, nửa đầu buồn ngủ thật sự, phí tiền vé.", "days_ago": 9, "hours_ago": 3},
+  {"movie_id": 1, "content": "Nhạc nền vừa đủ, không lấn át lời thoại và kết phim có dư âm.", "days_ago": 14, "hours_ago": 5},
+
+  {"movie_id": 2, "content": "Kịch bản nhảm, hù dọa chỉ dựa vào tiếng động lớn nên rất thất vọng.", "days_ago": 1, "hours_ago": 1, "review": "confirm"},
+  {"movie_id": 2, "content": "Tưởng đáng sợ lắm, ai ngờ mình ngủ ngon được nửa phim, thật tuyệt vời.", "days_ago": 3, "hours_ago": 6, "review": "opposite"},
+  {"movie_id": 2, "content": "Nhân vật xử lý vô lý, đoạn cuối đoán được từ quá sớm.", "days_ago": 6, "hours_ago": 2},
+  {"movie_id": 2, "content": "Âm thanh quá to nhưng không tạo được cảm giác sợ, xem khá mệt.", "days_ago": 10, "hours_ago": 7},
+  {"movie_id": 2, "content": "Poster hấp dẫn hơn nội dung, bỏ phí một ý tưởng có tiềm năng.", "days_ago": 15, "hours_ago": 4},
+
+  {"movie_id": 3, "content": "Cảnh cứu hộ giữa dòng nước quay rất thật, âm thanh trong rạp nghe đã.", "days_ago": 0, "hours_ago": 8},
+  {"movie_id": 3, "content": "Nhịp phim chắc, các thành viên trong đội đều có vai trò rõ ràng.", "days_ago": 4, "hours_ago": 3, "review": "confirm"},
+  {"movie_id": 3, "content": "Đoạn mở đầu hơi nhiều lời giải thích nhưng về sau cuốn hơn hẳn.", "days_ago": 7, "hours_ago": 5},
+  {"movie_id": 3, "content": "Một vài cảnh kỹ xảo nước còn giả, bù lại diễn xuất rất thuyết phục.", "days_ago": 11, "hours_ago": 2},
+  {"movie_id": 3, "content": "Kết thúc vội và thiếu cảm xúc, mình thấy khá thất vọng.", "days_ago": 16, "hours_ago": 6},
+
+  {"movie_id": 4, "content": "Con mình cười suốt, chú mèo đáng yêu và màu phim rất tươi.", "days_ago": 1, "hours_ago": 5},
+  {"movie_id": 4, "content": "Một bộ phim gia đình dễ thương, người lớn xem cùng trẻ nhỏ vẫn vui.", "days_ago": 3, "hours_ago": 2, "review": "confirm"},
+  {"movie_id": 4, "content": "Đoạn ở chợ Bến Thành nhiều chi tiết vui, lồng tiếng nghe tự nhiên.", "days_ago": 8, "hours_ago": 4},
+  {"movie_id": 4, "content": "Cốt truyện đơn giản nhưng kể duyên, bé nhà mình muốn xem lại.", "days_ago": 12, "hours_ago": 1},
+  {"movie_id": 4, "content": "Nhạc vui tai, hình ảnh sáng và thông điệp về gia đình rất vừa vặn.", "days_ago": 14, "hours_ago": 8},
+
+  {"movie_id": 5, "content": "Hài nhạt, cười được đúng hai lần, càng về cuối càng chán.", "days_ago": 2, "hours_ago": 3, "review": "confirm"},
+  {"movie_id": 5, "content": "Đúng là một đêm không ngủ, vì mình cứ chờ mãi xem khi nào phim mới hay.", "days_ago": 4, "hours_ago": 7, "review": "opposite"},
+  {"movie_id": 5, "content": "Các mảng miếng lặp lại, nhân vật nói nhiều mà câu chuyện không tiến lên.", "days_ago": 6, "hours_ago": 5},
+  {"movie_id": 5, "content": "Dàn diễn viên có duyên nhưng kịch bản rời rạc và đoạn kết quá gượng.", "days_ago": 10, "hours_ago": 2},
+  {"movie_id": 5, "content": "Có vài câu thoại vui, xem giải trí cuối tuần cũng tạm ổn.", "days_ago": 13, "hours_ago": 6},
+
+  {"movie_id": 9, "content": "Nhạc phim hay, đoạn biểu diễn cuối làm mình nổi da gà.", "days_ago": 0, "hours_ago": 6},
+  {"movie_id": 9, "content": "Màu sắc đẹp và tình bạn của nhóm được xây dựng rất chân thành.", "days_ago": 5, "hours_ago": 8, "review": "confirm"},
+  {"movie_id": 9, "content": "Bài hát chính bắt tai nhưng hai bài ở giữa hơi giống nhau.", "days_ago": 7, "hours_ago": 1},
+  {"movie_id": 9, "content": "Nửa đầu chậm và vài đoạn hội thoại dài khiến mình buồn ngủ.", "days_ago": 11, "hours_ago": 4},
+  {"movie_id": 9, "content": "Kết phim trọn vẹn, phần hòa âm ở rạp nghe rất đã.", "days_ago": 16, "hours_ago": 2}
+]

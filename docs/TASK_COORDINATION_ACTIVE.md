@@ -33,13 +33,13 @@ Trước khi áp dụng workflow: giao diện React đầy đủ (`giao-dien-v1`
 ## 4. Current Project Status
 ```
 Overall Status: CLAUDE_REVIEW
-Phase: T12 đã hoàn tất implementation và gate DEV, chờ Claude review độc lập
-Current Active Task: T12 — CLAUDE_REVIEW
+Phase: T12 Fix Round 1 đã triển khai, chờ Claude review Round 2
+Current Active Task: T12 — CLAUDE_REVIEW / ROUND 2 PENDING
 Ngày bắt đầu sản phẩm: 05/10/2026 · Hạn: 01/11/2026
 ```
 
 ## 5. Current Active Task
-**T12 — CLAUDE_REVIEW.** Codex đã hoàn tất dữ liệu demo, reset/launcher, kịch bản 6 phút 30 giây và mock parity. Gate dùng SQLite tạm: reset hai lần cùng 21 phim/99 suất/143 vé/30 bình luận, seed 4,21/4,23 giây; model thật xác nhận A `binh_thuong 0,0485`, B `tieu_cuc 0,9990`; pytest 81/81, build real/mock, health và hồi quy 7/7 đạt. AC-02 chờ PO chạy kịch bản hai lần từ lúc khởi động máy. Report: `reports/2026-10-16/codex_implementation_T12_2026-10-16.md`.
+**T12 — CLAUDE_REVIEW / ROUND 2 PENDING.** Codex đã sửa RF-01/RF-02: khôi phục fallback admin dev theo T20; reset preflight khóa trước khi xóa, phục hồi best-effort không che lỗi gốc, kịch bản yêu cầu tắt Backend. Probe uvicorn + SQLite tạm: reset exit 2 với câu tiếng Việt, DB/sidecar giữ nguyên hash; reset bình thường hai lần cùng 21/99/143/30; compile, health, pytest 81/81, build real/mock và mock flow đạt. TODO-01..03 không xử lý. Report: `reports/2026-10-16/codex_fix_T12_round1_2026-10-16.md`.
 
 ## 6. Current Task Record
 Task record đang active: [docs/tasks/T12.md](tasks/T12.md).
@@ -59,7 +59,7 @@ Task record đang active: [docs/tasks/T12.md](tasks/T12.md).
 | T09 | Train PhoBERT phần B | ML | 3 | T08 | [T09.md](tasks/T09.md) | DONE / CLOSED (Claude PASS_WITH_TODO; PO APPROVED; AC 6/6; DoD MET theo PO; RF 0; blocker 0; TODO 7/7 dispositioned; TODO-02 RESOLVED 10/10/2026 theo PO, notebook `PO_ATTESTED`; merge `27c364e`; T09_MERGE_VERIFIED) |
 | T10 | Gắn model B vào web | Web | 3 | T07, T09 | [T10.md](tasks/T10.md) | DONE / CLOSED — PO APPROVED_WITH_NOTES; Claude Final PASS_WITH_TODO; AC 7/7; Technical DoD MET; RF 0; fast-forward merge + annotated tag `phobert-B` VERIFIED tại `857a8272` |
 | T11 | Kiểm thử tự động và sửa lỗi | Web | 4 | T04–T10 | [T11.md](tasks/T11.md) | DONE / CLOSED — Claude PASS_WITH_TODO; PO APPROVED_WITH_NOTES; AC 6/6; DoD MET; RF 0; merge `06dd44f0` VERIFIED |
-| T12 | Dữ liệu demo và kịch bản bảo vệ | Web | 4 | T10, T20 | [T12.md](tasks/T12.md) | CLAUDE_REVIEW — DEV gate đạt trên SQLite tạm; AC-02 chờ PO chạy hai lần |
+| T12 | Dữ liệu demo và kịch bản bảo vệ | Web | 4 | T10, T20 | [T12.md](tasks/T12.md) | CLAUDE_REVIEW / ROUND 2 PENDING — RF-01/RF-02 DEV FIXED; TODO-01..03 giữ nguyên |
 | T13 | Chốt v1.0 và sao lưu | Tất cả | 4 | T12, T14, T15, T20, T21 | [T13.md](tasks/T13.md) | PLANNED — thứ tự 6, **task cuối cùng** |
 | T14 | Hủy vé giữ chỗ, đổi mật khẩu | Web | 4 | T20 | [T14.md](tasks/T14.md) | PLANNED — thứ tự 5; PO chọn làm 15/10 |
 | T15 | Thử nghiệm có tách từ | ML | 4 | T09 | [T15.md](tasks/T15.md) | DONE / CLOSED — PO approved trong chat 16/10, merge vào `master`; Claude PASS_WITH_TODO; TODO-01 PO_ATTESTED (bằng chứng tái lập trên Drive), TODO-02..04 ACCEPT_LATER → T13 |
@@ -205,13 +205,15 @@ Nếu trễ: cắt T14 → T15 → rút gọn T05. Không cắt T01–T03, T07�
 | Claude review T18 RF-04 | OBS-01: reduced-motion có thể render PosterIntro 1–2 frame trước khi effect gỡ | **ACCEPT_LATER — future backlog; chưa authorize task mới** |
 
 ## 11. Current Next Step
-1. **Claude:** review T12 độc lập theo `docs/tasks/T12.md` và report Codex; mọi reset/startup phải dùng SQLite tạm, không chạm `backend/firefly.db`.
-2. **Tín (PO):** AC-02 chỉ thực hiện ở PO review sau kết quả Claude — chạy trọn kịch bản hai lần từ lúc khởi động máy và ghi giờ.
+1. **Claude:** review T12 Round 2, xác minh RF-01/RF-02 và probe reset khi uvicorn giữ SQLite tạm; không chạm database thật.
+2. **Tín (PO):** AC-02 thực hiện ở PO review sau khi Claude PASS — chạy trọn kịch bản hai lần từ lúc khởi động máy và ghi giờ. Quyết định TODO-01 (câu khen bị model B che trên phim mở đầu).
 3. Không tự mở T21 trước kết quả review theo workflow; lộ trình cuối 15/10/2026 giữ nguyên.
 
 ## 12. Active Timeline
 | Ngày | Ai | Sự kiện |
 |---|---|---|
+| 16/10/2026 | Codex | T12 Fix Round 1: RF-01 khôi phục fallback `admin123` + cảnh báo theo T20 trong seed thường, reset demo vẫn bắt buộc `ADMIN_PASSWORD`; RF-02 thêm preflight rename DB trước mọi xóa và phục hồi best-effort độc lập. Probe uvicorn/DB tạm: exit 2 tiếng Việt, DB+sidecar tồn tại và hash không đổi; hai reset cùng 21/99/143/30, seed 3,83/3,85 s; compile, health, pytest 81/81, build real/mock và mock flow đạt. TODO-01..03 không xử lý. T12 `FIX_LOOP → CLAUDE_REVIEW / ROUND 2 PENDING`. |
+| 16/10/2026 | Claude | T12 review **FAIL** trên `23df507`: scope 9/9 file trong allowlist; reset 2 lần trên DB tạm cùng 21/99/143/30, seed 3,91/3,96 s; A/B câu "lê thê" xác nhận bằng model thật (A bình thường 0,0485, B tiêu cực 0,999); compileall 0, pytest 81/81, build đạt. RF-01 Medium (bỏ fallback `admin123` trái T20), RF-02 Medium (reset khi backend mở → PermissionError, sidecar mất). TODO-01..03. T12 `CLAUDE_REVIEW → FIX_LOOP`. |
 | 16/10/2026 | Codex | T12 implementation hoàn tất: reset chỉ nhận SQLite local, backup/restore an toàn, 30 bình luận/6 phim/17 ngày, vé paid/pending_verify/expired, launcher và kịch bản 6:30, mock parity. Hai reset cùng 21/99/143/30, seed 4,21/4,23 giây; model thật câu “lê thê”: A bình thường 0,0485, B tiêu cực 0,9990; compile, health DB tạm, pytest 81/81, build real/mock, launcher và hồi quy 7/7 đạt. T12 `IN_PROGRESS → CLAUDE_REVIEW`; AC-02 chờ PO, không mở T21. |
 | 16/10/2026 | Tín (PO) + Claude | PO merge T20 (`55a9b04`) và T15 vào `master` (T15 PO approved trong chat). Bản `merge --squash` T15 lỗi trên nhánh T12 (dấu xung đột bị stage) đã được bỏ, merge lại đúng trên master; xung đột nhật ký giữ cả hai phía, đưa tiêu đề bảng Active Timeline lên đầu. T15, T20 → DONE / CLOSED; T12 READY_FOR_HANDOFF. |
 | 16/10/2026 | Claude | T20 Round 2 **PASS_WITH_TODO** trên `8693e39`: RF-01 CLOSED / VERIFIED BY CLAUDE (uvicorn thật: 5 sai → đúng mật khẩu 429, email viết hoa 429, tài khoản khác 200; pytest nhánh sau 301 giây). compileall 0, pytest 81/81, build PASS; scope fix đúng 3 file; bản sao report T15 đã dọn khỏi working tree. AC 11/11, RF mở 0, TODO-01..03 Low. T20 `CLAUDE_REVIEW → PO_REVIEW`; T12 → `READY_FOR_HANDOFF` (lộ trình cuối). |

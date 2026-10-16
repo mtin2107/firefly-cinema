@@ -45,6 +45,36 @@ def local_sqlite_path(database_url: str) -> Path:
     return database_path
 
 
+def ensure_database_unlocked(database_path: Path) -> None:
+    """Trên Windows, đổi tên là probe đáng tin cậy khi backend đang giữ DB."""
+    if not database_path.exists():
+        return
+    probe_path = database_path.with_name(
+        f".{database_path.name}.reset-probe-{os.getpid()}"
+    )
+    if probe_path.exists():
+        fail("Không thể kiểm tra khóa database vì còn file probe từ lần chạy trước.")
+
+    moved = False
+    try:
+        os.replace(database_path, probe_path)
+        moved = True
+        os.replace(probe_path, database_path)
+        moved = False
+    except OSError:
+        # Trường hợp rất hiếm lỗi sau lần đổi tên đầu: cố đưa DB về tên cũ,
+        # nhưng không để lỗi phục hồi che thông báo khóa dễ hiểu cho người dùng.
+        if moved and probe_path.exists() and not database_path.exists():
+            try:
+                os.replace(probe_path, database_path)
+            except OSError:
+                try:
+                    shutil.copy2(probe_path, database_path)
+                except OSError:
+                    pass
+        fail("Database đang được Backend sử dụng. Hãy tắt Backend trước khi đặt lại dữ liệu demo.")
+
+
 def backup_existing(database_path: Path) -> tuple[Path | None, Path | None]:
     if not database_path.exists():
         return None, None
@@ -76,6 +106,39 @@ def backup_existing(database_path: Path) -> tuple[Path | None, Path | None]:
     return backup_path, state_backup
 
 
+def restore_after_failure(
+    database_path: Path,
+    state_path: Path,
+    backup_path: Path | None,
+    state_backup: Path | None,
+    engine,
+) -> list[str]:
+    """Phục hồi best-effort và luôn thử cả DB lẫn sidecar."""
+    errors: list[str] = []
+    try:
+        engine.dispose()
+    except Exception as exc:  # pragma: no cover - lỗi driver hiếm, vẫn phải phục hồi file
+        errors.append(f"đóng kết nối: {exc}")
+
+    for target in (database_path, state_path):
+        try:
+            target.unlink(missing_ok=True)
+        except OSError as exc:
+            errors.append(f"dọn {target.name}: {exc}")
+
+    for source, target in (
+        (backup_path, database_path),
+        (state_backup, state_path),
+    ):
+        if source is None:
+            continue
+        try:
+            shutil.copy2(source, target)
+        except OSError as exc:
+            errors.append(f"phục hồi {target.name}: {exc}")
+    return errors
+
+
 def main() -> int:
     if hasattr(sys.stdout, "reconfigure"):
         sys.stdout.reconfigure(encoding="utf-8")
@@ -94,19 +157,22 @@ def main() -> int:
     os.environ["DATABASE_URL"] = normalized_url
     config.DATABASE_URL = normalized_url
 
+    # Phải probe khóa trước khi xóa DB hoặc sidecar. Đặt trước cả import seed
+    # để lỗi "backend còn mở" trả nhanh mà không cần nạp model.
+    ensure_database_unlocked(database_path)
+    backup_path, state_backup = backup_existing(database_path)
+    state_path = database_path.with_name(database_path.name + ".showtime-seed.json")
+
     # Import sau khi URL đã được chuẩn hóa để engine luôn dùng đúng một file,
     # bất kể lệnh được gọi từ thư mục gốc hay từ backend.
     from app.database import Base, SessionLocal, engine
     from app.models import Booking, Comment, Movie, Showtime
     from app.seed import seed
 
-    backup_path, state_backup = backup_existing(database_path)
-    state_path = database_path.with_name(database_path.name + ".showtime-seed.json")
-
     started = datetime.now()
     try:
-        state_path.unlink(missing_ok=True)
         database_path.unlink(missing_ok=True)
+        state_path.unlink(missing_ok=True)
         Base.metadata.create_all(engine)
         with SessionLocal() as db:
             seed(db)
@@ -121,14 +187,16 @@ def main() -> int:
             statuses = dict(db.query(Booking.status, func.count())
                             .group_by(Booking.status).all())
     except Exception:
-        engine.dispose()
-        database_path.unlink(missing_ok=True)
-        state_path.unlink(missing_ok=True)
-        if backup_path is not None:
-            shutil.copy2(backup_path, database_path)
-        if state_backup is not None:
-            shutil.copy2(state_backup, state_path)
-        print("Seed thất bại; đã phục hồi database trước đó từ bản sao lưu.", file=sys.stderr)
+        recovery_errors = restore_after_failure(
+            database_path, state_path, backup_path, state_backup, engine
+        )
+        if recovery_errors:
+            print(
+                "Seed thất bại; phục hồi có cảnh báo: " + "; ".join(recovery_errors),
+                file=sys.stderr,
+            )
+        else:
+            print("Seed thất bại; đã phục hồi dữ liệu trước đó.", file=sys.stderr)
         raise
 
     elapsed = (datetime.now() - started).total_seconds()

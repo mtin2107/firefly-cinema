@@ -2,6 +2,7 @@
 
 ## Chuẩn bị trước khi trình bày
 
+- Tắt cửa sổ **Backend** cũ trước khi chạy lại `reset-demo.bat`; script sẽ từ chối reset nếu database còn bị Backend khóa.
 - Chạy `reset-demo.bat`, sau đó `chay-firefly.bat`; chỉ bắt đầu khi cửa sổ lệnh báo backend dùng PhoBERT.
 - Dùng tài khoản khách `demo@firefly.vn` và tài khoản `admin@firefly.vn`; mật khẩu lấy từ cấu hình môi trường của máy demo, không ghi vào tài liệu.
 - Mở sẵn hai cửa sổ trình duyệt: cửa sổ khách và cửa sổ riêng tư cho admin. Đặt mức thu phóng 100%.

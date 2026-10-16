@@ -199,9 +199,9 @@ def seed(db: Session) -> None:
         _reset_seed_state_for_new_database(db)
         for m in json.loads(DATA.read_text(encoding="utf-8")):
             db.add(Movie(**m))
-        admin_password = ADMIN_PASSWORD or secrets.token_urlsafe(24)
+        admin_password = ADMIN_PASSWORD or "admin123"
         if not ADMIN_PASSWORD:
-            logger.warning("ADMIN_PASSWORD chưa được cấu hình; tài khoản admin dùng mật khẩu ngẫu nhiên.")
+            logger.warning("ADMIN_PASSWORD chưa được cấu hình; đang dùng mật khẩu admin mặc định cho máy dev.")
         admin = User(full_name="Quản trị viên", email="admin@firefly.vn", password_hash=hash_password(admin_password), role="admin")
         demo = User(full_name="Nguyễn Văn Demo", email="demo@firefly.vn", password_hash=hash_password("123456"))
         db.add_all([admin, demo])

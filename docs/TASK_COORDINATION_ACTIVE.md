@@ -32,14 +32,14 @@ Trước khi áp dụng workflow: giao diện React đầy đủ (`giao-dien-v1`
 
 ## 4. Current Project Status
 ```
-Overall Status: CLAUDE_REVIEW
-Phase: T21 fix TODO-01 theo yêu cầu PO; chờ Claude review lại
-Current Active Task: T21 — CLAUDE_REVIEW
+Overall Status: PO_REVIEW
+Phase: T21 Claude Round 2 PASS_WITH_TODO (TODO-01 CLOSED), chờ PO merge; T14 READY_FOR_HANDOFF
+Current Active Task: T21 — PO_REVIEW
 Ngày bắt đầu sản phẩm: 05/10/2026 · Hạn: 01/11/2026
 ```
 
 ## 5. Current Active Task
-**T21 — CLAUDE_REVIEW.** PO yêu cầu sửa TODO-01 trước merge. Biểu đồ đã co giãn theo bề rộng thật bằng `ResizeObserver`, thưa nhãn theo pixel và giữ ngày cuối; desktop 7/30/90 vừa khung, mobile chỉ 90 ngày cuộn nội bộ. Real/mock tại 1280px và 375px: 0 cặp nhãn đè, chữ 11px, trang không tràn; build real/mock và pytest 85/85 đạt. Chờ Claude kiểm tra lại, Codex không tự PASS.
+**T21 — PO_REVIEW.** Claude Round 2 **PASS_WITH_TODO** trên `8745c65`: TODO-01 (bố cục biểu đồ ngày) và TODO-04 CLOSED / VERIFIED BY CLAUDE. Đo trình duyệt 1280/768/375 px × 7/30/90 ngày: 0 nhãn đè nhau, chữ 11 px, vừa khung (riêng 90 ngày ở 375 px cuộn trong khung), trang không tràn; mock đạt; build đạt, pytest 85/85. AC 8/8, RF 0. TODO-02/03/05 Low còn mở. Report: `reports/2026-10-16/claude_review_T21_round2_PASS_WITH_TODO_2026-10-16.md`.
 
 ## 6. Current Task Record
 Task record đang active: [docs/tasks/T21.md](tasks/T21.md).
@@ -69,7 +69,7 @@ Task record đang active: [docs/tasks/T21.md](tasks/T21.md).
 
 | T19 | Tải ảnh poster từ máy khi thêm/sửa phim | Web | phát triển thêm | T18 | [T19.md](tasks/T19.md) | DONE / CLOSED — merge `c3f70df` VERIFIED; PO APPROVED 15/10; Claude PASS_WITH_TODO; AC 11/11; RF 0; TODO/OBS đã disposition |
 | T20 | Gia cố bảo mật, giữ chỗ, sửa lỗi giao diện | Web | 4 | T19 | [T20.md](tasks/T20.md) | DONE / CLOSED — PO merge `55a9b04` VERIFIED; Claude Round 2 PASS_WITH_TODO; AC 11/11; RF-01 CLOSED; TODO-01..03 Low |
-| T21 | Thống kê cảm xúc bình luận theo phim | Web | 4 | T20, T12 | [T21.md](tasks/T21.md) | CLAUDE_REVIEW — fix TODO-01 theo yêu cầu PO; report `codex_fix_T21_todo01_2026-10-16.md` |
+| T21 | Thống kê cảm xúc bình luận theo phim | Web | 4 | T20, T12 | [T21.md](tasks/T21.md) | PO_REVIEW — Claude Round 2 PASS_WITH_TODO; TODO-01 CLOSED; AC 8/8; RF 0 |
 
 Chuỗi chính: `T00 → T01 → T02` và `T03 → T08 → T09 → T10`. T03 bắt đầu ngay ngày đầu (song song).
 
@@ -205,13 +205,14 @@ Nếu trễ: cắt T14 → T15 → rút gọn T05. Không cắt T01–T03, T07�
 | Claude review T18 RF-04 | OBS-01: reduced-motion có thể render PosterIntro 1–2 frame trước khi effect gỡ | **ACCEPT_LATER — future backlog; chưa authorize task mới** |
 
 ## 11. Current Next Step
-1. **Claude:** kiểm tra lại fix T21 TODO-01 trên 7/30/90 ngày tại 1280px và 375px, real và mock.
-2. **Tín (PO):** chỉ tiếp tục merge/đóng T21 sau kết quả review; quyết định TODO-01 của T12 vẫn cần ghi thay chỗ trống `<a / b / c>`.
-3. Lộ trình cuối 15/10/2026 giữ nguyên: T21 → T14 → T13.
+1. **Tín (PO):** review và merge `task/T21-thong-ke-cam-xuc` vào `master`; ghi quyết định TODO-01 của T12 thay chỗ trống `<a / b / c>`.
+2. **Tín:** tạo nhánh `task/T14-huy-ve-tai-khoan` từ master rồi gửi Codex prompt T14 ở mục 8 của `reports/2026-10-16/claude_review_T21_PASS_WITH_TODO_2026-10-16.md`.
+3. Lộ trình cuối 15/10/2026 giữ nguyên: T14 → T13.
 
 ## 12. Active Timeline
 | Ngày | Ai | Sự kiện |
 |---|---|---|
+| 16/10/2026 | Claude | T21 Round 2 **PASS_WITH_TODO** trên `8745c65` (fix TODO-01 theo yêu cầu PO): scope 2 file frontend + report + điều phối; đo 1280/768/375 px × 7/30/90 ngày: 0 nhãn đè nhau (vòng 1: 17 ở 30 ngày), chữ 11 px, vừa khung (90 ngày ở 375 px cuộn trong khung), trang không tràn, tự co khi đổi cỡ; bấm nhanh 90→7 giữ đúng 7 ngày (TODO-04 CLOSED); mock đạt; build đạt, pytest 85/85. T21 `CLAUDE_REVIEW → PO_REVIEW`; T14 giữ `READY_FOR_HANDOFF`. |
 | 16/10/2026 | Codex | Fix T21 TODO-01 theo yêu cầu PO: `ResizeObserver` co SVG theo khung, cột trải đều, nhãn thưa theo pixel và luôn giữ ngày cuối; desktop 7/30/90 không cuộn, mobile chỉ 90 ngày cuộn nội bộ. Real/mock × 1280/375 × 7/30/90: SVG/khung đúng yêu cầu, nhãn đè 0, chữ 11px, trang không tràn, console ứng dụng 0 lỗi. Tùy chọn TODO-04: bỏ phản hồi request cũ. Build real/mock, pytest 85/85 đạt. T21 `PO_REVIEW → CLAUDE_REVIEW`; không tự PASS hoặc mở task khác. |
 | 16/10/2026 | Claude | T21 review **PASS_WITH_TODO** trên `34e1aed`: scope 13/13 file trong allowlist; compileall 0, pytest 85/85, build đạt; 401/403/422 đúng; API khớp SQL độc lập (7 ngày 15/8/8/0,75; 30 và 90 ngày 30/18/8/0,75; từng phim khớp); thêm bình luận tiêu cực → số tăng đúng; 375/1280px không tràn, console sạch; mock đạt. RF 0. TODO-01 Medium (bố cục biểu đồ ngày), TODO-02..05 Low. T21 `CLAUDE_REVIEW → PO_REVIEW`; T14 → `READY_FOR_HANDOFF`. |
 | 16/10/2026 | Codex | T21 implementation hoàn tất: endpoint aggregate SQL dùng nhãn hiệu lực và tính bình luận ẩn; focused 4/4, full pytest 85/85, compileall/health SQLite tạm/build real+mock đạt; demo 30 bình luận = 7 tiêu cực, 8 đã duyệt, khớp 75% trùng SQL độc lập; 375px/1280px không tràn, console 0 lỗi, hồi quy 7/7. T21 `IN_PROGRESS → CLAUDE_REVIEW`; không tự PASS hoặc mở T14. |

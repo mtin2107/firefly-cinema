@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { api } from "../api";
 import { ErrorState, Loading } from "../components/StateViews";
@@ -9,24 +9,49 @@ const shortDate = (value) => new Intl.DateTimeFormat("vi-VN", { day: "2-digit", 
   .format(new Date(`${value}T00:00:00`));
 
 function DailyChart({ rows }) {
+  const frameRef = useRef(null);
+  const [frameWidth, setFrameWidth] = useState(0);
+
+  useEffect(() => {
+    const frame = frameRef.current;
+    if (!frame) return undefined;
+    const updateWidth = () => setFrameWidth(Math.floor(frame.getBoundingClientRect().width));
+    updateWidth();
+    const observer = new ResizeObserver(updateWidth);
+    observer.observe(frame);
+    return () => observer.disconnect();
+  }, []);
+
   const max = Math.max(1, ...rows.map((row) => row.total));
-  const slot = 24;
-  const width = Math.max(320, rows.length * slot);
+  const visibleWidth = Math.max(frameWidth, 320);
+  const width = frameWidth < 600 && rows.length === 90
+    ? Math.max(visibleWidth, rows.length * 16)
+    : visibleWidth;
+  const sidePadding = 22;
+  const plotWidth = width - sidePadding * 2;
+  const slot = plotWidth / rows.length;
+  const pairWidth = Math.min(40, Math.max(6, slot * 0.72));
+  const barGap = Math.min(2, pairWidth * 0.12);
+  const barWidth = (pairWidth - barGap) / 2;
+  const labelEvery = Math.max(1, Math.ceil(48 / slot));
+  const lastIndex = rows.length - 1;
   return <>
-    <div className="sentiment-chart-scroll">
-      <svg className="sentiment-chart" viewBox={`0 0 ${width} 220`} role="img"
+    <div className="sentiment-chart-scroll" ref={frameRef}>
+      <svg className="sentiment-chart" width={width} height="240" viewBox={`0 0 ${width} 240`} role="img"
         aria-label="Biểu đồ cột tổng số và số bình luận tiêu cực theo ngày">
-        <line x1="0" y1="190" x2={width} y2="190" className="sentiment-chart__axis" />
+        <line x1={sidePadding} y1="202" x2={width - sidePadding} y2="202" className="sentiment-chart__axis" />
         {rows.map((row, index) => {
-          const totalHeight = row.total / max * 160;
-          const negativeHeight = row.negative / max * 160;
-          const x = index * slot + 3;
+          const totalHeight = row.total / max * 170;
+          const negativeHeight = row.negative / max * 170;
+          const center = sidePadding + (index + 0.5) * slot;
+          const x = center - pairWidth / 2;
+          const showLabel = index === lastIndex
+            || (index % labelEvery === 0 && (lastIndex - index) * slot >= 48);
           return <g key={row.date}>
             <title>{`${row.date}: ${row.total} tổng, ${row.negative} tiêu cực`}</title>
-            <rect x={x} y={190 - totalHeight} width="8" height={totalHeight} className="sentiment-chart__total" />
-            <rect x={x + 9} y={190 - negativeHeight} width="8" height={negativeHeight} className="sentiment-chart__negative" />
-            {(rows.length <= 30 || index % 7 === 0 || index === rows.length - 1) &&
-              <text x={x + 8} y="208" textAnchor="middle">{shortDate(row.date)}</text>}
+            <rect x={x} y={202 - totalHeight} width={barWidth} height={totalHeight} className="sentiment-chart__total" />
+            <rect x={x + barWidth + barGap} y={202 - negativeHeight} width={barWidth} height={negativeHeight} className="sentiment-chart__negative" />
+            {showLabel && <text x={center} y="224" textAnchor="middle">{shortDate(row.date)}</text>}
           </g>;
         })}
       </svg>
@@ -39,13 +64,17 @@ export default function AdminSentiment() {
   const [days, setDays] = useState(30);
   const [data, setData] = useState(null);
   const [error, setError] = useState("");
+  const [reloadKey, setReloadKey] = useState(0);
 
-  const load = () => {
+  useEffect(() => {
+    let active = true;
     setError("");
     setData(null);
-    api.admin.sentiment(days).then(setData).catch((err) => setError(err.message));
-  };
-  useEffect(load, [days]);
+    api.admin.sentiment(days)
+      .then((result) => { if (active) setData(result); })
+      .catch((err) => { if (active) setError(err.message); });
+    return () => { active = false; };
+  }, [days, reloadKey]);
 
   return <div className="container admin-sentiment">
     <div className="admin-sentiment__heading">
@@ -61,7 +90,7 @@ export default function AdminSentiment() {
       </div>
     </div>
 
-    {error ? <ErrorState message={error} onRetry={load} /> : !data ? <Loading /> : <>
+    {error ? <ErrorState message={error} onRetry={() => setReloadKey((value) => value + 1)} /> : !data ? <Loading /> : <>
       <section className="sentiment-summary" aria-label={`Tóm tắt ${days} ngày`}>
         <div><span>Tổng bình luận</span><strong>{data.summary.total}</strong></div>
         <div><span>Bình luận tiêu cực</span><strong>{data.summary.negative}</strong></div>

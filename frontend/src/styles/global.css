@@ -777,9 +777,9 @@ h1, h2, h3 { margin: 0; line-height: 1.15; }
 .sentiment-bar { height: 13px; overflow: hidden; border-radius: 999px; background: var(--surface-2); }
 .sentiment-bar span { display: block; height: 100%; border-radius: inherit; background: linear-gradient(90deg, var(--yellow), #e44758); }
 .sentiment-movie small { display: block; margin-top: 5px; }
-.sentiment-chart-scroll { width: 100%; overflow-x: auto; }
-.sentiment-chart { display: block; min-width: 100%; height: 260px; color: var(--muted); }
-.sentiment-chart text { fill: currentColor; font-size: 8px; }
+.sentiment-chart-scroll { width: 100%; max-width: 100%; overflow-x: auto; overflow-y: hidden; }
+.sentiment-chart { display: block; max-width: none; color: var(--muted); }
+.sentiment-chart text { fill: currentColor; font-size: 11px; }
 .sentiment-chart__axis { stroke: var(--line); stroke-width: 1; }
 .sentiment-chart__total { fill: var(--yellow); }
 .sentiment-chart__negative { fill: #e44758; }

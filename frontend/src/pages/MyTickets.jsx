@@ -10,10 +10,25 @@ export default function MyTickets() {
   const [error, setError] = useState("");
   const [notice, setNotice] = useState("");
   const [claimingId, setClaimingId] = useState(null);
+  const [cancellingId, setCancellingId] = useState(null);
 
   const load = () => {
     setError("");
     api.bookings.mine().then(setBookings).catch((e) => setError(e.message));
+  };
+
+  const cancel = async (booking) => {
+    if (!window.confirm(`Hủy vé ${booking.code} và trả lại các ghế đã giữ?`)) return;
+    setCancellingId(booking.id); setError(""); setNotice("");
+    try {
+      await api.bookings.remove(booking.id);
+      setNotice(`Đã hủy vé ${booking.code}; các ghế đã được trả lại.`);
+      load();
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setCancellingId(null);
+    }
   };
   useEffect(load, []);
 
@@ -56,6 +71,7 @@ export default function MyTickets() {
             <TicketStub key={b.id} movie={b.movie} showtime={b.showtime} seats={b.seats}
               total={b.total} code={b.code} status={b.status} holdExpiresAt={b.hold_expires_at}
               qrUrl={b.qr_url} onClaim={() => claim(b)} claiming={claimingId === b.id}
+              onCancel={() => cancel(b)} cancelling={cancellingId === b.id}
               highlight={b.id === state?.newBookingId} />
           ))}
         </div>

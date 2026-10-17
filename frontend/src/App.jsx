@@ -8,6 +8,7 @@ import MovieDetail from "./pages/MovieDetail";
 import SeatSelection from "./pages/SeatSelection";
 import Checkout from "./pages/Checkout";
 import MyTickets from "./pages/MyTickets";
+import Account from "./pages/Account";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 import AdminComments from "./pages/AdminComments";
@@ -36,6 +37,7 @@ export default function App() {
               <Route path="/dat-ve/:showtimeId" element={<SeatSelection />} />
               <Route path="/xac-nhan" element={<Checkout />} />
               <Route path="/ve-cua-toi" element={<MyTickets />} />
+              <Route path="/tai-khoan" element={<Account />} />
             </Route>
             <Route element={<ProtectedRoute adminOnly />}>
               <Route path="/quan-tri/ve" element={<AdminBookings />} />

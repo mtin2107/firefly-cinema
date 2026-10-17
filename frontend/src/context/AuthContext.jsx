@@ -27,6 +27,12 @@ export function AuthProvider({ children }) {
     checking,
     login: async (email, password) => handleAuth(await api.auth.login({ email, password })),
     register: async (full_name, email, password) => handleAuth(await api.auth.register({ full_name, email, password })),
+    updateProfile: async (full_name) => {
+      const updated = await api.auth.updateMe({ full_name });
+      setUser(updated);
+      return updated;
+    },
+    changePassword: (current_password, new_password) => api.auth.changePassword({ current_password, new_password }),
     logout: () => { tokenStore.set(null); setUser(null); },
   };
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

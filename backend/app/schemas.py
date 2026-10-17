@@ -26,6 +26,23 @@ class LoginIn(BaseModel):
     password: str
 
 
+class UpdateProfileIn(BaseModel):
+    full_name: str = Field(min_length=2, max_length=100)
+
+    @field_validator("full_name")
+    @classmethod
+    def validate_full_name(cls, value: str) -> str:
+        value = value.strip()
+        if len(value) < 2:
+            raise PydanticCustomError("full_name", "Họ tên cần từ 2 đến 100 ký tự.")
+        return value
+
+
+class ChangePasswordIn(BaseModel):
+    current_password: str
+    new_password: str = Field(min_length=6, max_length=100)
+
+
 class UserOut(ORM):
     id: int
     full_name: str

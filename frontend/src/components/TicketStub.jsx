@@ -13,7 +13,7 @@ const STATUS_LABELS = {
 };
 
 export default function TicketStub({ movie, showtime, seats, total, code, status, holdExpiresAt,
-  qrUrl, highlight = false, onClaim, claiming = false }) {
+  qrUrl, highlight = false, onClaim, claiming = false, onCancel, cancelling = false }) {
   const holdText = holdExpiresAt ? fullDateTime(holdExpiresAt) : "—";
   // Vé giữ chỗ có QR không lật để thao tác thanh toán luôn thấy và bấm được
   const flippable = status === "paid" || status === "pending_verify";
@@ -60,6 +60,9 @@ export default function TicketStub({ movie, showtime, seats, total, code, status
               {qrUrl && <button type="button" className="btn btn--primary btn--sm" onClick={onClaim} disabled={claiming}>
                 {claiming ? "Đang gửi..." : "Tôi đã chuyển khoản"}
               </button>}
+              <button type="button" className="btn btn--danger btn--sm" onClick={onCancel} disabled={cancelling}>
+                {cancelling ? "Đang hủy..." : "Hủy vé"}
+              </button>
             </div>}
             {flippable && (
               <button type="button" className="btn btn--ghost btn--sm ticket__flip" onClick={() => flip(true)}>Lật vé</button>

@@ -7,7 +7,8 @@ from sqlalchemy.orm import Session
 
 from ..database import get_db
 from ..booking_rules import (
-    HOLD_CUTOFF_MINUTES, booking_out, expire_holds, transfer_payment_enabled,
+    HOLD_CUTOFF_MINUTES, booking_out, expire_holds, release_booking_seats,
+    transfer_payment_enabled,
 )
 from ..models import Booking, BookingSeat, Showtime, User
 from ..schemas import BookingIn, BookingOut
@@ -74,6 +75,28 @@ def my_bookings(user: User = Depends(get_current_user), db: Session = Depends(ge
     db.commit()
     rows = db.scalars(select(Booking).where(Booking.user_id == user.id).order_by(Booking.id.desc())).all()
     return [booking_out(b) for b in rows]
+
+
+@router.delete("/{booking_id}")
+def cancel_booking(
+    booking_id: int,
+    user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    expire_holds(db)
+    booking = db.scalar(select(Booking).where(
+        Booking.id == booking_id, Booking.user_id == user.id
+    ))
+    if booking is None:
+        db.commit()
+        raise HTTPException(404, "Không tìm thấy vé.")
+    if booking.status != "held":
+        db.commit()
+        raise HTTPException(409, "Chỉ hủy được vé đang giữ chỗ chưa thanh toán.")
+    release_booking_seats(db, booking.id)
+    db.delete(booking)
+    db.commit()
+    return {"detail": "Đã hủy vé."}
 
 
 @router.post("/{booking_id}/transfer-claim", response_model=BookingOut)

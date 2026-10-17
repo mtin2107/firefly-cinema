@@ -350,6 +350,14 @@ h1, h2, h3 { margin: 0; line-height: 1.15; }
 .auth__switch { text-align: center; color: var(--muted); }
 .auth__demo { font-size: .85rem; text-align: center; border-top: 1px solid var(--line); padding-top: 14px; }
 
+/* ---------- Tài khoản ---------- */
+.account-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px; }
+.account-card { padding: 22px; background: var(--surface-2); border: 1px solid var(--line); border-radius: var(--radius); }
+.account-card h2 { font-family: var(--font-display); font-size: 1.7rem; text-transform: uppercase; }
+.account-form { display: flex; flex-direction: column; gap: 16px; margin-top: 18px; }
+.account-form .notice { margin: 0; }
+.account-form .btn { align-self: flex-start; }
+
 /* ---------- Quản trị ---------- */
 .admin__intro { max-width: 70ch; }
 .admin__stats { margin: 0 0 24px; }
@@ -494,6 +502,7 @@ h1, h2, h3 { margin: 0; line-height: 1.15; }
   .poster--lg { width: 200px; }
   .poster--lg .poster__title { font-size: 1.9rem; }
   .ticket__facts { grid-template-columns: 1fr; }
+  .account-grid { grid-template-columns: 1fr; }
   .admin-movie-editor { grid-template-columns: 1fr; }
   .admin-movie-editor__preview { position: static; }
   .admin-movie-editor__preview .poster { width: min(240px, 72vw); }

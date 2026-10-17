@@ -4,7 +4,7 @@ import pytest
 from sqlalchemy import func, select
 
 from app.models import Booking, BookingSeat, User
-from app.security import create_token, hash_password
+from app.security import verify_password
 
 
 def _booking(db, showtime, user, status, seat):
@@ -126,6 +126,91 @@ def test_change_password_rejects_wrong_current_password(client, auth_headers):
 
     assert response.status_code == 400
     assert response.json() == {"detail": "Mật khẩu hiện tại không đúng."}
+
+
+def test_change_password_blocks_correct_password_after_five_failures_without_changing_it(
+    client, auth_headers, users, monkeypatch
+):
+    from app import rate_limit
+    from app.routers import auth
+
+    clock = [3000.0]
+    monkeypatch.setattr(rate_limit.time, "monotonic", lambda: clock[0])
+    original_verify = auth.verify_password
+    verify_calls = []
+
+    def counting_verify(password, stored):
+        verify_calls.append(password)
+        return original_verify(password, stored)
+
+    monkeypatch.setattr(auth, "verify_password", counting_verify)
+    payload = {"current_password": "sai-mat-khau", "new_password": "matkhau-moi"}
+    for _ in range(5):
+        assert client.post(
+            "/api/auth/change-password", headers=auth_headers["user"], json=payload
+        ).status_code == 400
+
+    payload["current_password"] = "secret1"
+    blocked = client.post(
+        "/api/auth/change-password", headers=auth_headers["user"], json=payload
+    )
+    assert blocked.status_code == 429
+    assert blocked.json() == {
+        "detail": "Bạn nhập sai mật khẩu quá nhiều lần. Hãy thử lại sau 5 phút."
+    }
+    assert verify_calls == ["sai-mat-khau"] * 5
+    assert verify_password("secret1", users[0].password_hash)
+    assert not verify_password("matkhau-moi", users[0].password_hash)
+
+
+def test_change_password_failures_share_counter_with_login(
+    client, auth_headers, users, monkeypatch
+):
+    from app import rate_limit
+
+    clock = [4000.0]
+    monkeypatch.setattr(rate_limit.time, "monotonic", lambda: clock[0])
+    payload = {"current_password": "sai-mat-khau", "new_password": "matkhau-moi"}
+    for _ in range(5):
+        assert client.post(
+            "/api/auth/change-password", headers=auth_headers["user"], json=payload
+        ).status_code == 400
+
+    login = client.post(
+        "/api/auth/login",
+        json={"email": users[0].email.upper(), "password": "secret1"},
+    )
+    assert login.status_code == 429
+    assert login.json() == {
+        "detail": "Bạn đăng nhập sai quá nhiều lần. Hãy thử lại sau 5 phút."
+    }
+
+
+def test_successful_change_password_clears_shared_failure_counter(
+    client, auth_headers, monkeypatch
+):
+    from app import rate_limit
+
+    clock = [5000.0]
+    monkeypatch.setattr(rate_limit.time, "monotonic", lambda: clock[0])
+    wrong = {"current_password": "sai-mat-khau", "new_password": "matkhau-moi"}
+    for _ in range(4):
+        assert client.post(
+            "/api/auth/change-password", headers=auth_headers["user"], json=wrong
+        ).status_code == 400
+
+    changed = client.post(
+        "/api/auth/change-password",
+        headers=auth_headers["user"],
+        json={"current_password": "secret1", "new_password": "matkhau-moi"},
+    )
+    assert changed.status_code == 200
+
+    after_clear = client.post(
+        "/api/auth/change-password", headers=auth_headers["user"], json=wrong
+    )
+    assert after_clear.status_code == 400
+    assert after_clear.json() == {"detail": "Mật khẩu hiện tại không đúng."}
 
 
 def test_account_fields_keep_registration_length_limits(client, auth_headers):

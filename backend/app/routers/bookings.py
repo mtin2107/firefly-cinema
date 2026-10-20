@@ -66,7 +66,7 @@ def create_booking(body: BookingIn, user: User = Depends(get_current_user), db: 
         db.rollback()
         raise HTTPException(409, "Có ghế vừa được người khác đặt. Hãy tải lại sơ đồ ghế.")
     db.refresh(booking)
-    return booking_out(booking)
+    return {**booking_out(booking), "checked_in_at": booking.checked_in_at}
 
 
 @router.get("/me", response_model=list[BookingOut])
@@ -74,7 +74,7 @@ def my_bookings(user: User = Depends(get_current_user), db: Session = Depends(ge
     expire_holds(db)
     db.commit()
     rows = db.scalars(select(Booking).where(Booking.user_id == user.id).order_by(Booking.id.desc())).all()
-    return [booking_out(b) for b in rows]
+    return [{**booking_out(b), "checked_in_at": b.checked_in_at} for b in rows]
 
 
 @router.delete("/{booking_id}")
@@ -117,4 +117,4 @@ def claim_transfer(booking_id: int, user: User = Depends(get_current_user), db: 
     booking.status = "pending_verify"
     db.commit()
     db.refresh(booking)
-    return booking_out(booking)
+    return {**booking_out(booking), "checked_in_at": booking.checked_in_at}

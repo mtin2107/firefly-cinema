@@ -60,6 +60,11 @@ export const realApi = {
     remove: (id) => request(`/api/comments/${id}`, { method: "DELETE" }),
   },
   admin: {
+    dashboard: (days = 30) => request(`/api/admin/dashboard?days=${days}`),
+    checkin: {
+      get: (code) => request(`/api/admin/checkin/${encodeURIComponent(code.trim())}`),
+      confirm: (code) => request(`/api/admin/checkin/${encodeURIComponent(code.trim())}`, { method: "POST" }),
+    },
     sentiment: (days = 30) => request(`/api/admin/sentiment?days=${days}`),
     posters: {
       upload: (payload) => request("/api/admin/posters", { method: "POST", body: payload }),

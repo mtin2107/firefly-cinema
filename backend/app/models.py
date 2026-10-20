@@ -91,7 +91,10 @@ class Booking(Base):
     total: Mapped[int] = mapped_column(Integer)
     status: Mapped[str] = mapped_column(String(20), default="held", server_default="held")
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.now)
-    user: Mapped[User] = relationship()
+    checked_in_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
+    checked_in_by: Mapped[int | None] = mapped_column(ForeignKey("users.id"), nullable=True)
+    user: Mapped[User] = relationship(foreign_keys=[user_id])
+    checkin_user: Mapped[User | None] = relationship(foreign_keys=[checked_in_by])
     showtime: Mapped[Showtime] = relationship()
     seats: Mapped[list["BookingSeat"]] = relationship(back_populates="booking", cascade="all, delete-orphan")
 

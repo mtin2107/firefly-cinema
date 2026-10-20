@@ -273,6 +273,7 @@ class BookingIn(BaseModel):
 
 
 class BookingOut(BaseModel):
+    checked_in_at: datetime | None = None
     id: int
     code: str
     status: Literal["held", "pending_verify", "paid", "expired", "rejected"]
@@ -286,6 +287,7 @@ class BookingOut(BaseModel):
 
 
 class AdminBookingOut(BookingOut):
+    checked_in_by_name: str | None = None
     customer_name: str
     customer_email: str
 

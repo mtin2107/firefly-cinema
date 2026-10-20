@@ -256,3 +256,20 @@ Ngoài máy: Google Drive `MyDrive/thesis/data/…`, `MyDrive/thesis_results/…
 - `DELETE /api/comments/{id}` trả `{ok:true}` cho chủ bình luận, 404 cho ID không tồn tại hoặc không thuộc mình. Không xóa điểm khi xóa bình luận.
 - API frontend real/mock cùng `ratings.mine/set/remove`, `comments.remove` và `comments.create(movieId, payload)`. Mock v5 tính điểm từ ratings; sáu khán giả mẫu riêng, lượt chấm `2 + movie_id % 5` và sao deterministic giống backend; admin/demo không có điểm mẫu. `StarRating` đầu trang lưu/hủy ngay; dãy trong form có draft riêng, mặc định điểm hiện tại. Chỉ POST bình luận mới lưu draft; bỏ chọn thì bỏ trường stars và giữ điểm cũ. Gửi thành công cập nhật điểm đầu trang và thống kê. Token 401 ở GET bình luận công khai được xem như khách, không đổi xác thực API ghi.
 - Cột score cũ vẫn lưu nhưng không dùng hiển thị/xếp hạng người xem; hero theo rating_avg rồi rating_count, top_rated lọc >=4.0. Không đổi classifier/normalize/luật ghế. Reset schema do PO theo HUONG_DAN.
+
+### T23 — Tổng quan kinh doanh và soát vé
+
+- `GET /api/admin/dashboard?days=7|30|90`: require_admin, expire_holds trước
+  thống kê; truy vấn SQL gộp số vé, doanh thu và ghế, không lặp từng vé.
+  Sức chứa suất = len(ROWS) × COLS từ seats.py. Doanh thu/số vé/ghế bán
+  theo bookings.created_at; lấp ghế trên các suất có start_time >= đầu khoảng (gồm suất sắp chiếu, không chặn trên); ratings và
+  comments theo created_at. Khoảng ngày gồm hôm nay, nửa mở [00:00 đầu, 00:00 mai).
+  Không có dữ liệu trả 0. Điểm sao là trung bình các lượt chấm trong khoảng;
+  tiêu cực dùng human_label nếu đã duyệt, nếu chưa thì is_negative, gồm cả bình luận ẩn như T21.
+- `GET/POST /api/admin/checkin/{code}`: require_admin. POST dùng một UPDATE
+  có điều kiện status=paid AND checked_in_at IS NULL; rowcount quyết định thành công,
+  chống soát hai lần kể cả đồng thời. Lưu bookings.checked_in_at và checked_in_by.
+- BookingOut thêm checked_in_at; AdminBookingOut thêm checked_in_by_name.
+  MyTickets truyền checked_in_at xuống TicketStub qua prop checkedInAt (không gọi API thêm).
+- Real/mock cùng admin.dashboard, admin.checkin.get/confirm. Trang admin mới
+  có ProtectedRoute adminOnly; biểu đồ SVG không dùng thư viện mới.

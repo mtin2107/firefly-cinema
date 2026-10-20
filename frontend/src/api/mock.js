@@ -292,7 +292,7 @@ function saveRating(movieId, userId, stars) {
   if (!Number.isInteger(stars) || stars < 1 || stars > 5) throw new ApiError("Số sao phải từ 1 đến 5.", 422);
   const rating = db.ratings.find((r) => r.movie_id === Number(movieId) && r.user_id === userId);
   if (rating) rating.stars = stars;
-  else db.ratings.push({ movie_id: Number(movieId), user_id: userId, stars });
+  else db.ratings.push({ movie_id: Number(movieId), user_id: userId, stars, created_at: new Date().toISOString() });
 }
 function ownsComment(c) {
   try { return currentUser().id === c.user_id; } catch { return false; }
@@ -325,13 +325,19 @@ const bookingOut = (booking) => {
     ? `https://img.vietqr.io/image/${MOCK_BANK.id}-${MOCK_BANK.account}-compact2.png?${new URLSearchParams({ amount: booking.total, addInfo: code, accountName: MOCK_BANK.name })}`
     : null;
   return {
-    ...booking, code, hold_expires_at: holdExpiresAt(booking), qr_url: qr,
+    ...booking, checked_in_at: booking.checked_in_at ?? null, code, hold_expires_at: holdExpiresAt(booking), qr_url: qr,
     showtime, movie: movieById(showtime.movie_id),
   };
 };
+function findCheckin(code) {
+  const match=/^FF([0-9]+)$/i.exec(code.trim());
+  const b=match && db.bookings.find((b)=>b.id===Number(match[1]));
+  if (!b) throw new ApiError("Không tìm thấy vé.",404);
+  return b;
+}
 const adminBookingOut = (booking) => {
   const user = db.users.find((item) => item.id === booking.user_id);
-  return { ...bookingOut(booking), customer_name: user?.full_name ?? "Không rõ", customer_email: user?.email ?? "Không rõ" };
+  return { ...bookingOut(booking), checked_in_by_name: db.users.find((u) => u.id === booking.checked_in_by)?.full_name ?? null, customer_name: user?.full_name ?? "Không rõ", customer_email: user?.email ?? "Không rõ" };
 };
 const bookedSeats = (showtimeId) => [
   ...(db.adminShowtimeIds.includes(showtimeId) ? [] : seedBooked(showtimeId)),
@@ -682,6 +688,38 @@ export const mockApi = {
     },
   },
   admin: {
+    async dashboard(days = 30) {
+      await wait(); requireAdmin(); expireHolds();
+      days = Number(days);
+      if (![7,30,90].includes(days)) throw new ApiError("Số ngày phải là 7, 30 hoặc 90.", 422);
+      const start = new Date(); start.setHours(0,0,0,0); start.setDate(start.getDate()-days+1);
+      const end = new Date(); end.setHours(24,0,0,0);
+      const inRange = (v) => new Date(v) >= start && new Date(v) < end;
+      const dateKey = (v) => { const d=new Date(v); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`; };
+      const bookings=db.bookings.filter((b)=>inRange(b.created_at)), paid=bookings.filter((b)=>b.status==="paid");
+      const ratings=db.ratings.filter((r)=>inRange(r.created_at ?? new Date().toISOString()));
+      const avg=(rs)=>rs.length ? rs.reduce((n,r)=>n+r.stars,0)/rs.length : 0;
+      const sum=(bs)=>bs.reduce((n,b)=>n+b.total,0);
+      const daily=Array.from({length:days},(_,i)=> { const d=new Date(start); d.setDate(d.getDate()+i); const date=dateKey(d), bs=paid.filter((b)=>dateKey(b.created_at)===date); return {date,revenue:sum(bs),tickets:bs.length}; });
+      const movies=db.movies.map((m)=> {
+        const bs=paid.filter((b)=>db.showtimes.find((s)=>s.id===b.showtime_id)?.movie_id===m.id);
+        const shows=db.showtimes.filter((s)=>s.movie_id===m.id && new Date(s.start_time) >= start);
+        const ids=new Set(shows.map((s)=>s.id));
+        const sold=db.bookings.filter((b)=>b.status==="paid" && ids.has(b.showtime_id)).reduce((n,b)=>n+b.seats.length,0);
+        const rs=ratings.filter((r)=>r.movie_id===m.id), cs=db.comments.filter((c)=>c.movie_id===m.id && inRange(c.created_at));
+        return {movie_id:m.id,title:m.title,paid_tickets:bs.length,revenue:sum(bs),occupancy:shows.length ? sold/(shows.length*ROWS.length*COLS) : 0,rating_avg:avg(rs),rating_count:rs.length,negative_rate:cs.length ? cs.filter((c)=>(c.human_label ?? Number(c.is_negative))===1).length/cs.length : 0};
+      }).sort((a,b)=>a.title.localeCompare(b.title,"vi") || a.movie_id-b.movie_id);
+      return clone({days,revenue:sum(paid),paid_tickets:paid.length,pending_tickets:bookings.filter((b)=>["held","pending_verify"].includes(b.status)).length,cancelled_tickets:bookings.filter((b)=>["expired","rejected"].includes(b.status)).length,seats_sold:paid.reduce((n,b)=>n+b.seats.length,0),rating_avg:avg(ratings),rating_count:ratings.length,daily,movies});
+    },
+    checkin: {
+      async get(code) { await wait(); requireAdmin(); expireHolds(); return clone(adminBookingOut(findCheckin(code))); },
+      async confirm(code) {
+        await wait(); requireAdmin(); const admin=currentUser(); expireHolds(); const b=findCheckin(code);
+        if (b.checked_in_at) throw new ApiError(`Vé đã được soát lúc ${new Date(b.checked_in_at).toLocaleString("vi-VN")}.`,409);
+        if (b.status!=="paid") throw new ApiError({held:"Vé chưa thanh toán, đang giữ chỗ.",pending_verify:"Vé chưa thanh toán, đang chờ xác nhận chuyển khoản.",expired:"Vé đã hủy do quá hạn thanh toán.",rejected:"Vé đã hủy do không nhận được thanh toán."}[b.status],409);
+        b.checked_in_at=new Date().toISOString(); b.checked_in_by=admin.id; save(); return clone(adminBookingOut(b));
+      },
+    },
     async sentiment(days = 30) {
       await wait();
       requireAdmin();

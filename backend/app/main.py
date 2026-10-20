@@ -10,6 +10,7 @@ from .classifier import classifier
 from .config import FRONTEND_ORIGINS, UPLOAD_DIR
 from .database import Base, engine, SessionLocal
 from .routers import auth, movies, bookings, comments, admin_bookings, admin_movies, admin_predict, admin_sentiment, admin_showtimes, admin_posters, chat, ratings
+from .routers import admin_dashboard, admin_checkin
 from .seed import seed
 
 
@@ -64,6 +65,8 @@ async def validation_error(request: Request, exc: RequestValidationError):
     )
 
 
+app.include_router(admin_dashboard.router)
+app.include_router(admin_checkin.router)
 app.include_router(auth.router)
 app.include_router(movies.router)
 app.include_router(bookings.router)

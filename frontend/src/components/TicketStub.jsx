@@ -13,7 +13,7 @@ const STATUS_LABELS = {
 };
 
 export default function TicketStub({ movie, showtime, seats, total, code, status, holdExpiresAt,
-  onExpire, qrUrl, highlight = false, onClaim, claiming = false, onCancel, cancelling = false }) {
+  onExpire, qrUrl, highlight = false, onClaim, claiming = false, onCancel, cancelling = false, checkedInAt = null }) {
   const [now, setNow] = useState(Date.now);
   const expiryNotified = useRef(false);
   const expiryTime = holdExpiresAt ? new Date(holdExpiresAt).getTime() : NaN;
@@ -61,6 +61,7 @@ export default function TicketStub({ movie, showtime, seats, total, code, status
           <div className="ticket__main">
             <h3 className="ticket__title">{movie.title}</h3>
             <p className="ticket__line"><AgeBadge rating={movie.age_rating} /> {showtime.room}</p>
+            {checkedInAt && <p className="notice notice--ok">Đã vào rạp lúc {fullDateTime(checkedInAt)}</p>}
             <dl className="ticket__facts">
               <div><dt>Suất chiếu</dt><dd>{fullDateTime(showtime.start_time)}</dd></div>
               <div><dt>Ghế</dt><dd>{sortSeats(seats).join(", ")}</dd></div>

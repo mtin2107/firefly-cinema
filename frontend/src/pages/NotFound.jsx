@@ -1,5 +1,7 @@
+import { usePageTitle } from "../utils/pageTitle";
 import { Link } from "react-router-dom";
 export default function NotFound() {
+  usePageTitle("Không tìm thấy trang");
   return (
     <div className="container state">
       <h1 className="page-title">Không tìm thấy trang</h1>

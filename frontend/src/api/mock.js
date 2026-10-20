@@ -8,7 +8,7 @@ import { ApiError } from "./http";
 import { ROWS, COLS, totalPrice, MAX_SEATS_PER_BOOKING } from "../utils/seats";
 import { AGE_RATINGS, COUNTRY_LABELS, FORMAT_LABELS, GENRE_LABELS } from "../utils/taxonomy";
 
-const DB_KEY = "firefly_mockdb_v3";
+const DB_KEY = "firefly_mockdb_v4";
 const ROOMS = ["Phòng 1", "Phòng 2", "Phòng 3", "Phòng 4"];
 const CLEANUP_MINUTES = 15;
 const HOLD_CUTOFF_MINUTES = 30;
@@ -195,6 +195,8 @@ function createDb() {
       created_at: new Date(Date.now() - (HOLD_MINUTES + 1) * 60000).toISOString() },
   ];
   return {
+    ratings: MOVIES.filter((m) => m.status !== "coming_soon").flatMap((m) =>
+      [1, 2].map((user_id, index) => ({ movie_id: m.id, user_id, stars: 3 + ((m.id + index) % 3) }))),
     users, movies: clone(MOVIES), comments, bookings, showtimes,
     adminShowtimeIds: [],
     seq: { user: 3, movie: Math.max(...MOVIES.map((m) => m.id)) + 1, comment: 31, booking: 4, showtime: Math.max(...showtimes.map((item) => item.id), 0) + 1 },
@@ -263,8 +265,32 @@ function currentUser() {
 const movieById = (id) => {
   const m = db.movies.find((x) => x.id === Number(id));
   if (!m) throw new ApiError("Không tìm thấy phim.", 404);
-  return m;
+  return Object.assign(m, ratingSummary(m.id));
 };
+function ratingSummary(id) {
+  const rows = db.ratings.filter((r) => r.movie_id === Number(id));
+  return { rating_avg: rows.length ? Math.round(rows.reduce((n, r) => n + r.stars, 0) / rows.length * 10) / 10 : 0,
+    rating_count: rows.length };
+}
+function rateable(id) {
+  const movie = movieById(id);
+  if (movie.status === "coming_soon") throw new ApiError("Phim sắp chiếu chưa nhận bình luận hoặc chấm sao.", 400);
+}
+const ratingUsage = new Map();
+function ratingLimit(userId) {
+  const recent = (ratingUsage.get(userId) ?? []).filter((t) => Date.now() - t < 60000);
+  if (recent.length >= 20) throw new ApiError("Bạn chấm sao quá nhanh. Hãy thử lại sau ít phút.", 429);
+  recent.push(Date.now()); ratingUsage.set(userId, recent);
+}
+function saveRating(movieId, userId, stars) {
+  if (!Number.isInteger(stars) || stars < 1 || stars > 5) throw new ApiError("Số sao phải từ 1 đến 5.", 422);
+  const rating = db.ratings.find((r) => r.movie_id === Number(movieId) && r.user_id === userId);
+  if (rating) rating.stars = stars;
+  else db.ratings.push({ movie_id: Number(movieId), user_id: userId, stars });
+}
+function ownsComment(c) {
+  try { return currentUser().id === c.user_id; } catch { return false; }
+}
 const bookingCode = (id) => `FF${String(id).padStart(5, "0")}`;
 const holdExpiresAt = (booking) => {
   const showtime = db.showtimes.find((item) => item.id === booking.showtime_id);
@@ -306,14 +332,16 @@ const bookedSeats = (showtimeId) => [
   ...db.bookings.filter((b) => b.showtime_id === showtimeId && !["expired", "rejected"].includes(b.status)).flatMap((b) => b.seats),
 ];
 const commentOut = (c) => ({
-  id: c.id, movie_id: c.movie_id, user_name: db.users.find((u) => u.id === c.user_id)?.full_name ?? "Ẩn danh",
+  id: c.id, movie_id: c.movie_id, user_name: c.is_anonymous ? "Khán giả ẩn danh" : db.users.find((u) => u.id === c.user_id)?.full_name ?? "Khán giả",
+  is_anonymous: Boolean(c.is_anonymous), can_delete: ownsComment(c),
+  author_stars: db.ratings.find((r) => r.movie_id === c.movie_id && r.user_id === c.user_id)?.stars ?? null,
   content: c.content, is_negative: c.is_negative,
   effective_negative: c.human_label === 0 || c.human_label === 1 ? c.human_label === 1 : c.is_negative,
   reviewed: c.human_label === 0 || c.human_label === 1,
   negative_score: c.negative_score, created_at: c.created_at,
 });
 const adminCommentOut = (c) => ({
-  ...commentOut(c), movie_title: movieById(c.movie_id).title, model_name: c.model_name,
+  ...commentOut(c), can_delete: false, user_name: db.users.find((u) => u.id === c.user_id)?.full_name ?? "Khán giả", movie_title: movieById(c.movie_id).title, model_name: c.model_name,
   model_version: c.model_version,
   human_label: c.human_label, reviewed_by: c.reviewed_by,
   reviewed_by_name: db.users.find((u) => u.id === c.reviewed_by)?.full_name ?? null,
@@ -512,7 +540,7 @@ export const mockApi = {
       const split = (v) => v.split(",").map((x) => x.trim()).filter(Boolean);
       const plain = (t) => t.normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/đ/gi, "d").toLowerCase();
       const f = filters;
-      let list = db.movies.filter((m) => {
+      let list = db.movies.map((m) => movieById(m.id)).filter((m) => {
         const year = Number(m.release_date.slice(0, 4));
         return (!f.status || m.status === f.status)
           && (!f.genre || split(m.genre).includes(f.genre))
@@ -525,7 +553,7 @@ export const mockApi = {
       }).sort((a, b) => b.release_date.localeCompare(a.release_date));
 
       if (f.collection === "top_rated") {
-        list = list.filter((m) => m.score >= 8).sort((a, b) => b.score - a.score);
+        list = list.filter((m) => m.rating_avg >= 4).sort((a, b) => b.rating_avg - a.rating_avg || b.rating_count - a.rating_count);
       } else if (f.collection) {
         const rank = ranking(f.collection);
         list = list.filter((m) => rank[m.id] > 0).sort((a, b) => rank[b.id] - rank[a.id]);
@@ -604,24 +632,47 @@ export const mockApi = {
       return clone(bookingOut(booking));
     },
   },
+  ratings: {
+    async mine(id) {
+      await wait(); const user = currentUser(); movieById(id);
+      return { stars: db.ratings.find((r) => r.movie_id === Number(id) && r.user_id === user.id)?.stars ?? null };
+    },
+    async set(id, stars) {
+      await wait(); const user = currentUser(); rateable(id); ratingLimit(user.id);
+      saveRating(id, user.id, stars); save(); return { stars, ...ratingSummary(id) };
+    },
+    async remove(id) {
+      await wait(); const user = currentUser(); rateable(id); ratingLimit(user.id);
+      db.ratings = db.ratings.filter((r) => !(r.movie_id === Number(id) && r.user_id === user.id));
+      save(); return { stars: null, ...ratingSummary(id) };
+    },
+  },
   comments: {
     async list(movieId) {
       await wait();
+      movieById(movieId);
       return db.comments.filter((c) => c.movie_id === Number(movieId) && !c.hidden)
         .sort((a, b) => b.created_at.localeCompare(a.created_at)).map(commentOut);
     },
-    async create(movieId, content) {
+    async create(movieId, payload) {
       await wait(600);
       const user = currentUser();
-      movieById(movieId);
-      const text = content.trim();
-      if (text.length < 2 || text.length > 1000) throw new ApiError("Bình luận cần từ 2 đến 1000 ký tự.", 400);
+      rateable(movieId);
+      const text = String(payload.content ?? "").trim();
+      if (text.length < 2 || text.length > 1000) throw new ApiError("Bình luận cần từ 2 đến 1000 ký tự.", 422);
       checkCommentLimit(user.id);
-      const c = { id: db.seq.comment++, movie_id: Number(movieId), user_id: user.id, content: text,
+      if (payload.stars != null) { ratingLimit(user.id); saveRating(movieId, user.id, payload.stars); }
+      const c = { id: db.seq.comment++, movie_id: Number(movieId), user_id: user.id, content: text, is_anonymous: Boolean(payload.is_anonymous),
         ...fakeClassify(text), model_name: "phobert_b", model_version: "phobert-B-2026-10-09-mock", human_label: null, reviewed_by: null,
         reviewed_at: null, hidden: false, created_at: nowIso() };
       db.comments.push(c); save();
       return commentOut(c);
+    },
+    async remove(id) {
+      await wait(); const user = currentUser();
+      const comment = db.comments.find((c) => c.id === Number(id) && c.user_id === user.id);
+      if (!comment) throw new ApiError("Không tìm thấy bình luận.", 404);
+      db.comments = db.comments.filter((c) => c.id !== comment.id); save(); return { ok: true };
     },
   },
   admin: {
@@ -828,7 +879,7 @@ export const mockApi = {
       async list() {
         await wait();
         if (currentUser().role !== "admin") throw new ApiError("Chỉ quản trị viên mới xem được trang này.", 403);
-        return clone([...db.movies].sort((a, b) => b.release_date.localeCompare(a.release_date) || b.id - a.id));
+        return clone(db.movies.map((m) => movieById(m.id)).sort((a, b) => b.release_date.localeCompare(a.release_date) || b.id - a.id));
       },
       async create(payload) {
         await wait();
@@ -837,7 +888,7 @@ export const mockApi = {
         if (!value.poster_url) throw new ApiError("Hãy chọn ảnh poster hoặc dán đường dẫn poster.", 422);
         const movie = { id: db.seq.movie++, ...value, genre: value.genre.join(", "), formats: value.formats.join(", "), score: 0 };
         db.movies.push(movie); save();
-        return clone(movie);
+        return clone(movieById(movie.id));
       },
       async update(id, payload) {
         await wait();
@@ -846,7 +897,7 @@ export const mockApi = {
         const value = validateMovie(payload);
         Object.assign(movie, value, { genre: value.genre.join(", "), formats: value.formats.join(", ") });
         save();
-        return clone(movie);
+        return clone(movieById(movie.id));
       },
       async remove(id) {
         await wait();
@@ -859,6 +910,7 @@ export const mockApi = {
         db.movies = db.movies.filter((item) => item.id !== movie.id);
         db.showtimes = db.showtimes.filter((item) => item.movie_id !== movie.id);
         db.comments = db.comments.filter((item) => item.movie_id !== movie.id);
+        db.ratings = db.ratings.filter((item) => item.movie_id !== movie.id);
         save();
         return { detail: "Đã xóa phim." };
       },

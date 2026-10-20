@@ -63,6 +63,22 @@ Thử đủ luồng: chọn phim → chọn ngày, giờ → chọn ghế → Ti
 
 ---
 
+## T22 — Cập nhật schema trước khi chạy backend
+
+T22 thêm bảng `ratings` và `comments.is_anonymous`. Database cũ không tự nâng cấp bằng `create_all`.
+**Phải xóa `backend\firefly.db` rồi khởi động lại để seed schema mới.** Thao tác này mất tài khoản, vé và bình luận hiện có; chỉ PO thực hiện sau khi đã sao lưu, xác minh SHA-256, `PRAGMA integrity_check` và khả năng phục hồi theo mục 2.1. Sao lưu cả DB và sidecar `firefly.db.showtime-seed.json` cùng snapshot, dừng backend trước khi sao lưu/reset. Codex kiểm thử T22 bằng SQLite tạm và không xóa DB thật.
+
+Sau khi PO hoàn tất checkpoint và duyệt reset, chạy từ thư mục gốc trong PowerShell:
+
+```powershell
+Remove-Item -LiteralPath .\backend\firefly.db
+Set-Location backend
+.\venv\Scripts\python -m uvicorn app.main:app --port 8000
+```
+
+Seed mới giữ kịch bản demo T12 và thêm hai điểm chấm cố định/phim đang chiếu hoặc đã chiếu (`3 + ((movie_id + index) % 3)`, index 0/1). Khởi động lại không chấm lại thay người dùng. Điểm chỉ phục vụ demo; chưa giới hạn người đã mua vé.
+Mock T22 dùng khóa Local Storage `firefly_mockdb_v4`, tách khỏi dữ liệu mock phiên bản cũ.
+
 ## Phần 2. Chạy backend FastAPI
 
 Mở **terminal thứ hai** (để terminal của frontend vẫn chạy).

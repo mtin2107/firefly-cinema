@@ -1,6 +1,6 @@
 from datetime import datetime
-from sqlalchemy import String, Integer, Float, Boolean, Text, DateTime, ForeignKey, UniqueConstraint, CheckConstraint
-from sqlalchemy.orm import Mapped, mapped_column, relationship
+from sqlalchemy import String, Integer, Float, Boolean, Text, DateTime, ForeignKey, UniqueConstraint, CheckConstraint, select, func
+from sqlalchemy.orm import Mapped, mapped_column, relationship, column_property
 from .database import Base
 
 
@@ -37,6 +37,34 @@ class Movie(Base):
     poster_url: Mapped[str | None] = mapped_column(String(500), nullable=True)
     country: Mapped[str] = mapped_column(String(50), default="")
     formats: Mapped[str] = mapped_column(String(50), default="")  # "Phụ đề", "Lồng tiếng" hoặc cả hai
+
+
+class Rating(Base):
+    __tablename__ = "ratings"
+    __table_args__ = (
+        UniqueConstraint("user_id", "movie_id", name="uq_rating_user_movie"),
+        CheckConstraint("stars BETWEEN 1 AND 5", name="ck_rating_stars"),
+    )
+    id: Mapped[int] = mapped_column(primary_key=True)
+    user_id: Mapped[int] = mapped_column(ForeignKey("users.id"), index=True)
+    movie_id: Mapped[int] = mapped_column(ForeignKey("movies.id", ondelete="CASCADE"), index=True)
+    movie: Mapped[Movie] = relationship(back_populates="ratings")
+    stars: Mapped[int] = mapped_column(Integer)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.now)
+    updated_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.now, onupdate=datetime.now)
+
+
+# Correlated SQL expressions are part of each Movie SELECT, including nested
+# booking/showtime responses. Lists use one SQL statement rather than N queries.
+Movie.ratings = relationship(Rating, back_populates="movie", cascade="all, delete-orphan")
+Movie.rating_avg = column_property(
+    select(func.coalesce(func.round(func.avg(Rating.stars), 1), 0.0))
+    .where(Rating.movie_id == Movie.id).correlate_except(Rating).scalar_subquery()
+)
+Movie.rating_count = column_property(
+    select(func.count(Rating.id)).where(Rating.movie_id == Movie.id)
+    .correlate_except(Rating).scalar_subquery()
+)
 
 
 class Showtime(Base):
@@ -85,6 +113,7 @@ class Comment(Base):
     id: Mapped[int] = mapped_column(primary_key=True)
     movie_id: Mapped[int] = mapped_column(ForeignKey("movies.id"), index=True)
     user_id: Mapped[int] = mapped_column(ForeignKey("users.id"))
+    is_anonymous: Mapped[bool] = mapped_column(Boolean, default=False, server_default="0")
     content: Mapped[str] = mapped_column(Text)
     is_negative: Mapped[bool] = mapped_column(Boolean)       # kết quả mô hình
     negative_score: Mapped[float] = mapped_column(Float)     # xác suất tiêu cực 0..1
@@ -100,3 +129,9 @@ class Comment(Base):
     user: Mapped[User] = relationship(foreign_keys=[user_id])
     reviewer: Mapped[User | None] = relationship(foreign_keys=[reviewed_by])
     movie: Mapped[Movie] = relationship()
+
+
+Comment.author_stars = column_property(
+    select(Rating.stars).where(Rating.movie_id == Comment.movie_id, Rating.user_id == Comment.user_id)
+    .correlate_except(Rating).scalar_subquery()
+)

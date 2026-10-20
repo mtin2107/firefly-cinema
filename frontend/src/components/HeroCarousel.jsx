@@ -1,3 +1,4 @@
+import { ratingText } from "../utils/ratings";
 import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import Poster from "./Poster";
@@ -99,13 +100,13 @@ export default function HeroCarousel({ movies }) {
       onKeyDown={onKey}>
       <FireflyField />
       <div className="marquee__text">
-        <p className="marquee__kicker">Được khán giả chấm cao nhất tuần này</p>
+        <p className="marquee__kicker">Khán giả chấm cao nhất</p>
         <h1 className="marquee__title" ref={titleRef} key={m.id}>{m.title}</h1>
         <p className="marquee__meta">
           <AgeBadge rating={m.age_rating} />
           <span>{m.genre}</span>
           <span>{duration(m.duration_min)}</span>
-          <span className="score">★ {m.score}</span>
+          <span className="score">{ratingText(m)}</span>
         </p>
         <p className="marquee__desc">{m.description}</p>
         <div className="marquee__actions">

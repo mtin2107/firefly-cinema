@@ -1,3 +1,4 @@
+import { usePageTitle } from "../utils/pageTitle";
 import { useEffect, useState } from "react";
 import { Navigate, useLocation, useNavigate } from "react-router-dom";
 import { api } from "../api";
@@ -7,6 +8,7 @@ import { money } from "../utils/format";
 import { isVip, seatPrice, sortSeats, totalPrice } from "../utils/seats";
 
 export default function Checkout() {
+  usePageTitle("Xác nhận đặt vé");
   const { state } = useLocation();
   const navigate = useNavigate();
   const [data, setData] = useState(null);

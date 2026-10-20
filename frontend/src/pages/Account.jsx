@@ -1,7 +1,9 @@
+import { usePageTitle } from "../utils/pageTitle";
 import { useEffect, useState } from "react";
 import { useAuth } from "../context/AuthContext";
 
 export default function Account() {
+  usePageTitle("Tài khoản");
   const { user, updateProfile, changePassword } = useAuth();
   const [fullName, setFullName] = useState(user?.full_name ?? "");
   const [currentPassword, setCurrentPassword] = useState("");

@@ -1,3 +1,4 @@
+import { usePageTitle } from "../utils/pageTitle";
 import { useEffect, useState } from "react";
 import { api } from "../api";
 import { Loading, ErrorState } from "../components/StateViews";
@@ -17,6 +18,7 @@ function Label({ negative }) {
 }
 
 export default function AdminComments() {
+  usePageTitle("Kiểm duyệt bình luận");
   const [label, setLabel] = useState("");
   const [reviewed, setReviewed] = useState("");
   const [page, setPage] = useState(1);
@@ -127,7 +129,7 @@ export default function AdminComments() {
               <tbody>{result.items.map((comment) => {
                 const nextLabel = comment.effective_negative ? 0 : 1;
                 return <tr key={comment.id}>
-                  <td><strong>{comment.movie_title}</strong><br /><span className="muted">{comment.user_name} · {relativeTime(comment.created_at)}</span></td>
+                  <td><strong>{comment.movie_title}</strong><br /><span className="muted">{comment.user_name}{comment.is_anonymous && " · Ẩn danh"} · {relativeTime(comment.created_at)}</span></td>
                   <td className="admin-table__content">{comment.content}</td>
                   <td><Label negative={comment.is_negative} /><div className="meter"><span className="meter__fill" style={{ width: `${comment.negative_score * 100}%` }} /></div><span className="meter__num">{comment.negative_score.toFixed(2)} · {comment.model_name} · {comment.model_version ?? "Chưa có phiên bản"}</span></td>
                   <td>{comment.reviewed ? <><Label negative={comment.human_label === 1} /><small className="moderation-meta">{comment.reviewed_by_name ?? "Không rõ người duyệt"}<br />{comment.reviewed_at ? relativeTime(comment.reviewed_at) : "Chưa có thời gian duyệt"}</small></> : <span className="muted">Chưa duyệt</span>}</td>

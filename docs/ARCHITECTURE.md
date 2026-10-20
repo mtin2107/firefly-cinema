@@ -246,3 +246,13 @@ Ngoài máy: Google Drive `MyDrive/thesis/data/…`, `MyDrive/thesis_results/…
 - Validator phim giữ URL ngoài http(s), cho phép thêm đường dẫn poster nội bộ chặt chẽ; **chỉ router POST tạo phim** buộc có poster, PUT sửa phim cũ vẫn cho phép trống. Không đổi schema (`movies.poster_url` hiện có).
 - Frontend lưu file base64 qua `api.admin.posters.upload`, ưu tiên upload thay vì link nếu đồng thời có cả hai; `Poster` ghép `API_URL` khi đường dẫn bắt đầu `/uploads/`. Mock dùng cùng JSON `{poster_url}`, trả data URL, giới hạn 500 KiB do localStorage. Hai ô màu poster vẫn tồn tại.
 - Không xóa file khi sửa/xóa phim (file mồ côi được chấp nhận trong phạm vi khóa luận). Lưu trữ trên ổ đĩa không bền vững có thể mất ảnh khi môi trường triển khai reset.
+
+## T22 — Chấm sao và bình luận ẩn danh (20/10/2026)
+
+- `ratings(id, user_id, movie_id, stars, created_at, updated_at)`: UNIQUE(user_id, movie_id), CHECK stars BETWEEN 1 AND 5; FK phim có ON DELETE CASCADE. PUT dùng SQLite upsert nguyên tử; DELETE không có điểm vẫn 200.
+- `MovieOut.rating_avg` (làm tròn một chữ số, 0 khi trống) và `rating_count` được tổng hợp từ ratings. Danh sách phim JOIN truy vấn GROUP BY một lần; chi tiết/phim lồng trong vé và suất dùng biểu thức SQL aggregate cùng SELECT, không truy vấn riêng cho từng phim.
+- `GET /api/movies/{id}/my-rating` → `{stars: int|null}`; `PUT /api/movies/{id}/rating` nhận `{stars: 1..5}`; `DELETE /api/movies/{id}/rating` → `{stars, rating_avg, rating_count}`. Cần đăng nhập; ghi/xóa tối đa 20 lần/phút/người, POST bình luận kèm sao dùng chung bộ đếm. Coming soon không nhận ghi/xóa điểm hoặc bình luận (400 tiếng Việt).
+- `comments.is_anonymous` mặc định false. POST bình luận nhận `{content, is_anonymous?, stars?}` và ghi sao vào cùng ratings trong transaction với bình luận. Public `CommentOut` chỉ hiện “Khán giả ẩn danh”, không chứa user_id/email; admin vẫn tên thật + cờ ẩn danh. `author_stars` là điểm hiện tại, null khi đã hủy. `can_delete` chỉ là boolean quyền của phiên đăng nhập, không chứa định danh tác giả; khách không token vẫn đọc được.
+- `DELETE /api/comments/{id}` trả `{ok:true}` cho chủ bình luận, 404 cho ID không tồn tại hoặc không thuộc mình. Không xóa điểm khi xóa bình luận.
+- API frontend real/mock cùng `ratings.mine/set/remove`, `comments.remove` và `comments.create(movieId, payload)`. Mock v4 tính điểm từ ratings; dữ liệu mẫu deterministic giống backend. `StarRating` dùng chung với trạng thái được quản lý tại MovieDetail để hai dãy sao đồng bộ.
+- Cột score cũ vẫn lưu nhưng không dùng hiển thị/xếp hạng người xem; hero theo rating_avg rồi rating_count, top_rated lọc >=4.0. Không đổi classifier/normalize/luật ghế. Reset schema do PO theo HUONG_DAN.

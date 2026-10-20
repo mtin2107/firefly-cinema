@@ -1,3 +1,5 @@
+import { usePageTitle } from "../utils/pageTitle";
+import { byRating } from "../utils/ratings";
 import { useEffect, useRef, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { api } from "../api";
@@ -20,11 +22,16 @@ function titleFor(active, q) {
 }
 
 export default function Explore() {
+  usePageTitle("Khám phá");
   const [params, setParams] = useSearchParams();
   const [movies, setMovies] = useState(null);
   const gridRef = useRef(null);
   const [error, setError] = useState("");
   const { active, query, q } = readFilters(params);
+  const sort = params.get("sap-xep") ?? "moi-nhat";
+  const sorted = movies && [...movies].sort(sort === "danh-gia-cao" ? byRating
+    : sort === "ten-a-z" ? (a, b) => a.title.localeCompare(b.title, "vi")
+    : (a, b) => b.release_date.localeCompare(a.release_date) || a.id - b.id);
   const queryKey = JSON.stringify(query);
 
   const load = () => {
@@ -46,6 +53,11 @@ export default function Explore() {
       <h1 className="page-title">{titleFor(active, q)}</h1>
 
       <div className="filters">
+        <label className="filter"><span>Sắp xếp</span>
+          <select aria-label="Sắp xếp" value={sort} onChange={(e) => change("sap-xep", e.target.value)}>
+            <option value="moi-nhat">Mới nhất</option><option value="danh-gia-cao">Đánh giá cao</option><option value="ten-a-z">Tên A–Z</option>
+          </select>
+        </label>
         {FILTERS.map((f) => (
           <label key={f.key} className="filter">
             <span>{f.label}</span>
@@ -72,7 +84,7 @@ export default function Explore() {
         ) : (
           <>
             <p className="muted result-count">{movies.length} phim</p>
-            <div className="movie-grid" ref={gridRef}>{movies.map((m) => <MovieCard key={m.id} movie={m} />)}</div>
+            <div className="movie-grid" ref={gridRef}>{sorted.map((m) => <MovieCard key={m.id} movie={m} />)}</div>
           </>
         )}
     </div>

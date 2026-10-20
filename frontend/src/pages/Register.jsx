@@ -1,15 +1,22 @@
-import { useState } from "react";
+import { returnTo } from "../utils/pageTitle";
+import { usePageTitle } from "../utils/pageTitle";
+import { useEffect, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 
 export default function Register() {
-  const { register } = useAuth();
+  usePageTitle("Đăng ký");
+  const { register, user, checking } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   const [form, setForm] = useState({ full_name: "", email: "", password: "", confirm: "" });
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const set = (k) => (e) => setForm({ ...form, [k]: e.target.value });
+
+  useEffect(() => {
+    if (!checking && user) navigate(returnTo(location.state?.from), { replace: true });
+  }, [user, checking, navigate, location.state]);
 
   const submit = async (e) => {
     e.preventDefault();
@@ -19,7 +26,7 @@ export default function Register() {
     try {
       await register(form.full_name.trim(), form.email.trim(), form.password);
       const from = location.state?.from;
-      navigate(from ? `${from.pathname}${from.hash ?? ""}` : "/", { replace: true });
+      navigate(returnTo(from), { replace: true });
     } catch (err) {
       setError(err.message);
       setLoading(false);

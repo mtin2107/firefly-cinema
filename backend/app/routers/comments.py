@@ -4,6 +4,7 @@ from datetime import datetime
 from typing import Literal
 
 from fastapi import APIRouter, Depends, HTTPException, Query, Response
+from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
@@ -21,6 +22,15 @@ from ..schemas import (
 )
 from ..security import get_current_user, require_admin
 from .movies import get_movie_or_404
+from .ratings import require_rateable, save_rating, limit_rating
+
+_optional_bearer = HTTPBearer(auto_error=False)
+
+
+def optional_user(cred: HTTPAuthorizationCredentials | None = Depends(_optional_bearer),
+                  db: Session = Depends(get_db)):
+    return get_current_user(cred, db) if cred else None
+
 
 router = APIRouter(prefix="/api", tags=["Bình luận"])
 _comment_limits = SlidingWindowRateLimiter()
@@ -35,10 +45,12 @@ def _csv_safe(value: str) -> str:
     return value
 
 
-def to_out(c: Comment) -> dict:
+def to_out(c: Comment, *, public=False, viewer=None) -> dict:
     reviewed = c.human_label in (0, 1)
     effective_negative = bool(c.human_label) if reviewed else c.is_negative
-    return {"id": c.id, "movie_id": c.movie_id, "user_name": c.user.full_name, "content": c.content,
+    return {"id": c.id, "movie_id": c.movie_id, "user_name": "Khán giả ẩn danh" if public and c.is_anonymous else c.user.full_name,
+            "is_anonymous": c.is_anonymous, "author_stars": c.author_stars,
+            "can_delete": bool(viewer and viewer.id == c.user_id), "content": c.content,
             "is_negative": c.is_negative, "effective_negative": effective_negative, "reviewed": reviewed,
             "negative_score": c.negative_score, "created_at": c.created_at,
             "movie_title": c.movie.title, "model_name": c.model_name,
@@ -49,28 +61,43 @@ def to_out(c: Comment) -> dict:
 
 
 @router.get("/movies/{movie_id}/comments", response_model=list[CommentOut])
-def list_comments(movie_id: int, db: Session = Depends(get_db)):
+def list_comments(movie_id: int, db: Session = Depends(get_db),
+                  user: User | None = Depends(optional_user)):
     get_movie_or_404(db, movie_id)
     rows = db.scalars(select(Comment).where(
         Comment.movie_id == movie_id, Comment.hidden.is_(False)
     ).order_by(Comment.created_at.desc())).all()
-    return [to_out(c) for c in rows]
+    return [to_out(c, public=True, viewer=user) for c in rows]
 
 
 @router.post("/movies/{movie_id}/comments", response_model=CommentOut, status_code=201)
 def create_comment(movie_id: int, body: CommentIn, user: User = Depends(get_current_user),
                    db: Session = Depends(get_db)):
-    get_movie_or_404(db, movie_id)
+    require_rateable(get_movie_or_404(db, movie_id))
     text = body.content.strip()
     _comment_limits.hit(user.id, limit=3, seconds=60, message=_COMMENT_LIMIT_MESSAGE)
+    if body.stars is not None:
+        limit_rating(user.id)
     is_negative, score = classifier.predict(text)  # <-- PhoBERT chấm điểm ở đây
-    c = Comment(movie_id=movie_id, user_id=user.id, content=text, is_negative=is_negative,
+    if body.stars is not None:
+        save_rating(db, movie_id, user.id, body.stars)
+    c = Comment(movie_id=movie_id, user_id=user.id, content=text, is_anonymous=body.is_anonymous, is_negative=is_negative,
                 negative_score=score, model_name=classifier.name,
                 model_version=classifier.version)
     db.add(c)
     db.commit()
     db.refresh(c)
-    return to_out(c)
+    return to_out(c, public=True, viewer=user)
+
+
+@router.delete("/comments/{comment_id}")
+def delete_comment(comment_id: int, user: User = Depends(get_current_user), db: Session = Depends(get_db)):
+    comment = db.scalar(select(Comment).where(Comment.id == comment_id, Comment.user_id == user.id))
+    if comment is None:
+        raise HTTPException(404, "Không tìm thấy bình luận.")
+    db.delete(comment)
+    db.commit()
+    return {"ok": True}
 
 
 @router.get("/admin/comments", response_model=AdminCommentPage)

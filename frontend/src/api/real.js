@@ -48,10 +48,16 @@ export const realApi = {
     remove: (id) => request(`/api/bookings/${id}`, { method: "DELETE" }),
     claimTransfer: (id) => request(`/api/bookings/${id}/transfer-claim`, { method: "POST" }),
   },
+  ratings: {
+    mine: (id) => request(`/api/movies/${id}/my-rating`),
+    set: (id, stars) => request(`/api/movies/${id}/rating`, { method: "PUT", body: { stars } }),
+    remove: (id) => request(`/api/movies/${id}/rating`, { method: "DELETE" }),
+  },
   comments: {
     list: (movieId) => request(`/api/movies/${movieId}/comments`),
-    create: (movieId, content) =>
-      request(`/api/movies/${movieId}/comments`, { method: "POST", body: { content } }),
+    create: (movieId, payload) =>
+      request(`/api/movies/${movieId}/comments`, { method: "POST", body: payload }),
+    remove: (id) => request(`/api/comments/${id}`, { method: "DELETE" }),
   },
   admin: {
     sentiment: (days = 30) => request(`/api/admin/sentiment?days=${days}`),

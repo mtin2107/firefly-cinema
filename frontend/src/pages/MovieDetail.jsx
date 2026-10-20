@@ -1,3 +1,7 @@
+import { usePageTitle } from "../utils/pageTitle";
+import StarRating from "../components/StarRating";
+import { useAuth } from "../context/AuthContext";
+import { ratingText } from "../utils/ratings";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Link, useLocation, useNavigate, useParams } from "react-router-dom";
 import { api } from "../api";
@@ -16,6 +20,35 @@ const TagLinks = ({ value, filterKey }) => value.split(",").map((x) => x.trim())
 
 export default function MovieDetail() {
   const { id } = useParams();
+  const { user } = useAuth();
+  const [stars, setStars] = useState(null);
+  const [commentBusy, setCommentBusy] = useState(false);
+  const [ratingBusy, setRatingBusy] = useState(false);
+  const [ratingNotice, setRatingNotice] = useState("");
+  const [commentVersion, setCommentVersion] = useState(0);
+  useEffect(() => {
+    let active = true;
+    setStars(null); setRatingNotice("");
+    if (user) api.ratings.mine(id).then((r) => { if (active) setStars(r.stars); })
+      .catch((e) => { if (active) setRatingNotice(e.message); });
+    return () => { active = false; };
+  }, [id, user]);
+  const refreshRating = async () => {
+    const updated = await api.movies.get(id);
+    setMovie(updated);
+    setCommentVersion((v) => v + 1);
+  };
+  const changeRating = async (value) => {
+    setRatingBusy(true);
+    try {
+      const result = value == null ? await api.ratings.remove(id) : await api.ratings.set(id, value);
+      setStars(result.stars);
+      setMovie((m) => ({ ...m, rating_avg: result.rating_avg, rating_count: result.rating_count }));
+      setCommentVersion((v) => v + 1);
+      setRatingNotice(value == null ? "Đã hủy đánh giá." : "Đã lưu đánh giá.");
+    } catch (e) { setRatingNotice(e.message); }
+    finally { setRatingBusy(false); }
+  };
   const location = useLocation();
   const [movie, setMovie] = useState(null);
   const [showtimes, setShowtimes] = useState([]);
@@ -29,9 +62,11 @@ export default function MovieDetail() {
   const introFor = useRef(null);    // phim đã chạy hiệu ứng vào trang (không chạy lại khi bật/tắt giảm chuyển động)
   const reduced = useReducedMotion();
 
+  usePageTitle(movie?.title ?? "Chi tiết phim");
+
   // Xóa state để tải lại trang (F5) không hiện lại hiệu ứng
   useEffect(() => {
-    if (location.state?.intro) navigate(`${location.pathname}${location.hash}`, { replace: true, state: null });
+    if (location.state?.intro) navigate(`${location.pathname}${location.search}${location.hash}`, { replace: true, state: null });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -84,8 +119,12 @@ export default function MovieDetail() {
           <p className="detail__meta">
             <AgeBadge rating={movie.age_rating} />
             <span>{duration(movie.duration_min)}</span>
-            {movie.score > 0 && <span className="score">★ {movie.score}</span>}
+            <span className="score">{ratingText(movie)}</span>
           </p>
+          {movie.status !== "coming_soon" && <>
+            <StarRating value={stars} onChange={changeRating} disabled={ratingBusy || commentBusy} />
+            <p role="status">{ratingNotice}</p>
+          </>}
           <p className="detail__desc">{movie.description}</p>
           <dl className="facts">
             <div><dt>Thể loại</dt><dd><TagLinks value={movie.genre} filterKey="the-loai" /></dd></div>
@@ -100,6 +139,7 @@ export default function MovieDetail() {
 
       <section className="section" id="lich-chieu" aria-labelledby="showtime-title">
         <h2 id="showtime-title" className="section-title">Lịch chiếu</h2>
+        <p className="score">{ratingText(movie)}</p>
         {movie.status === "ended" ? (
           <p className="muted">Phim đã ngừng chiếu tại rạp.</p>
         ) : movie.status !== "now_showing" ? (
@@ -134,7 +174,10 @@ export default function MovieDetail() {
         )}
       </section>
 
-      <CommentSection movieId={movie.id} />
+      <CommentSection movieId={movie.id} allowed={movie.status !== "coming_soon"}
+        stars={stars} onRatingChange={changeRating} ratingBusy={ratingBusy || commentBusy}
+        ratingNotice={ratingNotice} onSendingChange={setCommentBusy}
+        version={commentVersion} onCreated={refreshRating} />
     </div>
     </>
   );

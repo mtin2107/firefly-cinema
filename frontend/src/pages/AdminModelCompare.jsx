@@ -1,3 +1,4 @@
+import { usePageTitle } from "../utils/pageTitle";
 import { useState } from "react";
 import { api } from "../api";
 import { Empty, ErrorState, Loading } from "../components/StateViews";
@@ -17,6 +18,7 @@ const MODEL_NAMES = {
 };
 
 export default function AdminModelCompare() {
+  usePageTitle("So sánh mô hình");
   const [text, setText] = useState("");
   const [results, setResults] = useState(null);
   const [loading, setLoading] = useState(false);

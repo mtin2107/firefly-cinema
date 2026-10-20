@@ -13,7 +13,20 @@ const STATUS_LABELS = {
 };
 
 export default function TicketStub({ movie, showtime, seats, total, code, status, holdExpiresAt,
-  qrUrl, highlight = false, onClaim, claiming = false, onCancel, cancelling = false }) {
+  onExpire, qrUrl, highlight = false, onClaim, claiming = false, onCancel, cancelling = false }) {
+  const [now, setNow] = useState(Date.now);
+  const expiryNotified = useRef(false);
+  const remaining = Math.max(0, Math.ceil((new Date(holdExpiresAt).getTime() - now) / 1000));
+  const timedOut = status === "held" && remaining === 0;
+  const displayStatus = timedOut ? "expired" : status;
+  useEffect(() => {
+    if (status !== "held") return;
+    const timer = setInterval(() => setNow(Date.now()), 1000);
+    return () => clearInterval(timer);
+  }, [status, holdExpiresAt]);
+  useEffect(() => {
+    if (timedOut && !expiryNotified.current) { expiryNotified.current = true; onExpire?.(); }
+  }, [timedOut, onExpire]);
   const holdText = holdExpiresAt ? fullDateTime(holdExpiresAt) : "—";
   // Vé giữ chỗ có QR không lật để thao tác thanh toán luôn thấy và bấm được
   const flippable = status === "paid" || status === "pending_verify";
@@ -50,10 +63,10 @@ export default function TicketStub({ movie, showtime, seats, total, code, status
               <div><dt>Suất chiếu</dt><dd>{fullDateTime(showtime.start_time)}</dd></div>
               <div><dt>Ghế</dt><dd>{sortSeats(seats).join(", ")}</dd></div>
               <div><dt>Tổng tiền</dt><dd>{money(total)}</dd></div>
-              {status && <div><dt>Trạng thái</dt><dd><span className={`ticket-status ticket-status--${status}`}>{STATUS_LABELS[status]}</span></dd></div>}
-              {status === "held" && <div><dt>Tự hủy lúc</dt><dd>{holdText}</dd></div>}
+              {status && <div><dt>Trạng thái</dt><dd><span className={`ticket-status ticket-status--${displayStatus}`}>{STATUS_LABELS[displayStatus]}</span></dd></div>}
+              {displayStatus === "held" && <div><dt>Tự hủy lúc</dt><dd>{holdText} · Còn {String(Math.floor(remaining / 60)).padStart(2, "0")}:{String(remaining % 60).padStart(2, "0")}</dd></div>}
             </dl>
-            {status === "held" && <div className="ticket-payment">
+            {displayStatus === "held" && <div className="ticket-payment">
               {qrUrl ? <img className="ticket-payment__qr" src={qrUrl} alt={`Mã QR thanh toán vé ${code}`} />
                 : <p className="muted">Chưa cấu hình thanh toán QR. Vui lòng thanh toán tại quầy trước giờ tự hủy.</p>}
               {qrUrl && <div><p>Quét QR để chuyển khoản.</p><p><strong>Nội dung chuyển khoản: {code}</strong></p></div>}

@@ -1,3 +1,4 @@
+import { usePageTitle } from "../utils/pageTitle";
 import { useEffect, useRef, useState } from "react";
 import { api } from "../api";
 import Poster from "../components/Poster";
@@ -34,6 +35,7 @@ function validate(form, editingId, selectedPoster) {
 }
 
 export default function AdminMovies() {
+  usePageTitle("Quản lý phim");
   const [movies, setMovies] = useState(null);
   const [loadError, setLoadError] = useState("");
   const [form, setForm] = useState(EMPTY_FORM);

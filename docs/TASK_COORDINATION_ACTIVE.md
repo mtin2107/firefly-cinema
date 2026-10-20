@@ -16,6 +16,8 @@ Repo `C:\Projects\firefly-cinema`, nhánh `master`. Chi tiết: `PROJECT_SOURCE_
 - Mỗi task một nhánh `task/Txx-ten-ngan`, commit `[Txx] mô tả`. Chỉ Tín merge.
 
 ## 3. Latest Completed Task Summary
+**T22 — DONE / CLOSED.** PO đã merge vào master tại `3afbf42` (xác minh baseline T23); Claude Round 2 PASS, AC 12/12, RF-01 + TODO-01..04 CLOSED. OBS-01/02 giữ nguyên.
+
 **T19 — Tải ảnh poster từ máy khi thêm/sửa phim: DONE / CLOSED — merge c3f70df VERIFIED.** PO APPROVED sau khi tự chạy thử thêm phim bằng ảnh từ máy, sửa poster và chọn file sai; Claude `PASS_WITH_TODO`, AC 11/11 PASS, Required Fixes 0, blocker 0; toàn bộ TODO-01..04 và OBS-01..04 đã disposition trong `reports/2026-10-15/po_review_T19_APPROVED_2026-10-15.md`.
 
 **T18 — Chuyển động và hiệu ứng 3D: DONE / CLOSED (13/10/2026).** PO APPROVED, thẩm mỹ ĐẠT; Codex Round 3 `PASS_WITH_TODO`, Claude RF-04 `PASS`; AC 11/11 PASS, RF-01 → RF-04 CLOSED, Required Fix mở 0, blocker 0. TODO-01/02 WONT_FIX; TODO-03 ACCEPT_LATER → T13; OBS-01 ACCEPT_LATER → Future Backlog. Merge commit `fc10d34a1b65524cac69bcbd4d533f6ea995b8fe` trên `master` đã được xác minh; nhánh T18 và fix `490ac8a` đều là ancestor. Không mở task tiếp theo.
@@ -32,17 +34,19 @@ Trước khi áp dụng workflow: giao diện React đầy đủ (`giao-dien-v1`
 
 ## 4. Current Project Status
 ```
-Overall Status: PO_REVIEW
-Phase: T22 Claude Round 2 PASS, chờ PO merge; T23 READY_FOR_HANDOFF
-Current Active Task: T22 — PO_REVIEW
+Overall Status: CLAUDE_REVIEW
+Phase: T23 implementation hoàn tất, chờ Claude Independent Review
+Current Active Task: T23 — CLAUDE_REVIEW
 Ngày bắt đầu sản phẩm: 05/10/2026 · Hạn: 01/11/2026
 ```
 
 ## 5. Current Active Task
-**T22 — PO_REVIEW.** Claude Round 2 **PASS** trên `80037bb`: RF-01 CLOSED (thứ tự mặc định khớp API ở real và mock), TODO-01..04 CLOSED / VERIFIED BY CLAUDE. compileall 0, pytest 118/118, build đạt, mock đạt. AC 12/12, RF mở 0; OBS-01/02 giữ lại. Report: `reports/2026-10-20/claude_review_T22_round2_PASS_2026-10-20.md`.
+**T23 — CLAUDE_REVIEW.** T22 PO đã merge tại `3afbf42`, DONE / CLOSED. T23 triển khai theo bản PO duyệt; chỉ SQLite tạm. Dashboard SQL gộp, soát vé nguyên tử, frontend real/mock; compileall, health PhoBERT B, build real+mock, pytest 141/141, trình duyệt 375/1280 và hồi quy đạt ở mức DEV. Report: `reports/2026-10-20/codex_implementation_T23_2026-10-20.md`. Chờ Claude kiểm tra độc lập; không merge.
+
+T22 trước merge: Claude Round 2 **PASS** trên `80037bb`: RF-01 CLOSED (thứ tự mặc định khớp API ở real và mock), TODO-01..04 CLOSED / VERIFIED BY CLAUDE. compileall 0, pytest 118/118, build đạt, mock đạt. AC 12/12, RF mở 0; OBS-01/02 giữ lại. Report: `reports/2026-10-20/claude_review_T22_round2_PASS_2026-10-20.md`.
 
 ## 6. Current Task Record
-Task record đang active: [docs/tasks/T22.md](tasks/T22.md).
+Task record đang active: [docs/tasks/T23.md](tasks/T23.md).
 
 ## 7. Roadmap và trạng thái
 | ID | Task | Loại | Tuần | Phụ thuộc | Task Record | Trạng thái |
@@ -70,8 +74,8 @@ Task record đang active: [docs/tasks/T22.md](tasks/T22.md).
 | T19 | Tải ảnh poster từ máy khi thêm/sửa phim | Web | phát triển thêm | T18 | [T19.md](tasks/T19.md) | DONE / CLOSED — merge `c3f70df` VERIFIED; PO APPROVED 15/10; Claude PASS_WITH_TODO; AC 11/11; RF 0; TODO/OBS đã disposition |
 | T20 | Gia cố bảo mật, giữ chỗ, sửa lỗi giao diện | Web | 4 | T19 | [T20.md](tasks/T20.md) | DONE / CLOSED — PO merge `55a9b04` VERIFIED; Claude Round 2 PASS_WITH_TODO; AC 11/11; RF-01 CLOSED; TODO-01..03 Low |
 | T21 | Thống kê cảm xúc bình luận theo phim | Web | 4 | T20, T12 | [T21.md](tasks/T21.md) | DONE / CLOSED — merge `5c10522`; Claude Round 2 PASS_WITH_TODO; AC 8/8; RF 0; TODO-02/03/05 Low còn mở |
-| T22 | Chấm sao, bình luận ẩn danh, hoàn thiện người xem (đổi schema) | Web | 4 | T14 | [T22.md](tasks/T22.md) | PO_REVIEW — Claude R2 PASS trên `80037bb`; AC 12/12; RF-01 + TODO-01..04 CLOSED; pytest 118/118 |
-| T23 | Tổng quan quản trị và soát vé (đổi schema) | Web | 4 | T22 | [T23.md](tasks/T23.md) | READY_FOR_HANDOFF — tạo nhánh sau khi PO merge T22; prompt Codex ở mục 6 report T22 Round 2 |
+| T22 | Chấm sao, bình luận ẩn danh, hoàn thiện người xem (đổi schema) | Web | 4 | T14 | [T22.md](tasks/T22.md) | DONE / CLOSED — PO đã merge `3afbf42`; Claude R2 PASS; AC 12/12 |
+| T23 | Tổng quan quản trị và soát vé (đổi schema) | Web | 4 | T22 | [T23.md](tasks/T23.md) | CLAUDE_REVIEW — DEV implementation hoàn tất; pytest 141/141; baseline `3afbf42`; chờ Claude |
 
 Chuỗi chính: `T00 → T01 → T02` và `T03 → T08 → T09 → T10`. T03 bắt đầu ngay ngày đầu (song song).
 
@@ -207,13 +211,15 @@ Nếu trễ: cắt T14 → T15 → rút gọn T05. Không cắt T01–T03, T07�
 | Claude review T18 RF-04 | OBS-01: reduced-motion có thể render PosterIntro 1–2 frame trước khi effect gỡ | **ACCEPT_LATER — future backlog; chưa authorize task mới** |
 
 ## 11. Current Next Step
-1. **Tín (PO):** review và merge `task/T22-cham-sao-an-danh` vào `master`.
-2. **Tín:** backup/xác minh checksum DB thật rồi xóa `backendirefly.db` để seed lại (T22 đổi schema + seed).
-3. **Tín:** tạo `task/T23-tong-quan-soat-ve` từ `master` mới, gửi Codex prompt T23 ở mục 6 của `reports/2026-10-20/claude_review_T22_round2_PASS_2026-10-20.md`. T13 làm cuối; T12 TODO-01/T14 TODO-02 vẫn chờ PO quyết trước T13.
+1. **Claude:** review độc lập T23 theo Task Record và report Codex ngày 20/10/2026; chạy gate trên SQLite tạm.
+2. **Tín:** sau review và PO approval, tự backup/xác minh checksum + integrity DB và sidecar, rồi xóa `backend\firefly.db` để tạo schema T23 theo HUONG_DAN.md. Codex chưa thực hiện thao tác trên DB thật.
+3. Không merge hoặc mở T13 từ phía Codex. T12 TODO-01/T14 TODO-02 vẫn chờ PO quyết trước T13.
 
 ## 12. Active Timeline
 | Ngày | Ai | Sự kiện |
 |---|---|---|
+| 20/10/2026 | Codex | T23 IN_PROGRESS → CLAUDE_REVIEW: dashboard/soát vé + real/mock hoàn tất; focused 23/23, full 141/141; compileall, health PhoBERT B thật DB tạm, build real+mock, browser 375/1280, hồi quy đạt DEV. Đổi schema Có; PO cần backup/reset DB thật, Codex không đụng DB thật. Không merge. |
+| 20/10/2026 | Tín + Codex recording | PO đã merge T22 `3afbf42`; baseline/nhánh sạch đã xác minh. T22 DONE / CLOSED; T23 READY_FOR_HANDOFF → IN_PROGRESS theo prompt PO. |
 | 20/10/2026 | Claude | T22 Round 2 **PASS** trên `80037bb`: scope 12/12 file trong allowlist; compileall 0, pytest 118/118, build đạt; DB tạm seed mới: RF-01 thứ tự mặc định khớp API (`hot_week`, `top_rated`), A–Z đúng; TODO-01 bình luận mẫu không mang sao, lượt chấm 2..6; TODO-02 Bearer hỏng → 200; TODO-03 sao form chỉ lưu khi gửi (4.3/4 → 4.0/5, bỏ chọn giữ điểm); TODO-04 đọc code; mock đạt. T22 `CLAUDE_REVIEW → PO_REVIEW`; T23 → `READY_FOR_HANDOFF`. |
 | 20/10/2026 | Codex | T22 FIX_LOOP → CLAUDE_REVIEW Round 2: RF-01 + TODO-01..04 DEV FIXED theo PO; focused 20/20, full 118/118, compile/build real+mock, PhoBERT thật DB tạm, browser real/mock đạt. Seed sáu khán giả riêng, cần PO backup/reset DB thật; hash DB thật giữ nguyên. Chờ Claude xác minh, không merge/đóng task/mở T23. |
 | 20/10/2026 | Tín (PO) | Quyết T22 vòng sửa: Codex sửa RF-01 và cả TODO-01 (seed sao từ khán giả mẫu), TODO-02 (token hỏng = khách ở API công khai), TODO-03 (sao trong form bình luận chỉ lưu khi gửi), TODO-04 (chặn NaN đồng hồ); Claude review Round 2. |

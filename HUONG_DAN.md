@@ -471,3 +471,24 @@ Sơ đồ ghế: hàng A–H, mỗi hàng 12 ghế, hàng F–H là VIP (+20.000
 Backend nhận JSON base64 tại `POST /api/admin/posters` (không dùng multipart), trả URL `/uploads/posters/<uuid>.<jpg|png|webp>`. Ảnh được lưu trong `backend/uploads/posters/`, không đưa vào Git. Biến `UPLOAD_DIR=uploads` trong `backend/.env` chọn thư mục ảnh (đường dẫn tương đối tính từ `backend`, hoặc tuyệt đối); cần khởi động lại backend sau khi đổi. Cấp quyền ghi cho thư mục và sao lưu ảnh cùng SQLite khi cần chuyển máy. Ảnh cũ không được tự xóa khi đổi poster/xóa phim.
 
 Khi kiểm thử, **không chạy backend với `backend/firefly.db` thật**. Đặt `DATABASE_URL` trỏ SQLite tạm, `UPLOAD_DIR` trỏ thư mục tạm, và giữ các biến đó khi khởi động/pytest. Mock có giới hạn riêng **500 KB** để tránh làm đầy localStorage; dùng `VITE_USE_MOCK=true` để thử.
+
+### T23 — bổ sung dữ liệu soát vé (20/10/2026)
+
+Đổi schema: **Có**. `bookings.checked_in_at` (DateTime nullable),
+`bookings.checked_in_by` (FK users.id nullable). `create_all` không tự thêm cột
+vào bảng đã tồn tại. Sau khi PO sao lưu DB + sidecar seed, kiểm tra checksum,
+integrity và xác nhận bản sao phục hồi được, PO phải xóa `backend\firefly.db`
+và khởi động backend lại để tạo schema mới. Đây là thao tác mất dữ liệu;
+chỉ PO thực hiện sau khi duyệt. Codex T23 chỉ chạy trên SQLite tạm.
+
+```powershell
+# Chỉ PO chạy tại C:\Projects\firefly-cinema SAU khi đã backup và xác minh.
+Remove-Item -LiteralPath backend\firefly.db
+Set-Location backend
+venv\Scripts\python -m uvicorn app.main:app --port 8000
+```
+
+Không cần cài thư viện mới. Đăng nhập admin → Tổng quan quản trị
+(`/quan-tri/tong-quan`) hoặc Soát vé tại quầy (`/quan-tri/soat-ve`).
+Nhập mã FF00042 (không phân biệt hoa thường), tra cứu và xác nhận vào rạp.
+Vé paid chỉ soát được một lần; lịch sử ghi giờ và quản trị viên thực hiện.

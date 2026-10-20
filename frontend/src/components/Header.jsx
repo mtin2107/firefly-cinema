@@ -76,6 +76,8 @@ export default function Header() {
               <ul className="dd__list dd__list--single">
                 <li><NavLink to="/ve-cua-toi">Vé của tôi</NavLink></li>
                 <li><NavLink to="/tai-khoan">Tài khoản</NavLink></li>
+                {user.role === "admin" && <li><NavLink to="/quan-tri/tong-quan">Tổng quan quản trị</NavLink></li>}
+                {user.role === "admin" && <li><NavLink to="/quan-tri/soat-ve">Soát vé tại quầy</NavLink></li>}
                 {user.role === "admin" && <li><NavLink to="/quan-tri/ve">Quản lý vé</NavLink></li>}
                 {user.role === "admin" && <li><NavLink to="/quan-tri/phim">Quản lý phim</NavLink></li>}
                 {user.role === "admin" && <li><NavLink to="/quan-tri/suat-chieu">Quản lý suất chiếu</NavLink></li>}

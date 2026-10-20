@@ -16,6 +16,8 @@ router = APIRouter(prefix="/api/admin/bookings", tags=["Quản trị vé"])
 def _admin_out(booking: Booking) -> dict:
     return {
         **booking_out(booking),
+        "checked_in_at": booking.checked_in_at,
+        "checked_in_by_name": booking.checkin_user.full_name if booking.checkin_user else None,
         "customer_name": booking.user.full_name,
         "customer_email": booking.user.email,
     }

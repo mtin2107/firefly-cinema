@@ -817,3 +817,17 @@ h1, h2, h3 { margin: 0; line-height: 1.15; }
 .star-rating__button:focus-visible { outline: 3px solid #e6c56e; outline-offset: 2px; }
 .anonymous-option { display: flex; gap: 8px; align-items: center; margin: 12px 0; }
 .comment__head { flex-wrap: wrap; }
+
+/* T23: tổng quan và soát vé */
+.t23-page { padding-top: 28px; padding-bottom: 48px; overflow-wrap: anywhere; }
+.t23-cards { display: grid; grid-template-columns: repeat(auto-fit,minmax(220px,1fr)); gap: 16px; margin: 24px 0; }
+.t23-card { border: 1px solid #d4ad6260; border-radius: 12px; padding: 20px; margin-bottom: 16px; }
+.t23-card strong { display: block; font-size: 1.5rem; margin-top: 10px; }
+.t23-chart { width: 100%; }
+.t23-chart svg { display: block; width: 100%; height: auto; }
+.t23-table { overflow-x: auto; }
+.t23-table table { min-width: 760px; width: 100%; border-collapse: collapse; }
+.t23-table td, .t23-table th { padding: 12px; text-align: left; border-bottom: 1px solid #d4ad6240; }
+.t23-search { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; margin: 24px 0; }
+.t23-search input { min-width: 0; flex: 1; padding: 12px; }
+@media (max-width: 480px) { .t23-cards { grid-template-columns: 1fr; } .t23-search label { width: 100%; } }

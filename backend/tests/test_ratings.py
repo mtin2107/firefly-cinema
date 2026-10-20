@@ -149,9 +149,27 @@ def test_seed_ratings_deterministic_and_restart_preserves_removal(db, fake_class
     monkeypatch.setattr(seed_module, "classifier", fake_classifier)
     seed_module.seed(db)
     rows = db.scalars(select(Rating).order_by(Rating.movie_id, Rating.user_id)).all()
-    assert rows and len(rows) == 2 * db.scalar(select(func.count()).select_from(Movie).where(Movie.status != "coming_soon"))
-    for index, row in enumerate(rows):
-        assert row.stars == 3 + ((row.movie_id + index % 2) % 3)
+    from app.models import User, Comment
+    viewers = db.scalars(select(User).where(User.email.like("khan-gia-%@firefly.vn")).order_by(User.id)).all()
+    assert len(viewers) == 6
+    assert all(viewer.role == "user" and viewer.password_hash for viewer in viewers)
+    assert len({viewer.password_hash for viewer in viewers}) == 6
+    counts = []
+    for movie in db.scalars(select(Movie).order_by(Movie.id)).all():
+        ratings = [row for row in rows if row.movie_id == movie.id]
+        if movie.status == "coming_soon":
+            assert ratings == []
+            continue
+        counts.append(len(ratings))
+        assert len(ratings) == 2 + movie.id % 5
+        for index, row in enumerate(ratings):
+            assert row.user_id == viewers[index].id
+            assert row.stars == 3 + ((movie.id + index) % 3)
+    assert len(set(counts)) > 1
+    excluded = db.scalars(select(User.id).where(User.email.in_(("admin@firefly.vn", "demo@firefly.vn")))).all()
+    assert all(row.user_id not in excluded for row in rows)
+    comments = db.scalars(select(Comment)).all()
+    assert len(comments) == 30 and all(comment.author_stars is None for comment in comments)
     removed_id = rows[0].id
     db.delete(rows[0])
     db.commit()
@@ -185,3 +203,33 @@ def test_nested_showtime_and_booking_movie_ratings(client, db, showtime, users, 
     assert booking.status_code == 201
     assert booking.json()["movie"]["rating_avg"] == 5.0
     assert client.get("/api/bookings/me", headers=auth_headers["user"]).json()[0]["movie"]["rating_count"] == 1
+
+
+@pytest.mark.parametrize("token_kind", ["malformed", "expired"])
+def test_public_comments_invalid_token_is_guest(client, db, movie, users, auth_headers, token_kind):
+    from datetime import datetime, timedelta, timezone
+    import jwt
+    from app.config import SECRET_KEY
+    created = client.post(f"/api/movies/{movie.id}/comments", headers=auth_headers["user"],
+                          json={"content": "Bình luận của tôi", "is_anonymous": True})
+    assert created.status_code == 201
+    token = "not-a-valid-token" if token_kind == "malformed" else jwt.encode(
+        {"sub": str(users[0].id), "exp": datetime.now(timezone.utc) - timedelta(seconds=10)},
+        SECRET_KEY, algorithm="HS256")
+    headers = {"Authorization": f"Bearer {token}"}
+    result = client.get(f"/api/movies/{movie.id}/comments", headers=headers)
+    assert result.status_code == 200
+    assert result.json()[0]["can_delete"] is False
+    assert result.json()[0]["user_name"] == "Khán giả ẩn danh"
+    assert client.get(f"/api/movies/{movie.id}/my-rating", headers=headers).status_code == 401
+    assert client.delete(f"/api/comments/{created.json()['id']}", headers=headers).status_code == 401
+
+
+def test_comment_without_stars_preserves_existing_rating(client, db, movie, auth_headers):
+    headers = auth_headers["user"]
+    path = f"/api/movies/{movie.id}"
+    client.put(path + "/rating", headers=headers, json={"stars": 2})
+    created = client.post(path + "/comments", headers=headers, json={"content": "Không gửi sao mới"})
+    assert created.status_code == 201 and created.json()["author_stars"] == 2
+    assert client.get(path + "/my-rating", headers=headers).json() == {"stars": 2}
+    assert db.scalar(select(func.count()).select_from(Rating)) == 1

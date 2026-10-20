@@ -29,7 +29,14 @@ _optional_bearer = HTTPBearer(auto_error=False)
 
 def optional_user(cred: HTTPAuthorizationCredentials | None = Depends(_optional_bearer),
                   db: Session = Depends(get_db)):
-    return get_current_user(cred, db) if cred else None
+    if cred is None:
+        return None
+    try:
+        return get_current_user(cred, db)
+    except HTTPException as exc:
+        if exc.status_code == 401:
+            return None
+        raise
 
 
 router = APIRouter(prefix="/api", tags=["Bình luận"])

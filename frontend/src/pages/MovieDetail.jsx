@@ -33,9 +33,12 @@ export default function MovieDetail() {
       .catch((e) => { if (active) setRatingNotice(e.message); });
     return () => { active = false; };
   }, [id, user]);
-  const refreshRating = async () => {
-    const updated = await api.movies.get(id);
-    setMovie(updated);
+  const refreshRating = (created) => {
+    setStars(created.author_stars);
+    setRatingNotice("");
+    // The comment is already committed; a refresh error must not look like a
+    // failed submission and invite a duplicate POST.
+    api.movies.get(id).then(setMovie).catch((e) => setRatingNotice(e.message));
     setCommentVersion((v) => v + 1);
   };
   const changeRating = async (value) => {
@@ -175,8 +178,8 @@ export default function MovieDetail() {
       </section>
 
       <CommentSection movieId={movie.id} allowed={movie.status !== "coming_soon"}
-        stars={stars} onRatingChange={changeRating} ratingBusy={ratingBusy || commentBusy}
-        ratingNotice={ratingNotice} onSendingChange={setCommentBusy}
+        stars={stars} ratingBusy={ratingBusy || commentBusy}
+        onSendingChange={setCommentBusy}
         version={commentVersion} onCreated={refreshRating} />
     </div>
     </>

@@ -76,8 +76,8 @@ Set-Location backend
 .\venv\Scripts\python -m uvicorn app.main:app --port 8000
 ```
 
-Seed mới giữ kịch bản demo T12 và thêm hai điểm chấm cố định/phim đang chiếu hoặc đã chiếu (`3 + ((movie_id + index) % 3)`, index 0/1). Khởi động lại không chấm lại thay người dùng. Điểm chỉ phục vụ demo; chưa giới hạn người đã mua vé.
-Mock T22 dùng khóa Local Storage `firefly_mockdb_v4`, tách khỏi dữ liệu mock phiên bản cũ.
+Seed Round 2 giữ kịch bản demo T12, tạo sáu khán giả mẫu riêng (email khan-gia-1..6@firefly.vn, mật khẩu ngẫu nhiên không in ra); mỗi phim đang/đã chiếu có `2 + movie_id % 5` lượt, sao `3 + ((movie_id + index) % 3)`. Admin và demo không chấm mẫu, bình luận mẫu của demo không có sao. Muốn dùng seed mới, PO phải backup/xác minh rồi xóa `backend\firefly.db` theo bước trên. Khởi động lại không chấm lại thay người dùng. Điểm chỉ phục vụ demo; chưa giới hạn người đã mua vé.
+Mock T22 dùng khóa Local Storage `firefly_mockdb_v5`, tách khỏi dữ liệu mock phiên bản cũ.
 
 ## Phần 2. Chạy backend FastAPI
 

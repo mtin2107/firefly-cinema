@@ -8,7 +8,7 @@ import { ApiError } from "./http";
 import { ROWS, COLS, totalPrice, MAX_SEATS_PER_BOOKING } from "../utils/seats";
 import { AGE_RATINGS, COUNTRY_LABELS, FORMAT_LABELS, GENRE_LABELS } from "../utils/taxonomy";
 
-const DB_KEY = "firefly_mockdb_v4";
+const DB_KEY = "firefly_mockdb_v5";
 const ROOMS = ["Phòng 1", "Phòng 2", "Phòng 3", "Phòng 4"];
 const CLEANUP_MINUTES = 15;
 const HOLD_CUTOFF_MINUTES = 30;
@@ -137,6 +137,12 @@ function createDb() {
     { id: 1, full_name: "Quản trị viên", email: "admin@firefly.vn", password: "admin123", role: "admin" },
     { id: 2, full_name: "Nguyễn Văn Demo", email: "demo@firefly.vn", password: "123456", role: "user" },
   ];
+  const viewers = Array.from({ length: 6 }, (_, index) => ({
+    id: index + 3, full_name: `Khán giả mẫu ${index + 1}`, email: `khan-gia-${index + 1}@firefly.vn`,
+    password: Array.from(crypto.getRandomValues(new Uint8Array(24)), (byte) => byte.toString(16).padStart(2, "0")).join(""),
+    role: "user",
+  }));
+  users.push(...viewers);
   // [movie, nội dung, ngày lùi, giờ lùi, duyệt]; đồng bộ demo_comments.json.
   const sample = [
     [1, "Cảnh cuối trên toa tàu đẹp và ấm áp, xem xong chỉ muốn gọi về cho mẹ.", 0, 2, "confirm"],
@@ -195,11 +201,11 @@ function createDb() {
       created_at: new Date(Date.now() - (HOLD_MINUTES + 1) * 60000).toISOString() },
   ];
   return {
-    ratings: MOVIES.filter((m) => m.status !== "coming_soon").flatMap((m) =>
-      [1, 2].map((user_id, index) => ({ movie_id: m.id, user_id, stars: 3 + ((m.id + index) % 3) }))),
+    ratings: MOVIES.filter((m) => ["now_showing", "ended"].includes(m.status)).flatMap((m) =>
+      viewers.slice(0, 2 + m.id % 5).map((viewer, index) => ({ movie_id: m.id, user_id: viewer.id, stars: 3 + ((m.id + index) % 3) }))),
     users, movies: clone(MOVIES), comments, bookings, showtimes,
     adminShowtimeIds: [],
-    seq: { user: 3, movie: Math.max(...MOVIES.map((m) => m.id)) + 1, comment: 31, booking: 4, showtime: Math.max(...showtimes.map((item) => item.id), 0) + 1 },
+    seq: { user: users.length + 1, movie: Math.max(...MOVIES.map((m) => m.id)) + 1, comment: 31, booking: 4, showtime: Math.max(...showtimes.map((item) => item.id), 0) + 1 },
   };
 }
 

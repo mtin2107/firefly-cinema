@@ -28,10 +28,12 @@ export default function Explore() {
   const gridRef = useRef(null);
   const [error, setError] = useState("");
   const { active, query, q } = readFilters(params);
-  const sort = params.get("sap-xep") ?? "moi-nhat";
-  const sorted = movies && [...movies].sort(sort === "danh-gia-cao" ? byRating
+  const sort = params.get("sap-xep") ?? "";
+  const comparator = sort === "danh-gia-cao" ? byRating
     : sort === "ten-a-z" ? (a, b) => a.title.localeCompare(b.title, "vi")
-    : (a, b) => b.release_date.localeCompare(a.release_date) || a.id - b.id);
+    : sort === "moi-nhat" ? (a, b) => b.release_date.localeCompare(a.release_date) || a.id - b.id
+    : null;
+  const sorted = movies && (comparator ? [...movies].sort(comparator) : movies);
   const queryKey = JSON.stringify(query);
 
   const load = () => {
@@ -55,6 +57,7 @@ export default function Explore() {
       <div className="filters">
         <label className="filter"><span>Sắp xếp</span>
           <select aria-label="Sắp xếp" value={sort} onChange={(e) => change("sap-xep", e.target.value)}>
+            <option value="">Mặc định</option>
             <option value="moi-nhat">Mới nhất</option><option value="danh-gia-cao">Đánh giá cao</option><option value="ten-a-z">Tên A–Z</option>
           </select>
         </label>

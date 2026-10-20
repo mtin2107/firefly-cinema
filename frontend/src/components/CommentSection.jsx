@@ -29,11 +29,13 @@ function CommentItem({ comment, onRemove }) {
   );
 }
 
-export default function CommentSection({ movieId, allowed = true, stars, onRatingChange, ratingBusy, ratingNotice, onSendingChange, version, onCreated }) {
+export default function CommentSection({ movieId, allowed = true, stars, ratingBusy, onSendingChange, version, onCreated }) {
   const { user } = useAuth();
   const location = useLocation();
   const [comments, setComments] = useState(null);
   const [error, setError] = useState("");
+  const [draftStars, setDraftStars] = useState(stars);
+  useEffect(() => { setDraftStars(stars); }, [stars, movieId, user]);
   const [anonymous, setAnonymous] = useState(false);
   const [text, setText] = useState("");
   const [sending, setSending] = useState(false);
@@ -55,10 +57,11 @@ export default function CommentSection({ movieId, allowed = true, stars, onRatin
     if (!text.trim()) return;
     setSending(true); onSendingChange?.(true); setNotice(null);
     try {
-      const created = await api.comments.create(movieId, { content: text, is_anonymous: anonymous, ...(stars != null ? { stars } : {}) });
+      const created = await api.comments.create(movieId, { content: text, is_anonymous: anonymous, ...(draftStars != null ? { stars: draftStars } : {}) });
       setComments((list) => [created, ...(list ?? [])]);
       setText("");
-      await onCreated?.();
+      setDraftStars(created.author_stars);
+      onCreated?.(created);
       setNotice(created.effective_negative
         ? { type: "warn", text: "Đã đăng. Hệ thống đánh giá bình luận này mang tính tiêu cực nên sẽ ẩn mặc định với người xem khác." }
         : { type: "ok", text: "Đã đăng bình luận." });
@@ -75,8 +78,8 @@ export default function CommentSection({ movieId, allowed = true, stars, onRatin
 
       {!allowed ? <p className="muted">Phim sắp chiếu chưa nhận bình luận hoặc chấm sao.</p> : user ? (
         <form className="comment-form" onSubmit={submit}>
-          <StarRating value={stars} onChange={onRatingChange} disabled={ratingBusy || sending} />
-          {ratingNotice && <p className="muted">{ratingNotice}</p>}
+          <StarRating value={draftStars} onChange={setDraftStars} disabled={ratingBusy || sending} />
+          <p className="muted">Sao chỉ được lưu khi gửi bình luận. Bỏ chọn để giữ nguyên điểm hiện tại.</p>
           <label className="anonymous-option"><input type="checkbox" checked={anonymous} onChange={(e) => setAnonymous(e.target.checked)} /> Bình luận ẩn danh</label>
           <label htmlFor="comment-text" className="sr-only">Viết bình luận</label>
           <textarea id="comment-text" rows={3} maxLength={1000} value={text}

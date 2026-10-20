@@ -1,3 +1,4 @@
+import { usePageTitle } from "../utils/pageTitle";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { api } from "../api";
 import { Empty, ErrorState, Loading } from "../components/StateViews";
@@ -25,6 +26,7 @@ function validate(form) {
   return errors;
 }
 export default function AdminShowtimes() {
+  usePageTitle("Quản lý suất chiếu");
   const [movies, setMovies] = useState(null);
   const [showtimes, setShowtimes] = useState(null);
   const [filters, setFilters] = useState({ date: localDate(), movie_id: "" });

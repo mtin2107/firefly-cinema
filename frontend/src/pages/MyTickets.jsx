@@ -1,3 +1,4 @@
+import { usePageTitle } from "../utils/pageTitle";
 import { useEffect, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { api } from "../api";
@@ -5,6 +6,7 @@ import TicketStub from "../components/TicketStub";
 import { Loading, ErrorState, Empty } from "../components/StateViews";
 
 export default function MyTickets() {
+  usePageTitle("Vé của tôi");
   const { state } = useLocation();
   const [bookings, setBookings] = useState(null);
   const [error, setError] = useState("");
@@ -45,7 +47,7 @@ export default function MyTickets() {
     }
   };
 
-  if (error) return <ErrorState message={error} onRetry={load} />;
+  if (error && !bookings) return <ErrorState message={error} onRetry={load} />;
   if (!bookings) return <Loading />;
 
   return (
@@ -59,6 +61,7 @@ export default function MyTickets() {
       {bookings.some((booking) => booking.status === "expired") && (
         <p className="notice notice--warn" role="status">Có vé đã tự hủy vì quá hạn thanh toán; ghế đã được trả lại.</p>
       )}
+      {error && <p className="notice notice--error" role="alert">{error}</p>}
       {notice && <p className="notice notice--ok" role="status">{notice}</p>}
       {bookings.length === 0 ? (
         <Empty>
@@ -70,7 +73,7 @@ export default function MyTickets() {
           {bookings.map((b) => (
             <TicketStub key={b.id} movie={b.movie} showtime={b.showtime} seats={b.seats}
               total={b.total} code={b.code} status={b.status} holdExpiresAt={b.hold_expires_at}
-              qrUrl={b.qr_url} onClaim={() => claim(b)} claiming={claimingId === b.id}
+              onExpire={load} qrUrl={b.qr_url} onClaim={() => claim(b)} claiming={claimingId === b.id}
               onCancel={() => cancel(b)} cancelling={cancellingId === b.id}
               highlight={b.id === state?.newBookingId} />
           ))}

@@ -57,6 +57,8 @@ class TokenOut(BaseModel):
 
 # ---------- Phim, suất chiếu ----------
 class MovieOut(ORM):
+    rating_avg: float = 0
+    rating_count: int = 0
     id: int
     title: str
     genre: str
@@ -289,7 +291,13 @@ class AdminBookingOut(BookingOut):
 
 
 # ---------- Bình luận ----------
+class RatingIn(BaseModel):
+    stars: int = Field(ge=1, le=5, strict=True)
+
+
 class CommentIn(BaseModel):
+    is_anonymous: bool = False
+    stars: int | None = Field(default=None, ge=1, le=5, strict=True)
     content: str = Field(min_length=2, max_length=1000)
 
     @field_validator("content")
@@ -302,6 +310,9 @@ class CommentIn(BaseModel):
 
 
 class CommentOut(BaseModel):
+    is_anonymous: bool = False
+    author_stars: int | None = None
+    can_delete: bool = False
     id: int
     movie_id: int
     user_name: str

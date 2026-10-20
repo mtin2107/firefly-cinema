@@ -4,11 +4,12 @@ from typing import Literal
 
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy import select, func
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, defer
+from sqlalchemy.orm.attributes import set_committed_value
 
 from ..database import get_db
 from ..booking_rules import expire_holds
-from ..models import Movie, Showtime, Booking, BookingSeat, Comment
+from ..models import Movie, Showtime, Booking, BookingSeat, Comment, Rating
 from ..schemas import MovieOut, ShowtimeOut, ShowtimeDetailOut
 
 router = APIRouter(prefix="/api", tags=["Phim & suất chiếu"])
@@ -62,7 +63,16 @@ def list_movies(
     q: str | None = None,            # tìm theo tên phim, không cần gõ dấu
     db: Session = Depends(get_db),
 ):
-    query = select(Movie).order_by(Movie.release_date.desc())
+    aggregates = select(
+        Rating.movie_id,
+        func.round(func.avg(Rating.stars), 1).label("average"),
+        func.count(Rating.id).label("count"),
+    ).group_by(Rating.movie_id).subquery()
+    query = (select(Movie, func.coalesce(aggregates.c.average, 0.0), func.coalesce(aggregates.c.count, 0))
+             .outerjoin(aggregates, aggregates.c.movie_id == Movie.id)
+             .options(defer(Movie.rating_avg), defer(Movie.rating_count))
+             .execution_options(populate_existing=True)
+             .order_by(Movie.release_date.desc()))
     if status:
         query = query.where(Movie.status == status)
     if country:
@@ -73,7 +83,11 @@ def list_movies(
         query = query.where(Movie.release_date < f"{year_before}-01-01")
     if age_rating:
         query = query.where(Movie.age_rating == age_rating)
-    movies = db.scalars(query).all()
+    movies = []
+    for movie, average, count in db.execute(query).all():
+        set_committed_value(movie, "rating_avg", average)
+        set_committed_value(movie, "rating_count", count)
+        movies.append(movie)
 
     # Các cột chứa nhiều giá trị ("Hành động, Hài hước") lọc chính xác bằng Python
     if genre:
@@ -85,7 +99,7 @@ def list_movies(
         movies = [m for m in movies if needle in _plain(m.title)]
 
     if collection == "top_rated":
-        movies = sorted([m for m in movies if m.score >= 8], key=lambda m: m.score, reverse=True)
+        movies = sorted([m for m in movies if m.rating_avg >= 4.0], key=lambda m: (m.rating_avg, m.rating_count), reverse=True)
     elif collection:
         rank = _ranking(db, collection)
         movies = sorted([m for m in movies if m.id in rank], key=lambda m: rank[m.id], reverse=True)

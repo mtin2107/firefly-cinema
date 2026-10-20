@@ -1,3 +1,4 @@
+import { usePageTitle } from "../utils/pageTitle";
 import { useEffect, useState } from "react";
 import { api } from "../api";
 import { Empty, ErrorState, Loading } from "../components/StateViews";
@@ -14,6 +15,7 @@ const STATUSES = [
 const labelFor = (status) => STATUSES.find(([value]) => value === status)?.[1] ?? status;
 
 export default function AdminBookings() {
+  usePageTitle("Quản lý vé");
   const [filters, setFilters] = useState({ status: "pending_verify", code: "" });
   const [rows, setRows] = useState(null);
   const [error, setError] = useState("");

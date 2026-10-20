@@ -1,3 +1,4 @@
+import { usePageTitle } from "../utils/pageTitle";
 import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { api } from "../api";
@@ -61,6 +62,7 @@ function DailyChart({ rows }) {
 }
 
 export default function AdminSentiment() {
+  usePageTitle("Thống kê cảm xúc");
   const [days, setDays] = useState(30);
   const [data, setData] = useState(null);
   const [error, setError] = useState("");

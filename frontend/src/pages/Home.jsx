@@ -1,3 +1,5 @@
+import { usePageTitle } from "../utils/pageTitle";
+import { byRating } from "../utils/ratings";
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { api } from "../api";
 import MovieCard from "../components/MovieCard";
@@ -12,6 +14,7 @@ const TABS = [
 ];
 
 export default function Home() {
+  usePageTitle("Trang chủ");
   const [movies, setMovies] = useState(null);
   const [error, setError] = useState("");
   const [tab, setTab] = useState("now_showing");
@@ -47,7 +50,7 @@ export default function Home() {
   );
 
   const showing = movies.filter((m) => m.status === "now_showing");
-  const hero = [...showing].sort((a, b) => b.score - a.score).slice(0, HERO_SIZE);
+  const hero = [...showing].sort(byRating).slice(0, HERO_SIZE);
   const list = movies.filter((m) => m.status === tab);
 
   return (

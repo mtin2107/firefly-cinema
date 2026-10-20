@@ -1,3 +1,5 @@
+import { usePageTitle } from "../utils/pageTitle";
+import { ratingText } from "../utils/ratings";
 import { useEffect, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { api } from "../api";
@@ -13,6 +15,8 @@ export default function SeatSelection() {
   const [error, setError] = useState("");
   const [selected, setSelected] = useState([]);
   const [hint, setHint] = useState("");
+
+  usePageTitle(data?.movie?.title ? `Chọn ghế – ${data.movie.title}` : "Chọn ghế");
 
   const load = () => {
     setError("");
@@ -43,6 +47,7 @@ export default function SeatSelection() {
       <div className="booking__head">
         <Link to={`/phim/${movie.id}#lich-chieu`} className="back">Đổi suất chiếu</Link>
         <h1 className="booking__title">{movie.title}</h1>
+        <p className="score">{ratingText(movie)}</p>
         <p className="muted">{fullDateTime(showtime.start_time)}, {showtime.room}</p>
       </div>
 

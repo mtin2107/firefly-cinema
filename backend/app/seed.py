@@ -10,7 +10,7 @@ from sqlalchemy.orm import Session
 
 import secrets
 
-from .models import User, Movie, Showtime, Comment, Booking, BookingSeat
+from .models import User, Movie, Showtime, Comment, Booking, BookingSeat, Rating
 from .seats import ROWS, COLS, seat_price
 from .security import hash_password
 from .classifier import classifier
@@ -206,6 +206,16 @@ def seed(db: Session) -> None:
         demo = User(full_name="Nguyễn Văn Demo", email="demo@firefly.vn", password_hash=hash_password("123456"))
         db.add_all([admin, demo])
         db.flush()
+        viewers = [User(full_name=f"Khán giả mẫu {index + 1}",
+                        email=f"khan-gia-{index + 1}@firefly.vn",
+                        password_hash=hash_password(secrets.token_hex(24)))
+                   for index in range(6)]
+        db.add_all(viewers)
+        db.flush()
+        for movie in db.scalars(select(Movie).where(Movie.status.in_(("now_showing", "ended")))).all():
+            for index, viewer in enumerate(viewers[:2 + movie.id % 5]):
+                db.add(Rating(movie_id=movie.id, user_id=viewer.id,
+                              stars=3 + ((movie.id + index) % 3)))
         samples = json.loads(DEMO_COMMENTS.read_text(encoding="utf-8"))
         now = datetime.now()
         for sample in samples:

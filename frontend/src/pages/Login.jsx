@@ -1,10 +1,13 @@
-import { useState } from "react";
+import { returnTo } from "../utils/pageTitle";
+import { usePageTitle } from "../utils/pageTitle";
+import { useEffect, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { USE_MOCK } from "../config";
 
 export default function Login() {
-  const { login } = useAuth();
+  usePageTitle("Đăng nhập");
+  const { login, user, checking } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   const [email, setEmail] = useState("");
@@ -13,7 +16,11 @@ export default function Login() {
   const [loading, setLoading] = useState(false);
 
   const from = location.state?.from;
-  const backTo = from ? `${from.pathname}${from.hash ?? ""}` : "/";
+  const backTo = returnTo(from);
+
+  useEffect(() => {
+    if (!checking && user) navigate(returnTo(location.state?.from), { replace: true });
+  }, [user, checking, navigate, location.state]);
 
   const submit = async (e) => {
     e.preventDefault();

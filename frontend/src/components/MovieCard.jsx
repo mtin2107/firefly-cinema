@@ -1,3 +1,4 @@
+import { ratingText } from "../utils/ratings";
 import { useRef } from "react";
 import { Link } from "react-router-dom";
 import Poster from "./Poster";
@@ -50,6 +51,7 @@ export default function MovieCard({ movie }) {
         <p className="movie-card__meta">
           <AgeBadge rating={movie.age_rating} /> {duration(movie.duration_min)}
         </p>
+        <p className="score">{ratingText(movie)}</p>
         <p className="movie-card__meta muted">{movie.genre}</p>
         {showing
           ? <Link to={`${detail}#lich-chieu`} state={{ intro: movie }} className="btn btn--primary btn--sm btn--block">Đặt vé</Link>

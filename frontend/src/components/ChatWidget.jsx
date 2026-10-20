@@ -75,7 +75,7 @@ export default function ChatWidget() {
   const freeY = Math.max(0, viewport.height - buttonSize - 2 * EDGE);
   const launcher = dragPoint || (seatPage && !movedOnSeatPage ? {
     x: Math.max(EDGE, viewport.width - buttonSize - EDGE),
-    y: EDGE + freeY,
+    y: viewport.width <= 767 ? Math.max(EDGE, viewport.height - buttonSize - 150) : EDGE + freeY,
   } : {
     x: dock.side === "left" ? EDGE : Math.max(EDGE, viewport.width - buttonSize - EDGE),
     y: EDGE + dock.fraction * freeY,

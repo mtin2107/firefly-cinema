@@ -262,7 +262,7 @@ Ngoài máy: Google Drive `MyDrive/thesis/data/…`, `MyDrive/thesis_results/…
 - `GET /api/admin/dashboard?days=7|30|90`: require_admin, expire_holds trước
   thống kê; truy vấn SQL gộp số vé, doanh thu và ghế, không lặp từng vé.
   Sức chứa suất = len(ROWS) × COLS từ seats.py. Doanh thu/số vé/ghế bán
-  theo bookings.created_at; lấp ghế theo showtimes.start_time; ratings và
+  theo bookings.created_at; lấp ghế trên các suất có start_time >= đầu khoảng (gồm suất sắp chiếu, không chặn trên); ratings và
   comments theo created_at. Khoảng ngày gồm hôm nay, nửa mở [00:00 đầu, 00:00 mai).
   Không có dữ liệu trả 0. Điểm sao là trung bình các lượt chấm trong khoảng;
   tiêu cực dùng human_label nếu đã duyệt, nếu chưa thì is_negative, gồm cả bình luận ẩn như T21.
@@ -270,7 +270,6 @@ Ngoài máy: Google Drive `MyDrive/thesis/data/…`, `MyDrive/thesis_results/…
   có điều kiện status=paid AND checked_in_at IS NULL; rowcount quyết định thành công,
   chống soát hai lần kể cả đồng thời. Lưu bookings.checked_in_at và checked_in_by.
 - BookingOut thêm checked_in_at; AdminBookingOut thêm checked_in_by_name.
-  Vì MyTickets.jsx ngoài allowlist, TicketStub tự lấy metadata từ bookings.mine
-  khi hiển thị vé paid (mỗi thẻ một yêu cầu bổ sung); lỗi lấy metadata không chặn hiển thị vé.
+  MyTickets truyền checked_in_at xuống TicketStub qua prop checkedInAt (không gọi API thêm).
 - Real/mock cùng admin.dashboard, admin.checkin.get/confirm. Trang admin mới
   có ProtectedRoute adminOnly; biểu đồ SVG không dùng thư viện mới.

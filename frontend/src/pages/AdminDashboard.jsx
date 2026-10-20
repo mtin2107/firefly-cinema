@@ -26,7 +26,7 @@ export default function AdminDashboard() {
     <h1 className="page-title">Tổng quan quản trị</h1>
     <Link to="/quan-tri/soat-ve">Soát vé tại quầy →</Link>
     <p><label>Khoảng thời gian <select value={days} onChange={(e) => setDays(Number(e.target.value))}>{[7,30,90].map((n) => <option key={n} value={n}>{n} ngày</option>)}</select></label></p>
-    <p className="muted">Doanh thu, số vé và ghế bán theo ngày đặt vé; tỷ lệ lấp ghế theo ngày suất chiếu. Điểm sao và bình luận theo ngày tạo, gồm hôm nay.</p>
+    <p className="muted">Doanh thu, số vé và ghế bán theo ngày đặt vé; tỷ lệ lấp ghế tính trên các suất từ đầu khoảng thời gian, gồm suất sắp chiếu. Điểm sao và bình luận theo ngày tạo, gồm hôm nay.</p>
     {error && <p role="alert">{error} <button onClick={() => setRetry((n) => n + 1)}>Thử lại</button></p>}
     {!data && !error && <p role="status">Đang tải tổng quan…</p>}
     {data && <>

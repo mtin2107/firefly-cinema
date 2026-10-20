@@ -703,7 +703,7 @@ export const mockApi = {
       const daily=Array.from({length:days},(_,i)=> { const d=new Date(start); d.setDate(d.getDate()+i); const date=dateKey(d), bs=paid.filter((b)=>dateKey(b.created_at)===date); return {date,revenue:sum(bs),tickets:bs.length}; });
       const movies=db.movies.map((m)=> {
         const bs=paid.filter((b)=>db.showtimes.find((s)=>s.id===b.showtime_id)?.movie_id===m.id);
-        const shows=db.showtimes.filter((s)=>s.movie_id===m.id && inRange(s.start_time));
+        const shows=db.showtimes.filter((s)=>s.movie_id===m.id && new Date(s.start_time) >= start);
         const ids=new Set(shows.map((s)=>s.id));
         const sold=db.bookings.filter((b)=>b.status==="paid" && ids.has(b.showtime_id)).reduce((n,b)=>n+b.seats.length,0);
         const rs=ratings.filter((r)=>r.movie_id===m.id), cs=db.comments.filter((c)=>c.movie_id===m.id && inRange(c.created_at));

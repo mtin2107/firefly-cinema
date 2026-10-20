@@ -75,7 +75,7 @@ export default function MyTickets() {
               total={b.total} code={b.code} status={b.status} holdExpiresAt={b.hold_expires_at}
               onExpire={load} qrUrl={b.qr_url} onClaim={() => claim(b)} claiming={claimingId === b.id}
               onCancel={() => cancel(b)} cancelling={cancellingId === b.id}
-              highlight={b.id === state?.newBookingId} />
+              checkedInAt={b.checked_in_at} highlight={b.id === state?.newBookingId} />
           ))}
         </div>
       )}

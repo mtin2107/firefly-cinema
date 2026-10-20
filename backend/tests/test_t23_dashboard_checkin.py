@@ -83,8 +83,9 @@ def test_concurrent_checkin(db,users,showtime):
         with ThreadPoolExecutor(max_workers=2) as pool: assert sorted(pool.map(run,range(2)))==[200,409]
     finally: engine.dispose()
 
-def test_payment_and_cancel_increase(client,db,users,showtime,auth_headers):
-    showtime.start_time=datetime.now()+timedelta(hours=3); db.commit()
+@pytest.mark.parametrize("ahead",[timedelta(hours=3),timedelta(days=3)])  # suất sắp chiếu sau hôm nay vẫn tính lấp ghế
+def test_payment_and_cancel_increase(client,db,users,showtime,auth_headers,ahead):
+    showtime.start_time=datetime.now()+ahead; db.commit()
     headers=auth_headers["admin"]
     before=client.get("/api/admin/dashboard",headers=headers).json()
     b=client.post("/api/bookings",headers=auth_headers["user"],json={"showtime_id":showtime.id,"seats":["A1","A2"]}).json()

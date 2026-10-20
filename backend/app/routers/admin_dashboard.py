@@ -37,11 +37,12 @@ def dashboard(days: int = 30, _: User = Depends(require_admin), db: Session = De
     sales = db.execute(select(Showtime.movie_id, revenue, paid_count).select_from(Booking).join(Showtime)
                        .where(*period(Booking.created_at)).group_by(Showtime.movie_id)).all()
     sales_map = {r[0]: (r[1], r[2]) for r in sales}
+    # Lấp ghế gồm cả suất sắp chiếu: vé bán hôm nay thường cho suất các ngày sau.
     capacities = dict(db.execute(select(Showtime.movie_id, func.count(Showtime.id) * len(ROWS) * COLS)
-                                 .where(*period(Showtime.start_time)).group_by(Showtime.movie_id)).all())
+                                 .where(Showtime.start_time >= start).group_by(Showtime.movie_id)).all())
     occupied = dict(db.execute(select(Showtime.movie_id, func.count(BookingSeat.id)).select_from(BookingSeat)
                                .join(Booking).join(Showtime, Showtime.id == Booking.showtime_id)
-                               .where(paid, *period(Showtime.start_time)).group_by(Showtime.movie_id)).all())
+                               .where(paid, Showtime.start_time >= start).group_by(Showtime.movie_id)).all())
     ratings = {r[0]: (float(r[1]), r[2]) for r in db.execute(select(Rating.movie_id, func.avg(Rating.stars), func.count(Rating.id))
                .where(*period(Rating.created_at)).group_by(Rating.movie_id))}
     effective = case((Comment.human_label.is_not(None), Comment.human_label), else_=cast(Comment.is_negative, Integer))

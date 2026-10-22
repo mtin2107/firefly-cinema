@@ -55,3 +55,19 @@ Ràng buộc: chỉ file trong mục 6 của T13.md; không sửa code; không c
 Gate: compileall, pytest, npm run build (real + mock) để xác nhận không hồi quy.
 Commit "[T13] mô tả". Viết reports/YYYY-MM-DD/codex_implementation_T13_YYYY-MM-DD.md, đặt T13 sang CLAUDE_REVIEW. Không merge, không gắn tag v1.0 (Tín gắn).
 ```
+
+## 7. Quét hồi quy toàn web trước merge (theo yêu cầu PO, 22/10/2026 21:40)
+Trên `task/T24-sua-loi-ra-soat` `d6cf6eb`, backend thật + DB tạm mới, health `phobert_b`.
+
+| Luồng / phạm vi | Kết quả |
+|---|---|
+| Đặt vé bằng giao diện: trang chủ → "Đặt vé" → suất → 2 ghế VIP → xác nhận → Vé của tôi | Đạt: H11, H12 = 190.000 đ (95.000/ghế VIP); vé mới ở "Sắp xem", đếm ngược 14:57 |
+| Admin: tìm vé theo mã → "Đã nhận tiền" → soát vé (mã chữ thường) | Đạt: "Đã xác nhận vé FF00144."; soát xong nút khóa; khách thấy "Đã vào rạp lúc 21:42" |
+| Chấm sao + bình luận ẩn danh + xóa | Đạt: 4.3 (4) → 4.4 (5); "Khán giả ẩn danh ★★★★★"; xóa được |
+| So sánh mô hình | Đạt: 5 mô hình trả nhãn và thời gian |
+| 15 route user + 8 route admin, 1280px và 375px | Đạt: không tràn, không ảnh lỗi, không nút thiếu tên, tiêu đề đúng, 0 lỗi console |
+| Mock, khách | Đạt: trang công khai hiển thị; trang cần đăng nhập/admin chuyển sang đăng nhập; 0 lỗi console |
+
+Quan sát thêm (có từ trước, không do T24, không chặn): token sống 24 giờ; nếu hết hạn giữa phiên, trang báo "Phiên đăng nhập đã hết hạn" kèm nút "Thử lại" thay vì tự chuyển sang đăng nhập. Khuyến nghị: đăng nhập lại ngay trước buổi demo.
+
+**Kết luận quét: không phát hiện hồi quy. T24 sẵn sàng merge.**

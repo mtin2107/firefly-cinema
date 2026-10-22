@@ -66,7 +66,7 @@ export default function TicketStub({ movie, showtime, seats, total, code, status
               <div><dt>Suất chiếu</dt><dd>{fullDateTime(showtime.start_time)}</dd></div>
               <div><dt>Ghế</dt><dd>{sortSeats(seats).join(", ")}</dd></div>
               <div><dt>Tổng tiền</dt><dd>{money(total)}</dd></div>
-              {status && <div><dt>Trạng thái</dt><dd><span className={`ticket-status ticket-status--${displayStatus}`}>{STATUS_LABELS[displayStatus]}</span></dd></div>}
+              {status && <div><dt>Trạng thái</dt><dd><span className={`ticket-status ticket-status--${displayStatus}`}>{displayStatus === "paid" && new Date(showtime.start_time).getTime() <= now ? "Đã chiếu" : STATUS_LABELS[displayStatus]}</span></dd></div>}
               {displayStatus === "held" && hasExpiry && <div><dt>Tự hủy lúc</dt><dd>{holdText} · Còn {String(Math.floor(remaining / 60)).padStart(2, "0")}:{String(remaining % 60).padStart(2, "0")}</dd></div>}
             </dl>
             {displayStatus === "held" && <div className="ticket-payment">

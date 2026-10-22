@@ -261,6 +261,7 @@ class ShowtimeIn(BaseModel):
 
 
 class ShowtimeDetailOut(BaseModel):
+    bookable: bool
     showtime: ShowtimeOut
     movie: MovieOut
     booked_seats: list[str]

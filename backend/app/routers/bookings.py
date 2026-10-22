@@ -25,9 +25,13 @@ def create_booking(body: BookingIn, user: User = Depends(get_current_user), db: 
     st = db.get(Showtime, body.showtime_id)
     if not st:
         raise HTTPException(404, "Không tìm thấy suất chiếu.")
+    now = datetime.now()
+    if st.start_time <= now:
+        db.commit()
+        raise HTTPException(400, "Suất chiếu đã bắt đầu, không thể đặt vé.")
     if st.movie.status == "ended":
         raise HTTPException(400, "Phim đã chiếu xong, không thể đặt vé.")
-    if st.start_time <= datetime.now() + timedelta(minutes=HOLD_CUTOFF_MINUTES):
+    if st.start_time <= now + timedelta(minutes=HOLD_CUTOFF_MINUTES):
         db.commit()
         raise HTTPException(400, "Suất chiếu sắp bắt đầu, vui lòng mua vé tại quầy.")
     existing_hold = db.scalar(select(Booking.id).where(

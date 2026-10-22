@@ -50,6 +50,10 @@ export default function MyTickets() {
   if (error && !bookings) return <ErrorState message={error} onRetry={load} />;
   if (!bookings) return <Loading />;
 
+  const now = Date.now();
+  const isPast = (b) => ["expired", "rejected"].includes(b.status) || new Date(b.showtime.start_time).getTime() <= now;
+  const groups = [["Sắp xem", bookings.filter((b) => !isPast(b))], ["Đã qua", bookings.filter(isPast)]];
+
   return (
     <div className="container narrow">
       <h1 className="page-title">Vé của tôi</h1>
@@ -69,15 +73,19 @@ export default function MyTickets() {
           <Link className="btn btn--primary" to="/">Chọn phim</Link>
         </Empty>
       ) : (
-        <div className="ticket-list">
-          {bookings.map((b) => (
+        groups.map(([title, items]) => <section key={title} aria-label={title}>
+          <h2>{title}</h2>
+          {!items.length && <p className="muted">Chưa có vé trong nhóm này.</p>}
+          <div className="ticket-list">
+          {items.map((b) => (
             <TicketStub key={b.id} movie={b.movie} showtime={b.showtime} seats={b.seats}
               total={b.total} code={b.code} status={b.status} holdExpiresAt={b.hold_expires_at}
               onExpire={load} qrUrl={b.qr_url} onClaim={() => claim(b)} claiming={claimingId === b.id}
               onCancel={() => cancel(b)} cancelling={cancellingId === b.id}
               checkedInAt={b.checked_in_at} highlight={b.id === state?.newBookingId} />
           ))}
-        </div>
+          </div>
+        </section>)
       )}
     </div>
   );

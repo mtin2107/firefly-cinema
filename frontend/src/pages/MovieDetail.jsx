@@ -77,7 +77,7 @@ export default function MovieDetail() {
     setError(""); setMovie(null);
     Promise.all([api.movies.get(id), api.movies.showtimes(id)])
       .then(([m, s]) => { setMovie(m); setShowtimes(s); })
-      .catch((e) => setError(e.message));
+      .catch(setError);
   };
   useEffect(load, [id]);
 
@@ -109,7 +109,7 @@ export default function MovieDetail() {
   // Khung bong bóng đứng cùng một vị trí ở mọi nhánh để không bị chạy lại khi dữ liệu tải xong
   const introLayer = intro && <PosterIntro movie={intro} onDone={() => setIntro(null)} />;
 
-  if (error) return <>{introLayer}<ErrorState message={error} onRetry={load} /></>;
+  if (error) return <>{introLayer}<ErrorState message={error.message} onRetry={error.status === 404 ? undefined : load} /></>;
   if (!movie) return <>{introLayer}<Loading /></>;
 
   return (

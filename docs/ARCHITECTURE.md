@@ -273,3 +273,9 @@ Ngoài máy: Google Drive `MyDrive/thesis/data/…`, `MyDrive/thesis_results/…
   MyTickets truyền checked_in_at xuống TicketStub qua prop checkedInAt (không gọi API thêm).
 - Real/mock cùng admin.dashboard, admin.checkin.get/confirm. Trang admin mới
   có ProtectedRoute adminOnly; biểu đồ SVG không dùng thư viện mới.
+# T24 — khả năng đặt online
+
+`GET /api/movies/{id}/showtimes` chỉ trả suất có `start_time > now + HOLD_CUTOFF_MINUTES`
+(hằng số từ `booking_rules.py`). `GET /api/showtimes/{id}` bổ sung `bookable: bool`
+theo cùng điều kiện, không đổi schema DB. Frontend khóa ghế và nút Tiếp tục khi
+`bookable=false`; mock dùng cùng cutoff và thông báo phân biệt suất đã bắt đầu.

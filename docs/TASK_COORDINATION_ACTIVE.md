@@ -36,17 +36,17 @@ Trước khi áp dụng workflow: giao diện React đầy đủ (`giao-dien-v1`
 
 ## 4. Current Project Status
 ```
-Overall Status: READY_FOR_NEXT_TASK
-Phase: T23 DONE / CLOSED; T13 PLANNED, chờ PO quyết T12 TODO-01 và T14 TODO-02
-Current Active Task: NONE
+Overall Status: CLAUDE_REVIEW
+Phase: T24 — Sửa lỗi rà soát trước v1.0
+Current Active Task: T24
 Ngày bắt đầu sản phẩm: 05/10/2026 · Hạn: 01/11/2026
 ```
 
 ## 5. Current Active Task
-**NONE.** T23 đã DONE / CLOSED sau PO approval và merge `33c45e3`. Không mở T13; T13 vẫn PLANNED, chờ PO quyết T12 TODO-01 và T14 TODO-02.
+**T24 — CLAUDE_REVIEW.** PO duyệt Task Record ngày 22/10/2026; Codex triển khai trên `task/T24-sua-loi-ra-soat`. Không mở T13.
 
 ## 6. Current Task Record
-Không có Task Record đang active. Task vừa đóng: [docs/tasks/T23.md](tasks/T23.md).
+[docs/tasks/T24.md](tasks/T24.md) — bản PO đã duyệt.
 
 ## 7. Roadmap và trạng thái
 | ID | Task | Loại | Tuần | Phụ thuộc | Task Record | Trạng thái |
@@ -76,7 +76,7 @@ Không có Task Record đang active. Task vừa đóng: [docs/tasks/T23.md](task
 | T21 | Thống kê cảm xúc bình luận theo phim | Web | 4 | T20, T12 | [T21.md](tasks/T21.md) | DONE / CLOSED — merge `5c10522`; Claude Round 2 PASS_WITH_TODO; AC 8/8; RF 0; TODO-02/03/05 Low còn mở |
 | T22 | Chấm sao, bình luận ẩn danh, hoàn thiện người xem (đổi schema) | Web | 4 | T14 | [T22.md](tasks/T22.md) | DONE / CLOSED — PO đã merge `3afbf42`; Claude R2 PASS; AC 12/12 |
 | T23 | Tổng quan quản trị và soát vé (đổi schema) | Web | 4 | T22 | [T23.md](tasks/T23.md) | DONE / CLOSED — PO đã duyệt, merge `33c45e3` VERIFIED; Claude R1 FAIL → Claude fix R2 theo PO → Codex review độc lập PASS; OBS-01..03 ACCEPT_LATER |
-| T24 | Sửa lỗi rà soát trước v1.0 | Web | 4 | T23 | [T24.md](tasks/T24.md) | READY_FOR_HANDOFF — PO yêu cầu 22/10/2026 sau rà soát toàn web; Codex làm, Claude review |
+| T24 | Sửa lỗi rà soát trước v1.0 | Web | 4 | T23 | [T24.md](tasks/T24.md) | CLAUDE_REVIEW — Codex hoàn tất 22/10/2026; pytest 148/148, build real/mock, browser 375/1280; chờ Claude review độc lập |
 
 Chuỗi chính: `T00 → T01 → T02` và `T03 → T08 → T09 → T10`. T03 bắt đầu ngay ngày đầu (song song).
 
@@ -215,13 +215,14 @@ Nếu trễ: cắt T14 → T15 → rút gọn T05. Không cắt T01–T03, T07�
 | Claude review T23 R1 | OBS-03: code trang admin dồn dòng, định dạng giờ lỗi 409 mock/real khác nhau | **ACCEPT_LATER — theo PO closure T23; không mở task mới** |
 
 ## 11. Current Next Step
-1. **Tín:** tạo `task/T24-sua-loi-ra-soat` từ `master`, gửi Codex prompt T24 (Claude soạn trong chat 22/10/2026).
+1. **Claude:** review độc lập T24 theo Task Record và `reports/2026-10-22/codex_implementation_T24_2026-10-22.md`; xác minh AC-01..AC-08 và chạy gate.
 2. **Tín:** tự xử lý cấu hình A-02 (BANK_ID/BANK_ACCOUNT/BANK_ACCOUNT_NAME trong `backend\.env`) và A-03 (khóa/hạn mức Gemini) trước khi quay demo.
 3. **Tín:** quyết T12 TODO-01 và T14 TODO-02 trước T13. T13 làm sau T24.
 
 ## 12. Active Timeline
 | Ngày | Ai | Sự kiện |
 |---|---|---|
+| 22/10/2026 | Codex | T24 READY_FOR_HANDOFF → IN_PROGRESS → CLAUDE_REVIEW. A-01/A-04..07 và mock hoàn tất trong allowlist; thêm 6 test cutoff/404, full pytest 148/148; compileall, build real/mock, health PhoBERT B thật SQLite tạm, browser real/mock 375/1280 đạt DEV. Không đổi schema, không sửa DB thật/.env, không merge hoặc mở T13. Report: `reports/2026-10-22/codex_implementation_T24_2026-10-22.md`. |
 | 22/10/2026 | Claude | Rà soát toàn web trên `c8f3cf0` (`reports/2026-10-22/claude_audit_toan_web_2026-10-22.md`): A-01 Medium (suất đã qua/≤30 phút vẫn chọn được ghế), A-02/A-03 cấu hình QR và Gemini (PO tự xử lý), A-04..A-07 Low. PO yêu cầu Codex sửa, Claude review → soạn `docs/tasks/T24.md`, T24 `READY_FOR_HANDOFF`, T13 lùi sau T24. |
 | 20/10/2026 | Tín (PO) + Codex recording | Final Closure Sync: PO xác nhận T23 đã duyệt, merge `33c45e3` trên master VERIFIED; Claude R1 FAIL → Claude fix R2 theo yêu cầu PO → Codex review độc lập PASS. T23 DONE / CLOSED, RF-01 + TODO-01 CLOSED, OBS-01..03 ACCEPT_LATER; DB local đã reset, schema ratings/comments.is_anonymous/bookings.checked_in_at và health OK (PO_ATTESTED). Current Active Task NONE; T13 giữ PLANNED, chờ PO quyết T12 TODO-01/T14 TODO-02; không mở T13, không thao tác DB. |
 | 20/10/2026 | Codex (reviewer fix theo PO) | Review độc lập diff `5b1bc40..5d334ae` PASS; RF-01 + TODO-01 CLOSED / VERIFIED BY CODEX. compileall 0, pytest 142/142, build real+mock, probe SQLite biên/+120 ngày và browser mock MyTickets/Checkout đạt. Không sửa code/test, không DB thật, không merge. T23 PO_REVIEW, chờ quyết định PO. |

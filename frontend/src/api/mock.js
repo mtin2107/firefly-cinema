@@ -575,7 +575,8 @@ export const mockApi = {
     async get(id) { await wait(); return clone(movieById(id)); },
     async showtimes(id) {
       await wait();
-      const now = Date.now();
+      movieById(id);
+      const now = Date.now() + HOLD_CUTOFF_MINUTES * 60000;
       return clone(db.showtimes.filter((s) => s.movie_id === Number(id) && new Date(s.start_time).getTime() > now));
     },
   },
@@ -585,7 +586,8 @@ export const mockApi = {
       expireHolds();
       const st = db.showtimes.find((s) => s.id === Number(id));
       if (!st) throw new ApiError("Không tìm thấy suất chiếu.", 404);
-      return clone({ showtime: st, movie: movieById(st.movie_id), booked_seats: bookedSeats(st.id) });
+      return clone({ showtime: st, movie: movieById(st.movie_id), booked_seats: bookedSeats(st.id),
+        bookable: new Date(st.start_time).getTime() > Date.now() + HOLD_CUTOFF_MINUTES * 60000 });
     },
   },
   bookings: {
@@ -595,8 +597,10 @@ export const mockApi = {
       const user = currentUser();
       const st = db.showtimes.find((s) => s.id === Number(showtime_id));
       if (!st) throw new ApiError("Không tìm thấy suất chiếu.", 404);
+      const now = Date.now();
+      if (new Date(st.start_time).getTime() <= now) throw new ApiError("Suất chiếu đã bắt đầu, không thể đặt vé.", 400);
       if (movieById(st.movie_id).status === "ended") throw new ApiError("Phim đã chiếu xong, không thể đặt vé.", 400);
-      if (new Date(st.start_time).getTime() <= Date.now() + HOLD_CUTOFF_MINUTES * 60000) {
+      if (new Date(st.start_time).getTime() <= now + HOLD_CUTOFF_MINUTES * 60000) {
         throw new ApiError("Suất chiếu sắp bắt đầu, vui lòng mua vé tại quầy.", 400);
       }
       if (db.bookings.some((item) => item.user_id === user.id && item.showtime_id === st.id && item.status === "held")) {

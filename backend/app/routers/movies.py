@@ -8,7 +8,7 @@ from sqlalchemy.orm import Session, defer
 from sqlalchemy.orm.attributes import set_committed_value
 
 from ..database import get_db
-from ..booking_rules import expire_holds
+from ..booking_rules import HOLD_CUTOFF_MINUTES, expire_holds
 from ..models import Movie, Showtime, Booking, BookingSeat, Comment, Rating
 from ..schemas import MovieOut, ShowtimeOut, ShowtimeDetailOut
 
@@ -116,7 +116,8 @@ def movie_showtimes(movie_id: int, db: Session = Depends(get_db)):
     get_movie_or_404(db, movie_id)
     return db.scalars(
         select(Showtime)
-        .where(Showtime.movie_id == movie_id, Showtime.start_time > datetime.now())
+        .where(Showtime.movie_id == movie_id,
+               Showtime.start_time > datetime.now() + timedelta(minutes=HOLD_CUTOFF_MINUTES))
         .order_by(Showtime.start_time)
     ).all()
 
@@ -129,4 +130,5 @@ def showtime_detail(showtime_id: int, db: Session = Depends(get_db)):
     if not st:
         raise HTTPException(404, "Không tìm thấy suất chiếu.")
     booked = db.scalars(select(BookingSeat.seat_code).where(BookingSeat.showtime_id == st.id)).all()
-    return {"showtime": st, "movie": st.movie, "booked_seats": list(booked)}
+    return {"showtime": st, "movie": st.movie, "booked_seats": list(booked),
+            "bookable": st.start_time > datetime.now() + timedelta(minutes=HOLD_CUTOFF_MINUTES)}

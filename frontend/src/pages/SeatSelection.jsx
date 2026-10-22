@@ -20,15 +20,17 @@ export default function SeatSelection() {
 
   const load = () => {
     setError("");
-    api.showtimes.get(showtimeId).then(setData).catch((e) => setError(e.message));
+    setData(null); setSelected([]);
+    api.showtimes.get(showtimeId).then(setData).catch(setError);
   };
   useEffect(load, [showtimeId]);
 
-  if (error) return <ErrorState message={error} onRetry={load} />;
+  if (error) return <ErrorState message={error.message} onRetry={error.status === 404 ? undefined : load} />;
   if (!data) return <Loading />;
-  const { movie, showtime, booked_seats } = data;
+  const { movie, showtime, booked_seats, bookable } = data;
 
   const toggle = (code) => {
+    if (!bookable) return;
     setHint("");
     setSelected((cur) => {
       if (cur.includes(code)) return cur.filter((c) => c !== code);
@@ -51,7 +53,15 @@ export default function SeatSelection() {
         <p className="muted">{fullDateTime(showtime.start_time)}, {showtime.room}</p>
       </div>
 
-      <SeatMap booked={booked_seats} selected={selected} onToggle={toggle} />
+      {!bookable && <p className="notice notice--warn" role="status">
+        {new Date(showtime.start_time).getTime() <= Date.now()
+          ? "Suất chiếu đã bắt đầu, không thể đặt vé."
+          : "Suất chiếu sắp bắt đầu, vui lòng mua vé tại quầy."}
+        {" "}<Link to={`/phim/${movie.id}#lich-chieu`}>Về lịch chiếu</Link>
+      </p>}
+      <fieldset className="booking-seat-fieldset" disabled={!bookable} aria-label="Chọn ghế">
+        <SeatMap booked={booked_seats} selected={selected} onToggle={toggle} />
+      </fieldset>
 
       <div className="summary-bar">
         <div className="container summary-bar__inner">
@@ -62,7 +72,7 @@ export default function SeatSelection() {
             {hint && <p className="summary-bar__hint" role="status">{hint}</p>}
           </div>
           <p className="summary-bar__total">{money(total)}</p>
-          <button className="btn btn--primary btn--lg" disabled={!selected.length}
+          <button className="btn btn--primary btn--lg" disabled={!bookable || !selected.length}
             onClick={() => navigate("/xac-nhan", { state: { showtimeId: showtime.id, seats: selected } })}>
             Tiếp tục
           </button>

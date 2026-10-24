@@ -15,6 +15,12 @@
 - Cho phép admin sửa hoặc xóa suất seed trong mock khi chưa có vé thật; nguyên nhân là ghế trang trí từ `seedBooked()` bị tính nhầm thành vé; tái hiện và xác minh bằng probe mock CRUD suất chiếu.
 
 
+## T26 — 24/10/2026
+
+- Thay hàng sao đầu trang chi tiết bằng nút điểm mở dialog gốc; chọn sao tạm, xác nhận lưu hoặc hủy qua API hiện có.
+- Dialog thông báo kết quả/lỗi, hỗ trợ Esc, bấm ngoài, vòng Tab và trả focus; bố cục 375px/1280px, không thêm hiệu ứng hoặc thư viện.
+- Giữ chuyển đăng nhập kèm trang quay lại, chặn phim sắp chiếu và giữ nguyên sao trong form bình luận; không đổi schema.
+
 ## T25 — 24/10/2026
 
 - Thêm banner trailer chỉ nạp sau khi bấm, phát file video có tua hoặc YouTube riêng tư nâng cao; mục Nội dung phim nhiều đoạn trước Lịch chiếu.

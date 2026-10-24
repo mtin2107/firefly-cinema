@@ -14,13 +14,13 @@ def booking(db,users,showtime,status="paid",when=None,seat="A1"):
 
 @pytest.mark.parametrize("days",[7,30,90])
 def test_dashboard_sql(client,db,users,showtime,auth_headers,days):
-    now=datetime.now(); showtime.start_time=datetime.combine(now.date(),time(23,59))
+    now=datetime.now(); showtime.start_time=now+timedelta(days=1)
     for i,status in enumerate(["paid","held","pending_verify","expired","rejected"]):
         booking(db,users,showtime,status,seat=f"A{i+1}")
     for i,ago in enumerate([6,7,29,30,89,90]):
         booking(db,users,showtime,when=datetime.combine(now.date()-timedelta(days=ago),time.min),seat=f"B{i+1}")
     booking(db,users,showtime,"held",now-timedelta(hours=1),"C1")
-    db.add(Rating(user_id=users[0].id,movie_id=showtime.movie_id,stars=4))
+    db.add(Rating(user_id=users[0].id,movie_id=showtime.movie_id,stars=10))
     db.add(Comment(user_id=users[0].id,movie_id=showtime.movie_id,content="Thử",is_negative=True,negative_score=.9,model_name="fake",human_label=0,hidden=True))
     db.commit()
     d=client.get(f"/api/admin/dashboard?days={days}",headers=auth_headers["admin"]).json()

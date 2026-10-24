@@ -215,7 +215,7 @@ def seed(db: Session) -> None:
         for movie in db.scalars(select(Movie).where(Movie.status.in_(("now_showing", "ended")))).all():
             for index, viewer in enumerate(viewers[:2 + movie.id % 5]):
                 db.add(Rating(movie_id=movie.id, user_id=viewer.id,
-                              stars=3 + ((movie.id + index) % 3)))
+                              stars=6 + ((movie.id + index) % 5)))
         samples = json.loads(DEMO_COMMENTS.read_text(encoding="utf-8"))
         now = datetime.now()
         for sample in samples:

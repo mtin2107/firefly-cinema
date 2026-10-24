@@ -13,7 +13,7 @@ function CommentItem({ comment, onRemove }) {
     <li className={`comment${comment.effective_negative ? " comment--negative" : ""}`}>
       <div className="comment__head">
         <span className="comment__author">{comment.user_name}</span>
-        {comment.author_stars != null && <span aria-label={`${comment.author_stars} sao`}>{"★".repeat(comment.author_stars)}</span>}
+        {comment.author_stars != null && <span aria-label={`Chấm ${comment.author_stars} trên 10 điểm`}>★ {comment.author_stars}/10</span>}
         {comment.can_delete && <button type="button" className="link-btn" onClick={() => onRemove(comment.id)}>Xóa bình luận</button>}
         <span className="muted">{relativeTime(comment.created_at)}</span>
       </div>

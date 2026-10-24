@@ -16,20 +16,20 @@ def clear_rating_limit():
 def test_rating_lifecycle(client, db, movie, auth_headers):
     path = f"/api/movies/{movie.id}"
     headers = auth_headers["user"]
-    assert client.get(path + "/my-rating", headers=headers).json() == {"stars": None}
+    assert client.get(path + "/my-rating", headers=headers).json()["stars"] is None
     assert client.put(path + "/rating", headers=headers, json={"stars": 3}).json() == {
-        "stars": 3, "rating_avg": 3.0, "rating_count": 1}
+        "stars": 3, "rating_avg": 3.0, "rating_count": 1, "distribution": distribution({3: 1})}
     assert client.put(path + "/rating", headers=headers, json={"stars": 5}).json()["rating_count"] == 1
-    assert client.get(path + "/my-rating", headers=headers).json() == {"stars": 5}
+    assert client.get(path + "/my-rating", headers=headers).json()["stars"] == 5
     row = db.scalar(select(Rating))
     assert row.stars == 5 and row.updated_at >= row.created_at
     assert client.put(path + "/rating", headers=auth_headers["admin"], json={"stars": 4}).json() == {
-        "stars": 4, "rating_avg": 4.5, "rating_count": 2}
+        "stars": 4, "rating_avg": 4.5, "rating_count": 2, "distribution": distribution({4: 1, 5: 1})}
     db.expire_all()
     assert client.get(path).json()["rating_avg"] == 4.5
     assert client.get("/api/movies?collection=top_rated").json()[0]["id"] == movie.id
     assert client.delete(path + "/rating", headers=headers).json() == {
-        "stars": None, "rating_avg": 4.0, "rating_count": 1}
+        "stars": None, "rating_avg": 4.0, "rating_count": 1, "distribution": distribution({4: 1})}
     assert client.delete(path + "/rating", headers=headers).status_code == 200
     client.delete(path + "/rating", headers=auth_headers["admin"])
     db.expire_all()
@@ -37,7 +37,7 @@ def test_rating_lifecycle(client, db, movie, auth_headers):
     assert client.get("/api/movies?collection=top_rated").json() == []
 
 
-@pytest.mark.parametrize("stars", [0, 6, -1, 2.5, True, "4", None])
+@pytest.mark.parametrize("stars", [0, 11, -1, 5.5, True, "8", None])
 def test_invalid_stars(client, movie, auth_headers, stars):
     assert client.put(f"/api/movies/{movie.id}/rating", headers=auth_headers["user"],
                       json={"stars": stars}).status_code == 422
@@ -101,7 +101,7 @@ def test_database_constraints(db, movie, users):
     with pytest.raises(IntegrityError):
         db.commit()
     db.rollback()
-    db.add(Rating(movie_id=movie.id, user_id=users[1].id, stars=6))
+    db.add(Rating(movie_id=movie.id, user_id=users[1].id, stars=11))
     with pytest.raises(IntegrityError):
         db.commit()
     db.rollback()
@@ -164,7 +164,7 @@ def test_seed_ratings_deterministic_and_restart_preserves_removal(db, fake_class
         assert len(ratings) == 2 + movie.id % 5
         for index, row in enumerate(ratings):
             assert row.user_id == viewers[index].id
-            assert row.stars == 3 + ((movie.id + index) % 3)
+            assert row.stars == 6 + ((movie.id + index) % 5)
     assert len(set(counts)) > 1
     excluded = db.scalars(select(User.id).where(User.email.in_(("admin@firefly.vn", "demo@firefly.vn")))).all()
     assert all(row.user_id not in excluded for row in rows)
@@ -231,5 +231,52 @@ def test_comment_without_stars_preserves_existing_rating(client, db, movie, auth
     client.put(path + "/rating", headers=headers, json={"stars": 2})
     created = client.post(path + "/comments", headers=headers, json={"content": "Không gửi sao mới"})
     assert created.status_code == 201 and created.json()["author_stars"] == 2
-    assert client.get(path + "/my-rating", headers=headers).json() == {"stars": 2}
+    assert client.get(path + "/my-rating", headers=headers).json()["stars"] == 2
     assert db.scalar(select(func.count()).select_from(Rating)) == 1
+
+
+def distribution(counts):
+    return {str(score): counts.get(score, 0) for score in range(1, 11)}
+
+
+def test_t27_boundaries_distribution(client, movie, auth_headers):
+    path = f"/api/movies/{movie.id}"
+    for role, score in [("user", 1), ("admin", 10)]:
+        response = client.put(path + "/rating", headers=auth_headers[role], json={"stars": score})
+        assert response.status_code == 200
+    expected = distribution({1: 1, 10: 1})
+    result = client.get(path + "/my-rating", headers=auth_headers["user"]).json()
+    assert result == {"stars": 1, "rating_avg": 5.5, "rating_count": 2, "distribution": expected}
+    result = client.delete(path + "/rating", headers=auth_headers["user"]).json()
+    assert result["distribution"] == distribution({10: 1})
+    assert sum(result["distribution"].values()) == result["rating_count"]
+
+
+@pytest.mark.parametrize("score", [0, 11, 5.5, "8", True])
+def test_t27_score_errors_in_rating_and_comment(client, movie, auth_headers, score):
+    for method, suffix, body in [("put", "/rating", {"stars": score}),
+                                 ("post", "/comments", {"content": "Phim hay", "stars": score})]:
+        response = getattr(client, method)(f"/api/movies/{movie.id}" + suffix,
+                                           headers=auth_headers["user"], json=body)
+        assert response.status_code == 422
+        assert "Điểm phải từ 1 đến 10." in response.json()["detail"]
+
+
+def test_t27_seed_two_fresh_databases(tmp_path, fake_classifier, monkeypatch):
+    from sqlalchemy import create_engine
+    from sqlalchemy.orm import Session
+    from app.database import Base
+    from app import seed as seed_module
+    monkeypatch.setattr(seed_module, "classifier", fake_classifier)
+    snapshots = []
+    for index in range(2):
+        engine = create_engine(f"sqlite:///{tmp_path / f'fresh-{index}.db'}")
+        Base.metadata.create_all(engine)
+        with Session(engine) as session:
+            seed_module.seed(session)
+            snapshot = list(session.execute(select(Rating.movie_id, Rating.user_id, Rating.stars)
+                                            .order_by(Rating.movie_id, Rating.user_id)))
+            assert snapshot and all(6 <= row.stars <= 10 for row in snapshot)
+            snapshots.append(snapshot)
+        engine.dispose()
+    assert snapshots[0] == snapshots[1]

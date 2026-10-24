@@ -289,3 +289,11 @@ theo cùng điều kiện, không đổi schema DB. Frontend khóa ghế và nú
 - Trailer chỉ nhận đường dẫn upload chuẩn hoặc YouTube http/https trên youtube.com/www/m/youtu.be; watch/shorts/embed được chuẩn hóa về `https://www.youtube.com/watch?v=ID`. Không nhận nguồn khác hay credentials/port tùy ý.
 - Frontend gọi `api.admin.trailers.upload(File)`; real gửi raw body cùng token, mock kiểm chữ ký rồi trả blob URL (chỉ sống trong phiên). TrailerBanner chưa tạo video/iframe trước khi bấm; YouTube qua youtube-nocookie.com, có link mở ngoài. Nội dung nhiều đoạn đứng trước Lịch chiếu. File video ưu tiên hơn link nếu chọn cả hai; gỡ chỉ bỏ trường, không xóa file mồ côi.
 - Hai movies.json giống byte, 21 synopsis hai đoạn, trailer_url null; schema thật do PO reset theo HUONG_DAN, không tự migrate.
+
+
+### T27 — Điểm phim 1–10 và phân bố
+- `ratings.stars` là số nguyên 1–10, strict tại RatingIn/CommentIn và CHECK tại SQLite. Điểm ngoài miền trả 422 tiếng Việt.
+- PUT/DELETE `/api/movies/{id}/rating` và GET `/my-rating` cùng trả `stars`, `rating_avg` (1 chữ số), `rating_count`, `distribution` đủ khóa chuỗi 1..10. Distribution đếm từng mức; nhóm 9–10…1–2 được tính ở dialog.
+- Seed real/mock dùng `6 + ((movie.id + index) % 5)`; mock nâng namespace dữ liệu lên v6 để không dùng điểm demo thang cũ. Dashboard giữ công thức trung bình.
+- RatingDialog dùng native modal, lấy summary mới khi mở; draft chỉ lưu khi xác nhận. Hiệu ứng GSAP qua motion.js có điều kiện MOTION_OK, dọn hạt/tween khi đóng, unmount hoặc đổi reduced motion; auto-close xác nhận 1,2 giây.
+- Schema cũ cần PO backup/checksum/integrity và reset theo HUONG_DAN mục T27. Không migrate/quy đổi hoặc thao tác DB thật trong implementation.

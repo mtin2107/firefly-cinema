@@ -9,7 +9,7 @@ import { ApiError } from "./http";
 import { ROWS, COLS, totalPrice, MAX_SEATS_PER_BOOKING } from "../utils/seats";
 import { AGE_RATINGS, COUNTRY_LABELS, FORMAT_LABELS, GENRE_LABELS } from "../utils/taxonomy";
 
-const DB_KEY = "firefly_mockdb_v5";
+const DB_KEY = "firefly_mockdb_v6";
 const ROOMS = ["Phòng 1", "Phòng 2", "Phòng 3", "Phòng 4"];
 const CLEANUP_MINUTES = 15;
 const HOLD_CUTOFF_MINUTES = 30;
@@ -203,7 +203,7 @@ function createDb() {
   ];
   return {
     ratings: MOVIES.filter((m) => ["now_showing", "ended"].includes(m.status)).flatMap((m) =>
-      viewers.slice(0, 2 + m.id % 5).map((viewer, index) => ({ movie_id: m.id, user_id: viewer.id, stars: 3 + ((m.id + index) % 3) }))),
+      viewers.slice(0, 2 + m.id % 5).map((viewer, index) => ({ movie_id: m.id, user_id: viewer.id, stars: 6 + ((m.id + index) % 5) }))),
     users, movies: clone(MOVIES), comments, bookings, showtimes,
     adminShowtimeIds: [],
     seq: { user: users.length + 1, movie: Math.max(...MOVIES.map((m) => m.id)) + 1, comment: 31, booking: 4, showtime: Math.max(...showtimes.map((item) => item.id), 0) + 1 },
@@ -272,12 +272,13 @@ function currentUser() {
 const movieById = (id) => {
   const m = db.movies.find((x) => x.id === Number(id));
   if (!m) throw new ApiError("Không tìm thấy phim.", 404);
-  return Object.assign(m, ratingSummary(m.id));
+  const { rating_avg, rating_count } = ratingSummary(m.id);
+  return Object.assign(m, { rating_avg, rating_count });
 };
 function ratingSummary(id) {
   const rows = db.ratings.filter((r) => r.movie_id === Number(id));
   return { rating_avg: rows.length ? Math.round(rows.reduce((n, r) => n + r.stars, 0) / rows.length * 10) / 10 : 0,
-    rating_count: rows.length };
+    rating_count: rows.length, distribution: Object.fromEntries(Array.from({ length: 10 }, (_, i) => [String(i + 1), rows.filter((r) => r.stars === i + 1).length])) };
 }
 function rateable(id) {
   const movie = movieById(id);
@@ -290,7 +291,7 @@ function ratingLimit(userId) {
   recent.push(Date.now()); ratingUsage.set(userId, recent);
 }
 function saveRating(movieId, userId, stars) {
-  if (!Number.isInteger(stars) || stars < 1 || stars > 5) throw new ApiError("Số sao phải từ 1 đến 5.", 422);
+  if (!Number.isInteger(stars) || stars < 1 || stars > 10) throw new ApiError("Điểm phải từ 1 đến 10.", 422);
   const rating = db.ratings.find((r) => r.movie_id === Number(movieId) && r.user_id === userId);
   if (rating) rating.stars = stars;
   else db.ratings.push({ movie_id: Number(movieId), user_id: userId, stars, created_at: new Date().toISOString() });
@@ -660,7 +661,7 @@ export const mockApi = {
   ratings: {
     async mine(id) {
       await wait(); const user = currentUser(); movieById(id);
-      return { stars: db.ratings.find((r) => r.movie_id === Number(id) && r.user_id === user.id)?.stars ?? null };
+      return { stars: db.ratings.find((r) => r.movie_id === Number(id) && r.user_id === user.id)?.stars ?? null, ...ratingSummary(id) };
     },
     async set(id, stars) {
       await wait(); const user = currentUser(); rateable(id); ratingLimit(user.id);

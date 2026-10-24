@@ -36,14 +36,19 @@ def save_rating(db, movie_id, user_id, stars):
 def rating_result(db, movie_id, stars):
     avg, count = db.execute(select(func.round(func.avg(Rating.stars), 1), func.count(Rating.id))
                             .where(Rating.movie_id == movie_id)).one()
-    return {"stars": stars, "rating_avg": float(avg or 0), "rating_count": count}
+    distribution = {str(score): 0 for score in range(1, 11)}
+    for score, total in db.execute(select(Rating.stars, func.count(Rating.id)).where(
+            Rating.movie_id == movie_id).group_by(Rating.stars)):
+        distribution[str(score)] = total
+    return {"stars": stars, "rating_avg": float(avg or 0), "rating_count": count,
+            "distribution": distribution}
 
 
 @router.get("/{movie_id}/my-rating")
 def mine(movie_id: int, user: User = Depends(get_current_user), db: Session = Depends(get_db)):
     get_movie_or_404(db, movie_id)
-    return {"stars": db.scalar(select(Rating.stars).where(
-        Rating.movie_id == movie_id, Rating.user_id == user.id))}
+    return rating_result(db, movie_id, db.scalar(select(Rating.stars).where(
+        Rating.movie_id == movie_id, Rating.user_id == user.id)))
 
 
 @router.put("/{movie_id}/rating")

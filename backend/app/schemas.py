@@ -332,13 +332,24 @@ class AdminBookingOut(BookingOut):
 
 
 # ---------- Bình luận ----------
-class RatingIn(BaseModel):
-    stars: int = Field(ge=1, le=5, strict=True)
+class ScoreInput(BaseModel):
+    @field_validator("stars", mode="before", check_fields=False)
+    @classmethod
+    def valid_score(cls, value):
+        if value is None and cls.__name__ == "CommentIn":
+            return value
+        if type(value) is not int or not 1 <= value <= 10:
+            raise PydanticCustomError("comment_score", "Điểm phải từ 1 đến 10.")
+        return value
 
 
-class CommentIn(BaseModel):
+class RatingIn(ScoreInput):
+    stars: int = Field(ge=1, le=10, strict=True)
+
+
+class CommentIn(ScoreInput):
     is_anonymous: bool = False
-    stars: int | None = Field(default=None, ge=1, le=5, strict=True)
+    stars: int | None = Field(default=None, ge=1, le=10, strict=True)
     content: str = Field(min_length=2, max_length=1000)
 
     @field_validator("content")

@@ -518,3 +518,53 @@ Set-Location C:\Projects\firefly-cinema\backend
 curl.exe -s -o NUL -D - -H "Range: bytes=0-1023" http://localhost:8025/uploads/trailers/<uuid>.mp4
 # HTTP 206; Content-Range: bytes 0-1023/<size>; Accept-Ranges: bytes
 ```
+
+
+## T27 — Reset có kiểm soát để dùng thang điểm 10 (PO thực hiện sau merge)
+
+Đổi schema: Có. Constraint `ratings.ck_rating_stars` chuyển sang `BETWEEN 1 AND 10`.
+`create_all()` không cập nhật constraint của bảng đã tồn tại. Không có script quy đổi điểm cũ.
+Codex chỉ kiểm tra bằng SQLite tạm; các lệnh dưới đây dành cho PO, chưa được thực thi trên DB thật.
+Reset làm mất tài khoản/vé/bình luận hiện có trong DB đang chạy; giữ bản sao để phục hồi.
+
+1. Dừng mọi backend trước khi sao lưu; xác nhận không còn tiến trình ghi DB.
+2. Tại thư mục gốc dự án, sao lưu DB, toàn bộ sidecar (kể cả WAL/SHM nếu có), và uploads:
+
+```powershell
+Set-Location C:\Projects\firefly-cinema
+$t27Source = (Resolve-Path backend\firefly.db).Path
+$t27Backup = Join-Path (Get-Location) ('backup\db-truoc-T27-' + (Get-Date -Format 'yyyyMMdd-HHmmss'))
+New-Item -ItemType Directory -Path $t27Backup -ErrorAction Stop | Out-Null
+$t27Files = Get-ChildItem -LiteralPath (Split-Path $t27Source) -File | Where-Object { $_.Name -like 'firefly.db*' }
+foreach ($t27File in $t27Files) {
+    $t27Copy = Join-Path $t27Backup $t27File.Name
+    Copy-Item -LiteralPath $t27File.FullName -Destination $t27Copy -ErrorAction Stop
+    if ((Get-FileHash -LiteralPath $t27File.FullName -Algorithm SHA256).Hash -ne (Get-FileHash -LiteralPath $t27Copy -Algorithm SHA256).Hash) { throw 'SHA-256 không khớp; dừng reset.' }
+}
+if (Test-Path -LiteralPath backend\uploads) {
+    Copy-Item -LiteralPath backend\uploads -Destination (Join-Path $t27Backup 'uploads') -Recurse -ErrorAction Stop
+    foreach ($t27Upload in (Get-ChildItem -LiteralPath backend\uploads -File -Recurse)) {
+        $t27Relative = [IO.Path]::GetRelativePath((Resolve-Path backend\uploads).Path, $t27Upload.FullName)
+        $t27UploadCopy = Join-Path (Join-Path $t27Backup 'uploads') $t27Relative
+        if ((Get-FileHash -LiteralPath $t27Upload.FullName).Hash -ne (Get-FileHash -LiteralPath $t27UploadCopy).Hash) { throw 'Uploads không khớp; dừng reset.' }
+    }
+}
+backend\venv\Scripts\python -c "import sqlite3,sys; from pathlib import Path; c=sqlite3.connect(Path(sys.argv[1]).resolve().as_uri()+'?mode=ro',uri=True); result=c.execute('PRAGMA integrity_check').fetchall(); fk=c.execute('PRAGMA foreign_key_check').fetchall(); print(result, fk); assert result==[('ok',)] and not fk" (Join-Path $t27Backup 'firefly.db')
+if ($LASTEXITCODE -ne 0) { throw 'Integrity/FK không đạt; dừng reset.' }
+Get-ChildItem -LiteralPath $t27Backup -File | Get-FileHash -Algorithm SHA256 | Format-Table
+```
+
+3. Chỉ khi SHA-256 tất cả file khớp, integrity `ok`, FK rỗng và PO chấp nhận mất dữ liệu sau bản sao, reset đúng file đã xác minh:
+
+```powershell
+Remove-Item -LiteralPath $t27Source -ErrorAction Stop
+# Backend đã dừng; xóa WAL/SHM cũ đã sao lưu nếu vẫn còn, tránh ghép với DB mới.
+foreach ($t27Suffix in @('-wal', '-shm', '-journal')) {
+    $t27Sidecar = $t27Source + $t27Suffix
+    if (Test-Path -LiteralPath $t27Sidecar) { Remove-Item -LiteralPath $t27Sidecar -ErrorAction Stop }
+}
+Set-Location backend
+venv\Scripts\python -m uvicorn app.main:app --port 8000
+```
+
+Giữ nguyên bản sao `uploads` và seed sidecar trong thư mục sao lưu. Seed hiện có tự làm mới trạng thái seed khi bảng movies rỗng. Sau khởi động, kiểm `/api/health`, schema mới, điểm mẫu 6–10, đăng nhập demo, chấm 1 và 10; không khôi phục DB thang 5 vào ứng dụng thang 10 để tiếp tục chấm. Nếu cần rollback: dừng backend, dùng lại code trước T27 và phục hồi nguyên bộ DB + sidecar + uploads từ cùng một bản sao đã kiểm hash.

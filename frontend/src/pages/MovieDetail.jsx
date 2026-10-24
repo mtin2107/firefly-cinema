@@ -32,7 +32,7 @@ export default function MovieDetail() {
   useEffect(() => {
     let active = true;
     setStars(null); setRatingNotice("");
-    if (user) api.ratings.mine(id).then((r) => { if (active) setStars(r.stars); })
+    if (user) api.ratings.mine(id).then((r) => { if (active) { setStars(r.stars); setMovie((m) => m ? { ...m, ...r } : m); } })
       .catch((e) => { if (active) setRatingNotice(e.message); });
     return () => { active = false; };
   }, [id, user]);
@@ -49,7 +49,7 @@ export default function MovieDetail() {
     try {
       const result = value == null ? await api.ratings.remove(id) : await api.ratings.set(id, value);
       setStars(result.stars);
-      setMovie((m) => ({ ...m, rating_avg: result.rating_avg, rating_count: result.rating_count }));
+      setMovie((m) => ({ ...m, rating_avg: result.rating_avg, rating_count: result.rating_count, distribution: result.distribution }));
       setCommentVersion((v) => v + 1);
       setRatingNotice(value == null ? "Đã hủy đánh giá." : "Đã lưu đánh giá.");
       return true;
@@ -134,7 +134,7 @@ export default function MovieDetail() {
                   if (!user) return navigate("/dang-nhap", { state: { from: location } });
                   setRatingNotice(""); setRatingOpen(true);
                 }}>{movie.rating_count ? ratingText(movie) : "Chưa có đánh giá — chấm ngay"}</button>
-              {stars != null && <small className="rating-personal">Bạn đã chấm {stars}★</small>}
+              {stars != null && <small className="rating-personal">Bạn đã chấm {stars}/10</small>}
             </>}
           </p>
           <dl className="facts">

@@ -45,7 +45,7 @@ class Rating(Base):
     __tablename__ = "ratings"
     __table_args__ = (
         UniqueConstraint("user_id", "movie_id", name="uq_rating_user_movie"),
-        CheckConstraint("stars BETWEEN 1 AND 5", name="ck_rating_stars"),
+        CheckConstraint("stars BETWEEN 1 AND 10", name="ck_rating_stars"),
     )
     id: Mapped[int] = mapped_column(primary_key=True)
     user_id: Mapped[int] = mapped_column(ForeignKey("users.id"), index=True)

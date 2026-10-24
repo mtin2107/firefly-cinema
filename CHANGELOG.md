@@ -27,3 +27,10 @@
 - Admin upload MP4/WebM body thô tối đa 100 MiB, kiểm chữ ký và ghi dần; chọn file ưu tiên hơn link YouTube, có gỡ trailer. API real/mock cùng contract.
 - Thêm synopsis và trailer_url nullable; seed 21 synopsis, không bịa link trailer. Schema cũ cần PO backup và reset theo HUONG_DAN.
 - Route Range riêng cho Starlette 0.38.6; test upload, quyền, cleanup, Range và validator.
+
+
+## 2026-10-24 — T27
+- Thang điểm nguyên 1–10 xuyên suốt API, seed, bình luận, dashboard và mock; API rating bổ sung phân bố đầy đủ.
+- Khung đánh giá có poster, vòng điểm, 5 thanh phân bố, 10 sao và nhãn tiếng Việt; giữ lưu/hủy/đóng và focus của T26.
+- GSAP mở khung, nảy sao, đom đóm và cập nhật điểm khi lưu; hỗ trợ giảm chuyển động, tự dọn hiệu ứng. Focus đơn thuần không tô sao (T26 TODO-01).
+- Đổi constraint SQLite; PO cần sao lưu/xác minh rồi reset sau merge theo HUONG_DAN mục T27. Implementation chỉ dùng SQLite tạm.

@@ -36,17 +36,23 @@ Trước khi áp dụng workflow: giao diện React đầy đủ (`giao-dien-v1`
 
 ## 4. Current Project Status
 ```
-Overall Status: PO_REVIEW
-Phase: T24 Claude review PASS, chờ PO merge; T13 READY_FOR_HANDOFF (cần PO quyết T12 TODO-01/T14 TODO-02)
-Current Active Task: T24 — PO_REVIEW
+Overall Status: IN_PROGRESS
+Phase: T26 IN_PROGRESS / BLOCKED_PENDING_T25_MASTER — master local chưa chứa T25; không mở T13
+Current Active Task: T26 — IN_PROGRESS / BLOCKED_PENDING_T25_MASTER
 Ngày bắt đầu sản phẩm: 05/10/2026 · Hạn: 01/11/2026
 ```
 
 ## 5. Current Active Task
+**T26 — IN_PROGRESS / BLOCKED_PENDING_T25_MASTER.** PO giao triển khai ngày 24/10/2026. Preflight: `master=b8f6ef6`, chưa chứa implementation T25 `03e0d44` hoặc review `c9f7eef`; HEAD hiện ở `task/T25-trailer-phim`, không có remote. Chưa tạo nhánh T26 từ baseline cũ, chưa sửa production code. Chờ PO merge T25 hoặc cung cấp master mới; không tự merge, không mở T13.
+
+**T25 — PO_REVIEW.** Claude review **PASS_WITH_TODO** trên `03e0d44`: scope 20/20, RF 0, TODO-01/02 Low (form admin), OBS-01/02. compileall 0, pytest 194/194, build đạt; probe upload/Range/validator, browser real/mock 375/1280 đạt. Report: `reports/2026-10-24/claude_review_T25_PASS_WITH_TODO_2026-10-24.md`. Đổi schema: PO sao lưu DB + sidecar + `backend\uploads\` rồi reset `firefly.db` sau merge.
+
+Trước đó — Codex: Codex hoàn tất 24/10/2026: upload raw/Range, synopsis, banner và form admin real/mock; compileall, health PhoBERT B thật, pytest 194/194, build real/mock, browser 375/1280 và hồi quy đạt trên SQLite/UPLOAD_DIR tạm. Report: `reports/2026-10-24/codex_implementation_T25_2026-10-24.md`. Đổi schema: Có; DB thật do PO backup/reset sau duyệt, không mở T13.
+
 **T24 — PO_REVIEW.** Claude review **PASS** trên `32e6b4d`: AC 8/8, RF 0, OBS-01 (thẻ Điểm sao xuống dòng). compileall 0, pytest 148/148, build/mock đạt. Report: `reports/2026-10-22/claude_review_T24_PASS_2026-10-22.md`. Trước đó: PO duyệt Task Record ngày 22/10/2026; Codex triển khai trên `task/T24-sua-loi-ra-soat`. Không mở T13.
 
 ## 6. Current Task Record
-[docs/tasks/T24.md](tasks/T24.md) — bản PO đã duyệt.
+[docs/tasks/T26.md](tasks/T26.md) — bản PO đã duyệt.
 
 ## 7. Roadmap và trạng thái
 | ID | Task | Loại | Tuần | Phụ thuộc | Task Record | Trạng thái |
@@ -64,7 +70,7 @@ Ngày bắt đầu sản phẩm: 05/10/2026 · Hạn: 01/11/2026
 | T10 | Gắn model B vào web | Web | 3 | T07, T09 | [T10.md](tasks/T10.md) | DONE / CLOSED — PO APPROVED_WITH_NOTES; Claude Final PASS_WITH_TODO; AC 7/7; Technical DoD MET; RF 0; fast-forward merge + annotated tag `phobert-B` VERIFIED tại `857a8272` |
 | T11 | Kiểm thử tự động và sửa lỗi | Web | 4 | T04–T10 | [T11.md](tasks/T11.md) | DONE / CLOSED — Claude PASS_WITH_TODO; PO APPROVED_WITH_NOTES; AC 6/6; DoD MET; RF 0; merge `06dd44f0` VERIFIED |
 | T12 | Dữ liệu demo và kịch bản bảo vệ | Web | 4 | T10, T20 | [T12.md](tasks/T12.md) | DONE / CLOSED — PO duyệt, merge `0a717e9`; TODO-01: PO chưa quyết định — giữ mở, xử lý trước T13 |
-| T13 | Chốt v1.0 và sao lưu | Tất cả | 4 | T12, T14, T15, T20, T21, T22, T23, T24 | [T13.md](tasks/T13.md) | READY_FOR_HANDOFF — sau khi PO merge T24; prompt ở mục 6 report T24, PO điền quyết định T12 TODO-01/T14 TODO-02 trước khi gửi |
+| T13 | Chốt v1.0 và sao lưu | Tất cả | 4 | T12, T14, T15, T20, T21, T22, T23, T24, T25, T26 | [T13.md](tasks/T13.md) | CHỜ T26 (PO thêm 24/10/2026) — mở sau khi T25 và T26 merge; prompt ở mục 10 report Claude T25, PO điền quyết định T12 TODO-01/T14 TODO-02/T25 TODO-01..02 trước khi gửi |
 | T14 | Hủy vé giữ chỗ, đổi mật khẩu | Web | 4 | T20 | [T14.md](tasks/T14.md) | PO_REVIEW — Claude Round 2 PASS_WITH_TODO; TODO-01 CLOSED; AC 5/5; RF 0 |
 | T15 | Thử nghiệm có tách từ | ML | 4 | T09 | [T15.md](tasks/T15.md) | DONE / CLOSED — PO approved trong chat 16/10, merge vào `master`; Claude PASS_WITH_TODO; TODO-01 PO_ATTESTED (bằng chứng tái lập trên Drive), TODO-02..04 ACCEPT_LATER → T13 |
 | T16 | Giữ chỗ có hạn và thanh toán QR (đổi schema) | Web | phát triển thêm | T11 | [T16.md](tasks/T16.md) | DONE / CLOSED — PO APPROVED, merge theo PO; Claude PASS_WITH_TODO, AC 12/12, RF 0, TODO-01..07 preserved |
@@ -77,6 +83,8 @@ Ngày bắt đầu sản phẩm: 05/10/2026 · Hạn: 01/11/2026
 | T22 | Chấm sao, bình luận ẩn danh, hoàn thiện người xem (đổi schema) | Web | 4 | T14 | [T22.md](tasks/T22.md) | DONE / CLOSED — PO đã merge `3afbf42`; Claude R2 PASS; AC 12/12 |
 | T23 | Tổng quan quản trị và soát vé (đổi schema) | Web | 4 | T22 | [T23.md](tasks/T23.md) | DONE / CLOSED — PO đã duyệt, merge `33c45e3` VERIFIED; Claude R1 FAIL → Claude fix R2 theo PO → Codex review độc lập PASS; OBS-01..03 ACCEPT_LATER |
 | T24 | Sửa lỗi rà soát trước v1.0 | Web | 4 | T23 | [T24.md](tasks/T24.md) | PO_REVIEW — Claude PASS trên `32e6b4d`; AC 8/8; RF 0; pytest 148/148 |
+| T25 | Banner trailer và mục Nội dung phim (đổi schema) | Web | 4 | T24 | [T25.md](tasks/T25.md) | PO_REVIEW — Claude PASS_WITH_TODO trên `03e0d44`; RF 0; TODO-01/02 Low; pytest 194/194 |
+| T26 | Khung đánh giá sao bật lên khi bấm vào điểm | Web | 4 | T25 | [T26.md](tasks/T26.md) | IN_PROGRESS / BLOCKED_PENDING_T25_MASTER — master local b8f6ef6 chưa chứa T25; chờ PO cập nhật master; không đổi schema |
 
 Chuỗi chính: `T00 → T01 → T02` và `T03 → T08 → T09 → T10`. T03 bắt đầu ngay ngày đầu (song song).
 
@@ -85,6 +93,7 @@ Chuỗi chính: `T00 → T01 → T02` và `T03 → T08 → T09 → T10`. T03 b�
 Nếu trễ: cắt T14 → T15 → rút gọn T05. Không cắt T01–T03, T07–T10.
 
 ## 8. Open Blockers
+- **T26 BASELINE-01 — OPEN (24/10/2026):** PO nói T25 đã merge nhưng Git local kiểm chứng `master=b8f6ef6`, T25 implementation/review chỉ có trên `task/T25-trailer-phim` (`c9f7eef`), không có remote. Cần PO merge/cập nhật master trước khi tạo `task/T26-khung-danh-gia`. Codex không tự merge theo chỉ dẫn của PO.
 - **T19 GATE-BLOCKER-01: RESOLVED 14/10/2026.** PO chạy môi trường repository Windows với SQLite tạm và UPLOAD_DIR tạm; compileall=0, frontend build=0, full pytest 65/65, health OK; browser real/mock và hồi quy PO xác nhận đạt. Không tác động DB thật.
 - **T19 GATE-BLOCKER-02: RESOLVED 14/10/2026.** PO phê duyệt ngoại lệ sửa duy nhất `backend/tests/test_admin_features.py` để CREATE có poster hợp lệ nhưng PUT vẫn giữ dữ liệu không poster; focused 16/16, full pytest 65/65 PASS. Không thay `conftest.py`.
 - T18: **DONE / CLOSED**, 0 blocker; merge `fc10d34` VERIFIED. TODO-01/02 WONT_FIX; TODO-03 ACCEPT_LATER → T13; OBS-01 ACCEPT_LATER → Future Backlog.
@@ -215,13 +224,19 @@ Nếu trễ: cắt T14 → T15 → rút gọn T05. Không cắt T01–T03, T07�
 | Claude review T23 R1 | OBS-03: code trang admin dồn dòng, định dạng giờ lỗi 409 mock/real khác nhau | **ACCEPT_LATER — theo PO closure T23; không mở task mới** |
 
 ## 11. Current Next Step
-1. **Tín (PO):** merge `task/T24-sua-loi-ra-soat` vào `master` (không đổi schema, không phải xóa DB).
-2. **Tín:** quyết T12 TODO-01 và T14 TODO-02, điền vào prompt T13 (mục 6 của `reports/2026-10-22/claude_review_T24_PASS_2026-10-22.md`), tạo `task/T13-v1` từ `master` mới và gửi Codex.
-3. **Tín:** cấu hình A-02 (BANK_* trong `backend\.env`) và A-03 (khóa/hạn mức Gemini) trước khi quay demo.
+1. **Tín (PO):** review rồi merge `task/T25-trailer-phim` vào `master`. **Đổi schema:** dừng backend, sao lưu `firefly.db` + sidecar + `backend\uploads\`, kiểm SHA-256/integrity, xóa `firefly.db`, khởi động lại (HUONG_DAN mục T25). Không chạy code mới trên DB cũ.
+2. **Tín:** thêm trailer (MP4 H.264 hoặc link YouTube) cho các phim demo.
+3. **Tín:** tạo `task/T26-khung-danh-gia` từ `master` đã merge T25, gửi Codex prompt T26 (Claude đưa trong chat 24/10/2026) kèm `docs/tasks/T26.md`.
+4. **Sau khi T26 merge — Tín:** quyết T12 TODO-01, T14 TODO-02, T25 TODO-01/02; điền vào prompt T13 (mục 10 của `reports/2026-10-24/claude_review_T25_PASS_WITH_TODO_2026-10-24.md`), tạo `task/T13-v1` từ `master` mới và gửi Codex.
+5. **Tín:** cấu hình A-02 (BANK_* trong `backend\.env`) và A-03 (khóa/hạn mức Gemini) trước khi quay demo.
 
 ## 12. Active Timeline
 | Ngày | Ai | Sự kiện |
 |---|---|---|
+| 24/10/2026 | Claude | PO yêu cầu thay hàng 5 nút sao ở trang chi tiết bằng điểm bấm được mở khung đánh giá → Claude soạn `docs/tasks/T26.md` (chỉ frontend, không đổi schema), T26 `READY_FOR_HANDOFF` sau khi T25 merge; T13 chờ T26. |
+| 24/10/2026 | Claude | T25 review **PASS_WITH_TODO** trên `03e0d44`: scope 20/20; compileall 0, pytest 194/194, build đạt; probe 401/403/422/413 (khai báo và chunked, không sót file tạm), Range 200/206/416 đúng byte, tên lạ 404, validator YouTube 5 dạng hợp lệ/8 dạng xấu; browser real: WebM thật phát + tua, file thắng link, Gỡ trailer, YouTube nocookie lazy, file hỏng báo lỗi, synopsis/fallback, 375/1280 không tràn; mock cùng 20 khóa JSON. TODO-01/02 Low form admin. T25 `CLAUDE_REVIEW → PO_REVIEW`; T13 → `READY_FOR_HANDOFF` sau merge T25. Commit kèm `docs/tasks/T25.md` (bản PO duyệt, trước đó untracked). |
+| 24/10/2026 | Codex | T25 READY_FOR_HANDOFF → IN_PROGRESS → CLAUDE_REVIEW trên nhánh từ master `b8f6ef6`; upload raw MP4/WebM ≤100 MiB, Range 206/416, synopsis, banner lazy và admin real/mock. Pytest 194/194; compileall/build real+mock/health PhoBERT B/browser 375–1280/hồi quy đạt trên DB và uploads tạm. Không sửa DB thật, không merge/mở T13. |
+| 24/10/2026 | Claude | Quét lần cuối `master` `b8f6ef6` theo PO: compileall 0, pytest 148/148, build đạt; hồi quy trên DB tạm (tìm kiếm, đăng ký → quay lại suất, đặt 2 ghế, bình luận tiêu cực 0,9992, 403/401 admin, 8 trang admin, mock) đạt; hero tự chuyển chưa xác minh (khung trình duyệt ẩn). PO thêm ý tưởng trailer → Claude soạn `docs/tasks/T25.md`, T25 `READY_FOR_HANDOFF`, T13 chờ T25. |
 | 22/10/2026 | Claude | T24 review **PASS** trên `32e6b4d`: scope 15/15 trong allowlist; compileall 0, pytest 148/148, build đạt; trình duyệt real: suất 09:30 bị khóa chọn ghế (thông báo "đã bắt đầu" + link lịch chiếu), lịch chiếu bắt đầu từ suất 22:00 lúc 21:08, Vé của tôi chia Sắp xem/Đã qua + nhãn Đã chiếu, 404 không còn Thử lại, tiêu đề tab khi bị chặn, Tổng quan dùng tab + thẻ T21, bảng xếp doanh thu; mock đạt; 375px không tràn. T24 `CLAUDE_REVIEW → PO_REVIEW`; T13 → `READY_FOR_HANDOFF`. |
 | 22/10/2026 | Codex | T24 READY_FOR_HANDOFF → IN_PROGRESS → CLAUDE_REVIEW. A-01/A-04..07 và mock hoàn tất trong allowlist; thêm 6 test cutoff/404, full pytest 148/148; compileall, build real/mock, health PhoBERT B thật SQLite tạm, browser real/mock 375/1280 đạt DEV. Không đổi schema, không sửa DB thật/.env, không merge hoặc mở T13. Report: `reports/2026-10-22/codex_implementation_T24_2026-10-22.md`. |
 | 22/10/2026 | Claude | Rà soát toàn web trên `c8f3cf0` (`reports/2026-10-22/claude_audit_toan_web_2026-10-22.md`): A-01 Medium (suất đã qua/≤30 phút vẫn chọn được ghế), A-02/A-03 cấu hình QR và Gemini (PO tự xử lý), A-04..A-07 Low. PO yêu cầu Codex sửa, Claude review → soạn `docs/tasks/T24.md`, T24 `READY_FOR_HANDOFF`, T13 lùi sau T24. |

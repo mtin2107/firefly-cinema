@@ -1,4 +1,5 @@
 import { usePageTitle } from "../utils/pageTitle";
+import TrailerBanner from "../components/TrailerBanner";
 import StarRating from "../components/StarRating";
 import { useAuth } from "../context/AuthContext";
 import { ratingText } from "../utils/ratings";
@@ -115,6 +116,7 @@ export default function MovieDetail() {
   return (
     <>{introLayer}
     <div className="container" ref={pageRef}>
+      <TrailerBanner key={`${movie.id}:${movie.trailer_url}`} movie={movie} />
       <section className="detail" style={{ "--p-bg": movie.poster_bg }}>
         <div className="detail__poster" ref={posterRef}><Poster movie={movie} size="lg" /></div>
         <div className="detail__info">
@@ -128,7 +130,6 @@ export default function MovieDetail() {
             <StarRating value={stars} onChange={changeRating} disabled={ratingBusy || commentBusy} />
             <p role="status">{ratingNotice}</p>
           </>}
-          <p className="detail__desc">{movie.description}</p>
           <dl className="facts">
             <div><dt>Thể loại</dt><dd><TagLinks value={movie.genre} filterKey="the-loai" /></dd></div>
             <div><dt>Quốc gia</dt><dd><Link to={exploreLink("quoc-gia", slugify(movie.country))}>{movie.country}</Link></dd></div>
@@ -138,6 +139,11 @@ export default function MovieDetail() {
             <div><dt>Khởi chiếu</dt><dd>{new Date(movie.release_date).toLocaleDateString("vi-VN")}</dd></div>
           </dl>
         </div>
+      </section>
+
+      <section className="section movie-synopsis" aria-labelledby="synopsis-title">
+        <h2 id="synopsis-title" className="section-title">Nội dung phim</h2>
+        {(movie.synopsis || movie.description).split(/\n\s*\n/).filter(Boolean).map((paragraph, index) => <p key={index}>{paragraph}</p>)}
       </section>
 
       <section className="section" id="lich-chieu" aria-labelledby="showtime-title">

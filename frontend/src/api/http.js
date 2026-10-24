@@ -21,8 +21,8 @@ export class ApiError extends Error {
   }
 }
 
-export async function request(path, { method = "GET", body } = {}) {
-  const headers = { "Content-Type": "application/json" };
+export async function request(path, { method = "GET", body, raw = false } = {}) {
+  const headers = { "Content-Type": raw ? body.type : "application/json" };
   const token = tokenStore.get();
   if (token) headers.Authorization = `Bearer ${token}`;
 
@@ -31,7 +31,7 @@ export async function request(path, { method = "GET", body } = {}) {
     res = await fetch(`${API_URL}${path}`, {
       method,
       headers,
-      body: body ? JSON.stringify(body) : undefined,
+      body: raw ? body : body ? JSON.stringify(body) : undefined,
     });
   } catch {
     throw new ApiError(`Không kết nối được máy chủ. Kiểm tra backend đã chạy ở ${API_URL} chưa.`, 0);

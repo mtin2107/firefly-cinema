@@ -492,3 +492,29 @@ Không cần cài thư viện mới. Đăng nhập admin → Tổng quan quản 
 (`/quan-tri/tong-quan`) hoặc Soát vé tại quầy (`/quan-tri/soat-ve`).
 Nhập mã FF00042 (không phân biệt hoa thường), tra cứu và xác nhận vào rạp.
 Vé paid chỉ soát được một lần; lịch sử ghi giờ và quản trị viên thực hiện.
+
+
+### T25 — Cập nhật schema trailer và Nội dung phim
+
+T25 thêm `movies.trailer_url` và `movies.synopsis`. `create_all` không thêm cột vào DB cũ. Codex chỉ chạy SQLite và UPLOAD_DIR tạm; PO tự thực hiện reset sau khi duyệt theo quy trình backup/checksum/integrity ở mục 2.1:
+
+1. Dừng backend và mọi chương trình đang dùng DB. Xác nhận đúng `backend\firefly.db`.
+2. Sao lưu cả DB, sidecar `firefly.db.showtime-seed.json` (nếu có), và toàn bộ `backend\uploads\` vào cùng một snapshot. Kiểm SHA-256, `PRAGMA integrity_check`, thử bản sao trước khi xóa. Đặc biệt giữ `uploads\trailers\` trong bản sao lưu T13.
+3. Chỉ sau khi xác minh bản sao, PO xóa `backend\firefly.db` để seed lại. Tài khoản, vé, sao và bình luận cũ không được giữ trong DB mới; không tự phục hồi DB cũ vào schema mới. Khi chạy backend, seed nhận biết movies rỗng và reset sidecar theo quy trình hiện có.
+4. Khởi động backend, kiểm `/api/health`, 21 phim có synopsis và trailer_url null. Upload thử trailer, kiểm phát/tua và Nội dung phim. Thư mục upload cũ được giữ nguyên; gỡ/thay trailer không xóa file vật lý.
+
+Admin có thể chọn MP4/WebM tối đa 100 MiB hoặc dán YouTube (watch, youtu.be, shorts, embed); chọn file sẽ được ưu tiên. Nên dùng MP4 H.264 hoặc WebM VP8/VP9, trailer dưới khoảng 50 MB. MOV/HEVC cần chuyển định dạng trước; hệ thống chỉ kiểm chữ ký container, không chuyển codec. Mock phát blob trong phiên; tải lại trang có thể mất video. YouTube cần mạng và quyền nhúng; dùng “Mở trên YouTube” nếu chủ kênh chặn nhúng.
+
+Kiểm thử an toàn bằng process riêng, không sửa .env:
+
+```powershell
+$t25Dir = Join-Path $env:TEMP ('firefly-t25-' + [guid]::NewGuid())
+New-Item -ItemType Directory -Path $t25Dir | Out-Null
+$env:DATABASE_URL = 'sqlite:///' + ($t25Dir -replace '\\','/') + '/t25.db'
+$env:UPLOAD_DIR = Join-Path $t25Dir 'uploads'
+Set-Location C:\Projects\firefly-cinema\backend
+.\venv\Scripts\python.exe -m uvicorn app.main:app --port 8025
+# Sau upload, thay <uuid> bằng tên trả về, chạy ở PowerShell khác:
+curl.exe -s -o NUL -D - -H "Range: bytes=0-1023" http://localhost:8025/uploads/trailers/<uuid>.mp4
+# HTTP 206; Content-Range: bytes 0-1023/<size>; Accept-Ranges: bytes
+```

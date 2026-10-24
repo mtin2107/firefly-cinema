@@ -1,6 +1,6 @@
 from datetime import date, datetime, timezone
 import re
-from urllib.parse import urlparse
+from urllib.parse import urlparse, parse_qs
 
 from typing import Literal
 
@@ -72,6 +72,8 @@ class MovieOut(ORM):
     description: str
     poster_bg: str
     poster_fg: str
+    trailer_url: str | None = None
+    synopsis: str | None = None
     poster_url: str | None = None
     country: str
     formats: str
@@ -93,7 +95,43 @@ class MovieIn(BaseModel):
     description: str = ""
     poster_bg: str
     poster_fg: str
+    trailer_url: str | None = None
+    synopsis: str | None = None
     poster_url: str | None = None
+
+    @field_validator("synopsis")
+    @classmethod
+    def validate_synopsis(cls, value: str | None) -> str | None:
+        value = value.strip() if value is not None else None
+        if value and len(value) > 5000:
+            raise PydanticCustomError("movie_synopsis", "Nội dung phim tối đa 5000 ký tự.")
+        return value or None
+
+    @field_validator("trailer_url")
+    @classmethod
+    def validate_trailer_url(cls, value: str | None) -> str | None:
+        value = value.strip() if value is not None else None
+        if not value:
+            return None
+        if re.fullmatch(r"/uploads/trailers/[0-9a-f]{32}\.(mp4|webm)", value):
+            return value
+        try:
+            parsed = urlparse(value)
+            video_id = None
+            if parsed.scheme in {"http", "https"} and not parsed.username and not parsed.password:
+                if parsed.netloc.lower() == "youtu.be":
+                    video_id = parsed.path.removeprefix("/")
+                elif parsed.netloc.lower() in {"youtube.com", "www.youtube.com", "m.youtube.com"}:
+                    if parsed.path == "/watch":
+                        video_id = parse_qs(parsed.query).get("v", [None])[0]
+                    else:
+                        match = re.fullmatch(r"/(shorts|embed)/([A-Za-z0-9_-]{11})", parsed.path)
+                        video_id = match[2] if match else None
+            if video_id and re.fullmatch(r"[A-Za-z0-9_-]{11}", video_id):
+                return f"https://www.youtube.com/watch?v={video_id}"
+        except ValueError:
+            pass
+        raise PydanticCustomError("movie_trailer_url", "Link trailer phải là link YouTube hoặc video đã tải lên.")
 
     @field_validator("title")
     @classmethod

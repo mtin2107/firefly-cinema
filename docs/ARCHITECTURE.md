@@ -279,3 +279,13 @@ Ngoài máy: Google Drive `MyDrive/thesis/data/…`, `MyDrive/thesis_results/…
 (hằng số từ `booking_rules.py`). `GET /api/showtimes/{id}` bổ sung `bookable: bool`
 theo cùng điều kiện, không đổi schema DB. Frontend khóa ghế và nút Tiếp tục khi
 `bookable=false`; mock dùng cùng cutoff và thông báo phân biệt suất đã bắt đầu.
+
+
+## T25 — Trailer và nội dung phim (24/10/2026)
+
+- Movies thêm `trailer_url VARCHAR(500) NULL`, `synopsis TEXT NULL`; MovieIn/MovieOut có cả hai trường. Nội dung strip, tối đa 5000 ký tự; rỗng thành null. `description` tiếp tục là mô tả ngắn của hero.
+- `POST /api/admin/trailers` cần require_admin, body thô MP4/WebM; không multipart/base64. Giới hạn 100 MiB, kiểm Content-Length trước khi đọc và đếm request.stream() khi ghi file tạm; mọi nhánh lỗi/ngắt kết nối đều dọn file tạm. Chữ ký quyết định đuôi UUID, không tin MIME để xác định định dạng. Lưu dưới UPLOAD_DIR/trailers, trả 201 `{trailer_url}`.
+- `GET /uploads/trailers/{name}` đăng ký trước StaticFiles `/uploads`; bắt cả tên có slash rồi chỉ chấp nhận `[0-9a-f]{32}\.(mp4|webm)`. Stream khối 64 KiB; không Range trả 200, single byte range đóng/mở/suffix trả 206, range không hợp lệ hoặc ngoài file trả 416 với `Content-Range: bytes */size`. Có Accept-Ranges, Content-Length và MIME video đúng.
+- Trailer chỉ nhận đường dẫn upload chuẩn hoặc YouTube http/https trên youtube.com/www/m/youtu.be; watch/shorts/embed được chuẩn hóa về `https://www.youtube.com/watch?v=ID`. Không nhận nguồn khác hay credentials/port tùy ý.
+- Frontend gọi `api.admin.trailers.upload(File)`; real gửi raw body cùng token, mock kiểm chữ ký rồi trả blob URL (chỉ sống trong phiên). TrailerBanner chưa tạo video/iframe trước khi bấm; YouTube qua youtube-nocookie.com, có link mở ngoài. Nội dung nhiều đoạn đứng trước Lịch chiếu. File video ưu tiên hơn link nếu chọn cả hai; gỡ chỉ bỏ trường, không xóa file mồ côi.
+- Hai movies.json giống byte, 21 synopsis hai đoạn, trailer_url null; schema thật do PO reset theo HUONG_DAN, không tự migrate.

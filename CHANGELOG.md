@@ -13,3 +13,11 @@
 - Trả 401 cho JWT có `sub` thiếu hoặc sai kiểu thay vì lỗi 500; nguyên nhân là chuyển `sub` sang số ngoài khối xử lý token lỗi; tái hiện và khóa bằng `test_register_login_me_and_invalid_tokens`.
 - Từ chối bình luận chỉ gồm khoảng trắng; nguyên nhân là kiểm tra độ dài chạy trước khi loại khoảng trắng; tái hiện và khóa bằng `test_blank_comment_returns_vietnamese_422`.
 - Cho phép admin sửa hoặc xóa suất seed trong mock khi chưa có vé thật; nguyên nhân là ghế trang trí từ `seedBooked()` bị tính nhầm thành vé; tái hiện và xác minh bằng probe mock CRUD suất chiếu.
+
+
+## T25 — 24/10/2026
+
+- Thêm banner trailer chỉ nạp sau khi bấm, phát file video có tua hoặc YouTube riêng tư nâng cao; mục Nội dung phim nhiều đoạn trước Lịch chiếu.
+- Admin upload MP4/WebM body thô tối đa 100 MiB, kiểm chữ ký và ghi dần; chọn file ưu tiên hơn link YouTube, có gỡ trailer. API real/mock cùng contract.
+- Thêm synopsis và trailer_url nullable; seed 21 synopsis, không bịa link trailer. Schema cũ cần PO backup và reset theo HUONG_DAN.
+- Route Range riêng cho Starlette 0.38.6; test upload, quyền, cleanup, Range và validator.

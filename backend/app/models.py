@@ -35,6 +35,8 @@ class Movie(Base):
     poster_bg: Mapped[str] = mapped_column(String(9))
     poster_fg: Mapped[str] = mapped_column(String(9))
     poster_url: Mapped[str | None] = mapped_column(String(500), nullable=True)
+    trailer_url: Mapped[str | None] = mapped_column(String(500), nullable=True)
+    synopsis: Mapped[str | None] = mapped_column(Text, nullable=True)
     country: Mapped[str] = mapped_column(String(50), default="")
     formats: Mapped[str] = mapped_column(String(50), default="")  # "Phụ đề", "Lồng tiếng" hoặc cả hai
 

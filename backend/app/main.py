@@ -10,7 +10,7 @@ from .classifier import classifier
 from .config import FRONTEND_ORIGINS, UPLOAD_DIR
 from .database import Base, engine, SessionLocal
 from .routers import auth, movies, bookings, comments, admin_bookings, admin_movies, admin_predict, admin_sentiment, admin_showtimes, admin_posters, chat, ratings
-from .routers import admin_dashboard, admin_checkin
+from .routers import admin_dashboard, admin_checkin, admin_trailers
 from .seed import seed
 
 
@@ -74,6 +74,7 @@ app.include_router(comments.router)
 app.include_router(ratings.router)
 app.include_router(admin_movies.router)
 app.include_router(admin_posters.router)
+app.include_router(admin_trailers.router)
 app.include_router(admin_bookings.router)
 app.include_router(admin_showtimes.router)
 app.include_router(admin_predict.router)

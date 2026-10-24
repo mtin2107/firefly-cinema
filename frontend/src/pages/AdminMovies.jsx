@@ -14,7 +14,7 @@ const STATUS_OPTIONS = [
 const EMPTY_FORM = {
   title: "", genre: [], duration_min: "", age_rating: "P", release_date: "",
   status: "now_showing", country: "Việt Nam", formats: ["Phụ đề"], director: "",
-  cast: "", description: "", poster_bg: "#1c1c1c", poster_fg: "#ffc72c", poster_url: "",
+  cast: "", description: "", synopsis: "", trailer_url: "", poster_bg: "#1c1c1c", poster_fg: "#ffc72c", poster_url: "",
 };
 
 const split = (value) => value.split(",").map((item) => item.trim()).filter(Boolean);
@@ -45,6 +45,22 @@ export default function AdminMovies() {
   const [notice, setNotice] = useState("");
   const [saving, setSaving] = useState(false);
   const [selectedPoster, setSelectedPoster] = useState(null);
+  const [selectedVideo, setSelectedVideo] = useState(null);
+  const [uploadingVideo, setUploadingVideo] = useState(false);
+  const videoInputRef = useRef(null);
+  const clearVideo = () => {
+    setSelectedVideo(null);
+    if (videoInputRef.current) videoInputRef.current.value = "";
+  };
+  const selectVideo = (event) => {
+    const file = event.target.files?.[0];
+    clearVideo();
+    let error = "";
+    if (file && !["video/mp4", "video/webm"].includes(file.type)) error = "Chỉ nhận video MP4 hoặc WebM.";
+    else if (file && file.size > 100 * 1024 * 1024) error = "Video trailer tối đa 100 MB.";
+    setFieldErrors((current) => ({ ...current, trailer_file: error }));
+    if (!error && file) setSelectedVideo(file);
+  };
   const fileInputRef = useRef(null);
   const fileRequestRef = useRef(0);
 
@@ -109,6 +125,7 @@ export default function AdminMovies() {
 
   const resetForm = () => {
     setForm(EMPTY_FORM);
+    clearVideo();
     clearPosterSelection();
     setEditingId(null);
     setFieldErrors({});
@@ -116,6 +133,7 @@ export default function AdminMovies() {
   };
 
   const startEdit = (movie) => {
+    clearVideo();
     clearPosterSelection();
     setEditingId(movie.id);
     setForm({
@@ -130,6 +148,8 @@ export default function AdminMovies() {
       director: movie.director,
       cast: movie.cast,
       description: movie.description,
+      synopsis: movie.synopsis ?? "",
+      trailer_url: movie.trailer_url ?? "",
       poster_bg: movie.poster_bg,
       poster_fg: movie.poster_fg,
       poster_url: movie.poster_url ?? "",
@@ -143,17 +163,26 @@ export default function AdminMovies() {
   const submit = async (event) => {
     event.preventDefault();
     const errors = validate(form, editingId, selectedPoster);
+    if (fieldErrors.trailer_file) errors.trailer_file = fieldErrors.trailer_file;
+    if ([...form.synopsis.trim()].length > 5000) errors.synopsis = "Nội dung phim tối đa 5000 ký tự.";
     setFieldErrors(errors);
     if (Object.keys(errors).length) return;
     setSaving(true);
     setActionError("");
     setNotice("");
-    const payload = { ...form, duration_min: Number(form.duration_min), poster_url: form.poster_url || null };
+    const payload = { ...form, duration_min: Number(form.duration_min), poster_url: form.poster_url || null, trailer_url: form.trailer_url || null, synopsis: form.synopsis.trim() || null };
     try {
       if (selectedPoster) {
         const data = selectedPoster.dataUrl.split(",")[1];
         const uploaded = await api.admin.posters.upload({ filename: selectedPoster.filename, data });
         payload.poster_url = uploaded.poster_url; // ảnh chọn từ máy luôn được ưu tiên
+      }
+      if (selectedVideo) {
+        setUploadingVideo(true);
+        try {
+          const uploaded = await api.admin.trailers.upload(selectedVideo);
+          payload.trailer_url = uploaded.trailer_url;
+        } finally { setUploadingVideo(false); }
       }
       if (editingId) await api.admin.movies.update(editingId, payload);
       else await api.admin.movies.create(payload);
@@ -196,6 +225,7 @@ export default function AdminMovies() {
           {actionError && <p className="notice notice--error" role="alert">{actionError}</p>}
           {notice && <p className="notice notice--ok" role="status">{notice}</p>}
           <form className="movie-form" onSubmit={submit} noValidate>
+            <fieldset className="movie-form__body" disabled={saving}>
             <label className="field">
               <span>Tên phim *</span>
               <input value={form.title} maxLength={200} onChange={(event) => update("title", event.target.value)} aria-invalid={Boolean(fieldErrors.title)} />
@@ -229,6 +259,13 @@ export default function AdminMovies() {
               <label className="field"><span>Đạo diễn</span><input value={form.director} maxLength={100} onChange={(event) => update("director", event.target.value)} /></label>
               <label className="field"><span>Diễn viên</span><input value={form.cast} maxLength={255} onChange={(event) => update("cast", event.target.value)} /></label>
             </div>
+            <label className="field"><span id="movie-synopsis-label">Nội dung phim (hiện ở trang chi tiết)</span><textarea aria-labelledby="movie-synopsis-label" rows="7" value={form.synopsis} onChange={(event) => update("synopsis", event.target.value)} aria-invalid={Boolean(fieldErrors.synopsis)} />{fieldErrors.synopsis && <span className="field__error">{fieldErrors.synopsis}</span>}</label>
+            <fieldset className="choice-field">
+              <legend>Trailer</legend>
+              <label className="field"><span id="movie-trailer-label">Chọn video từ máy</span><input aria-labelledby="movie-trailer-label" ref={videoInputRef} type="file" accept="video/mp4,video/webm" onChange={selectVideo} aria-invalid={Boolean(fieldErrors.trailer_file)} /><small>MP4 hoặc WebM, tối đa 100 MB</small>{selectedVideo && <span>Đã chọn: {selectedVideo.name}</span>}{fieldErrors.trailer_file && <span className="field__error" role="alert">{fieldErrors.trailer_file}</span>}</label>
+              <label className="field"><span>Hoặc dán link YouTube</span><input value={form.trailer_url} onChange={(event) => update("trailer_url", event.target.value)} placeholder="https://www.youtube.com/watch?v=..." /></label>
+              {(form.trailer_url || selectedVideo) && <button type="button" className="btn btn--ghost btn--sm" onClick={() => { clearVideo(); update("trailer_url", ""); setFieldErrors((current) => ({ ...current, trailer_file: "" })); }}>Gỡ trailer</button>}
+            </fieldset>
             <label className="field"><span>Mô tả</span><textarea rows="4" value={form.description} onChange={(event) => update("description", event.target.value)} /></label>
             <label className="field"><span>{editingId ? "Đường dẫn poster (không bắt buộc)" : "Đường dẫn poster (hoặc chọn ảnh từ máy) *"}</span><input type="url" placeholder="https://..." value={form.poster_url} onChange={(event) => update("poster_url", event.target.value)} aria-invalid={Boolean(fieldErrors.poster_url)} />{fieldErrors.poster_url && <span className="field__error">{fieldErrors.poster_url}</span>}</label>
             <div className="field movie-form__poster-upload">
@@ -243,8 +280,9 @@ export default function AdminMovies() {
             </div>
             <div className="actions">
               {editingId && <button type="button" className="btn btn--ghost" onClick={resetForm}>Hủy sửa</button>}
-              <button type="submit" className="btn btn--primary" disabled={saving}>{saving ? "Đang lưu..." : editingId ? "Lưu thay đổi" : "Thêm phim"}</button>
+              <button type="submit" className="btn btn--primary" disabled={saving}>{uploadingVideo ? "Đang tải video lên…" : saving ? "Đang lưu..." : editingId ? "Lưu thay đổi" : "Thêm phim"}</button>
             </div>
+            </fieldset>
           </form>
         </div>
         <aside className="admin-movie-editor__preview" aria-label="Xem trước poster">

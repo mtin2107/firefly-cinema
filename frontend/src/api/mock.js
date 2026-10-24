@@ -3,6 +3,7 @@
 // Mọi hàm trả về đúng cấu trúc JSON mà backend FastAPI trả về,
 // nên khi chuyển sang backend thật, giao diện không phải sửa gì.
 // ======================================================================
+import { youtubeId } from "../utils/youtube";
 import MOVIES from "./movies.json";
 import { ApiError } from "./http";
 import { ROWS, COLS, totalPrice, MAX_SEATS_PER_BOOKING } from "../utils/seats";
@@ -413,8 +414,16 @@ function validateMovie(payload) {
     poster_bg: payload.poster_bg?.trim().toLowerCase() ?? "",
     poster_fg: payload.poster_fg?.trim().toLowerCase() ?? "",
     poster_url: payload.poster_url?.trim() || null,
+    trailer_url: payload.trailer_url?.trim() || null,
+    synopsis: payload.synopsis?.trim() || null,
   };
   const fail = (message) => { throw new ApiError(message, 422); };
+  if (value.synopsis && [...value.synopsis].length > 5000) fail("Nội dung phim tối đa 5000 ký tự.");
+  if (value.trailer_url) {
+    const id = youtubeId(value.trailer_url);
+    if (id) value.trailer_url = `https://www.youtube.com/watch?v=${id}`;
+    else if (!/^\/uploads\/trailers\/[0-9a-f]{32}\.(mp4|webm)$/.test(value.trailer_url) && !value.trailer_url.startsWith("blob:")) fail("Link trailer phải là link YouTube hoặc video đã tải lên.");
+  }
   if (!value.title) fail("Tên phim không được để trống.");
   if (value.title.length > 200) fail("Tên phim không được dài quá 200 ký tự.");
   if (!value.genre.length) fail("Hãy chọn ít nhất một thể loại.");
@@ -782,6 +791,19 @@ export const mockApi = {
         movies,
         daily,
       });
+    },
+    trailers: {
+      async upload(file) {
+        await wait();
+        requireAdmin();
+        if (file.size > 100 * 1024 * 1024) throw new ApiError("Video trailer tối đa 100 MB.", 413);
+        const header = new Uint8Array(await file.slice(0, 8).arrayBuffer());
+        const mp4 = [102, 116, 121, 112].every((v, i) => header[i + 4] === v);
+        const webm = [26, 69, 223, 163].every((v, i) => header[i] === v);
+        if (!["video/mp4", "video/webm"].includes(file.type) || !(mp4 || webm)) throw new ApiError("Chỉ nhận video MP4 hoặc WebM.", 422);
+        // Video mock chỉ dùng trong phiên; blob URL mất khi tải lại trang.
+        return { trailer_url: URL.createObjectURL(file) };
+      },
     },
     posters: {
       async upload({ filename, data }) {

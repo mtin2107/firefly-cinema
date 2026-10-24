@@ -66,6 +66,9 @@ export const realApi = {
       confirm: (code) => request(`/api/admin/checkin/${encodeURIComponent(code.trim())}`, { method: "POST" }),
     },
     sentiment: (days = 30) => request(`/api/admin/sentiment?days=${days}`),
+    trailers: {
+      upload: (file) => request("/api/admin/trailers", { method: "POST", body: file, raw: true }),
+    },
     posters: {
       upload: (payload) => request("/api/admin/posters", { method: "POST", body: payload }),
     },

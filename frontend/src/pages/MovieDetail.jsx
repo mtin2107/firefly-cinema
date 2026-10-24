@@ -1,6 +1,6 @@
 import { usePageTitle } from "../utils/pageTitle";
 import TrailerBanner from "../components/TrailerBanner";
-import StarRating from "../components/StarRating";
+import RatingDialog from "../components/RatingDialog";
 import { useAuth } from "../context/AuthContext";
 import { ratingText } from "../utils/ratings";
 import { useEffect, useMemo, useRef, useState } from "react";
@@ -26,6 +26,8 @@ export default function MovieDetail() {
   const [commentBusy, setCommentBusy] = useState(false);
   const [ratingBusy, setRatingBusy] = useState(false);
   const [ratingNotice, setRatingNotice] = useState("");
+  const [ratingOpen, setRatingOpen] = useState(false);
+  const ratingButtonRef = useRef(null);
   const [commentVersion, setCommentVersion] = useState(0);
   useEffect(() => {
     let active = true;
@@ -50,7 +52,8 @@ export default function MovieDetail() {
       setMovie((m) => ({ ...m, rating_avg: result.rating_avg, rating_count: result.rating_count }));
       setCommentVersion((v) => v + 1);
       setRatingNotice(value == null ? "Đã hủy đánh giá." : "Đã lưu đánh giá.");
-    } catch (e) { setRatingNotice(e.message); }
+      return true;
+    } catch (e) { setRatingNotice(e.message); return false; }
     finally { setRatingBusy(false); }
   };
   const location = useLocation();
@@ -124,12 +127,16 @@ export default function MovieDetail() {
           <p className="detail__meta">
             <AgeBadge rating={movie.age_rating} />
             <span>{duration(movie.duration_min)}</span>
-            <span className="score">{ratingText(movie)}</span>
+            {movie.status === "coming_soon" ? <span className="score">{ratingText(movie)}</span> : <>
+              <button type="button" className="score rating-trigger" ref={ratingButtonRef}
+                aria-haspopup="dialog" disabled={ratingBusy || commentBusy}
+                onClick={() => {
+                  if (!user) return navigate("/dang-nhap", { state: { from: location } });
+                  setRatingNotice(""); setRatingOpen(true);
+                }}>{movie.rating_count ? ratingText(movie) : "Chưa có đánh giá — chấm ngay"}</button>
+              {stars != null && <small className="rating-personal">Bạn đã chấm {stars}★</small>}
+            </>}
           </p>
-          {movie.status !== "coming_soon" && <>
-            <StarRating value={stars} onChange={changeRating} disabled={ratingBusy || commentBusy} />
-            <p role="status">{ratingNotice}</p>
-          </>}
           <dl className="facts">
             <div><dt>Thể loại</dt><dd><TagLinks value={movie.genre} filterKey="the-loai" /></dd></div>
             <div><dt>Quốc gia</dt><dd><Link to={exploreLink("quoc-gia", slugify(movie.country))}>{movie.country}</Link></dd></div>
@@ -188,6 +195,9 @@ export default function MovieDetail() {
         onSendingChange={setCommentBusy}
         version={commentVersion} onCreated={refreshRating} />
     </div>
+    {movie.status !== "coming_soon" && <RatingDialog key={`${movie.id}:${user?.id}`} open={ratingOpen}
+      movie={movie} stars={stars} busy={ratingBusy || commentBusy} notice={ratingNotice}
+      onSave={changeRating} onClose={() => { setRatingOpen(false); ratingButtonRef.current?.focus(); }} />}
     </>
   );
 }

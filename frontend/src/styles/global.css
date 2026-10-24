@@ -856,3 +856,13 @@ h1, h2, h3 { margin: 0; line-height: 1.15; }
 
 .admin-movie-editor__form, .movie-form__body > *, .movie-form__body .choice-field { min-width: 0; }
 .movie-form__body input[type="file"] { max-width: 100%; }
+
+/* T26: native rating dialog */
+.rating-trigger { background: transparent; border: 1px solid var(--line); border-radius: 8px; padding: 8px 12px; min-height: 44px; font: inherit; cursor: pointer; }
+.rating-trigger:focus-visible { outline: 3px solid var(--yellow); outline-offset: 3px; }
+.rating-personal { color: var(--text); }
+.rating-dialog { width: min(480px, calc(100vw - 24px)); max-height: calc(100dvh - 32px); box-sizing: border-box; margin: auto; padding: 24px; overflow: auto; border: 1px solid var(--line); border-radius: var(--radius); background: var(--surface); color: var(--text); }
+.rating-dialog::backdrop { background: rgb(0 0 0 / 65%); }
+.rating-dialog h2 { margin: 0 0 16px; font-size: 1.3rem; overflow-wrap: anywhere; }
+.rating-dialog__notice { min-height: 1.5em; }
+.rating-dialog__actions { display: flex; flex-wrap: wrap; gap: 10px; }

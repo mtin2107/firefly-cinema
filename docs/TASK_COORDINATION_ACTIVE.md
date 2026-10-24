@@ -36,14 +36,16 @@ Trước khi áp dụng workflow: giao diện React đầy đủ (`giao-dien-v1`
 
 ## 4. Current Project Status
 ```
-Overall Status: IN_PROGRESS
-Phase: T26 CLAUDE_REVIEW — implementation hoàn tất; không mở T13
-Current Active Task: T26 — CLAUDE_REVIEW
+Overall Status: PO_REVIEW
+Phase: T26 Claude review PASS_WITH_TODO, chờ PO merge (không đổi schema); T13 READY_FOR_HANDOFF sau khi merge T26
+Current Active Task: T26 — PO_REVIEW
 Ngày bắt đầu sản phẩm: 05/10/2026 · Hạn: 01/11/2026
 ```
 
 ## 5. Current Active Task
-**T26 — CLAUDE_REVIEW.** Codex triển khai trên `task/T26-khung-danh-gia` từ master `6d49d16` đã chứa T25. Dialog gốc chọn sao tạm, lưu/hủy, thông báo, focus/keyboard; compileall, health PhoBERT B với SQLite tạm, pytest 194/194, build real/mock, browser 375/1280 và hồi quy đạt. Report: `reports/2026-10-24/codex_implementation_T26_2026-10-24.md`. Không đổi schema; chờ Claude review độc lập, không merge, không mở T13.
+**T26 — PO_REVIEW.** Claude review **PASS_WITH_TODO** trên `cffc533`: scope 6/6, RF 0, TODO-01 Low (sao 1 sáng khi mở dialog), OBS-01. compileall 0, pytest 194/194, build real/mock đạt; browser real/mock, bàn phím, 375/1280 đạt. Report: `reports/2026-10-24/claude_review_T26_PASS_WITH_TODO_2026-10-24.md`. Không đổi schema.
+
+Trước đó — Codex: Codex triển khai trên `task/T26-khung-danh-gia` từ master `6d49d16` đã chứa T25. Dialog gốc chọn sao tạm, lưu/hủy, thông báo, focus/keyboard; compileall, health PhoBERT B với SQLite tạm, pytest 194/194, build real/mock, browser 375/1280 và hồi quy đạt. Report: `reports/2026-10-24/codex_implementation_T26_2026-10-24.md`. Không đổi schema; chờ Claude review độc lập, không merge, không mở T13.
 
 **T25 — PO_REVIEW.** Claude review **PASS_WITH_TODO** trên `03e0d44`: scope 20/20, RF 0, TODO-01/02 Low (form admin), OBS-01/02. compileall 0, pytest 194/194, build đạt; probe upload/Range/validator, browser real/mock 375/1280 đạt. Report: `reports/2026-10-24/claude_review_T25_PASS_WITH_TODO_2026-10-24.md`. Đổi schema: PO sao lưu DB + sidecar + `backend\uploads\` rồi reset `firefly.db` sau merge.
 
@@ -70,7 +72,7 @@ Trước đó — Codex: Codex hoàn tất 24/10/2026: upload raw/Range, synopsi
 | T10 | Gắn model B vào web | Web | 3 | T07, T09 | [T10.md](tasks/T10.md) | DONE / CLOSED — PO APPROVED_WITH_NOTES; Claude Final PASS_WITH_TODO; AC 7/7; Technical DoD MET; RF 0; fast-forward merge + annotated tag `phobert-B` VERIFIED tại `857a8272` |
 | T11 | Kiểm thử tự động và sửa lỗi | Web | 4 | T04–T10 | [T11.md](tasks/T11.md) | DONE / CLOSED — Claude PASS_WITH_TODO; PO APPROVED_WITH_NOTES; AC 6/6; DoD MET; RF 0; merge `06dd44f0` VERIFIED |
 | T12 | Dữ liệu demo và kịch bản bảo vệ | Web | 4 | T10, T20 | [T12.md](tasks/T12.md) | DONE / CLOSED — PO duyệt, merge `0a717e9`; TODO-01: PO chưa quyết định — giữ mở, xử lý trước T13 |
-| T13 | Chốt v1.0 và sao lưu | Tất cả | 4 | T12, T14, T15, T20, T21, T22, T23, T24, T25, T26 | [T13.md](tasks/T13.md) | CHỜ T26 (PO thêm 24/10/2026) — mở sau khi T25 và T26 merge; prompt ở mục 10 report Claude T25, PO điền quyết định T12 TODO-01/T14 TODO-02/T25 TODO-01..02 trước khi gửi |
+| T13 | Chốt v1.0 và sao lưu | Tất cả | 4 | T12, T14, T15, T20, T21, T22, T23, T24, T25, T26 | [T13.md](tasks/T13.md) | READY_FOR_HANDOFF — sau khi PO merge T26; prompt ở mục 8 report Claude T26, PO điền quyết định T12 TODO-01/T14 TODO-02/T25 TODO-01..02/T26 TODO-01 trước khi gửi |
 | T14 | Hủy vé giữ chỗ, đổi mật khẩu | Web | 4 | T20 | [T14.md](tasks/T14.md) | PO_REVIEW — Claude Round 2 PASS_WITH_TODO; TODO-01 CLOSED; AC 5/5; RF 0 |
 | T15 | Thử nghiệm có tách từ | ML | 4 | T09 | [T15.md](tasks/T15.md) | DONE / CLOSED — PO approved trong chat 16/10, merge vào `master`; Claude PASS_WITH_TODO; TODO-01 PO_ATTESTED (bằng chứng tái lập trên Drive), TODO-02..04 ACCEPT_LATER → T13 |
 | T16 | Giữ chỗ có hạn và thanh toán QR (đổi schema) | Web | phát triển thêm | T11 | [T16.md](tasks/T16.md) | DONE / CLOSED — PO APPROVED, merge theo PO; Claude PASS_WITH_TODO, AC 12/12, RF 0, TODO-01..07 preserved |
@@ -83,8 +85,8 @@ Trước đó — Codex: Codex hoàn tất 24/10/2026: upload raw/Range, synopsi
 | T22 | Chấm sao, bình luận ẩn danh, hoàn thiện người xem (đổi schema) | Web | 4 | T14 | [T22.md](tasks/T22.md) | DONE / CLOSED — PO đã merge `3afbf42`; Claude R2 PASS; AC 12/12 |
 | T23 | Tổng quan quản trị và soát vé (đổi schema) | Web | 4 | T22 | [T23.md](tasks/T23.md) | DONE / CLOSED — PO đã duyệt, merge `33c45e3` VERIFIED; Claude R1 FAIL → Claude fix R2 theo PO → Codex review độc lập PASS; OBS-01..03 ACCEPT_LATER |
 | T24 | Sửa lỗi rà soát trước v1.0 | Web | 4 | T23 | [T24.md](tasks/T24.md) | PO_REVIEW — Claude PASS trên `32e6b4d`; AC 8/8; RF 0; pytest 148/148 |
-| T25 | Banner trailer và mục Nội dung phim (đổi schema) | Web | 4 | T24 | [T25.md](tasks/T25.md) | PO_REVIEW — Claude PASS_WITH_TODO trên `03e0d44`; RF 0; TODO-01/02 Low; pytest 194/194 |
-| T26 | Khung đánh giá sao bật lên khi bấm vào điểm | Web | 4 | T25 | [T26.md](tasks/T26.md) | CLAUDE_REVIEW — Codex hoàn tất; pytest 194/194, browser real/mock 375/1280; không đổi schema |
+| T25 | Banner trailer và mục Nội dung phim (đổi schema) | Web | 4 | T24 | [T25.md](tasks/T25.md) | PO_REVIEW — Claude PASS_WITH_TODO trên `03e0d44`; RF 0; TODO-01/02 Low; pytest 194/194; PO đã merge `6d49d16`, DB thật reset 24/10 (bản sao `backup/db-truoc-T25`) |
+| T26 | Khung đánh giá sao bật lên khi bấm vào điểm | Web | 4 | T25 | [T26.md](tasks/T26.md) | PO_REVIEW — Claude PASS_WITH_TODO trên `cffc533`; RF 0; TODO-01 Low; pytest 194/194 |
 
 Chuỗi chính: `T00 → T01 → T02` và `T03 → T08 → T09 → T10`. T03 bắt đầu ngay ngày đầu (song song).
 
@@ -224,14 +226,14 @@ Nếu trễ: cắt T14 → T15 → rút gọn T05. Không cắt T01–T03, T07�
 | Claude review T23 R1 | OBS-03: code trang admin dồn dòng, định dạng giờ lỗi 409 mock/real khác nhau | **ACCEPT_LATER — theo PO closure T23; không mở task mới** |
 
 ## 11. Current Next Step
-1. **Claude:** review độc lập T26 trên `task/T26-khung-danh-gia`, đọc Task Record và report Codex, chạy lại gate; không sửa production code.
-2. **Tín:** thêm trailer cho phim demo; các hành động database thật của T25 vẫn do PO tự thực hiện theo runbook.
-3. **Sau khi T26 được review và PO duyệt:** PO quyết định merge; hiện không merge và không mở T13. Giữ các quyết định T12 TODO-01, T14 TODO-02, T25 TODO-01/02 cho bước PO tiếp theo.
-4. **Tín:** cấu hình BANK_* và khóa/hạn mức Gemini trước demo.
+1. **Tín (PO):** review rồi merge `task/T26-khung-danh-gia` vào `master` (không đổi schema, không phải reset DB).
+2. **Tín:** quyết T12 TODO-01, T14 TODO-02, T25 TODO-01/02, T26 TODO-01; điền vào prompt T13 (mục 8 của `reports/2026-10-24/claude_review_T26_PASS_WITH_TODO_2026-10-24.md`), tạo `task/T13-v1` từ `master` mới và gửi Codex.
+3. **Tín:** thêm trailer cho phim demo; cấu hình BANK_* và khóa/hạn mức Gemini trước demo.
 
 ## 12. Active Timeline
 | Ngày | Ai | Sự kiện |
 |---|---|---|
+| 24/10/2026 | Claude | T26 review **PASS_WITH_TODO** trên `cffc533`: scope 6/6; compileall 0, pytest 194/194, build real/mock đạt; browser real (DB tạm): khách → đăng nhập → quay lại phim, Enter mở dialog modal, chọn 4★ + Lưu (6→7 lượt, "Bạn đã chấm 4★", focus về nút), Esc không gọi API, Hủy (7→6), phim sắp chiếu không mở, sao form bình luận không gọi API; mock lưu 5★; 375/1280 không tràn, sao 44px. TODO-01 Low. T26 `CLAUDE_REVIEW → PO_REVIEW`; T13 → `READY_FOR_HANDOFF` sau merge T26. Trước đó cùng ngày, theo lệnh PO trong chat: Claude merge T25 vào master (`6d49d16`), sao lưu `firefly.db` + sidecar vào `backup/db-truoc-T25` (SHA-256 khớp, integrity ok) rồi reset DB thật; health `phobert_b`, 21 phim có synopsis. |
 | 24/10/2026 | Codex | Xác minh master `6d49d16` chứa T25, tạo nhánh T26; IN_PROGRESS → CLAUDE_REVIEW sau implementation và gate. SQLite/UPLOAD_DIR tạm, không đổi schema, không merge, không mở T13. |
 | 24/10/2026 | Claude | PO yêu cầu thay hàng 5 nút sao ở trang chi tiết bằng điểm bấm được mở khung đánh giá → Claude soạn `docs/tasks/T26.md` (chỉ frontend, không đổi schema), T26 `READY_FOR_HANDOFF` sau khi T25 merge; T13 chờ T26. |
 | 24/10/2026 | Claude | T25 review **PASS_WITH_TODO** trên `03e0d44`: scope 20/20; compileall 0, pytest 194/194, build đạt; probe 401/403/422/413 (khai báo và chunked, không sót file tạm), Range 200/206/416 đúng byte, tên lạ 404, validator YouTube 5 dạng hợp lệ/8 dạng xấu; browser real: WebM thật phát + tua, file thắng link, Gỡ trailer, YouTube nocookie lazy, file hỏng báo lỗi, synopsis/fallback, 375/1280 không tràn; mock cùng 20 khóa JSON. TODO-01/02 Low form admin. T25 `CLAUDE_REVIEW → PO_REVIEW`; T13 → `READY_FOR_HANDOFF` sau merge T25. Commit kèm `docs/tasks/T25.md` (bản PO duyệt, trước đó untracked). |

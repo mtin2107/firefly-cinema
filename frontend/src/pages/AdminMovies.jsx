@@ -142,7 +142,7 @@ export default function AdminMovies() {
       duration_min: String(movie.duration_min),
       age_rating: movie.age_rating,
       release_date: movie.release_date,
-      status: movie.stored_status || movie.status,
+      status: movie.status,
       country: movie.country,
       formats: split(movie.formats),
       director: movie.director,

@@ -69,3 +69,11 @@ def expire_holds(db: Session, now: datetime | None = None) -> int:
         for booking in expired:
             db.expire(booking, ["seats"])
     return len(expired)
+
+
+def age_allowed(birth_date, age_rating, on_date):
+    minimum = {"T13": 13, "T16": 16, "T18": 18}.get(age_rating, 0)
+    if not birth_date or not minimum:
+        return True
+    age = on_date.year - birth_date.year - ((on_date.month, on_date.day) < (birth_date.month, birth_date.day))
+    return age >= minimum

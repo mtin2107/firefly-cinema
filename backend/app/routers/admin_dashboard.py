@@ -59,3 +59,23 @@ def dashboard(days: int = 30, _: User = Depends(require_admin), db: Session = De
                 seats_sold=seats_sold, rating_avg=float(rating_avg), rating_count=rating_count,
                 daily=[daily_map.get((first + timedelta(days=i)).isoformat(),
                        dict(date=(first + timedelta(days=i)).isoformat(), revenue=0, tickets=0)) for i in range(days)], movies=movies)
+
+
+@router.get("/me/summary")
+def my_summary(user: User = Depends(require_admin), db: Session = Depends(get_db)):
+    today = datetime.now().date()
+    comments = db.scalars(select(Comment)).all()
+    bookings = db.scalars(select(Booking)).all()
+    reviewed = [c for c in comments if c.reviewed_by == user.id and c.reviewed_at]
+    checked = [b for b in bookings if b.checked_in_by == user.id and b.checked_in_at]
+    activity = [{"kind": "review", "id": c.id, "at": c.reviewed_at, "label": "Duyệt bình luận"} for c in reviewed]
+    activity += [{"kind": "checkin", "id": b.id, "at": b.checked_in_at, "label": "Soát vé"} for b in checked]
+    return {
+        "todo": {"comments": sum(c.is_negative and c.human_label is None and c.reviewed_at is None for c in comments),
+                 "pending_verify": sum(b.status == "pending_verify" for b in bookings),
+                 "showtimes_today": db.scalar(select(func.count(Showtime.id)).where(func.date(Showtime.start_time) == today.isoformat()))},
+        "work": {"reviewed_today": sum(c.reviewed_at.date() == today for c in reviewed), "reviewed_total": len(reviewed),
+                 "overrides": sum(c.human_label is not None and c.human_label != int(c.is_negative) for c in reviewed),
+                 "checked_in_today": sum(b.checked_in_at.date() == today for b in checked)},
+        "recent_activity": sorted(activity, key=lambda a: (a["at"], a["id"]), reverse=True)[:5],
+    }

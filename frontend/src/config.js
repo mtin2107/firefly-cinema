@@ -14,3 +14,9 @@ export const CONTACT = {
   phone: "0329 711 217",
   phoneHref: "tel:0329711217",
 };
+
+export const MEMBERSHIP = [
+  { name: "Thành viên", threshold: 0 },
+  { name: "Bạc", threshold: 1000000 },
+  { name: "Vàng", threshold: 3000000 },
+];

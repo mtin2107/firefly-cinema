@@ -1,3 +1,10 @@
+from datetime import datetime
+from pathlib import Path
+import re
+from uuid import uuid4
+from ..config import UPLOAD_DIR
+from .admin_posters import PosterUploadIn, validate_image
+from ..schemas import ChangeEmailIn
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy import select
 from sqlalchemy.orm import Session
@@ -50,7 +57,8 @@ def update_me(
     user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
-    user.full_name = body.full_name
+    for key in body.model_fields_set:
+        setattr(user, key, getattr(body, key))
     db.commit()
     db.refresh(user)
     return user
@@ -90,6 +98,7 @@ def me_summary(user: User = Depends(get_current_user), db: Session = Depends(get
                          .order_by(Rating.updated_at.desc(), Rating.id.desc())).all()
     genres = Counter(g.strip() for b in paid for g in b.showtime.movie.genre.split(",") if g.strip())
     return {
+        "spent_this_year": sum(b.total for b in paid if b.created_at.year == datetime.now().year),
         "member_since": user.created_at,
         "stats": {"bookings": sum(b.status not in ("expired", "rejected") for b in bookings),
                   "paid": len(paid), "watched": sum(b.checked_in_at is not None for b in bookings),
@@ -97,9 +106,59 @@ def me_summary(user: User = Depends(get_current_user), db: Session = Depends(get
         "favorite_genre": sorted(genres, key=lambda g: (-genres[g], g))[0] if genres else None,
         "recent_comments": [{"id": c.id, "movie_id": c.movie_id, "movie_title": c.movie.title,
                              "content": c.content, "created_at": c.created_at, "is_anonymous": c.is_anonymous,
-                             "hidden": c.hidden,
+                             "hidden": c.hidden, "human_label": c.human_label, "is_negative": c.is_negative, "reviewed_at": c.reviewed_at,
                              "effective_negative": bool(c.human_label if c.human_label is not None else c.is_negative)}
                             for c in comments[:3]],
         "ratings": [{"movie_id": r.movie_id, "movie_title": r.movie.title, "stars": r.stars,
                      "updated_at": r.updated_at} for r in ratings[:5]],
     }
+
+
+@router.post("/me/email", response_model=UserOut)
+def change_email(body: ChangeEmailIn, user: User = Depends(get_current_user), db: Session = Depends(get_db)):
+    key = user.email.lower()
+    if _login_failures.is_blocked(key, limit=5, seconds=300):
+        raise HTTPException(429, _CHANGE_PASSWORD_LIMIT_MESSAGE)
+    if not verify_password(body.current_password, user.password_hash):
+        _login_failures.hit(key, limit=5, seconds=300, message=_CHANGE_PASSWORD_LIMIT_MESSAGE)
+        raise HTTPException(400, "Mật khẩu hiện tại không đúng.")
+    email = body.new_email.lower()
+    if db.scalar(select(User).where(User.email == email, User.id != user.id)):
+        raise HTTPException(400, "Email này đã được đăng ký.")
+    user.email = email
+    db.commit()
+    _login_failures.clear(key)
+    return user
+
+
+def remove_avatar_file(url):
+    if url and re.fullmatch(r"/uploads/avatars/[0-9a-f]{32}\.(jpg|png|webp)", url):
+        (Path(UPLOAD_DIR) / "avatars" / url.rsplit("/", 1)[1]).unlink(missing_ok=True)
+
+
+@router.put("/me/avatar", response_model=UserOut)
+def put_avatar(body: PosterUploadIn, user: User = Depends(get_current_user), db: Session = Depends(get_db)):
+    binary, ext = validate_image(body.data, "Ảnh đại diện")
+    folder = Path(UPLOAD_DIR) / "avatars"
+    folder.mkdir(parents=True, exist_ok=True)
+    path = folder / f"{uuid4().hex}.{ext}"
+    path.write_bytes(binary)
+    old = user.avatar_url
+    user.avatar_url = f"/uploads/avatars/{path.name}"
+    try:
+        db.commit()
+    except Exception:
+        db.rollback()
+        path.unlink(missing_ok=True)
+        raise
+    remove_avatar_file(old)
+    return user
+
+
+@router.delete("/me/avatar", response_model=UserOut)
+def delete_avatar(user: User = Depends(get_current_user), db: Session = Depends(get_db)):
+    old = user.avatar_url
+    user.avatar_url = None
+    db.commit()
+    remove_avatar_file(old)
+    return user

@@ -1,3 +1,5 @@
+import { useAuth } from "../context/AuthContext";
+import { ageAllowed, ageNotice } from "../utils/account";
 import { usePageTitle } from "../utils/pageTitle";
 import { ratingText } from "../utils/ratings";
 import { useEffect, useState } from "react";
@@ -9,6 +11,7 @@ import { fullDateTime, money } from "../utils/format";
 import { MAX_SEATS_PER_BOOKING, sortSeats, totalPrice } from "../utils/seats";
 
 export default function SeatSelection() {
+  const { user } = useAuth();
   const { showtimeId } = useParams();
   const navigate = useNavigate();
   const [data, setData] = useState(null);
@@ -42,6 +45,8 @@ export default function SeatSelection() {
     });
   };
 
+  const eligible = user?.role === "admin" || ageAllowed(user?.birth_date, movie.age_rating, showtime.start_time);
+  const notice = ageNotice(user, movie, showtime.start_time);
   const total = totalPrice(selected, showtime.price);
 
   return (
@@ -53,13 +58,14 @@ export default function SeatSelection() {
         <p className="muted">{fullDateTime(showtime.start_time)}, {showtime.room}</p>
       </div>
 
+      {notice && <p role="status" className="notice notice--warn">{notice}</p>}
       {!bookable && <p className="notice notice--warn" role="status">
         {new Date(showtime.start_time).getTime() <= Date.now()
           ? "Suất chiếu đã bắt đầu, không thể đặt vé."
           : "Suất chiếu sắp bắt đầu, vui lòng mua vé tại quầy."}
         {" "}<Link to={`/phim/${movie.id}#lich-chieu`}>Về lịch chiếu</Link>
       </p>}
-      <fieldset className="booking-seat-fieldset" disabled={!bookable} aria-label="Chọn ghế">
+      <fieldset className="booking-seat-fieldset" disabled={!eligible || !bookable} aria-label="Chọn ghế">
         <SeatMap booked={booked_seats} selected={selected} onToggle={toggle} />
       </fieldset>
 
@@ -72,7 +78,7 @@ export default function SeatSelection() {
             {hint && <p className="summary-bar__hint" role="status">{hint}</p>}
           </div>
           <p className="summary-bar__total">{money(total)}</p>
-          <button className="btn btn--primary btn--lg" disabled={!bookable || !selected.length}
+          <button className="btn btn--primary btn--lg" disabled={!eligible || !bookable || !selected.length}
             onClick={() => navigate("/xac-nhan", { state: { showtimeId: showtime.id, seats: selected } })}>
             Tiếp tục
           </button>

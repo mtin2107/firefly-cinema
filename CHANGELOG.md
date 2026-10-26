@@ -43,3 +43,9 @@
 - Thêm GET /api/auth/me/summary và trang Tài khoản gồm hồ sơ, 6 số liệu, vé/bình luận/điểm gần đây, cài đặt; giữ logic đổi tên và mật khẩu T14.
 - Footer có Liên hệ, dữ liệu tập trung ở CONTACT; cho phép Poster màu khi thêm phim không ảnh theo T28 AC-13.
 - Thêm test T28 về thống kê riêng tư/nhãn duyệt và trạng thái ngày hôm qua/hôm nay/ngày mai; điều chỉnh hai test cũ bị ảnh hưởng trực tiếp. Không đổi schema DB, không thêm thư viện, không đổi biến :root.
+## T29 — 27/10/2026
+
+- Sửa lưới menu tài khoản ở breakpoint 1360px; hồ sơ, số vé giữ chỗ, nhóm quản trị và đăng xuất riêng; vừa 375px.
+- Khách: 4 thẻ nhớ hash, lịch sử nhóm tháng, hạng theo chi tiêu năm, giải thích kiểm duyệt và hồ sơ/bảo mật. Admin: việc cần làm, công việc và hoạt động cá nhân.
+- Thêm ngày sinh/giới tính/avatar, đổi email bằng mật khẩu; ảnh dùng chung kiểm tra poster; admin summary qua require_admin; API real/mock đồng bộ.
+- Chặn tuổi theo ngày suất chiếu bằng helper chung. Đổi schema: Có; PO sao lưu/kiểm tra/reset theo HUONG_DAN mục T29, không migration.

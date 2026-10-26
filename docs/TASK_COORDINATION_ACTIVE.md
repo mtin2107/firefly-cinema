@@ -36,14 +36,16 @@ Trước khi áp dụng workflow: giao diện React đầy đủ (`giao-dien-v1`
 
 ## 4. Current Project Status
 ```
-Overall Status: IN_PROGRESS
-Phase: T28 đã merge vào master `419b07e` và push (27/10); T29 IN_PROGRESS (PO yêu cầu 27/10, đổi schema); T13 lùi sau T29
-Current Active Task: T29 — IN_PROGRESS
+Overall Status: CLAUDE_REVIEW
+Phase: T28 đã merge vào master `419b07e` và push (27/10); T29 CLAUDE_REVIEW (Codex bàn giao 27/10, đổi schema); T13 lùi sau T29
+Current Active Task: T29 — CLAUDE_REVIEW
 Ngày bắt đầu sản phẩm: 05/10/2026 · Hạn: 01/11/2026
 ```
 
 ## 5. Current Active Task
-**T29 — IN_PROGRESS (27/10/2026).** PO chốt trong chat: sửa lỗi hồi quy T28 (menu tài khoản 2 cột ở ≤1360px), menu và trang Tài khoản mới (khách 4 thẻ, admin "việc cần làm"), ngày sinh, giới tính, ảnh đại diện, đổi email bằng mật khẩu, chặn đặt vé theo tuổi. **Đổi schema** (3 cột `users`), reset DB sau merge. Task Record do Claude soạn theo yêu cầu PO; Claude vẫn review độc lập. Nhánh `task/T29-tai-khoan` từ master.
+**T29 — CLAUDE_REVIEW (27/10/2026).** PO chốt trong chat: sửa lỗi hồi quy T28 (menu tài khoản 2 cột ở ≤1360px), menu và trang Tài khoản mới (khách 4 thẻ, admin "việc cần làm"), ngày sinh, giới tính, ảnh đại diện, đổi email bằng mật khẩu, chặn đặt vé theo tuổi. **Đổi schema** (3 cột `users`), reset DB sau merge. Task Record do Claude soạn theo yêu cầu PO; Claude vẫn review độc lập. Nhánh `task/T29-tai-khoan` từ master.
+
+**Codex bàn giao T29 (27/10/2026):** baseline master `9f7920e`, nhánh `task/T29-tai-khoan`; menu riêng một cột/nhóm quản trị, tài khoản khách 4 thẻ nhớ hash/admin việc cần làm, hồ sơ/email/avatar, helper tuổi theo ngày suất chiếu, API real/mock cùng khóa. **Đổi schema: Có**; chỉ SQLite/UPLOAD_DIR tạm, PO sao lưu/kiểm SHA-256/integrity/reset theo HUONG_DAN mục T29. Focused 38/38; full pytest 01:46:58–01:49:37 +07:00: 229 đạt +1 lỗi duy nhất OBS-01 test_sentiment trong ngoại lệ 0h–7h. Compileall, health PhoBERT B, build real/mock, hồi quy mục 7 real/mock, 62 kiểm tra viewport/hash/reduced-motion và 52 ảnh đã thực thi. Không cắt scope; chưa tự review/PASS/merge, không mở T13. Report: `reports/2026-10-27/codex_implementation_T29_2026-10-27.md`; ảnh/log: `reports/2026-10-27/codex_evidence_T29_2026-10-27.md`. Chờ Claude review độc lập.
 
 **T28 — PO_REVIEW.** Claude review round 3 **PASS** trên `5b27199`: R2-01 (tên dài 1 hàng, chạy chữ khi tràn; hover/focus trên máy có chuột, tự chạy trên cảm ứng, 2 dòng khi giảm chuyển động) và R2-02 (poster phụ hero hiện lại tên) đạt; RF 0; OBS-01..06 round 1 chờ PO. Report: `reports/2026-10-27/claude_review_T28_round3_PASS_2026-10-27.md`. Không đổi schema.
 
@@ -107,7 +109,7 @@ Trước đó — Codex: Codex hoàn tất 24/10/2026: upload raw/Range, synopsi
 | T26 | Khung đánh giá sao bật lên khi bấm vào điểm | Web | 4 | T25 | [T26.md](tasks/T26.md) | PO_REVIEW — Claude PASS_WITH_TODO trên `cffc533`; RF 0; TODO-01 Low; pytest 194/194; PO đã merge `c1916c6` |
 | T27 | Thang điểm 10 và khung đánh giá có hiệu ứng (đổi schema) | Web | 4 | T26 | [T27.md](tasks/T27.md) | PO_REVIEW — Claude PASS_WITH_TODO trên `73a57f6`; RF 0; TODO-01 Low; PO đã merge `f48922a`, DB đã reset |
 | T28 | Sửa lỗi hiển thị, hiệu ứng và trang tài khoản | Web | 4 | T27 | [T28.md](tasks/T28.md) | PO đã merge `419b07e` (27/10), chờ closure ở T13; trước đó PO_REVIEW — Claude round 3 PASS trên `5b27199` (vòng sửa 2); RF 0; không reset DB |
-| T29 | Tài khoản người dùng và quản trị (đổi schema) | Web | 4 | T28 | [T29.md](tasks/T29.md) | IN_PROGRESS — Codex triển khai từ master 9f7920e; chỉ DB/UPLOAD_DIR tạm |
+| T29 | Tài khoản người dùng và quản trị (đổi schema) | Web | 4 | T28 | [T29.md](tasks/T29.md) | CLAUDE_REVIEW — Codex bàn giao từ master 9f7920e; đổi schema, chỉ DB/UPLOAD_DIR tạm; report 27/10 |
 
 Chuỗi chính: `T00 → T01 → T02` và `T03 → T08 → T09 → T10`. T03 bắt đầu ngay ngày đầu (song song).
 

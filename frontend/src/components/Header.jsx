@@ -1,3 +1,5 @@
+import { api } from "../api";
+import { avatarSrc, initials } from "../utils/account";
 import { useEffect, useRef, useState } from "react";
 import { Link, NavLink, useLocation, useNavigate, useSearchParams } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
@@ -17,6 +19,12 @@ export default function Header() {
   const [openId, setOpenId] = useState(null);
   const [mobileOpen, setMobileOpen] = useState(false);
   const ref = useRef(null);
+  const [held, setHeld] = useState(null);
+  useEffect(() => {
+    let active = true;
+    if (user && openId === "account") api.bookings.mine().then(rows => { if (active) setHeld(rows.filter(b => b.status === "held").length); }).catch(() => { if (active) setHeld(null); });
+    return () => { active = false; };
+  }, [openId, user?.id]);
 
   // Đổi trang thì đóng hết menu
   useEffect(() => { setOpenId(null); setMobileOpen(false); }, [location.pathname, location.search]);
@@ -73,19 +81,21 @@ export default function Header() {
           {USE_MOCK && <span className="mock-flag" title="Đang dùng dữ liệu giả, chưa nối backend">Dữ liệu mẫu</span>}
           {user ? (
             <Dropdown id="account" label={user.full_name} openId={openId} setOpenId={setOpenId} align="right">
-              <ul className="dd__list dd__list--single">
-                <li><NavLink to="/ve-cua-toi">Vé của tôi</NavLink></li>
-                <li><NavLink to="/tai-khoan">Tài khoản</NavLink></li>
-                {user.role === "admin" && <li><NavLink to="/quan-tri/tong-quan">Tổng quan quản trị</NavLink></li>}
-                {user.role === "admin" && <li><NavLink to="/quan-tri/soat-ve">Soát vé tại quầy</NavLink></li>}
-                {user.role === "admin" && <li><NavLink to="/quan-tri/ve">Quản lý vé</NavLink></li>}
-                {user.role === "admin" && <li><NavLink to="/quan-tri/phim">Quản lý phim</NavLink></li>}
-                {user.role === "admin" && <li><NavLink to="/quan-tri/suat-chieu">Quản lý suất chiếu</NavLink></li>}
-                {user.role === "admin" && <li><NavLink to="/quan-tri/binh-luan">Kiểm duyệt bình luận</NavLink></li>}
-                {user.role === "admin" && <li><NavLink to="/quan-tri/so-sanh-mo-hinh">So sánh mô hình</NavLink></li>}
-                {user.role === "admin" && <li><NavLink to="/quan-tri/thong-ke">Thống kê cảm xúc</NavLink></li>}
-                <li><button type="button" className="dd__item-btn" onClick={() => { logout(); navigate("/"); }}>Đăng xuất</button></li>
-              </ul>
+              <div className={`account-menu${user.role === "admin" ? " account-menu--admin" : ""}`}>
+                <div className="account-menu__profile">
+                  <span className="account-avatar" aria-hidden="true">{user.avatar_url ? <img src={avatarSrc(user.avatar_url)} alt="" /> : initials(user.full_name)}</span>
+                  <div><strong>{user.full_name}</strong><p>{user.email}</p><small>{user.role === "admin" ? "Quản trị viên" : "Khách hàng"}</small></div>
+                </div>
+                <ul className="dd__list dd__list--single">
+                  <li><NavLink to="/tai-khoan"><MenuIcon />Tài khoản của tôi</NavLink></li>
+                  <li><NavLink to="/ve-cua-toi"><MenuIcon />Vé của tôi{held !== null && <span className="account-menu__badge">{held}</span>}</NavLink></li>
+                </ul>
+                {user.role === "admin" && <><h3>Quản trị</h3><ul className="dd__list account-menu__admin">{[
+                  ["tong-quan","Tổng quan quản trị"],["soat-ve","Soát vé tại quầy"],["ve","Quản lý vé"],["phim","Quản lý phim"],
+                  ["suat-chieu","Quản lý suất chiếu"],["binh-luan","Kiểm duyệt bình luận"],["so-sanh-mo-hinh","So sánh mô hình"],["thong-ke","Thống kê cảm xúc"]
+                ].map(([path,label]) => <li key={path}><NavLink to={`/quan-tri/${path}`}><MenuIcon />{label}</NavLink></li>)}</ul></>}
+                <div className="account-menu__logout"><button type="button" className="dd__item-btn" onClick={() => { logout(); navigate("/"); }}><MenuIcon />Đăng xuất</button></div>
+              </div>
             </Dropdown>
           ) : (
             <>
@@ -97,4 +107,8 @@ export default function Header() {
       </div>
     </header>
   );
+}
+
+function MenuIcon() {
+  return <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" aria-hidden="true"><rect x="4" y="4" width="16" height="16" rx="3" /><path d="M8 9h8M8 15h5" /></svg>;
 }

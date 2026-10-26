@@ -1,3 +1,4 @@
+import { ageAllowed, validateProfile } from "../utils/account";
 // ======================================================================
 // DỮ LIỆU GIẢ — chỉ dùng khi VITE_USE_MOCK=true (chưa có backend).
 // Mọi hàm trả về đúng cấu trúc JSON mà backend FastAPI trả về,
@@ -9,7 +10,7 @@ import { ApiError } from "./http";
 import { ROWS, COLS, totalPrice, MAX_SEATS_PER_BOOKING } from "../utils/seats";
 import { effectiveStatus, AGE_RATINGS, COUNTRY_LABELS, FORMAT_LABELS, GENRE_LABELS } from "../utils/taxonomy";
 
-const DB_KEY = "firefly_mockdb_v6";
+const DB_KEY = "firefly_mockdb_v7";
 const ROOMS = ["Phòng 1", "Phòng 2", "Phòng 3", "Phòng 4"];
 const CLEANUP_MINUTES = 15;
 const HOLD_CUTOFF_MINUTES = 30;
@@ -258,7 +259,7 @@ function load() {
 let db = load();
 const save = () => { try { localStorage.setItem(DB_KEY, JSON.stringify(db)); } catch { /* bỏ qua */ } };
 
-const publicUser = (u) => ({ id: u.id, full_name: u.full_name, email: u.email, role: u.role });
+const publicUser = (u) => ({ id: u.id, full_name: u.full_name, email: u.email, role: u.role, birth_date: u.birth_date ?? null, gender: u.gender ?? null, avatar_url: u.avatar_url ?? null, created_at: u.created_at || "2026-10-24T08:00:00" });
 const tokenFor = (u) => `mock-token-${u.id}`;
 
 function currentUser() {
@@ -546,25 +547,46 @@ export const mockApi = {
         const st = db.showtimes.find((s) => s.id === b.showtime_id);
         movieById(st.movie_id).genre.split(",").map((g) => g.trim()).filter(Boolean).forEach((g) => { genres[g] = (genres[g] || 0) + 1; });
       });
-      return clone({ member_since: user.created_at || "2026-10-24T08:00:00",
+      return clone({ spent_this_year: paid.filter(b => new Date(b.created_at).getFullYear() === new Date().getFullYear()).reduce((n,b) => n+b.total,0), member_since: user.created_at || "2026-10-24T08:00:00",
         stats: { bookings: bookings.filter((b) => !["expired", "rejected"].includes(b.status)).length,
           paid: paid.length, watched: bookings.filter((b) => b.checked_in_at).length,
           total_spent: paid.reduce((n,b) => n+b.total,0), comments: comments.length, ratings: ratings.length },
         favorite_genre: Object.keys(genres).sort((a,b) => genres[b]-genres[a] || (a < b ? -1 : a > b ? 1 : 0))[0] || null,
         recent_comments: comments.slice(0,3).map((c) => ({ id:c.id, movie_id:c.movie_id, movie_title:movieById(c.movie_id).title,
-          content:c.content, created_at:c.created_at, is_anonymous:!!c.is_anonymous, hidden:!!c.hidden,
+          human_label:c.human_label ?? null, is_negative:!!c.is_negative, reviewed_at:c.reviewed_at ?? null, content:c.content, created_at:c.created_at, is_anonymous:!!c.is_anonymous, hidden:!!c.hidden,
           effective_negative:!!(c.human_label ?? c.is_negative) })),
         ratings: ratings.slice(0,5).map((r) => ({ movie_id:r.movie_id, movie_title:movieById(r.movie_id).title,
           stars:r.stars, updated_at:r.updated_at || r.created_at || "2026-10-24T08:00:00" })) });
     },
+    async changeEmail({new_email, current_password}) {
+      await wait(); const user = currentUser();
+      if (user.password !== current_password) throw new ApiError("Mật khẩu hiện tại không đúng.",400);
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(new_email)) throw new ApiError("Email không đúng định dạng.",422);
+      const email = new_email.toLowerCase();
+      if (db.users.some(u => u.id !== user.id && u.email === email)) throw new ApiError("Email này đã được đăng ký.",400);
+      user.email = email; save(); return clone(publicUser(user));
+    },
+    async putAvatar({data}) {
+      await wait(); const user = currentUser();
+      const binary = decodePosterBase64(data);
+      if (binary.length > 2*1024*1024) throw new ApiError("Ảnh đại diện tối đa 2 MB.",422);
+      const mime = posterMime(binary); const old = user.avatar_url;
+      user.avatar_url = `data:${mime};base64,${data}`;
+      try { localStorage.setItem(DB_KEY, JSON.stringify(db)); } catch { user.avatar_url = old; throw new ApiError("Không đủ dung lượng lưu ảnh. Hãy chọn ảnh nhỏ hơn.",422); }
+      return clone(publicUser(user));
+    },
+    async deleteAvatar() { await wait(); const user = currentUser(); user.avatar_url = null; save(); return clone(publicUser(user)); },
     async me() { await wait(100); return publicUser(currentUser()); },
-    async updateMe({ full_name }) {
+    async updateMe({ full_name, ...profile }) {
       await wait();
       const user = currentUser();
       const value = String(full_name ?? "").trim();
       if (value.length < 2 || value.length > 100) {
         throw new ApiError("Họ tên cần từ 2 đến 100 ký tự.", 422);
       }
+      try { validateProfile(profile.birth_date, profile.gender); }
+      catch (error) { throw new ApiError(error.message, 422); }
+      for (const key of ["birth_date", "gender"]) if (Object.hasOwn(profile,key)) user[key] = profile[key];
       user.full_name = value;
       save();
       return clone(publicUser(user));
@@ -632,6 +654,8 @@ export const mockApi = {
       const user = currentUser();
       const st = db.showtimes.find((s) => s.id === Number(showtime_id));
       if (!st) throw new ApiError("Không tìm thấy suất chiếu.", 404);
+      const film = movieById(st.movie_id);
+      if (user.role !== "admin" && !ageAllowed(user.birth_date, film.age_rating, st.start_time)) throw new ApiError(`Bạn chưa đủ ${film.age_rating.slice(1)} tuổi để xem phim ${film.age_rating}.`,400);
       const now = Date.now();
       if (new Date(st.start_time).getTime() <= now) throw new ApiError("Suất chiếu đã bắt đầu, không thể đặt vé.", 400);
       if (movieById(st.movie_id).status === "ended") throw new ApiError("Phim đã chiếu xong, không thể đặt vé.", 400);
@@ -727,6 +751,17 @@ export const mockApi = {
     },
   },
   admin: {
+    async meSummary() {
+      await wait(); requireAdmin(); const user=currentUser();
+      const today=new Date().toLocaleDateString("en-CA");
+      const isToday = at => at && new Date(at).toLocaleDateString("en-CA") === today;
+      const reviewed=db.comments.filter(c=>c.reviewed_by === user.id && c.reviewed_at);
+      const checked=db.bookings.filter(b=>b.checked_in_by === user.id && b.checked_in_at);
+      const activity=[...reviewed.map(c=>({kind:"review",id:c.id,at:c.reviewed_at,label:"Duyệt bình luận"})),...checked.map(b=>({kind:"checkin",id:b.id,at:b.checked_in_at,label:"Soát vé"}))];
+      return clone({todo:{comments:db.comments.filter(c=>c.is_negative && c.human_label == null && !c.reviewed_at).length,pending_verify:db.bookings.filter(b=>b.status === "pending_verify").length,showtimes_today:db.showtimes.filter(s=>isToday(s.start_time)).length},
+        work:{reviewed_today:reviewed.filter(c=>isToday(c.reviewed_at)).length,reviewed_total:reviewed.length,overrides:reviewed.filter(c=>c.human_label != null && Number(c.human_label) !== Number(c.is_negative)).length,checked_in_today:checked.filter(b=>isToday(b.checked_in_at)).length},
+        recent_activity:activity.sort((a,b)=>b.at.localeCompare(a.at)||b.id-a.id).slice(0,5)});
+    },
     async dashboard(days = 30) {
       await wait(); requireAdmin(); expireHolds();
       days = Number(days);

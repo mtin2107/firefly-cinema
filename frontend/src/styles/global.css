@@ -946,3 +946,56 @@ h1, h2, h3 { margin: 0; line-height: 1.35; }
   .movie-card__title a { display: inline; white-space: normal; overflow: visible; text-overflow: clip; }
   .movie-card__title-text { display: inline; }
 }
+
+/* T29: menu tài khoản độc lập với lưới taxonomy trong Menu. */
+.header__account .dd__panel { max-width: calc(100vw - 24px); }
+.account-menu { width: 280px; max-width: calc(100vw - 46px); }
+.account-menu--admin { width: 470px; }
+.header__account .dd__list--single { grid-template-columns: minmax(0, 1fr); }
+.account-menu .dd__list a, .account-menu .dd__item-btn { white-space: nowrap; display: flex; align-items: center; gap: 8px; }
+.account-menu__profile { display: flex; gap: 12px; align-items: center; padding: 10px; border-bottom: 1px solid var(--line); margin-bottom: 8px; }
+.account-menu__profile > div { min-width: 0; overflow-wrap: anywhere; }
+.account-menu__profile p { margin: 3px 0; font-size: .82rem; color: var(--muted); }
+.account-menu__profile .account-avatar { width: 44px; height: 44px; font-size: 1rem; flex-shrink: 0; }
+.account-menu h3 { font-size: .8rem; color: var(--muted); margin: 12px 10px 4px; }
+.account-menu__admin { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.account-menu__logout { border-top: 1px solid var(--line); padding-top: 6px; margin-top: 8px; }
+.account-menu__badge { margin-left: auto; border-radius: 20px; padding: 0 6px; background: var(--yellow-soft); }
+.account-avatar { overflow: hidden; border: 1px solid var(--line); flex-shrink: 0; }
+.account-avatar img { width: 100%; height: 100%; object-fit: cover; }
+.account-layout { display: grid; grid-template-columns: 290px minmax(0,1fr); gap: 24px; align-items: start; }
+.account-sidebar { text-align: center; overflow-wrap: anywhere; }
+.account-sidebar .account-avatar { margin: 0 auto 18px; cursor: pointer; }
+.account-sidebar progress { display: block; width: 100%; margin: 14px 0; accent-color: var(--yellow); }
+.account-tier { color: var(--yellow); }
+.account-content { min-width: 0; }
+.account-content .account-card { margin-bottom: 20px; overflow-wrap: anywhere; }
+.account-tabs { display: flex; overflow-x: auto; border-bottom: 1px solid var(--line); margin-bottom: 20px; }
+.account-tabs button { flex: 0 0 auto; white-space: nowrap; background: none; border: 0; padding: 14px 16px; color: var(--muted); cursor: pointer; border-bottom: 2px solid transparent; }
+.account-tabs [aria-selected="true"] { color: var(--yellow); border-bottom-color: var(--yellow); }
+.account-security { border-top: 1px solid var(--line); margin-top: 24px; padding-top: 20px; }
+.account-actions { display: flex; gap: 10px; flex-wrap: wrap; }
+.account-ticket { display: flex; gap: 16px; border-bottom: 1px solid var(--line); padding: 18px 0; }
+.account-ticket img { width: 64px; height: 96px; object-fit: cover; border-radius: 6px; }
+.account-ticket > div { min-width: 0; }
+.account-ticket p { margin: 6px 0; }
+.account-todo { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 12px; }
+.account-todo a { display: flex; flex-direction: column; padding: 16px; border: 1px solid var(--line); border-radius: 8px; }
+.account-todo strong { font-size: 2rem; color: var(--yellow); }
+@media(max-width: 760px) {
+  .account-layout { grid-template-columns: minmax(0,1fr); }
+  .account-todo { grid-template-columns: minmax(0,1fr); }
+  .header__account .dd { position: static; }
+  .header__account .dd__panel { right: 12px; top: 100%; }
+}
+@media(max-width: 520px) {
+  .account-menu .account-menu__admin { grid-template-columns: minmax(0,1fr); }
+  .header__account .dd__panel { max-height: 78vh; overflow-y: auto; }
+}
+@media(prefers-reduced-motion: reduce) {
+  .account-page *, .account-menu * { animation: none !important; transition: none !important; }
+}
+
+.header__account .dd__label { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+.account-ticket__poster { width: 64px; height: 96px; flex-shrink: 0; display: grid; place-items: center; border-radius: 6px; overflow: hidden; font-weight: 800; }

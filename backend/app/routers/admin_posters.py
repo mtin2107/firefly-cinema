@@ -30,22 +30,28 @@ def _extension(data: bytes) -> str | None:
     return None
 
 
-@router.post("", status_code=201)
-def upload_poster(body: PosterUploadIn, _: User = Depends(require_admin)):
+def validate_image(data: str, label: str = "Ảnh poster"):
     try:
         # Không chấp nhận tiền tố data: hoặc chuỗi base64 không hợp lệ.
-        binary = base64.b64decode(body.data, validate=True)
+        binary = base64.b64decode(data, validate=True)
     except (ValueError, binascii.Error):
-        raise HTTPException(422, "Ảnh poster không hợp lệ.") from None
+        raise HTTPException(422, f"{label} không hợp lệ.") from None
 
     if not binary:
-        raise HTTPException(422, "Ảnh poster không hợp lệ.")
+        raise HTTPException(422, f"{label} không hợp lệ.")
     if len(binary) > MAX_POSTER_BYTES:
-        raise HTTPException(422, "Ảnh poster tối đa 2 MB.")
+        raise HTTPException(422, f"{label} tối đa 2 MB.")
 
     ext = _extension(binary)
     if ext is None:
         raise HTTPException(422, "Chỉ nhận ảnh JPG, PNG hoặc WebP.")
+
+    return binary, ext
+
+
+@router.post("", status_code=201)
+def upload_poster(body: PosterUploadIn, _: User = Depends(require_admin)):
+    binary, ext = validate_image(body.data)
 
     # Không bao giờ nối filename do client gửi vào đường dẫn.
     folder = Path(UPLOAD_DIR) / "posters"

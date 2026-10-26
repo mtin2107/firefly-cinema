@@ -22,7 +22,7 @@ def test_summary_counts_privacy_and_moderation(client, db, users, auth_headers, 
     response = client.get("/api/auth/me/summary", headers=auth_headers["user"])
     assert response.status_code == 200
     result = response.json()
-    assert set(result) == {"member_since", "stats", "favorite_genre", "recent_comments", "ratings"}
+    assert set(result) == {"spent_this_year", "member_since", "stats", "favorite_genre", "recent_comments", "ratings"}
     assert result["stats"] == {"bookings": 3, "paid": 2, "watched": 1, "total_spent": 160000, "comments": 4, "ratings": 1}
     assert result["favorite_genre"] == "Tâm lý"
     assert len(result["recent_comments"]) == 3

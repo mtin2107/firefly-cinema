@@ -27,6 +27,16 @@ class LoginIn(BaseModel):
 
 
 class UpdateProfileIn(BaseModel):
+    birth_date: date | None = None
+    gender: Literal["male", "female", "unspecified"] | None = None
+
+    @field_validator("birth_date")
+    @classmethod
+    def validate_birth_date(cls, value):
+        if value and not date(1900, 1, 1) <= value <= date.today():
+            raise ValueError("Ngày sinh phải từ 01/01/1900 đến hôm nay.")
+        return value
+
     full_name: str = Field(min_length=2, max_length=100)
 
     @field_validator("full_name")
@@ -43,7 +53,17 @@ class ChangePasswordIn(BaseModel):
     new_password: str = Field(min_length=6, max_length=100)
 
 
+class ChangeEmailIn(BaseModel):
+    new_email: EmailStr
+    current_password: str
+
+
 class UserOut(ORM):
+    birth_date: date | None = None
+    gender: str | None = None
+    avatar_url: str | None = None
+    created_at: datetime
+
     id: int
     full_name: str
     email: str
@@ -384,6 +404,9 @@ class CommentOut(BaseModel):
     content: str
     is_negative: bool
     effective_negative: bool
+    human_label: int | None = None
+    is_negative: bool = False
+    reviewed_at: datetime | None = None
     reviewed: bool
     negative_score: float
     created_at: datetime
@@ -535,6 +558,9 @@ class AccountComment(BaseModel):
     is_anonymous: bool
     hidden: bool
     effective_negative: bool
+    human_label: int | None = None
+    is_negative: bool = False
+    reviewed_at: datetime | None = None
 
 
 class AccountRating(BaseModel):
@@ -545,6 +571,7 @@ class AccountRating(BaseModel):
 
 
 class AccountSummary(BaseModel):
+    spent_this_year: int = 0
     member_since: datetime
     stats: AccountStats
     favorite_genre: str | None

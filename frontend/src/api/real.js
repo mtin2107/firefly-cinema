@@ -26,6 +26,9 @@ export const realApi = {
   auth: {
     register: (payload) => request("/api/auth/register", { method: "POST", body: payload }),
     login: (payload) => request("/api/auth/login", { method: "POST", body: payload }),
+    changeEmail: (payload) => request("/api/auth/me/email", { method: "POST", body: payload }),
+    putAvatar: (payload) => request("/api/auth/me/avatar", { method: "PUT", body: payload }),
+    deleteAvatar: () => request("/api/auth/me/avatar", { method: "DELETE" }),
     meSummary: () => request("/api/auth/me/summary"),
     me: () => request("/api/auth/me"),
     updateMe: (payload) => request("/api/auth/me", { method: "PATCH", body: payload }),
@@ -61,6 +64,7 @@ export const realApi = {
     remove: (id) => request(`/api/comments/${id}`, { method: "DELETE" }),
   },
   admin: {
+    meSummary: () => request("/api/admin/me/summary"),
     dashboard: (days = 30) => request(`/api/admin/dashboard?days=${days}`),
     checkin: {
       get: (code) => request(`/api/admin/checkin/${encodeURIComponent(code.trim())}`),

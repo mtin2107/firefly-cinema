@@ -568,3 +568,64 @@ venv\Scripts\python -m uvicorn app.main:app --port 8000
 ```
 
 Giữ nguyên bản sao `uploads` và seed sidecar trong thư mục sao lưu. Seed hiện có tự làm mới trạng thái seed khi bảng movies rỗng. Sau khởi động, kiểm `/api/health`, schema mới, điểm mẫu 6–10, đăng nhập demo, chấm 1 và 10; không khôi phục DB thang 5 vào ứng dụng thang 10 để tiếp tục chấm. Nếu cần rollback: dừng backend, dùng lại code trước T27 và phục hồi nguyên bộ DB + sidecar + uploads từ cùng một bản sao đã kiểm hash.
+## T29 — Sao lưu và reset DB sau khi đổi schema
+
+**Đổi schema: Có** — users.birth_date, users.gender, users.avatar_url. Không có migration. Codex chỉ kiểm tra trên SQLite và UPLOAD_DIR tạm. Các lệnh dưới do PO thực hiện sau duyệt/merge. Reset mất dữ liệu trong DB làm việc; giữ bộ sao lưu để phục hồi.
+
+1. Dừng mọi backend/uvicorn và ứng dụng đang dùng DB thật. Nếu DATABASE_URL/UPLOAD_DIR khác mặc định, thay đường dẫn tương ứng trước khi chạy.
+2. Sao lưu DB, toàn bộ sidecar (WAL/SHM và firefly.db.showtime-seed.json nếu có), cùng backend\uploads:
+
+```powershell
+cd C:\Projects\firefly-cinema
+$saveDir = Join-Path (Get-Location) ("backup\T29-" + (Get-Date -Format "yyyyMMdd-HHmmss"))
+New-Item -ItemType Directory -Path $saveDir | Out-Null
+Get-ChildItem -LiteralPath .\backend -File -Filter 'firefly.db*' | Copy-Item -Destination $saveDir
+if (Test-Path -LiteralPath .\backend\uploads) {
+    Copy-Item -LiteralPath .\backend\uploads -Destination (Join-Path $saveDir 'uploads') -Recurse
+}
+```
+
+3. Kiểm SHA-256 từng file nguồn với bản sao, kiểm integrity và khóa ngoại trên bản sao chỉ đọc. Không tiếp tục nếu thiếu file, checksum khác hoặc integrity không đạt:
+
+```powershell
+$dbHashes = Get-ChildItem -LiteralPath .\backend -File -Filter 'firefly.db*' | ForEach-Object {
+    $sourceHash = (Get-FileHash -LiteralPath $_.FullName -Algorithm SHA256).Hash
+    $copyHash = (Get-FileHash -LiteralPath (Join-Path $saveDir $_.Name) -Algorithm SHA256).Hash
+    if ($sourceHash -ne $copyHash) { throw "Sai checksum: $($_.Name)" }
+    [pscustomobject]@{ File = $_.Name; SHA256 = $sourceHash }
+}
+$dbHashes | Export-Csv -LiteralPath (Join-Path $saveDir 'db-sha256.csv') -NoTypeInformation -Encoding UTF8
+$uploadRoot = Join-Path (Get-Location) 'backend\uploads'
+if (Test-Path -LiteralPath $uploadRoot) {
+    $uploadHashes = Get-ChildItem -LiteralPath $uploadRoot -File -Recurse | ForEach-Object {
+        $relativeName = $_.FullName.Substring($uploadRoot.Length + 1)
+        $copyPath = Join-Path (Join-Path $saveDir 'uploads') $relativeName
+        $sourceHash = (Get-FileHash -LiteralPath $_.FullName -Algorithm SHA256).Hash
+        if ($sourceHash -ne (Get-FileHash -LiteralPath $copyPath -Algorithm SHA256).Hash) { throw "Sai checksum uploads: $relativeName" }
+        [pscustomobject]@{ File = $relativeName; SHA256 = $sourceHash }
+    }
+    $uploadHashes | Export-Csv -LiteralPath (Join-Path $saveDir 'uploads-sha256.csv') -NoTypeInformation -Encoding UTF8
+}
+$env:T29_BACKUP_DB = Join-Path $saveDir 'firefly.db'
+@'
+import os, sqlite3
+from pathlib import Path
+path = Path(os.environ['T29_BACKUP_DB']).resolve()
+with sqlite3.connect(path.as_uri() + '?mode=ro', uri=True) as db:
+    result = db.execute('PRAGMA integrity_check').fetchall()
+    assert result == [('ok',)], result
+    assert db.execute('PRAGMA foreign_key_check').fetchall() == []
+    print('Integrity và khóa ngoại: OK')
+'@ | .\backend\venv\Scripts\python -
+```
+
+4. Sau khi kiểm tra đạt và PO quyết định reset, giữ nguyên bản sao, xóa duy nhất DB làm việc rồi khởi động lại để tạo schema/seed mới. Sidecar đã được sao lưu; seed nhận DB rỗng và khởi tạo state mới. Không xóa uploads thật.
+
+```powershell
+Remove-Item -LiteralPath .\backend\firefly.db
+cd backend
+.\venv\Scripts\python -m uvicorn app.main:app --port 8000
+# Cửa sổ khác: Invoke-RestMethod http://localhost:8000/api/health
+```
+
+5. Kiểm tra đăng nhập khách/admin, hồ sơ, ảnh đại diện, đặt vé và health. Nếu phục hồi: dừng backend, giữ DB mới riêng, khôi phục cùng bộ DB + sidecar + uploads đã kiểm hash, chạy phiên bản code trước T29 với schema cũ. Không chép đè DB khi backend còn chạy.

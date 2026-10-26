@@ -25,10 +25,13 @@ export function AuthProvider({ children }) {
   const value = {
     user,
     checking,
+    changeEmail: async (payload) => { const updated = await api.auth.changeEmail(payload); setUser(updated); return updated; },
+    putAvatar: async (payload) => { const updated = await api.auth.putAvatar(payload); setUser(updated); return updated; },
+    deleteAvatar: async () => { const updated = await api.auth.deleteAvatar(); setUser(updated); return updated; },
     login: async (email, password) => handleAuth(await api.auth.login({ email, password })),
     register: async (full_name, email, password) => handleAuth(await api.auth.register({ full_name, email, password })),
-    updateProfile: async (full_name) => {
-      const updated = await api.auth.updateMe({ full_name });
+    updateProfile: async (profile) => {
+      const updated = await api.auth.updateMe(typeof profile === "string" ? { full_name: profile } : profile);
       setUser(updated);
       return updated;
     },

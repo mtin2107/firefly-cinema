@@ -7,7 +7,7 @@ from sqlalchemy.orm import Session
 
 from ..database import get_db
 from ..booking_rules import (
-    HOLD_CUTOFF_MINUTES, booking_out, expire_holds, release_booking_seats,
+    age_allowed, HOLD_CUTOFF_MINUTES, booking_out, expire_holds, release_booking_seats,
     transfer_payment_enabled,
 )
 from ..models import Booking, BookingSeat, Showtime, User
@@ -25,6 +25,8 @@ def create_booking(body: BookingIn, user: User = Depends(get_current_user), db: 
     st = db.get(Showtime, body.showtime_id)
     if not st:
         raise HTTPException(404, "Không tìm thấy suất chiếu.")
+    if user.role != "admin" and not age_allowed(user.birth_date, st.movie.age_rating, st.start_time.date()):
+        raise HTTPException(400, f"Bạn chưa đủ {st.movie.age_rating[1:]} tuổi để xem phim {st.movie.age_rating}.")
     now = datetime.now()
     if st.start_time <= now:
         db.commit()

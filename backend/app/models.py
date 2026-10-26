@@ -1,5 +1,5 @@
-from datetime import datetime
-from sqlalchemy import String, Integer, Float, Boolean, Text, DateTime, ForeignKey, UniqueConstraint, CheckConstraint, select, func
+from datetime import date, datetime
+from sqlalchemy import String, Integer, Float, Boolean, Text, Date, DateTime, ForeignKey, UniqueConstraint, CheckConstraint, select, func
 from sqlalchemy.orm import Mapped, mapped_column, relationship, column_property
 from .database import Base
 
@@ -15,6 +15,9 @@ class User(Base):
     full_name: Mapped[str] = mapped_column(String(100))
     email: Mapped[str] = mapped_column(String(255), unique=True, index=True)
     password_hash: Mapped[str] = mapped_column(String(255))
+    birth_date: Mapped[date | None] = mapped_column(Date, nullable=True)
+    gender: Mapped[str | None] = mapped_column(String(20), nullable=True)
+    avatar_url: Mapped[str | None] = mapped_column(String(500), nullable=True)
     role: Mapped[str] = mapped_column(String(20), default="user")  # "user" | "admin"
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.now)
 

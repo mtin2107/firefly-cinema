@@ -308,3 +308,14 @@ theo cùng điều kiện, không đổi schema DB. Frontend khóa ghế và nú
 - `MovieOut.status` là trạng thái hiệu lực; `stored_status` là trạng thái lưu để danh sách/form admin giải thích tự chuyển. Mock dùng `effectiveStatus` ở utils/taxonomy.js, không ghi đè trạng thái lưu khi đọc. Admin từ chối Sắp chiếu có ngày <= hôm nay với 422 tiếng Việt.
 - T28 cho phép tạo phim không poster để dùng Poster màu theo AC-13; vẫn xác thực URL/file khi có ảnh. Không đổi schema DB, seed hay dữ liệu phim JSON.
 - Thông tin liên hệ chỉ khai báo trong `CONTACT` (config.js), Footer dùng lại trên mọi trang.
+## T29 — Hồ sơ và tài khoản (27/10/2026)
+
+- Schema users thêm `birth_date DATE NULL`, `gender VARCHAR(20) NULL`, `avatar_url VARCHAR(500) NULL`. UserOut trả ba trường này và created_at; không trả password_hash.
+- PATCH `/api/auth/me`: họ tên, ngày sinh 1900..hôm nay, giới tính male/female/unspecified/null; chỉ cập nhật trường gửi lên.
+- POST `/api/auth/me/email`: `{new_email,current_password}`, dùng cùng limiter đăng nhập/đổi mật khẩu; email chữ thường, không gửi thư, token theo id vẫn dùng được.
+- PUT `/api/auth/me/avatar`: `{filename,data}` base64; DELETE cùng đường dẫn; trả UserOut. Dùng chung validate_image của poster (magic bytes JPG/PNG/WebP, 2 MB), UUID dưới UPLOAD_DIR/avatars. Thay/gỡ xóa file cũ của chính chủ sau khi commit DB.
+- GET `/api/auth/me/summary`: thêm spent_this_year từ vé paid tạo trong năm hiện tại; bình luận thêm human_label/is_negative/reviewed_at để giải thích kiểm duyệt. Giữ giới hạn T28: 3 bình luận, 5 điểm mới nhất.
+- GET `/api/admin/me/summary` dùng require_admin: `todo{comments,pending_verify,showtimes_today}`, `work{reviewed_today,reviewed_total,overrides,checked_in_today}`, `recent_activity[{kind,id,at,label}]` tối đa 5. Công việc/hoạt động giới hạn theo admin hiện tại; todo là toàn rạp.
+- booking_rules.age_allowed tính tuổi vào ngày suất chiếu; P/không khai/admin được qua. Frontend/mock dùng chung utils/account.js; API vẫn kiểm tra khi đặt vé.
+- Ngưỡng hạng nằm tại config.js MEMBERSHIP. Khách có 4 thẻ nhớ URL hash; admin có việc cần làm và bảo mật. Mock DB v7; avatar lưu data URL trong localStorage; real/mock cùng khóa JSON.
+- Không migration; PO sao lưu/kiểm tra/reset theo mục T29 trong HUONG_DAN.md.

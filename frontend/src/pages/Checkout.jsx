@@ -1,3 +1,5 @@
+import { useAuth } from "../context/AuthContext";
+import { ageAllowed, ageNotice } from "../utils/account";
 import { usePageTitle } from "../utils/pageTitle";
 import { useEffect, useState } from "react";
 import { Navigate, useLocation, useNavigate } from "react-router-dom";
@@ -8,6 +10,7 @@ import { money } from "../utils/format";
 import { isVip, seatPrice, sortSeats, totalPrice } from "../utils/seats";
 
 export default function Checkout() {
+  const { user } = useAuth();
   usePageTitle("Xác nhận đặt vé");
   const { state } = useLocation();
   const navigate = useNavigate();
@@ -26,6 +29,8 @@ export default function Checkout() {
   if (!data) return <Loading />;
 
   const { movie, showtime } = data;
+  const eligible = user?.role === "admin" || ageAllowed(user?.birth_date, movie.age_rating, showtime.start_time);
+  const notice = ageNotice(user,movie,showtime.start_time);
   const seats = sortSeats(state.seats);
   const total = totalPrice(seats, showtime.price);
   const holdUntil = new Date(Math.min(
@@ -36,6 +41,7 @@ export default function Checkout() {
   const holdDate = holdUntil.toLocaleDateString("vi-VN", { day: "2-digit", month: "2-digit", year: "numeric" });
 
   const confirm = async () => {
+    if (!eligible) { setSubmitError(notice); return; }
     setSubmitting(true); setSubmitError("");
     try {
       const booking = await api.bookings.create({ showtime_id: showtime.id, seats });
@@ -49,6 +55,7 @@ export default function Checkout() {
   return (
     <div className="container narrow">
       <h1 className="page-title">Xác nhận đặt vé</h1>
+      {notice && <p className="notice notice--warn" role="status">{notice}</p>}
       <TicketStub movie={movie} showtime={showtime} seats={seats} total={total} />
 
       <table className="price-table">
@@ -66,7 +73,7 @@ export default function Checkout() {
 
       <div className="actions">
         <button className="btn btn--ghost" onClick={() => navigate(-1)} disabled={submitting}>Chọn lại ghế</button>
-        <button className="btn btn--primary btn--lg" onClick={confirm} disabled={submitting}>
+        <button className="btn btn--primary btn--lg" onClick={confirm} disabled={submitting || !eligible}>
           {submitting ? "Đang đặt vé..." : "Đặt vé"}
         </button>
       </div>

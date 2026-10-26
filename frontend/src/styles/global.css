@@ -51,7 +51,7 @@ a { color: var(--yellow); text-decoration: none; }
 a:hover { text-decoration: underline; }
 button { font: inherit; }
 :focus-visible { outline: 2px solid var(--yellow); outline-offset: 3px; }
-h1, h2, h3 { margin: 0; line-height: 1.15; }
+h1, h2, h3 { margin: 0; line-height: 1.35; }
 .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 .muted { color: var(--muted); }
 .text-red { color: var(--red); }
@@ -183,7 +183,7 @@ h1, h2, h3 { margin: 0; line-height: 1.15; }
 .marquee__kicker { color: var(--yellow); font-weight: 600; margin: 0 0 12px; }
 .marquee__title {
   font-family: var(--font-display); font-weight: 900; text-transform: uppercase;
-  font-size: clamp(2.6rem, 6vw, 5.2rem); line-height: .95; letter-spacing: .005em;
+  font-size: clamp(2.6rem, 6vw, 5.2rem); line-height: 1.35; letter-spacing: .005em;
   color: var(--text);
 }
 .marquee__meta, .detail__meta { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 18px; margin: 18px 0; color: var(--muted); }
@@ -202,7 +202,7 @@ h1, h2, h3 { margin: 0; line-height: 1.15; }
   background: linear-gradient(160deg, rgba(255,255,255,.14) 0%, transparent 38%);
 }
 .poster__rating { position: absolute; top: 12px; left: 12px; font-size: .72rem; font-weight: 700; border: 1.5px solid currentColor; padding: 1px 6px; border-radius: 3px; }
-.poster__title { font-family: var(--font-display); font-weight: 900; text-transform: uppercase; font-size: 1.65rem; line-height: .95; }
+.poster__title { font-family: var(--font-display); font-weight: 900; text-transform: uppercase; font-size: 1.65rem; line-height: 1.35; }
 .poster__genre { font-size: .75rem; opacity: .8; margin-top: 8px; }
 .poster--lg { width: 280px; }
 .poster--lg .poster__title { font-size: 2.6rem; }
@@ -232,7 +232,7 @@ h1, h2, h3 { margin: 0; line-height: 1.15; }
 
 /* ---------- Chi tiết phim, lịch chiếu ---------- */
 .detail { display: grid; grid-template-columns: auto 1fr; gap: 48px; margin-top: 40px; }
-.detail__title { font-family: var(--font-display); font-weight: 900; text-transform: uppercase; font-size: clamp(2.2rem, 5vw, 4rem); line-height: .95; }
+.detail__title { font-family: var(--font-display); font-weight: 900; text-transform: uppercase; font-size: clamp(2.2rem, 5vw, 4rem); line-height: 1.35; }
 .detail__desc { max-width: 62ch; color: #d7d2c6; }
 .facts { display: grid; grid-template-columns: max-content 1fr; gap: 8px 24px; margin: 24px 0 0; }
 .facts div { display: contents; }
@@ -480,7 +480,7 @@ h1, h2, h3 { margin: 0; line-height: 1.15; }
 @keyframes bubble-pop { from { opacity: 0; transform: scale(.6); } }
 
 /* ---------- Màn hình nhỏ ---------- */
-@media (max-width: 1100px) {
+@media (max-width: 1360px) {
   .header__inner { flex-wrap: wrap; gap: 10px 16px; padding-top: 12px; padding-bottom: 12px; }
   .menu-toggle { display: inline-block; order: 2; margin-left: 0; }
   .header__account { order: 1; align-self: center; margin-left: auto; }
@@ -891,3 +891,50 @@ h1, h2, h3 { margin: 0; line-height: 1.15; }
 .rating-firefly { position: absolute; z-index: 5; width: 5px; height: 5px; border-radius: 50%; background: #ffe894; box-shadow: 0 0 8px #ffd862; pointer-events: none; }
 
 .rating-dialog__particles { position: absolute; inset: 0; overflow: hidden; pointer-events: none; }
+
+
+/* T28: shared rules for every catalogue entry. */
+.logo, .header__account .btn, .header__account .dd__btn { white-space: nowrap; }
+.logo { flex-shrink: 0; }
+.header__account { min-width: 0; }
+.header__account .dd__btn { max-width: 220px; overflow: hidden; text-overflow: ellipsis; }
+.poster__title, .poster--lg .poster__title, .intro__bubble .poster__title, .trailer__banner .poster__title {
+  line-height: 1.35; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; overflow-wrap: anywhere;
+}
+.poster__genre { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.detail__title { overflow-wrap: anywhere; }
+.movie-card { display: flex; flex-direction: column; min-width: 0; }
+.movie-card__body { flex: 1; }
+.movie-card__title { line-height: 1.4; min-height: 2.8em; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; overflow-wrap: anywhere; }
+.movie-card__genre { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; line-height: 1.5; min-height: 3em; }
+.movie-card__body .score { margin: 0; line-height: 1.5; min-height: 3em; }
+.movie-card__body > :last-child { margin-top: auto; min-height: 48px; height: 48px; display: flex; align-items: center; }
+.movie-card__body > .btn:last-child { justify-content: center; }
+.star-rating { display: grid; grid-template-columns: repeat(10, minmax(32px, 1fr)); gap: 4px; }
+.star-rating__button { width: 100%; min-width: 32px; min-height: 44px; border: 0; font-size: 2rem; }
+.hero3d__slot:not(.hero3d__slot--active) .poster__title,
+.hero3d__slot:not(.hero3d__slot--active) .poster__genre { visibility: hidden; }
+.trailer--static .trailer__banner { height: min(320px, 40vh); aspect-ratio: auto; }
+.trailer--static .poster > span { visibility: hidden; }
+.trailer--static .trailer__shade { background: rgba(0,0,0,.82); }
+.trailer__title { position: relative; color: #fff; font-family: var(--font-display); font-size: clamp(1.5rem, 3vw, 2.5rem); line-height: 1.35; padding: 0; margin: 24px; max-width: calc(100% - 48px); overflow-wrap: anywhere; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+.footer__inner { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 32px; }
+.footer__inner h2 { color: var(--text); }
+.footer__inner a { color: var(--yellow); overflow-wrap: anywhere; }
+.account-page > .account-card, .account-page > .account-grid { margin-bottom: 24px; }
+.account-card { min-width: 0; overflow-wrap: anywhere; }
+.account-profile { display: flex; align-items: center; gap: 20px; }
+.account-avatar { display: grid; place-items: center; width: 72px; height: 72px; flex-shrink: 0; border-radius: 50%; background: var(--yellow); color: var(--black); font-weight: 800; font-size: 1.7rem; }
+.account-stats { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 20px; }
+.account-stats strong, .account-stats span { display: block; }
+.account-stats strong { font-size: 1.4rem; color: var(--yellow); }
+.account-activity { border-top: 1px solid var(--line); padding-top: 16px; margin-top: 16px; }
+@media (max-width: 640px) {
+  .footer__inner { grid-template-columns: 1fr; }
+  .account-stats { grid-template-columns: repeat(2,minmax(0,1fr)); }
+  .account-profile { align-items: flex-start; flex-direction: column; }
+}
+@media (max-width: 420px) {
+  .star-rating { grid-template-columns: repeat(5,minmax(32px,1fr)); }
+  .header__account .dd__btn { max-width: 160px; }
+}

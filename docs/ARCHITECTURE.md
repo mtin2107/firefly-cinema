@@ -297,3 +297,14 @@ theo cùng điều kiện, không đổi schema DB. Frontend khóa ghế và nú
 - Seed real/mock dùng `6 + ((movie.id + index) % 5)`; mock nâng namespace dữ liệu lên v6 để không dùng điểm demo thang cũ. Dashboard giữ công thức trung bình.
 - RatingDialog dùng native modal, lấy summary mới khi mở; draft chỉ lưu khi xác nhận. Hiệu ứng GSAP qua motion.js có điều kiện MOTION_OK, dọn hạt/tween khi đóng, unmount hoặc đổi reduced motion; auto-close xác nhận 1,2 giây.
 - Schema cũ cần PO backup/checksum/integrity và reset theo HUONG_DAN mục T27. Không migrate/quy đổi hoặc thao tác DB thật trong implementation.
+
+## T28 — Tổng quan tài khoản và trạng thái phim hiệu lực (26/10/2026)
+
+- `GET /api/auth/me/summary`: cần bearer token như `/api/auth/me`; 401 dùng cùng thông báo tiếng Việt. Không đổi `UserOut`, `/me`, `/change-password`.
+- Response `AccountSummary`: `member_since`; `stats` gồm `bookings`, `paid`, `watched`, `total_spent`, `comments`, `ratings`; `favorite_genre`; 3 `recent_comments` mới nhất; tối đa 5 `ratings` mới nhất. Mọi truy vấn giới hạn theo người gọi. Bình luận của chính chủ giữ nguyên nội dung, cờ `hidden`, `is_anonymous`, `effective_negative` (nhãn người duyệt ưu tiên).
+- `bookings` loại expired/rejected; `paid` và chi tiêu chỉ tính paid; `watched` đếm checked_in_at khác null. Thể loại đếm theo phim của từng booking paid; hòa điểm chọn theo thứ tự chữ để real/mock ổn định.
+- Frontend gọi `api.auth.meSummary()` ở cả real/mock, dùng lại `api.bookings.mine()` cho vé gần đây. Form đổi tên/mật khẩu giữ luồng T14; lỗi tải số liệu không chặn form.
+- `taxonomy.effective_status(movie, today, sql=...)` là quy tắc chung backend: coming_soon có release_date <= hôm nay trả now_showing, các trạng thái khác giữ nguyên. Cùng quy tắc xây SQL CASE cho bộ lọc phim/chatbot và dùng trong MovieOut, quyền chấm điểm/bình luận qua ratings.require_rateable. Không UPDATE trạng thái DB.
+- `MovieOut.status` là trạng thái hiệu lực; `stored_status` là trạng thái lưu để danh sách/form admin giải thích tự chuyển. Mock dùng `effectiveStatus` ở utils/taxonomy.js, không ghi đè trạng thái lưu khi đọc. Admin từ chối Sắp chiếu có ngày <= hôm nay với 422 tiếng Việt.
+- T28 cho phép tạo phim không poster để dùng Poster màu theo AC-13; vẫn xác thực URL/file khi có ảnh. Không đổi schema DB, seed hay dữ liệu phim JSON.
+- Thông tin liên hệ chỉ khai báo trong `CONTACT` (config.js), Footer dùng lại trên mọi trang.

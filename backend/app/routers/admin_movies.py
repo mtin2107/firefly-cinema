@@ -1,3 +1,4 @@
+from ..taxonomy import effective_status
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy import delete, select
 from sqlalchemy.orm import Session
@@ -18,6 +19,8 @@ def _movie_or_404(db: Session, movie_id: int) -> Movie:
 
 
 def _values(body: MovieIn) -> dict:
+    if body.status == "coming_soon" and effective_status(body) != body.status:
+        raise HTTPException(422, "Phim sắp chiếu phải có ngày khởi chiếu sau hôm nay.")
     values = body.model_dump()
     values["genre"] = ", ".join(body.genre)
     values["formats"] = ", ".join(body.formats)
@@ -31,8 +34,6 @@ def list_admin_movies(_: User = Depends(require_admin), db: Session = Depends(ge
 
 @router.post("", response_model=MovieOut, status_code=201)
 def create_movie(body: MovieIn, _: User = Depends(require_admin), db: Session = Depends(get_db)):
-    if not body.poster_url:
-        raise HTTPException(422, "Hãy chọn ảnh poster hoặc dán đường dẫn poster.")
     movie = Movie(**_values(body), score=0)
     db.add(movie)
     db.commit()

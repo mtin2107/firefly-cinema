@@ -1,3 +1,4 @@
+from ..taxonomy import effective_status
 import unicodedata
 from datetime import datetime, timedelta
 from typing import Literal
@@ -74,7 +75,7 @@ def list_movies(
              .execution_options(populate_existing=True)
              .order_by(Movie.release_date.desc()))
     if status:
-        query = query.where(Movie.status == status)
+        query = query.where(effective_status(sql=True) == status)
     if country:
         query = query.where(Movie.country == country)
     if year:

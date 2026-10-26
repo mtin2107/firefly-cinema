@@ -3,9 +3,9 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from ..database import get_db
-from ..models import User
+from ..models import User, Booking, Comment, Rating
 from ..rate_limit import SlidingWindowRateLimiter
-from ..schemas import ChangePasswordIn, LoginIn, RegisterIn, TokenOut, UpdateProfileIn, UserOut
+from ..schemas import AccountSummary, ChangePasswordIn, LoginIn, RegisterIn, TokenOut, UpdateProfileIn, UserOut
 from ..security import hash_password, verify_password, create_token, get_current_user
 
 router = APIRouter(prefix="/api/auth", tags=["Tài khoản"])
@@ -77,3 +77,29 @@ def change_password(
     db.commit()
     _login_failures.clear(email)
     return {"detail": "Đã đổi mật khẩu."}
+
+
+@router.get("/me/summary", response_model=AccountSummary)
+def me_summary(user: User = Depends(get_current_user), db: Session = Depends(get_db)):
+    from collections import Counter
+    bookings = db.scalars(select(Booking).where(Booking.user_id == user.id)).all()
+    paid = [b for b in bookings if b.status == "paid"]
+    comments = db.scalars(select(Comment).where(Comment.user_id == user.id)
+                          .order_by(Comment.created_at.desc(), Comment.id.desc())).all()
+    ratings = db.scalars(select(Rating).where(Rating.user_id == user.id)
+                         .order_by(Rating.updated_at.desc(), Rating.id.desc())).all()
+    genres = Counter(g.strip() for b in paid for g in b.showtime.movie.genre.split(",") if g.strip())
+    return {
+        "member_since": user.created_at,
+        "stats": {"bookings": sum(b.status not in ("expired", "rejected") for b in bookings),
+                  "paid": len(paid), "watched": sum(b.checked_in_at is not None for b in bookings),
+                  "total_spent": sum(b.total for b in paid), "comments": len(comments), "ratings": len(ratings)},
+        "favorite_genre": sorted(genres, key=lambda g: (-genres[g], g))[0] if genres else None,
+        "recent_comments": [{"id": c.id, "movie_id": c.movie_id, "movie_title": c.movie.title,
+                             "content": c.content, "created_at": c.created_at, "is_anonymous": c.is_anonymous,
+                             "hidden": c.hidden,
+                             "effective_negative": bool(c.human_label if c.human_label is not None else c.is_negative)}
+                            for c in comments[:3]],
+        "ratings": [{"movie_id": r.movie_id, "movie_title": r.movie.title, "stars": r.stars,
+                     "updated_at": r.updated_at} for r in ratings[:5]],
+    }

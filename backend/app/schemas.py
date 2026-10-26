@@ -4,7 +4,7 @@ from urllib.parse import urlparse, parse_qs
 
 from typing import Literal
 
-from pydantic import BaseModel, ConfigDict, EmailStr, Field, field_validator
+from pydantic import BaseModel, ConfigDict, EmailStr, Field, field_validator, model_validator
 from pydantic_core import PydanticCustomError
 
 from .taxonomy import AGE_RATINGS, COUNTRIES, FORMATS, GENRES, MOVIE_STATUSES
@@ -57,6 +57,19 @@ class TokenOut(BaseModel):
 
 # ---------- Phim, suất chiếu ----------
 class MovieOut(ORM):
+    stored_status: str | None = None
+
+    @model_validator(mode="before")
+    @classmethod
+    def resolve_status(cls, value):
+        from .taxonomy import effective_status
+        values = dict(value) if isinstance(value, dict) else {
+            key: getattr(value, key) for key in cls.model_fields if hasattr(value, key)
+        }
+        values["stored_status"] = values.get("stored_status") or values["status"]
+        values["status"] = effective_status(values)
+        return values
+
     rating_avg: float = 0
     rating_count: int = 0
     id: int
@@ -502,3 +515,38 @@ class ChatMovieOut(BaseModel):
 class ChatOut(BaseModel):
     reply: str
     movies: list[ChatMovieOut] = Field(max_length=5)
+
+
+class AccountStats(BaseModel):
+    bookings: int
+    paid: int
+    watched: int
+    total_spent: int
+    comments: int
+    ratings: int
+
+
+class AccountComment(BaseModel):
+    id: int
+    movie_id: int
+    movie_title: str
+    content: str
+    created_at: datetime
+    is_anonymous: bool
+    hidden: bool
+    effective_negative: bool
+
+
+class AccountRating(BaseModel):
+    movie_id: int
+    movie_title: str
+    stars: int
+    updated_at: datetime
+
+
+class AccountSummary(BaseModel):
+    member_since: datetime
+    stats: AccountStats
+    favorite_genre: str | None
+    recent_comments: list[AccountComment]
+    ratings: list[AccountRating]

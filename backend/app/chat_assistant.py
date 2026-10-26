@@ -12,7 +12,7 @@ from .config import CHAT_API_KEY, CHAT_BASE_URL, CHAT_MODEL
 from .models import Movie, Showtime
 from .routers.movies import _plain, _split
 from .seats import VIP_ROWS, VIP_SURCHARGE
-from .taxonomy import GENRES
+from .taxonomy import GENRES, effective_status
 
 logger = logging.getLogger(__name__)
 _LOCAL_TZ = ZoneInfo("Asia/Ho_Chi_Minh")
@@ -61,7 +61,7 @@ def search_movies(db: Session, *, keyword=None, genre=None, status=None):
         return []
     query = select(Movie).order_by(Movie.release_date.desc(), Movie.id).limit(100)
     if status:
-        query = query.where(Movie.status == status)
+        query = query.where(effective_status(sql=True) == status)
     rows = db.scalars(query).all()
     if keyword:
         rows = [m for m in rows if _plain(str(keyword).strip()) in _plain(m.title)]
@@ -71,7 +71,7 @@ def search_movies(db: Session, *, keyword=None, genre=None, status=None):
     return [{
         "id": m.id, "title": m.title, "genre": m.genre,
         "duration_min": m.duration_min, "age_rating": m.age_rating,
-        "status": m.status, "description": (m.description or "")[:240],
+        "status": effective_status(m), "description": (m.description or "")[:240],
     } for m in rows[:12]]
 
 

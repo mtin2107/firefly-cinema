@@ -7,7 +7,7 @@ import { youtubeId } from "../utils/youtube";
 import MOVIES from "./movies.json";
 import { ApiError } from "./http";
 import { ROWS, COLS, totalPrice, MAX_SEATS_PER_BOOKING } from "../utils/seats";
-import { AGE_RATINGS, COUNTRY_LABELS, FORMAT_LABELS, GENRE_LABELS } from "../utils/taxonomy";
+import { effectiveStatus, AGE_RATINGS, COUNTRY_LABELS, FORMAT_LABELS, GENRE_LABELS } from "../utils/taxonomy";
 
 const DB_KEY = "firefly_mockdb_v6";
 const ROOMS = ["Phòng 1", "Phòng 2", "Phòng 3", "Phòng 4"];
@@ -75,7 +75,7 @@ function buildShowtimes(movies = MOVIES, existing = [], startId = 1) {
   const list = [];
   let id = startId;
   const today = new Date();
-  const nowShowing = movies.filter((movie) => movie.status === "now_showing");
+  const nowShowing = movies.filter((movie) => effectiveStatus(movie) === "now_showing");
 
   const addFirstAvailable = (movie, movieIndex, date, dayIndex, candidateIndexes) => {
     for (const timeIndex of candidateIndexes) {
@@ -273,7 +273,7 @@ const movieById = (id) => {
   const m = db.movies.find((x) => x.id === Number(id));
   if (!m) throw new ApiError("Không tìm thấy phim.", 404);
   const { rating_avg, rating_count } = ratingSummary(m.id);
-  return Object.assign(m, { rating_avg, rating_count });
+  return { ...m, stored_status: m.status, status: effectiveStatus(m), rating_avg, rating_count };
 };
 function ratingSummary(id) {
   const rows = db.ratings.filter((r) => r.movie_id === Number(id));
@@ -293,8 +293,8 @@ function ratingLimit(userId) {
 function saveRating(movieId, userId, stars) {
   if (!Number.isInteger(stars) || stars < 1 || stars > 10) throw new ApiError("Điểm phải từ 1 đến 10.", 422);
   const rating = db.ratings.find((r) => r.movie_id === Number(movieId) && r.user_id === userId);
-  if (rating) rating.stars = stars;
-  else db.ratings.push({ movie_id: Number(movieId), user_id: userId, stars, created_at: new Date().toISOString() });
+  if (rating) { rating.stars = stars; rating.updated_at = nowIso(); }
+  else db.ratings.push({ movie_id: Number(movieId), user_id: userId, stars, updated_at: nowIso(), created_at: new Date().toISOString() });
 }
 function ownsComment(c) {
   try { return currentUser().id === c.user_id; } catch { return false; }
@@ -435,6 +435,7 @@ function validateMovie(payload) {
   if (!AGE_RATINGS.includes(value.age_rating)) fail("Phân loại độ tuổi phải là P, T13, T16 hoặc T18.");
   if (!/^\d{4}-\d{2}-\d{2}$/.test(value.release_date ?? "") || Number.isNaN(new Date(`${value.release_date}T00:00:00Z`).getTime()) || new Date(`${value.release_date}T00:00:00Z`).toISOString().slice(0, 10) !== value.release_date) fail("Ngày phát hành phải là ngày hợp lệ theo dạng YYYY-MM-DD.");
   if (!["now_showing", "coming_soon", "ended"].includes(value.status)) fail("Trạng thái phim không hợp lệ.");
+  if (value.status === "coming_soon" && effectiveStatus(value) !== value.status) fail("Phim sắp chiếu phải có ngày khởi chiếu sau hôm nay.");
   if (!COUNTRY_LABELS.includes(value.country)) fail("Quốc gia không thuộc danh mục cho phép.");
   const badFormat = value.formats.find((item) => !FORMAT_LABELS.includes(item));
   if (badFormat) fail(`Định dạng không hợp lệ: ${badFormat}.`);
@@ -496,9 +497,10 @@ function mockChat(messages) {
   const titleMatch = db.movies.find((m) => question.includes(plain(m.title)));
   // "hài" becomes "hai" after normalization; it is a genre, not a price keyword.
   const wantsComedy = /(?:^|\s)(?:phim hai|the loai hai|hai huoc|phim cuoi)(?:\s|$)/.test(question);
-  let films = titleMatch ? [titleMatch] : db.movies.filter((m) => m.status === "now_showing").slice(0, 3);
+  const requestedStatus = question.includes("sap chieu") ? "coming_soon" : question.includes("ngung chieu") ? "ended" : "now_showing";
+  let films = titleMatch ? [titleMatch] : db.movies.filter((m) => effectiveStatus(m) === requestedStatus).slice(0, 3);
   if (wantsComedy && !titleMatch) {
-    films = db.movies.filter((m) => m.status === "now_showing" &&
+    films = db.movies.filter((m) => effectiveStatus(m) === requestedStatus &&
       m.genre.split(",").some((genre) => plain(genre.trim()) === "hai huoc")).slice(0, 3);
   }
   if (question.includes("thuong") || question.includes("vip") || question.includes("gia")) {
@@ -522,7 +524,7 @@ export const mockApi = {
       await wait();
       if (db.users.some((u) => u.email === email.toLowerCase())) throw new ApiError("Email này đã được đăng ký.", 400);
       if (password.length < 6) throw new ApiError("Mật khẩu cần ít nhất 6 ký tự.", 400);
-      const user = { id: db.seq.user++, full_name, email: email.toLowerCase(), password, role: "user" };
+      const user = { id: db.seq.user++, full_name, email: email.toLowerCase(), password, role: "user", created_at: nowIso() };
       db.users.push(user); save();
       return { access_token: tokenFor(user), user: publicUser(user) };
     },
@@ -531,6 +533,29 @@ export const mockApi = {
       const user = db.users.find((u) => u.email === email.toLowerCase() && u.password === password);
       if (!user) throw new ApiError("Email hoặc mật khẩu không đúng.", 401);
       return { access_token: tokenFor(user), user: publicUser(user) };
+    },
+    async meSummary() {
+      await wait();
+      const user = currentUser();
+      const bookings = db.bookings.filter((b) => b.user_id === user.id);
+      const paid = bookings.filter((b) => b.status === "paid");
+      const comments = db.comments.filter((c) => c.user_id === user.id).sort((a,b) => b.created_at.localeCompare(a.created_at) || b.id-a.id);
+      const ratings = db.ratings.filter((r) => r.user_id === user.id).sort((a,b) => (b.updated_at || b.created_at || "").localeCompare(a.updated_at || a.created_at || ""));
+      const genres = {};
+      paid.forEach((b) => {
+        const st = db.showtimes.find((s) => s.id === b.showtime_id);
+        movieById(st.movie_id).genre.split(",").map((g) => g.trim()).filter(Boolean).forEach((g) => { genres[g] = (genres[g] || 0) + 1; });
+      });
+      return clone({ member_since: user.created_at || "2026-10-24T08:00:00",
+        stats: { bookings: bookings.filter((b) => !["expired", "rejected"].includes(b.status)).length,
+          paid: paid.length, watched: bookings.filter((b) => b.checked_in_at).length,
+          total_spent: paid.reduce((n,b) => n+b.total,0), comments: comments.length, ratings: ratings.length },
+        favorite_genre: Object.keys(genres).sort((a,b) => genres[b]-genres[a] || (a < b ? -1 : a > b ? 1 : 0))[0] || null,
+        recent_comments: comments.slice(0,3).map((c) => ({ id:c.id, movie_id:c.movie_id, movie_title:movieById(c.movie_id).title,
+          content:c.content, created_at:c.created_at, is_anonymous:!!c.is_anonymous, hidden:!!c.hidden,
+          effective_negative:!!(c.human_label ?? c.is_negative) })),
+        ratings: ratings.slice(0,5).map((r) => ({ movie_id:r.movie_id, movie_title:movieById(r.movie_id).title,
+          stars:r.stars, updated_at:r.updated_at || r.created_at || "2026-10-24T08:00:00" })) });
     },
     async me() { await wait(100); return publicUser(currentUser()); },
     async updateMe({ full_name }) {
@@ -956,7 +981,7 @@ export const mockApi = {
         await wait();
         if (currentUser().role !== "admin") throw new ApiError("Chỉ quản trị viên mới xem được trang này.", 403);
         const value = validateMovie(payload);
-        if (!value.poster_url) throw new ApiError("Hãy chọn ảnh poster hoặc dán đường dẫn poster.", 422);
+
         const movie = { id: db.seq.movie++, ...value, genre: value.genre.join(", "), formats: value.formats.join(", "), score: 0 };
         db.movies.push(movie); save();
         return clone(movieById(movie.id));
@@ -966,7 +991,7 @@ export const mockApi = {
         if (currentUser().role !== "admin") throw new ApiError("Chỉ quản trị viên mới xem được trang này.", 403);
         const movie = movieById(id);
         const value = validateMovie(payload);
-        Object.assign(movie, value, { genre: value.genre.join(", "), formats: value.formats.join(", ") });
+        Object.assign(db.movies.find((m) => m.id === movie.id), value, { genre: value.genre.join(", "), formats: value.formats.join(", ") });
         save();
         return clone(movieById(movie.id));
       },

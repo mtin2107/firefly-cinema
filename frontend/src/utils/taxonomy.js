@@ -84,3 +84,9 @@ export function readFilters(searchParams) {
 }
 
 export const exploreLink = (key, slug) => `/kham-pha?${key}=${slug}`;
+
+
+export function effectiveStatus(movie, today = new Date()) {
+  const day = typeof today === "string" ? today : `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, "0")}-${String(today.getDate()).padStart(2, "0")}`;
+  return movie.status === "coming_soon" && movie.release_date <= day ? "now_showing" : movie.status;
+}

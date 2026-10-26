@@ -36,14 +36,14 @@ Trước khi áp dụng workflow: giao diện React đầy đủ (`giao-dien-v1`
 
 ## 4. Current Project Status
 ```
-Overall Status: IN_PROGRESS
-Phase: T27 đã merge `f48922a`, DB đã reset (ratings 1–10); T28 IN_PROGRESS (PO yêu cầu 26/10); T13 lùi sau T28
-Current Active Task: T28 — IN_PROGRESS
+Overall Status: CLAUDE_REVIEW
+Phase: T27 đã merge `f48922a`, DB đã reset (ratings 1–10); T28 CLAUDE_REVIEW (triển khai 26–27/10); T13 lùi sau T28
+Current Active Task: T28 — CLAUDE_REVIEW
 Ngày bắt đầu sản phẩm: 05/10/2026 · Hạn: 01/11/2026
 ```
 
 ## 5. Current Active Task
-**T28 — IN_PROGRESS (26/10/2026).** PO yêu cầu trong chat sau buổi test: sửa UI-01..03, FX-01..04 theo `reports/2026-10-26/claude_audit_hieu_ung_giao_dien_2026-10-26.md` và làm trang Tài khoản mức A. Không đổi schema. Task Record do Claude soạn theo yêu cầu PO; Claude vẫn review độc lập. Nhánh `task/T28-giao-dien-tai-khoan` từ master `bca6d23`.
+**T28 — CLAUDE_REVIEW (27/10/2026).** Codex triển khai trên `task/T28-giao-dien-tai-khoan` từ master `bca6d23`: UI-01..05, FX-01..04, trạng thái hiệu lực theo ngày dùng chung backend/mock, summary tài khoản real/mock và Account 5 khối; không đổi schema, không sửa movies.json/models.py/seed.py/:root, không thêm thư viện. Focused 8/8; full trước 0h 209/209, lượt cuối sau 0h 208 đạt +1 lỗi OBS-01 T27 (tái hiện cùng lỗi trên bản sao master). Compile/build real+mock/health PhoBERT B trên SQLite tạm, hồi quy real/mock, số đo và ảnh 375/1280, AC-13 tạo phim 200 ký tự qua form admin đã thực thi. Report: `reports/2026-10-27/codex_implementation_T28_2026-10-27.md`; chỉ mục ảnh: `reports/2026-10-27/codex_evidence_T28_2026-10-27.md`. Chờ Claude review độc lập; Codex không tự PASS/merge, không mở T13.
 
 **T27 — PO_REVIEW.** Claude review **PASS_WITH_TODO** trên `73a57f6`: scope 19/19, RF 0, TODO-01 Low (validator dựa vào tên lớp), OBS-01 (`test_sentiment` T21 fail 0h–7h, fail cả trên master). compileall 0, pytest 200 pass + 1 fail OBS-01, build real/mock đạt; probe API/constraint, browser hiệu ứng/giảm chuyển động/375/mock đạt. Report: `reports/2026-10-25/claude_review_T27_PASS_WITH_TODO_2026-10-25.md`. Đổi schema: reset DB sau merge.
 
@@ -94,7 +94,7 @@ Trước đó — Codex: Codex hoàn tất 24/10/2026: upload raw/Range, synopsi
 | T25 | Banner trailer và mục Nội dung phim (đổi schema) | Web | 4 | T24 | [T25.md](tasks/T25.md) | PO_REVIEW — Claude PASS_WITH_TODO trên `03e0d44`; RF 0; TODO-01/02 Low; pytest 194/194; PO đã merge `6d49d16`, DB thật reset 24/10 (bản sao `backup/db-truoc-T25`) |
 | T26 | Khung đánh giá sao bật lên khi bấm vào điểm | Web | 4 | T25 | [T26.md](tasks/T26.md) | PO_REVIEW — Claude PASS_WITH_TODO trên `cffc533`; RF 0; TODO-01 Low; pytest 194/194; PO đã merge `c1916c6` |
 | T27 | Thang điểm 10 và khung đánh giá có hiệu ứng (đổi schema) | Web | 4 | T26 | [T27.md](tasks/T27.md) | PO_REVIEW — Claude PASS_WITH_TODO trên `73a57f6`; RF 0; TODO-01 Low; PO đã merge `f48922a`, DB đã reset |
-| T28 | Sửa lỗi hiển thị, hiệu ứng và trang tài khoản | Web | 4 | T27 | [T28.md](tasks/T28.md) | IN_PROGRESS — Codex triển khai từ master bca6d23; không đổi schema |
+| T28 | Sửa lỗi hiển thị, hiệu ứng và trang tài khoản | Web | 4 | T27 | [T28.md](tasks/T28.md) | CLAUDE_REVIEW — Codex bàn giao 27/10; không đổi schema; OBS-01 T27 có đối chiếu master |
 
 Chuỗi chính: `T00 → T01 → T02` và `T03 → T08 → T09 → T10`. T03 bắt đầu ngay ngày đầu (song song).
 

@@ -26,6 +26,7 @@ export const realApi = {
   auth: {
     register: (payload) => request("/api/auth/register", { method: "POST", body: payload }),
     login: (payload) => request("/api/auth/login", { method: "POST", body: payload }),
+    meSummary: () => request("/api/auth/me/summary"),
     me: () => request("/api/auth/me"),
     updateMe: (payload) => request("/api/auth/me", { method: "PATCH", body: payload }),
     changePassword: (payload) => request("/api/auth/change-password", { method: "POST", body: payload }),

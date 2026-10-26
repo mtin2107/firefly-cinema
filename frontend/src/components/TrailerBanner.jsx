@@ -10,7 +10,7 @@ export default function TrailerBanner({ movie }) {
   const [failed, setFailed] = useState(false);
   const id = youtubeId(movie.trailer_url);
   return (
-    <div className="trailer">
+    <div className={`trailer${movie.trailer_url ? "" : " trailer--static"}`}>
       <div className="trailer__banner">
         {playing ? failed ? <p role="alert">Không phát được video trailer.</p>
           : id ? <iframe src={`https://www.youtube-nocookie.com/embed/${id}?autoplay=1&rel=0`}
@@ -19,6 +19,7 @@ export default function TrailerBanner({ movie }) {
           : <>
             <Poster movie={movie} size="lg" />
             <div className="trailer__shade" />
+            {!movie.trailer_url && <h2 className="trailer__title">{movie.title}</h2>}
             {movie.trailer_url && <button type="button" className="trailer__play" aria-label={`Xem trailer phim ${movie.title}`} onClick={() => setPlaying(true)}>▶</button>}
           </>}
       </div>

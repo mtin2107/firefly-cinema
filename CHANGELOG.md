@@ -34,3 +34,12 @@
 - Khung đánh giá có poster, vòng điểm, 5 thanh phân bố, 10 sao và nhãn tiếng Việt; giữ lưu/hủy/đóng và focus của T26.
 - GSAP mở khung, nảy sao, đom đóm và cập nhật điểm khi lưu; hỗ trợ giảm chuyển động, tự dọn hiệu ứng. Focus đơn thuần không tô sao (T26 TODO-01).
 - Đổi constraint SQLite; PO cần sao lưu/xác minh rồi reset sau merge theo HUONG_DAN mục T27. Implementation chỉ dùng SQLite tạm.
+
+## T28 — 26/10/2026
+
+- Sửa quy tắc chung cho dấu tiếng Việt, căn hàng thẻ phim, header, banner không trailer và poster phụ ở hero; không vá từng phim hoặc movies.json.
+- Trạng thái phim hiệu lực theo ngày dùng chung ở API/SQL filter, chấm điểm, chatbot và mock; admin báo lỗi ngày Sắp chiếu không hợp lệ và giải thích trạng thái tự chuyển.
+- Sửa tween sao khi rời chuột nhanh, tăng vùng bấm và khoảng cách, 2 hàng trên màn hình hẹp; tôn trọng giảm chuyển động.
+- Thêm GET /api/auth/me/summary và trang Tài khoản gồm hồ sơ, 6 số liệu, vé/bình luận/điểm gần đây, cài đặt; giữ logic đổi tên và mật khẩu T14.
+- Footer có Liên hệ, dữ liệu tập trung ở CONTACT; cho phép Poster màu khi thêm phim không ảnh theo T28 AC-13.
+- Thêm test T28 về thống kê riêng tư/nhãn duyệt và trạng thái ngày hôm qua/hôm nay/ngày mai; điều chỉnh hai test cũ bị ảnh hưởng trực tiếp. Không đổi schema DB, không thêm thư viện, không đổi biến :root.

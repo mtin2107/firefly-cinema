@@ -82,9 +82,11 @@ def test_upload_requires_admin(client, auth_headers, posters_dir):
     assert not (posters_dir / "posters").exists()
 
 
-def test_create_requires_poster_and_accepts_links(client, auth_headers, movie_payload, posters_dir):
+def test_create_optional_poster_and_accepts_links(client, auth_headers, movie_payload, posters_dir):
     headers = auth_headers["admin"]
-    assert client.post("/api/admin/movies", json=movie_payload, headers=headers).json() == {"detail": POSTER_MESSAGE}
+    result = client.post("/api/admin/movies", json=movie_payload, headers=headers)
+    assert result.status_code == 201
+    assert result.json()["poster_url"] is None
     for url in ("https://example.com/poster.jpg", "/uploads/posters/" + "a" * 32 + ".jpg"):
         result = client.post("/api/admin/movies", json={**movie_payload, "poster_url": url}, headers=headers)
         assert result.status_code == 201

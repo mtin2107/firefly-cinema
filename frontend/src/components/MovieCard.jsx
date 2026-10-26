@@ -47,12 +47,12 @@ export default function MovieCard({ movie }) {
         <Poster movie={movie} />
       </Link>
       <div className="movie-card__body">
-        <h3 className="movie-card__title"><Link to={detail} state={{ intro: movie }}>{movie.title}</Link></h3>
+        <h3 className="movie-card__title" title={movie.title}><Link to={detail} state={{ intro: movie }}>{movie.title}</Link></h3>
         <p className="movie-card__meta">
           <AgeBadge rating={movie.age_rating} /> {duration(movie.duration_min)}
         </p>
         <p className="score">{ratingText(movie)}</p>
-        <p className="movie-card__meta muted">{movie.genre}</p>
+        <p className="movie-card__meta muted movie-card__genre" title={movie.genre}>{movie.genre}</p>
         {showing
           ? <Link to={`${detail}#lich-chieu`} state={{ intro: movie }} className="btn btn--primary btn--sm btn--block">Đặt vé</Link>
           : movie.status === "coming_soon"

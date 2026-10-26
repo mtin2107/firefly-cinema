@@ -1,4 +1,5 @@
 """Viewer ratings; one atomic upsert per user and movie."""
+from ..taxonomy import effective_status
 from datetime import datetime
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy import select, func
@@ -16,7 +17,7 @@ _rating_limits = SlidingWindowRateLimiter()
 
 
 def require_rateable(movie):
-    if movie.status == "coming_soon":
+    if effective_status(movie) == "coming_soon":
         raise HTTPException(400, "Phim sắp chiếu chưa nhận bình luận hoặc chấm sao.")
 
 

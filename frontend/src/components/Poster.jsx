@@ -10,7 +10,7 @@ export default function Poster({ movie, size = "md" }) {
     <div className={`poster poster--${size}`} style={{ "--p-bg": movie.poster_bg, "--p-fg": movie.poster_fg }}
       role="img" aria-label={`Poster phim ${movie.title}`}>
       <span className="poster__rating">{movie.age_rating}</span>
-      <span className="poster__title">{movie.title}</span>
+      <span className="poster__title" title={movie.title}>{movie.title}</span>
       <span className="poster__genre">{movie.genre}</span>
     </div>
   );

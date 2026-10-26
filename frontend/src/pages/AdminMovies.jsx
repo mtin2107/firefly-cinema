@@ -3,7 +3,7 @@ import { useEffect, useRef, useState } from "react";
 import { api } from "../api";
 import Poster from "../components/Poster";
 import { Empty, ErrorState, Loading } from "../components/StateViews";
-import { AGE_RATINGS, COUNTRY_LABELS, FORMAT_LABELS, GENRE_LABELS } from "../utils/taxonomy";
+import { effectiveStatus, AGE_RATINGS, COUNTRY_LABELS, FORMAT_LABELS, GENRE_LABELS } from "../utils/taxonomy";
 
 const STATUS_OPTIONS = [
   { value: "now_showing", label: "Đang chiếu" },
@@ -29,8 +29,8 @@ function validate(form, editingId, selectedPoster) {
   if (!form.release_date) errors.release_date = "Hãy nhập ngày phát hành hợp lệ.";
   if (!/^#[0-9a-f]{6}$/i.test(form.poster_bg)) errors.poster_bg = "Màu nền phải có dạng #rrggbb.";
   if (!/^#[0-9a-f]{6}$/i.test(form.poster_fg)) errors.poster_fg = "Màu chữ phải có dạng #rrggbb.";
-  if (!editingId && !selectedPoster && !form.poster_url.trim()) errors.poster_url = "Hãy chọn ảnh poster hoặc dán đường dẫn poster.";
   if (!selectedPoster && form.poster_url && !/^(https?:\/\/|\/uploads\/posters\/[0-9a-f]{32}\.(jpg|png|webp)$|data:image\/(jpeg|png|webp);base64,)/i.test(form.poster_url)) errors.poster_url = "Đường dẫn poster phải bắt đầu bằng http:// hoặc https://.";
+  if (form.status === "coming_soon" && effectiveStatus(form) !== form.status) errors.release_date = "Phim sắp chiếu phải có ngày khởi chiếu sau hôm nay.";
   return errors;
 }
 
@@ -142,7 +142,7 @@ export default function AdminMovies() {
       duration_min: String(movie.duration_min),
       age_rating: movie.age_rating,
       release_date: movie.release_date,
-      status: movie.status,
+      status: movie.stored_status || movie.status,
       country: movie.country,
       formats: split(movie.formats),
       director: movie.director,
@@ -267,7 +267,7 @@ export default function AdminMovies() {
               {(form.trailer_url || selectedVideo) && <button type="button" className="btn btn--ghost btn--sm" onClick={() => { clearVideo(); update("trailer_url", ""); setFieldErrors((current) => ({ ...current, trailer_file: "" })); }}>Gỡ trailer</button>}
             </fieldset>
             <label className="field"><span>Mô tả</span><textarea rows="4" value={form.description} onChange={(event) => update("description", event.target.value)} /></label>
-            <label className="field"><span>{editingId ? "Đường dẫn poster (không bắt buộc)" : "Đường dẫn poster (hoặc chọn ảnh từ máy) *"}</span><input type="url" placeholder="https://..." value={form.poster_url} onChange={(event) => update("poster_url", event.target.value)} aria-invalid={Boolean(fieldErrors.poster_url)} />{fieldErrors.poster_url && <span className="field__error">{fieldErrors.poster_url}</span>}</label>
+            <label className="field"><span>{editingId ? "Đường dẫn poster (không bắt buộc)" : "Đường dẫn poster (không bắt buộc)"}</span><input type="url" placeholder="https://..." value={form.poster_url} onChange={(event) => update("poster_url", event.target.value)} aria-invalid={Boolean(fieldErrors.poster_url)} />{fieldErrors.poster_url && <span className="field__error">{fieldErrors.poster_url}</span>}</label>
             <div className="field movie-form__poster-upload">
               <label htmlFor="movie-poster-file">Chọn ảnh poster từ máy</label>
               <input ref={fileInputRef} id="movie-poster-file" type="file" accept="image/jpeg,image/png,image/webp" onChange={selectPoster} aria-invalid={Boolean(fieldErrors.poster_file)} aria-describedby={fieldErrors.poster_file ? "movie-poster-file-error" : undefined} />
@@ -305,7 +305,7 @@ export default function AdminMovies() {
                     <td><div className="admin-movie-title"><Poster movie={movie} size="sm" /><div><strong>{movie.title}</strong><span className="muted">{movie.duration_min} phút · {movie.age_rating}</span></div></div></td>
                     <td>{movie.genre}</td>
                     <td>{movie.release_date}</td>
-                    <td><span className="label label--ok">{statusLabel(movie.status)}</span></td>
+                    <td><span className="label label--ok">{statusLabel(movie.status)}</span>{movie.stored_status && movie.stored_status !== movie.status && <small className="muted"> tự chuyển từ Sắp chiếu</small>}</td>
                     <td><div className="admin-movie-actions"><button type="button" className="btn btn--ghost btn--sm" onClick={() => startEdit(movie)}>Sửa</button><button type="button" className="btn btn--danger btn--sm" onClick={() => remove(movie)}>Xóa</button></div></td>
                   </tr>
                 ))}</tbody>

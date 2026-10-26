@@ -11,7 +11,7 @@ export default function StarRating({ value, onChange, disabled = false, max = 10
     const buttons = rootRef.current?.querySelectorAll("button");
     if (buttons) { gsap.killTweensOf(buttons); gsap.set(buttons, { clearProps: "transform" }); }
     return () => { if (buttons) gsap.killTweensOf(buttons); };
-  }, [reduced]);
+  }, [reduced, disabled]);
   const [preview, setPreview] = useState(null);
   const { user } = useAuth();
   const navigate = useNavigate();
@@ -25,7 +25,7 @@ export default function StarRating({ value, onChange, disabled = false, max = 10
     {Array.from({ length: max }, (_, i) => i + 1).map((stars) => <button key={stars} type="button"
       aria-label={`Chấm ${stars} điểm`} aria-pressed={value === stars} disabled={disabled}
       className={`star-rating__button${stars <= (preview ?? value ?? 0) ? " star-rating__button--active" : ""}`}
-      onMouseEnter={(event) => { setPreview(stars); if (window.matchMedia(MOTION_OK).matches) gsap.to(event.currentTarget, { scale: 1.2, duration: 0.15 }); }} onMouseLeave={(event) => gsap.set(event.currentTarget, { scale: 1 })}
+      onMouseEnter={(event) => { setPreview(stars); if (!disabled && !reduced && window.matchMedia(MOTION_OK).matches) gsap.to(event.currentTarget, { scale: 1.2, duration: 0.15, overwrite: true }); }} onMouseLeave={(event) => { gsap.killTweensOf(event.currentTarget); gsap.set(event.currentTarget, { clearProps: "transform" }); }}
       onClick={(event) => choose(stars, event)}>★</button>)}
   </div><p className="rating-label">{(preview ?? value) ? `${preview ?? value} điểm · ${ratingLabels[(preview ?? value) - 1]}` : "Chọn điểm của bạn"}</p></div>;
 }

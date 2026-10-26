@@ -1,4 +1,5 @@
 """T22: API contracts, anonymity, ownership, aggregates and DB constraints."""
+from datetime import date, timedelta
 import pytest
 from sqlalchemy import select, func, event
 from sqlalchemy.exc import IntegrityError
@@ -51,6 +52,7 @@ def test_auth_missing_movies_and_coming_soon(client, db, movie, auth_headers):
         assert getattr(client, method)("/api/movies/99999" + suffix,
                                         headers=auth_headers["user"], **kwargs).status_code == 404
     movie.status = "coming_soon"
+    movie.release_date = (date.today() + timedelta(days=1)).isoformat()
     db.commit()
     for method, suffix, payload in [("put", "/rating", {"stars": 3}),
                                     ("post", "/comments", {"content": "Phim hay"})]:

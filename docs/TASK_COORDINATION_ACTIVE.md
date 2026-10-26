@@ -36,13 +36,15 @@ Trước khi áp dụng workflow: giao diện React đầy đủ (`giao-dien-v1`
 
 ## 4. Current Project Status
 ```
-Overall Status: PO_REVIEW
-Phase: T28 Claude round 3 PASS (vòng sửa 2 R2-01/R2-02), chờ PO merge (không reset DB); T13 READY_FOR_HANDOFF sau khi merge T28
-Current Active Task: T28 — PO_REVIEW
+Overall Status: READY_FOR_HANDOFF
+Phase: T28 đã merge vào master `419b07e` và push (27/10); T29 READY_FOR_HANDOFF (PO yêu cầu 27/10, đổi schema); T13 lùi sau T29
+Current Active Task: T29 — READY_FOR_HANDOFF
 Ngày bắt đầu sản phẩm: 05/10/2026 · Hạn: 01/11/2026
 ```
 
 ## 5. Current Active Task
+**T29 — READY_FOR_HANDOFF (27/10/2026).** PO chốt trong chat: sửa lỗi hồi quy T28 (menu tài khoản 2 cột ở ≤1360px), menu và trang Tài khoản mới (khách 4 thẻ, admin "việc cần làm"), ngày sinh, giới tính, ảnh đại diện, đổi email bằng mật khẩu, chặn đặt vé theo tuổi. **Đổi schema** (3 cột `users`), reset DB sau merge. Task Record do Claude soạn theo yêu cầu PO; Claude vẫn review độc lập. Nhánh `task/T29-tai-khoan` từ master.
+
 **T28 — PO_REVIEW.** Claude review round 3 **PASS** trên `5b27199`: R2-01 (tên dài 1 hàng, chạy chữ khi tràn; hover/focus trên máy có chuột, tự chạy trên cảm ứng, 2 dòng khi giảm chuyển động) và R2-02 (poster phụ hero hiện lại tên) đạt; RF 0; OBS-01..06 round 1 chờ PO. Report: `reports/2026-10-27/claude_review_T28_round3_PASS_2026-10-27.md`. Không đổi schema.
 
 **T28 — CLAUDE_REVIEW (vòng sửa 2, 27/10/2026).** Codex triển khai R2-01/R2-02 theo mục 14, baseline `00c5bdf`: MovieCard đo scrollWidth/clientWidth bằng ResizeObserver, chỉ chạy tên tràn; hover/focus trên chuột, tự chạy ~40px/giây và dừng 1,5 giây ở đầu/cuối trên cảm ứng; reduced motion dừng và tối đa 2 dòng. Bỏ CSS ẩn chữ poster phụ; HeroCarousel.jsx và utils/motion.js không đổi. Probe real/mock 375/1280: lệch hàng tối đa 0/0.03125px, không tràn; ảnh hero trước/sau 1280/1440; fixture tên 200 ký tự; compileall/build real+mock/health DB tạm đã chạy. Pytest 00:41:06–00:42:24 +07:00: 208 đạt +1 lỗi duy nhất OBS-01 T27 (ngoại lệ 0h–7h). Đổi schema: Không. Report: `reports/2026-10-27/codex_fix_T28_round2_2026-10-27.md`. Chờ Claude xác minh độc lập; không tự PASS/merge, không mở T13.
@@ -70,7 +72,7 @@ Trước đó — Codex: Codex hoàn tất 24/10/2026: upload raw/Range, synopsi
 **T24 — PO_REVIEW.** Claude review **PASS** trên `32e6b4d`: AC 8/8, RF 0, OBS-01 (thẻ Điểm sao xuống dòng). compileall 0, pytest 148/148, build/mock đạt. Report: `reports/2026-10-22/claude_review_T24_PASS_2026-10-22.md`. Trước đó: PO duyệt Task Record ngày 22/10/2026; Codex triển khai trên `task/T24-sua-loi-ra-soat`. Không mở T13.
 
 ## 6. Current Task Record
-[docs/tasks/T28.md](tasks/T28.md) — PO yêu cầu 26/10/2026.
+[docs/tasks/T29.md](tasks/T29.md) — PO yêu cầu 27/10/2026.
 
 ## 7. Roadmap và trạng thái
 | ID | Task | Loại | Tuần | Phụ thuộc | Task Record | Trạng thái |
@@ -88,7 +90,7 @@ Trước đó — Codex: Codex hoàn tất 24/10/2026: upload raw/Range, synopsi
 | T10 | Gắn model B vào web | Web | 3 | T07, T09 | [T10.md](tasks/T10.md) | DONE / CLOSED — PO APPROVED_WITH_NOTES; Claude Final PASS_WITH_TODO; AC 7/7; Technical DoD MET; RF 0; fast-forward merge + annotated tag `phobert-B` VERIFIED tại `857a8272` |
 | T11 | Kiểm thử tự động và sửa lỗi | Web | 4 | T04–T10 | [T11.md](tasks/T11.md) | DONE / CLOSED — Claude PASS_WITH_TODO; PO APPROVED_WITH_NOTES; AC 6/6; DoD MET; RF 0; merge `06dd44f0` VERIFIED |
 | T12 | Dữ liệu demo và kịch bản bảo vệ | Web | 4 | T10, T20 | [T12.md](tasks/T12.md) | DONE / CLOSED — PO duyệt, merge `0a717e9`; TODO-01: PO chưa quyết định — giữ mở, xử lý trước T13 |
-| T13 | Chốt v1.0 và sao lưu | Tất cả | 4 | T12, T14, T15, T20, T21, T22, T23, T24, T25, T26, T27, T28 | [T13.md](tasks/T13.md) | READY_FOR_HANDOFF — sau khi PO merge T28; prompt ở mục 8 report Claude T28, PO điền quyết định T12 TODO-01/T14 TODO-02/T25 TODO-01..02/T27 TODO-01/T28 TODO-01 trước khi gửi |
+| T13 | Chốt v1.0 và sao lưu | Tất cả | 4 | T12, T14, T15, T20, T21, T22, T23, T24, T25, T26, T27, T28, T29 | [T13.md](tasks/T13.md) | PLANNED — chờ T29 merge (PO thêm T29 ngày 27/10); prompt ở mục 8 report Claude T28, PO điền quyết định T12 TODO-01/T14 TODO-02/T25 TODO-01..02/T27 TODO-01/T28 TODO-01 trước khi gửi |
 | T14 | Hủy vé giữ chỗ, đổi mật khẩu | Web | 4 | T20 | [T14.md](tasks/T14.md) | PO_REVIEW — Claude Round 2 PASS_WITH_TODO; TODO-01 CLOSED; AC 5/5; RF 0 |
 | T15 | Thử nghiệm có tách từ | ML | 4 | T09 | [T15.md](tasks/T15.md) | DONE / CLOSED — PO approved trong chat 16/10, merge vào `master`; Claude PASS_WITH_TODO; TODO-01 PO_ATTESTED (bằng chứng tái lập trên Drive), TODO-02..04 ACCEPT_LATER → T13 |
 | T16 | Giữ chỗ có hạn và thanh toán QR (đổi schema) | Web | phát triển thêm | T11 | [T16.md](tasks/T16.md) | DONE / CLOSED — PO APPROVED, merge theo PO; Claude PASS_WITH_TODO, AC 12/12, RF 0, TODO-01..07 preserved |
@@ -104,7 +106,8 @@ Trước đó — Codex: Codex hoàn tất 24/10/2026: upload raw/Range, synopsi
 | T25 | Banner trailer và mục Nội dung phim (đổi schema) | Web | 4 | T24 | [T25.md](tasks/T25.md) | PO_REVIEW — Claude PASS_WITH_TODO trên `03e0d44`; RF 0; TODO-01/02 Low; pytest 194/194; PO đã merge `6d49d16`, DB thật reset 24/10 (bản sao `backup/db-truoc-T25`) |
 | T26 | Khung đánh giá sao bật lên khi bấm vào điểm | Web | 4 | T25 | [T26.md](tasks/T26.md) | PO_REVIEW — Claude PASS_WITH_TODO trên `cffc533`; RF 0; TODO-01 Low; pytest 194/194; PO đã merge `c1916c6` |
 | T27 | Thang điểm 10 và khung đánh giá có hiệu ứng (đổi schema) | Web | 4 | T26 | [T27.md](tasks/T27.md) | PO_REVIEW — Claude PASS_WITH_TODO trên `73a57f6`; RF 0; TODO-01 Low; PO đã merge `f48922a`, DB đã reset |
-| T28 | Sửa lỗi hiển thị, hiệu ứng và trang tài khoản | Web | 4 | T27 | [T28.md](tasks/T28.md) | PO_REVIEW — Claude round 3 PASS trên `5b27199` (vòng sửa 2); RF 0; không reset DB |
+| T28 | Sửa lỗi hiển thị, hiệu ứng và trang tài khoản | Web | 4 | T27 | [T28.md](tasks/T28.md) | PO đã merge `419b07e` (27/10), chờ closure ở T13; trước đó PO_REVIEW — Claude round 3 PASS trên `5b27199` (vòng sửa 2); RF 0; không reset DB |
+| T29 | Tài khoản người dùng và quản trị (đổi schema) | Web | 4 | T28 | [T29.md](tasks/T29.md) | READY_FOR_HANDOFF — PO yêu cầu 27/10; reset DB sau merge |
 
 Chuỗi chính: `T00 → T01 → T02` và `T03 → T08 → T09 → T10`. T03 bắt đầu ngay ngày đầu (song song).
 

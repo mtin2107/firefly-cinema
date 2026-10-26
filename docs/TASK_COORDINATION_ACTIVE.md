@@ -36,9 +36,9 @@ Trước khi áp dụng workflow: giao diện React đầy đủ (`giao-dien-v1`
 
 ## 4. Current Project Status
 ```
-Overall Status: PO_REVIEW
-Phase: T28 Claude round 2 PASS (TODO-01 CLOSED), chờ PO merge (không reset DB); T13 READY_FOR_HANDOFF sau khi merge T28
-Current Active Task: T28 — PO_REVIEW
+Overall Status: FIX_LOOP
+Phase: T28 vòng sửa 2 theo yêu cầu PO 27/10 (R2-01 chạy chữ tên phim dài, R2-02 khôi phục tên poster phụ hero); T13 READY_FOR_HANDOFF sau khi merge T28
+Current Active Task: T28 — FIX_LOOP (vòng 2)
 Ngày bắt đầu sản phẩm: 05/10/2026 · Hạn: 01/11/2026
 ```
 
@@ -100,7 +100,7 @@ Trước đó — Codex: Codex hoàn tất 24/10/2026: upload raw/Range, synopsi
 | T25 | Banner trailer và mục Nội dung phim (đổi schema) | Web | 4 | T24 | [T25.md](tasks/T25.md) | PO_REVIEW — Claude PASS_WITH_TODO trên `03e0d44`; RF 0; TODO-01/02 Low; pytest 194/194; PO đã merge `6d49d16`, DB thật reset 24/10 (bản sao `backup/db-truoc-T25`) |
 | T26 | Khung đánh giá sao bật lên khi bấm vào điểm | Web | 4 | T25 | [T26.md](tasks/T26.md) | PO_REVIEW — Claude PASS_WITH_TODO trên `cffc533`; RF 0; TODO-01 Low; pytest 194/194; PO đã merge `c1916c6` |
 | T27 | Thang điểm 10 và khung đánh giá có hiệu ứng (đổi schema) | Web | 4 | T26 | [T27.md](tasks/T27.md) | PO_REVIEW — Claude PASS_WITH_TODO trên `73a57f6`; RF 0; TODO-01 Low; PO đã merge `f48922a`, DB đã reset |
-| T28 | Sửa lỗi hiển thị, hiệu ứng và trang tài khoản | Web | 4 | T27 | [T28.md](tasks/T28.md) | PO_REVIEW — Claude round 2 PASS trên `7aba78b`; TODO-01 CLOSED; RF 0; không reset DB |
+| T28 | Sửa lỗi hiển thị, hiệu ứng và trang tài khoản | Web | 4 | T27 | [T28.md](tasks/T28.md) | FIX_LOOP — PO yêu cầu vòng 2 (T28.md mục 14) sau round 2 PASS `7aba78b`; không reset DB |
 
 Chuỗi chính: `T00 → T01 → T02` và `T03 → T08 → T09 → T10`. T03 bắt đầu ngay ngày đầu (song song).
 

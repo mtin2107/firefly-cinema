@@ -7,11 +7,83 @@ import { duration } from "../utils/format";
 import { gsap, useGSAP, MOTION_OK, FINE_POINTER } from "../utils/motion";
 
 const TILT_DEG = 8;
+const TITLE_SPEED = 40;
+const TITLE_PAUSE = 1.5;
 
 export default function MovieCard({ movie }) {
   const showing = movie.status === "now_showing";
+  const cardRef = useRef(null);
+  const titleLink = useRef(null);
+  const titleText = useRef(null);
   const posterLink = useRef(null);
   const detail = `/phim/${movie.id}`;
+
+  // Đo theo khung thật; mọi MovieCard dùng cùng quy tắc, kể cả phim mới.
+  useGSAP(() => {
+    const mm = gsap.matchMedia();
+    mm.add({ motion: MOTION_OK, hover: "(hover: hover)" }, ({ conditions }) => {
+      if (!conditions.motion) return;
+      const card = cardRef.current;
+      const link = titleLink.current;
+      const text = titleText.current;
+      const canHover = conditions.hover;
+      let timeline = null;
+      let distance = 0;
+      let active = true;
+      let hovered = card.matches(":hover");
+      let focused = card.contains(document.activeElement);
+
+      const stop = () => {
+        timeline?.kill();
+        timeline = null;
+        gsap.set(text, { clearProps: "transform" });
+        card.classList.remove("movie-card--title-running");
+      };
+      const sync = () => {
+        if (distance <= 0 || (canHover && !hovered && !focused)) {
+          stop();
+          return;
+        }
+        if (timeline) return;
+        card.classList.add("movie-card--title-running");
+        timeline = gsap.timeline({ repeat: -1, repeatDelay: TITLE_PAUSE,
+          delay: canHover ? 0 : TITLE_PAUSE })
+          .to(text, { x: -distance, duration: distance / TITLE_SPEED, ease: "none" })
+          .to(text, { x: -distance, duration: TITLE_PAUSE })
+          .set(text, { x: 0 });
+      };
+      const measure = () => {
+        if (!active) return;
+        stop();
+        distance = Math.max(0, link.scrollWidth - link.clientWidth);
+        sync();
+      };
+      const enter = () => { hovered = true; sync(); };
+      const leave = () => { hovered = false; sync(); };
+      const focus = () => { focused = true; sync(); };
+      const blur = (event) => { focused = card.contains(event.relatedTarget); sync(); };
+      card.addEventListener("pointerenter", enter);
+      card.addEventListener("pointerleave", leave);
+      card.addEventListener("focusin", focus);
+      card.addEventListener("focusout", blur);
+      const observer = new ResizeObserver(measure);
+      observer.observe(link);
+      document.fonts?.addEventListener("loadingdone", measure);
+      document.fonts?.ready.then(measure);
+      measure();
+      return () => {
+        active = false;
+        observer.disconnect();
+        document.fonts?.removeEventListener("loadingdone", measure);
+        card.removeEventListener("pointerenter", enter);
+        card.removeEventListener("pointerleave", leave);
+        card.removeEventListener("focusin", focus);
+        card.removeEventListener("focusout", blur);
+        stop();
+      };
+    });
+    return () => mm.revert();
+  }, { dependencies: [movie.title], scope: cardRef, revertOnUpdate: true });
 
   // Poster nghiêng theo chuột, vệt sáng chạy theo góc nghiêng (chỉ máy có chuột)
   useGSAP(() => {
@@ -42,12 +114,12 @@ export default function MovieCard({ movie }) {
   });
 
   return (
-    <article className="movie-card">
+    <article className="movie-card" ref={cardRef}>
       <Link to={detail} state={{ intro: movie }} className="movie-card__poster" ref={posterLink}>
         <Poster movie={movie} />
       </Link>
       <div className="movie-card__body">
-        <h3 className="movie-card__title" title={movie.title}><Link to={detail} state={{ intro: movie }}>{movie.title}</Link></h3>
+        <h3 className="movie-card__title" title={movie.title}><Link to={detail} state={{ intro: movie }} ref={titleLink}><span className="movie-card__title-text" ref={titleText}>{movie.title}</span></Link></h3>
         <p className="movie-card__meta">
           <AgeBadge rating={movie.age_rating} /> {duration(movie.duration_min)}
         </p>

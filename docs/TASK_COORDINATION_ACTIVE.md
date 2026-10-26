@@ -36,14 +36,16 @@ Trước khi áp dụng workflow: giao diện React đầy đủ (`giao-dien-v1`
 
 ## 4. Current Project Status
 ```
-Overall Status: FIX_LOOP
-Phase: T28 vòng sửa 2 theo yêu cầu PO 27/10 (R2-01 chạy chữ tên phim dài, R2-02 khôi phục tên poster phụ hero); T13 READY_FOR_HANDOFF sau khi merge T28
-Current Active Task: T28 — FIX_LOOP (vòng 2)
+Overall Status: CLAUDE_REVIEW
+Phase: T28 vòng sửa 2 đã triển khai, chờ Claude xác minh (R2-01 chạy chữ tên dài, R2-02 khôi phục chữ poster phụ hero); T13 READY_FOR_HANDOFF sau khi merge T28
+Current Active Task: T28 — CLAUDE_REVIEW (vòng sửa 2)
 Ngày bắt đầu sản phẩm: 05/10/2026 · Hạn: 01/11/2026
 ```
 
 ## 5. Current Active Task
-**T28 — PO_REVIEW.** Claude review round 2 **PASS** trên `7aba78b`: TODO-01 CLOSED (form sửa phim điền trạng thái hiệu lực; lưu phim tự chuyển thành công, quy tắc chặn Sắp chiếu ngày đã qua vẫn 422). RF 0; OBS-01..06 round 1 chờ PO. Report: `reports/2026-10-27/claude_review_T28_round2_PASS_2026-10-27.md`. Không đổi schema.
+**T28 — CLAUDE_REVIEW (vòng sửa 2, 27/10/2026).** Codex triển khai R2-01/R2-02 theo mục 14, baseline `00c5bdf`: MovieCard đo scrollWidth/clientWidth bằng ResizeObserver, chỉ chạy tên tràn; hover/focus trên chuột, tự chạy ~40px/giây và dừng 1,5 giây ở đầu/cuối trên cảm ứng; reduced motion dừng và tối đa 2 dòng. Bỏ CSS ẩn chữ poster phụ; HeroCarousel.jsx và utils/motion.js không đổi. Probe real/mock 375/1280: lệch hàng tối đa 0/0.03125px, không tràn; ảnh hero trước/sau 1280/1440; fixture tên 200 ký tự; compileall/build real+mock/health DB tạm đã chạy. Pytest 00:41:06–00:42:24 +07:00: 208 đạt +1 lỗi duy nhất OBS-01 T27 (ngoại lệ 0h–7h). Đổi schema: Không. Report: `reports/2026-10-27/codex_fix_T28_round2_2026-10-27.md`. Chờ Claude xác minh độc lập; không tự PASS/merge, không mở T13.
+
+**Review T28 trước vòng sửa 2 — Claude.** Claude review round 2 **PASS** trên `7aba78b`: TODO-01 CLOSED (form sửa phim điền trạng thái hiệu lực; lưu phim tự chuyển thành công, quy tắc chặn Sắp chiếu ngày đã qua vẫn 422). RF 0; OBS-01..06 round 1 chờ PO. Report: `reports/2026-10-27/claude_review_T28_round2_PASS_2026-10-27.md`. Không đổi schema.
 
 **T28 — CLAUDE_REVIEW (Fix Round 1, 27/10/2026).** PO quyết TODO-01 = FIX_NOW. Codex sửa duy nhất production `AdminMovies.jsx:145`: startEdit dùng `movie.status`; giữ ghi chú tự chuyển và mọi validation backend/mock. Real trên SQLite tạm + mock đều mở phim 6 thành Đang chiếu, lưu không đổi gì thành công; chọn Sắp chiếu ngày hôm nay vẫn bị chặn ở form và API 422. Compileall/build real+mock đạt; full pytest 00:24:05–00:26:34 +07:00: 208 đạt +1 lỗi duy nhất OBS-01 T27 (ngoại lệ 0h–7h). Đổi schema: Không. Report: `reports/2026-10-27/codex_fix_T28_round1_2026-10-27.md`. TODO-01 chờ Claude xác minh; không tự PASS/merge, không mở T13.
 
@@ -100,7 +102,7 @@ Trước đó — Codex: Codex hoàn tất 24/10/2026: upload raw/Range, synopsi
 | T25 | Banner trailer và mục Nội dung phim (đổi schema) | Web | 4 | T24 | [T25.md](tasks/T25.md) | PO_REVIEW — Claude PASS_WITH_TODO trên `03e0d44`; RF 0; TODO-01/02 Low; pytest 194/194; PO đã merge `6d49d16`, DB thật reset 24/10 (bản sao `backup/db-truoc-T25`) |
 | T26 | Khung đánh giá sao bật lên khi bấm vào điểm | Web | 4 | T25 | [T26.md](tasks/T26.md) | PO_REVIEW — Claude PASS_WITH_TODO trên `cffc533`; RF 0; TODO-01 Low; pytest 194/194; PO đã merge `c1916c6` |
 | T27 | Thang điểm 10 và khung đánh giá có hiệu ứng (đổi schema) | Web | 4 | T26 | [T27.md](tasks/T27.md) | PO_REVIEW — Claude PASS_WITH_TODO trên `73a57f6`; RF 0; TODO-01 Low; PO đã merge `f48922a`, DB đã reset |
-| T28 | Sửa lỗi hiển thị, hiệu ứng và trang tài khoản | Web | 4 | T27 | [T28.md](tasks/T28.md) | FIX_LOOP — PO yêu cầu vòng 2 (T28.md mục 14) sau round 2 PASS `7aba78b`; không reset DB |
+| T28 | Sửa lỗi hiển thị, hiệu ứng và trang tài khoản | Web | 4 | T27 | [T28.md](tasks/T28.md) | CLAUDE_REVIEW — vòng sửa 2 R2-01/R2-02 chờ Claude; report Codex 27/10/2026 |
 
 Chuỗi chính: `T00 → T01 → T02` và `T03 → T08 → T09 → T10`. T03 bắt đầu ngay ngày đầu (song song).
 

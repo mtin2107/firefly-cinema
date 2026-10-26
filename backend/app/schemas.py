@@ -404,9 +404,6 @@ class CommentOut(BaseModel):
     content: str
     is_negative: bool
     effective_negative: bool
-    human_label: int | None = None
-    is_negative: bool = False
-    reviewed_at: datetime | None = None
     reviewed: bool
     negative_score: float
     created_at: datetime

@@ -5,7 +5,9 @@ from uuid import uuid4
 from ..config import UPLOAD_DIR
 from .admin_posters import PosterUploadIn, validate_image
 from ..schemas import ChangeEmailIn
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Request
+from fastapi.exceptions import RequestValidationError
+from pydantic import ValidationError
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
@@ -136,8 +138,21 @@ def remove_avatar_file(url):
         (Path(UPLOAD_DIR) / "avatars" / url.rsplit("/", 1)[1]).unlink(missing_ok=True)
 
 
-@router.put("/me/avatar", response_model=UserOut)
-def put_avatar(body: PosterUploadIn, user: User = Depends(get_current_user), db: Session = Depends(get_db)):
+@router.put("/me/avatar", response_model=UserOut, openapi_extra={
+    "requestBody": {"required": True, "content": {"application/json": {"schema": PosterUploadIn.model_json_schema()}}}
+})
+async def put_avatar(request: Request, user: User = Depends(get_current_user), db: Session = Depends(get_db)):
+    length = request.headers.get("content-length")
+    if length and length.isdigit() and int(length) > 3 * 1024 * 1024:
+        raise HTTPException(413, "Ảnh đại diện tối đa 2 MB.")
+    media_type = request.headers.get("content-type", "").split(";")[0].strip().lower()
+    if media_type and media_type != "application/json" and not (media_type.startswith("application/") and media_type.endswith("+json")):
+        raise HTTPException(422, "Nội dung tải ảnh phải là JSON.")
+    try:
+        body = PosterUploadIn.model_validate_json(await request.body(), context={"image_label": "Ảnh đại diện"})
+    except ValidationError as exc:
+        # Giữ vị trí lỗi như FastAPI, kể cả body không phải object hoặc JSON sai.
+        raise RequestValidationError([{**error, "loc": ("body", *error["loc"])} for error in exc.errors()]) from None
     binary, ext = validate_image(body.data, "Ảnh đại diện")
     folder = Path(UPLOAD_DIR) / "avatars"
     folder.mkdir(parents=True, exist_ok=True)

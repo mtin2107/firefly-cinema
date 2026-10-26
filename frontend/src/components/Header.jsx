@@ -1,3 +1,4 @@
+import Icon from "./Icons";
 import { api } from "../api";
 import { avatarSrc, initials } from "../utils/account";
 import { useEffect, useRef, useState } from "react";
@@ -87,14 +88,14 @@ export default function Header() {
                   <div><strong>{user.full_name}</strong><p>{user.email}</p><small>{user.role === "admin" ? "Quản trị viên" : "Khách hàng"}</small></div>
                 </div>
                 <ul className="dd__list dd__list--single">
-                  <li><NavLink to="/tai-khoan"><MenuIcon />Tài khoản của tôi</NavLink></li>
-                  <li><NavLink to="/ve-cua-toi"><MenuIcon />Vé của tôi{held !== null && <span className="account-menu__badge">{held}</span>}</NavLink></li>
+                  <li><NavLink to="/tai-khoan"><Icon name="user" size={16} />Tài khoản của tôi</NavLink></li>
+                  <li><NavLink to="/ve-cua-toi"><Icon name="ticket" size={16} />Vé của tôi{held !== null && <span className="account-menu__badge">{held}</span>}</NavLink></li>
                 </ul>
                 {user.role === "admin" && <><h3>Quản trị</h3><ul className="dd__list account-menu__admin">{[
-                  ["tong-quan","Tổng quan quản trị"],["soat-ve","Soát vé tại quầy"],["ve","Quản lý vé"],["phim","Quản lý phim"],
-                  ["suat-chieu","Quản lý suất chiếu"],["binh-luan","Kiểm duyệt bình luận"],["so-sanh-mo-hinh","So sánh mô hình"],["thong-ke","Thống kê cảm xúc"]
-                ].map(([path,label]) => <li key={path}><NavLink to={`/quan-tri/${path}`}><MenuIcon />{label}</NavLink></li>)}</ul></>}
-                <div className="account-menu__logout"><button type="button" className="dd__item-btn" onClick={() => { logout(); navigate("/"); }}><MenuIcon />Đăng xuất</button></div>
+                  ["tong-quan","Tổng quan quản trị","overview"],["soat-ve","Soát vé tại quầy","checkin"],["ve","Quản lý vé","tickets"],["phim","Quản lý phim","film"],
+                  ["suat-chieu","Quản lý suất chiếu","calendar"],["binh-luan","Kiểm duyệt bình luận","moderation"],["so-sanh-mo-hinh","So sánh mô hình","compare"],["thong-ke","Thống kê cảm xúc","chart"]
+                ].map(([path,label,icon]) => <li key={path}><NavLink to={`/quan-tri/${path}`}><Icon name={icon} size={16} />{label}</NavLink></li>)}</ul></>}
+                <div className="account-menu__logout"><button type="button" className="dd__item-btn" onClick={() => { logout(); navigate("/"); }}><Icon name="logout" size={16} />Đăng xuất</button></div>
               </div>
             </Dropdown>
           ) : (
@@ -107,8 +108,4 @@ export default function Header() {
       </div>
     </header>
   );
-}
-
-function MenuIcon() {
-  return <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" aria-hidden="true"><rect x="4" y="4" width="16" height="16" rx="3" /><path d="M8 9h8M8 15h5" /></svg>;
 }

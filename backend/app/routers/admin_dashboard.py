@@ -68,8 +68,8 @@ def my_summary(user: User = Depends(require_admin), db: Session = Depends(get_db
     bookings = db.scalars(select(Booking)).all()
     reviewed = [c for c in comments if c.reviewed_by == user.id and c.reviewed_at]
     checked = [b for b in bookings if b.checked_in_by == user.id and b.checked_in_at]
-    activity = [{"kind": "review", "id": c.id, "at": c.reviewed_at, "label": "Duyệt bình luận"} for c in reviewed]
-    activity += [{"kind": "checkin", "id": b.id, "at": b.checked_in_at, "label": "Soát vé"} for b in checked]
+    activity = [{"kind": "review", "id": c.id, "at": c.reviewed_at, "label": "Duyệt bình luận", "movie_title": c.movie.title} for c in reviewed]
+    activity += [{"kind": "checkin", "id": b.id, "at": b.checked_in_at, "label": "Soát vé", "movie_title": b.showtime.movie.title} for b in checked]
     return {
         "todo": {"comments": sum(c.is_negative and c.human_label is None and c.reviewed_at is None for c in comments),
                  "pending_verify": sum(b.status == "pending_verify" for b in bookings),

@@ -757,7 +757,7 @@ export const mockApi = {
       const isToday = at => at && new Date(at).toLocaleDateString("en-CA") === today;
       const reviewed=db.comments.filter(c=>c.reviewed_by === user.id && c.reviewed_at);
       const checked=db.bookings.filter(b=>b.checked_in_by === user.id && b.checked_in_at);
-      const activity=[...reviewed.map(c=>({kind:"review",id:c.id,at:c.reviewed_at,label:"Duyệt bình luận"})),...checked.map(b=>({kind:"checkin",id:b.id,at:b.checked_in_at,label:"Soát vé"}))];
+      const activity=[...reviewed.map(c=>({kind:"review",id:c.id,at:c.reviewed_at,label:"Duyệt bình luận",movie_title:movieById(c.movie_id).title})),...checked.map(b=>({kind:"checkin",id:b.id,at:b.checked_in_at,label:"Soát vé",movie_title:movieById(db.showtimes.find(s=>s.id===b.showtime_id).movie_id).title}))];
       return clone({todo:{comments:db.comments.filter(c=>c.is_negative && c.human_label == null && !c.reviewed_at).length,pending_verify:db.bookings.filter(b=>b.status === "pending_verify").length,showtimes_today:db.showtimes.filter(s=>isToday(s.start_time)).length},
         work:{reviewed_today:reviewed.filter(c=>isToday(c.reviewed_at)).length,reviewed_total:reviewed.length,overrides:reviewed.filter(c=>c.human_label != null && Number(c.human_label) !== Number(c.is_negative)).length,checked_in_today:checked.filter(b=>isToday(b.checked_in_at)).length},
         recent_activity:activity.sort((a,b)=>b.at.localeCompare(a.at)||b.id-a.id).slice(0,5)});

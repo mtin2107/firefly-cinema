@@ -5,7 +5,7 @@ from pathlib import Path
 from uuid import uuid4
 
 from fastapi import APIRouter, Depends, HTTPException
-from pydantic import BaseModel
+from pydantic import BaseModel, Field, ValidationInfo, field_validator
 
 from ..config import UPLOAD_DIR
 from ..models import User
@@ -13,11 +13,21 @@ from ..security import require_admin
 
 router = APIRouter(prefix="/api/admin/posters", tags=["Quản trị poster"])
 MAX_POSTER_BYTES = 2 * 1024 * 1024
+MAX_IMAGE_BASE64 = 4 * ((MAX_POSTER_BYTES + 2) // 3)
 
 
 class PosterUploadIn(BaseModel):
     filename: str
-    data: str
+    data: str = Field(max_length=MAX_IMAGE_BASE64)
+
+    @field_validator("data", mode="before")
+    @classmethod
+    def bound_data(cls, value, info: ValidationInfo):
+        # Giữ câu lỗi poster cũ khi schema chặn trước bước giải mã ảnh.
+        if isinstance(value, str) and len(value) > MAX_IMAGE_BASE64:
+            label = (info.context or {}).get("image_label", "Ảnh poster")
+            raise HTTPException(422, f"{label} tối đa 2 MB.")
+        return value
 
 
 def _extension(data: bytes) -> str | None:

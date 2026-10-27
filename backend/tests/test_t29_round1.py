@@ -1,4 +1,6 @@
+import asyncio
 import base64
+import json
 from datetime import datetime
 
 import pytest
@@ -32,6 +34,65 @@ def test_avatar_valid_after_body_guard(client, auth_headers, tmp_path, monkeypat
     response = client.put("/api/auth/me/avatar", headers=auth_headers["user"], json={"filename": "small.png", "data": base64.b64encode(image).decode()})
     assert response.status_code == 200
     assert (tmp_path / "avatars" / response.json()["avatar_url"].rsplit("/", 1)[1]).read_bytes() == image
+
+
+def _put_chunked_avatar(client, headers, chunks):
+    """Đưa từng chunk vào ASGI, tránh TestClient gộp iterator thành một body."""
+    received = 0
+    messages = []
+
+    async def receive():
+        nonlocal received
+        chunk = chunks[received]
+        received += 1
+        return {"type": "http.request", "body": chunk, "more_body": received < len(chunks)}
+
+    async def send(message):
+        messages.append(message)
+
+    scope = {
+        "type": "http", "asgi": {"version": "3.0"}, "http_version": "1.1",
+        "method": "PUT", "scheme": "http", "path": "/api/auth/me/avatar",
+        "root_path": "", "query_string": b"", "server": ("testserver", 80), "client": ("testclient", 123),
+        "headers": [(key.lower().encode(), value.encode()) for key, value in {
+            **headers, "Content-Type": "application/json", "Transfer-Encoding": "chunked",
+        }.items()],
+    }
+    assert b"content-length" not in dict(scope["headers"])
+    asyncio.run(client.app(scope, receive, send))
+    status = next(m["status"] for m in messages if m["type"] == "http.response.start")
+    body = b"".join(m.get("body", b"") for m in messages if m["type"] == "http.response.body")
+    return status, json.loads(body), received
+
+
+def test_avatar_chunked_over_limit_stops_reading(client, auth_headers, tmp_path, monkeypatch):
+    from app.routers import auth
+    folder = tmp_path / "uploads"
+    monkeypatch.setattr(auth, "UPLOAD_DIR", folder)
+
+    def must_not_decode(*args, **kwargs):
+        raise AssertionError("Body quá lớn không được giải mã/ghi ảnh")
+
+    monkeypatch.setattr(auth, "validate_image", must_not_decode)
+    chunks = [b" " * (1024 * 1024)] * 3 + [b" ", b"khong duoc doc chunk cuoi"]
+    status, body, received = _put_chunked_avatar(client, auth_headers["user"], chunks)
+    assert status == 413
+    assert body == {"detail": "Ảnh đại diện tối đa 2 MB."}
+    assert received == 4  # Dừng ngay khi vượt 3 MiB, chưa đọc chunk thứ 5.
+    assert not folder.exists()
+
+
+def test_avatar_valid_chunked_upload(client, auth_headers, tmp_path, monkeypatch):
+    from app.routers import auth
+    folder = tmp_path / "uploads"
+    monkeypatch.setattr(auth, "UPLOAD_DIR", folder)
+    image = b"\x89PNG\r\n\x1a\n"
+    payload = json.dumps({"filename": "chunked.png", "data": base64.b64encode(image).decode()}).encode()
+    chunks = [payload[:13], payload[13:29], payload[29:]]
+    status, body, received = _put_chunked_avatar(client, auth_headers["user"], chunks)
+    assert status == 200
+    assert received == len(chunks)
+    assert (folder / "avatars" / body["avatar_url"].rsplit("/", 1)[1]).read_bytes() == image
 
 
 @pytest.mark.parametrize("payload", [[], None, "không phải object", {"filename": "x.png", "data": []}])

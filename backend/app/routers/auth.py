@@ -148,8 +148,15 @@ async def put_avatar(request: Request, user: User = Depends(get_current_user), d
     media_type = request.headers.get("content-type", "").split(";")[0].strip().lower()
     if media_type and media_type != "application/json" and not (media_type.startswith("application/") and media_type.endswith("+json")):
         raise HTTPException(422, "Nội dung tải ảnh phải là JSON.")
+    payload = bytearray()
+    size = 0
+    async for chunk in request.stream():
+        size += len(chunk)
+        if size > 3 * 1024 * 1024:
+            raise HTTPException(413, "Ảnh đại diện tối đa 2 MB.")
+        payload.extend(chunk)
     try:
-        body = PosterUploadIn.model_validate_json(await request.body(), context={"image_label": "Ảnh đại diện"})
+        body = PosterUploadIn.model_validate_json(payload, context={"image_label": "Ảnh đại diện"})
     except ValidationError as exc:
         # Giữ vị trí lỗi như FastAPI, kể cả body không phải object hoặc JSON sai.
         raise RequestValidationError([{**error, "loc": ("body", *error["loc"])} for error in exc.errors()]) from None

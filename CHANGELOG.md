@@ -2,6 +2,17 @@
 
 ## [Unreleased]
 
+### T30 — 27/10/2026
+
+- Chặn xóa phim có bất kỳ vé nào, kể cả expired/rejected, ở real/mock để không tạo vé mồ côi.
+- Dùng SQLite AUTOINCREMENT cho bookings, giữ định dạng mã vé, tránh cấp lại mã sau hủy. Đổi schema; PO sao lưu/kiểm tra/reset một lần sau merge T30 theo HUONG_DAN.
+- Khóa trong tiến trình cho đoạn kiểm tra và tạo vé, giữ giới hạn hai vé held khi gửi đồng thời; chỉ hỗ trợ một worker.
+- Đồng bộ ngưỡng Đánh giá cao 8.0/10 ở backend/mock.
+- Kiểm cấu trúc PNG/JPEG/WebP trước lưu poster/avatar, trả 422 tiếng Việt cho ảnh hỏng; cập nhật fixture ảnh và regression test.
+- Thông báo giữ chỗ chỉ hiện một lần, xóa history state để F5/Back không hiện lại.
+- Cố định đồng hồ test cảm xúc và kiểm tại 00:30, 12:00, 23:59; bổ sung regression BUG-01..05, kiểm tranh ghế và cập nhật test xóa phim theo PO cho phép.
+
+
 ### Fixed
 
 - Chặn đặt vé cho suất thuộc phim đã `ended` ở backend và mock; nguyên nhân là hai luồng chỉ kiểm tra suất tồn tại mà không kiểm tra trạng thái phim; tái hiện bằng probe mock và khóa backend bằng `test_cannot_book_showtime_for_ended_movie`.

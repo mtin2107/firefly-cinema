@@ -1,13 +1,18 @@
 import { usePageTitle } from "../utils/pageTitle";
 import { useEffect, useState } from "react";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { api } from "../api";
 import TicketStub from "../components/TicketStub";
 import { Loading, ErrorState, Empty } from "../components/StateViews";
 
 export default function MyTickets() {
   usePageTitle("Vé của tôi");
-  const { state } = useLocation();
+  const location = useLocation();
+  const navigate = useNavigate();
+  const [newBookingId] = useState(() => location.state?.newBookingId);
+  useEffect(() => {
+    if (location.state?.newBookingId) navigate(location.pathname + location.hash, { replace: true, state: null });
+  }, [location, navigate]);
   const [bookings, setBookings] = useState(null);
   const [error, setError] = useState("");
   const [notice, setNotice] = useState("");
@@ -57,7 +62,7 @@ export default function MyTickets() {
   return (
     <div className="container narrow">
       <h1 className="page-title">Vé của tôi</h1>
-      {state?.newBookingId && (
+      {newBookingId && (
         <p className="notice notice--ok" role="status">
           Đã giữ chỗ thành công. Hãy thanh toán vé bên dưới trước giờ tự hủy.
         </p>
@@ -82,7 +87,7 @@ export default function MyTickets() {
               total={b.total} code={b.code} status={b.status} holdExpiresAt={b.hold_expires_at}
               onExpire={load} qrUrl={b.qr_url} onClaim={() => claim(b)} claiming={claimingId === b.id}
               onCancel={() => cancel(b)} cancelling={cancellingId === b.id}
-              checkedInAt={b.checked_in_at} highlight={b.id === state?.newBookingId} />
+              checkedInAt={b.checked_in_at} highlight={b.id === newBookingId} />
           ))}
           </div>
         </section>)

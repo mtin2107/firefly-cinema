@@ -1,3 +1,4 @@
+const TOP_RATED_MIN = 8.0;
 import { ageAllowed, validateProfile } from "../utils/account";
 // ======================================================================
 // DỮ LIỆU GIẢ — chỉ dùng khi VITE_USE_MOCK=true (chưa có backend).
@@ -397,10 +398,17 @@ function decodePosterBase64(data) {
 
 function posterMime(binary) {
   const codes = [...binary.slice(0, 12)].map((ch) => ch.charCodeAt(0));
-  if (codes[0] === 0xff && codes[1] === 0xd8 && codes[2] === 0xff) return "image/jpeg";
-  if ([137, 80, 78, 71, 13, 10, 26, 10].every((v, i) => codes[i] === v)) return "image/png";
-  if ([82, 73, 70, 70].every((v, i) => codes[i] === v) && [87, 69, 66, 80].every((v, i) => codes[i + 8] === v)) return "image/webp";
-  throw new ApiError("Chỉ nhận ảnh JPG, PNG hoặc WebP.", 422);
+  let mime;
+  if (codes[0] === 0xff && codes[1] === 0xd8 && codes[2] === 0xff) mime = "image/jpeg";
+  else if ([137, 80, 78, 71, 13, 10, 26, 10].every((v, i) => codes[i] === v)) mime = "image/png";
+  else if (binary.slice(0, 4) === "RIFF" && binary.slice(8, 12) === "WEBP") mime = "image/webp";
+  else throw new ApiError("Chỉ nhận ảnh JPG, PNG hoặc WebP.", 422);
+  const valid = mime === "image/png"
+    ? binary.slice(12, 16) === "IHDR" && [...binary.slice(-12)].map((ch) => ch.charCodeAt(0)).join(",") === "0,0,0,0,73,69,78,68,174,66,96,130"
+    : mime === "image/jpeg" ? binary.slice(-2) === String.fromCharCode(255, 217)
+    : codes[4] + codes[5] * 256 + codes[6] * 65536 + codes[7] * 16777216 + 8 === binary.length;
+  if (!valid) throw new ApiError("Ảnh bị hỏng hoặc không đầy đủ.", 422);
+  return mime;
 }
 
 function validateMovie(payload) {
@@ -622,7 +630,10 @@ export const mockApi = {
       }).sort((a, b) => b.release_date.localeCompare(a.release_date));
 
       if (f.collection === "top_rated") {
-        list = list.filter((m) => m.rating_avg >= 4).sort((a, b) => b.rating_avg - a.rating_avg || b.rating_count - a.rating_count);
+        list = list.filter((m) => {
+          const ratings = db.ratings.filter((r) => r.movie_id === m.id);
+          return ratings.length > 0 && ratings.reduce((sum, r) => sum + r.stars, 0) / ratings.length >= TOP_RATED_MIN;
+        }).sort((a, b) => b.rating_avg - a.rating_avg || b.rating_count - a.rating_count);
       } else if (f.collection) {
         const rank = ranking(f.collection);
         list = list.filter((m) => rank[m.id] > 0).sort((a, b) => rank[b.id] - rank[a.id]);
@@ -1035,7 +1046,7 @@ export const mockApi = {
         if (currentUser().role !== "admin") throw new ApiError("Chỉ quản trị viên mới xem được trang này.", 403);
         const movie = movieById(id);
         const showtimeIds = db.showtimes.filter((item) => item.movie_id === movie.id).map((item) => item.id);
-        if (db.bookings.some((item) => showtimeIds.includes(item.showtime_id) && !["expired", "rejected"].includes(item.status))) {
+        if (db.bookings.some((item) => showtimeIds.includes(item.showtime_id))) {
           throw new ApiError("Phim đã có vé, không xóa được. Hãy chuyển trạng thái sang Đã chiếu xong.", 409);
         }
         db.movies = db.movies.filter((item) => item.id !== movie.id);

@@ -30,7 +30,7 @@ def test_avatar_rejects_large_body_before_parsing(client, auth_headers, tmp_path
 def test_avatar_valid_after_body_guard(client, auth_headers, tmp_path, monkeypatch):
     from app.routers import auth
     monkeypatch.setattr(auth, "UPLOAD_DIR", tmp_path)
-    image = b"\x89PNG\r\n\x1a\n"
+    image = bytes.fromhex("89504e470d0a1a0a0000000d49484452000000010000000108060000001f15c4890000000b49444154789c636000020000050001a5f645400000000049454e44ae426082")
     response = client.put("/api/auth/me/avatar", headers=auth_headers["user"], json={"filename": "small.png", "data": base64.b64encode(image).decode()})
     assert response.status_code == 200
     assert (tmp_path / "avatars" / response.json()["avatar_url"].rsplit("/", 1)[1]).read_bytes() == image
@@ -86,7 +86,7 @@ def test_avatar_valid_chunked_upload(client, auth_headers, tmp_path, monkeypatch
     from app.routers import auth
     folder = tmp_path / "uploads"
     monkeypatch.setattr(auth, "UPLOAD_DIR", folder)
-    image = b"\x89PNG\r\n\x1a\n"
+    image = bytes.fromhex("89504e470d0a1a0a0000000d49484452000000010000000108060000001f15c4890000000b49444154789c636000020000050001a5f645400000000049454e44ae426082")
     payload = json.dumps({"filename": "chunked.png", "data": base64.b64encode(image).decode()}).encode()
     chunks = [payload[:13], payload[13:29], payload[29:]]
     status, body, received = _put_chunked_avatar(client, auth_headers["user"], chunks)

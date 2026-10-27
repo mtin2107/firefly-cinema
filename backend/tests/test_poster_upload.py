@@ -8,9 +8,9 @@ from app.main import app
 from app.routers import admin_posters
 
 
-JPEG = b"\xff\xd8\xff\xe0" + b"\x00" * 30
-PNG = b"\x89PNG\r\n\x1a\n" + b"\x00" * 30
-WEBP = b"RIFF\x20\x00\x00\x00WEBP" + b"\x00" * 30
+JPEG = b"\xff\xd8\xff\xe0" + b"\x00" * 30 + b"\xff\xd9"
+PNG = bytes.fromhex("89504e470d0a1a0a0000000d49484452000000010000000108060000001f15c4890000000b49444154789c636000020000050001a5f645400000000049454e44ae426082")
+WEBP = b"RIFF\x22\x00\x00\x00WEBP" + b"\x00" * 30
 POSTER_MESSAGE = "Hãy chọn ảnh poster hoặc dán đường dẫn poster."
 
 

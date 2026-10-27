@@ -40,7 +40,7 @@ def test_email_password_limit(client,auth_headers):
     assert client.post("/api/auth/me/email",headers=auth_headers["user"],json={"new_email":"new@example.com","current_password":"secret1"}).status_code == 429
 
 
-@pytest.mark.parametrize("signature,extension",[(b"\xff\xd8\xff", "jpg"),(b"\x89PNG\r\n\x1a\n","png"),(b"RIFF1234WEBP","webp")])
+@pytest.mark.parametrize("signature,extension",[(b"\xff\xd8\xff\xe0\xff\xd9", "jpg"),(bytes.fromhex("89504e470d0a1a0a0000000d49484452000000010000000108060000001f15c4890000000b49444154789c636000020000050001a5f645400000000049454e44ae426082"),"png"),(b"RIFF\x04\x00\x00\x00WEBP","webp")])
 def test_avatar(client,auth_headers,tmp_path,monkeypatch,signature,extension):
     from app.routers import auth
     monkeypatch.setattr(auth,"UPLOAD_DIR",tmp_path)
@@ -57,7 +57,18 @@ def test_avatar(client,auth_headers,tmp_path,monkeypatch,signature,extension):
     second=put(signature)
     assert second.status_code == 200 and not path.exists() and other_path.exists()
     assert put(b"GIF89a").status_code == 422
-    assert put(signature+b"a"*(2*1024*1024-len(signature))).status_code == 200
+    padding = b"a" * (2*1024*1024-len(signature))
+    if extension == "jpg":
+        full = signature[:-2] + padding + signature[-2:]
+    elif extension == "png":
+        import struct, zlib
+        payload = b"a" * (len(padding)-12)
+        chunk = b"tEXt" + payload
+        full = signature[:-12] + struct.pack(">I", len(payload)) + chunk + struct.pack(">I", zlib.crc32(chunk)) + signature[-12:]
+    else:
+        full = signature[:4] + (2*1024*1024-8).to_bytes(4,"little") + signature[8:] + padding
+    assert len(full) == 2*1024*1024
+    assert put(full).status_code == 200
     assert put(signature+b"a"*(2*1024*1024)).status_code == 422
     assert client.put(url,headers=headers,json={"filename":"x.png","data":"%%%"}).status_code == 422
     assert client.delete(url,headers=headers).json()["avatar_url"] is None

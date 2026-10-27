@@ -28,7 +28,7 @@ def test_rating_lifecycle(client, db, movie, auth_headers):
         "stars": 4, "rating_avg": 4.5, "rating_count": 2, "distribution": distribution({4: 1, 5: 1})}
     db.expire_all()
     assert client.get(path).json()["rating_avg"] == 4.5
-    assert client.get("/api/movies?collection=top_rated").json()[0]["id"] == movie.id
+    assert client.get("/api/movies?collection=top_rated").json() == []
     assert client.delete(path + "/rating", headers=headers).json() == {
         "stars": None, "rating_avg": 4.0, "rating_count": 1, "distribution": distribution({4: 1})}
     assert client.delete(path + "/rating", headers=headers).status_code == 200

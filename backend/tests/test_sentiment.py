@@ -36,20 +36,27 @@ def test_sentiment_rejects_days_outside_range(client, auth_headers, days):
     assert response.json() == {"detail": "Số ngày thống kê phải từ 1 đến 365."}
 
 
+@pytest.mark.parametrize("clock", [(0, 30), (12, 0), (23, 59)])
 def test_sentiment_uses_effective_label_group_by_and_complete_daily(
-    client, db, users, auth_headers,
+    client, db, users, auth_headers, monkeypatch, clock,
 ):
+    from app.routers import admin_sentiment
+    class Clock(datetime):
+        @classmethod
+        def now(cls, tz=None):
+            return cls(2026, 10, 27, *clock)
+    monkeypatch.setattr(admin_sentiment, "datetime", Clock)
     user, _ = users
     first = _movie("Phim A")
     second = _movie("Phim B")
     db.add_all([first, second])
     db.flush()
-    now = datetime.now()
+    now = Clock.now()
     db.add_all([
-        _comment(first.id, user.id, created_at=now - timedelta(hours=1),
+        _comment(first.id, user.id, created_at=now.replace(hour=0, minute=0),
                  is_negative=True, score=0.9),
         # Đã ẩn vẫn tính; người duyệt đổi từ tiêu cực thành bình thường.
-        _comment(first.id, user.id, created_at=now - timedelta(hours=2),
+        _comment(first.id, user.id, created_at=now.replace(hour=0, minute=0),
                  is_negative=True, score=0.7, human_label=0, hidden=True),
         # Người duyệt đổi từ bình thường thành tiêu cực.
         _comment(second.id, user.id, created_at=now - timedelta(days=1),
@@ -85,13 +92,13 @@ def test_sentiment_uses_effective_label_group_by_and_complete_daily(
 
     daily = payload["daily"]
     assert len(daily) == 7
-    assert daily[0]["date"] == (datetime.now().date() - timedelta(days=6)).isoformat()
-    assert daily[-1]["date"] == datetime.now().date().isoformat()
+    assert daily[0]["date"] == (Clock.now().date() - timedelta(days=6)).isoformat()
+    assert daily[-1]["date"] == Clock.now().date().isoformat()
     by_date = {row["date"]: row for row in daily}
-    assert by_date[datetime.now().date().isoformat()] == {
-        "date": datetime.now().date().isoformat(), "total": 2, "negative": 1,
+    assert by_date[Clock.now().date().isoformat()] == {
+        "date": Clock.now().date().isoformat(), "total": 2, "negative": 1,
     }
-    yesterday = (datetime.now().date() - timedelta(days=1)).isoformat()
+    yesterday = (Clock.now().date() - timedelta(days=1)).isoformat()
     assert by_date[yesterday] == {"date": yesterday, "total": 1, "negative": 1}
     assert sum(row["total"] for row in daily) == 4
     assert sum(row["negative"] for row in daily) == 2

@@ -1,4 +1,5 @@
 from datetime import datetime, timedelta
+from threading import Lock
 
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy import select
@@ -18,61 +19,66 @@ from ..security import get_current_user
 router = APIRouter(prefix="/api/bookings", tags=["Đặt vé"])
 
 
+# shortcut: khóa trong tiến trình, chỉ đúng khi chạy 1 worker; nhiều worker thì cần khóa ở DB.
+_booking_lock = Lock()
+
+
 @router.post("", response_model=BookingOut, status_code=201)
 def create_booking(body: BookingIn, user: User = Depends(get_current_user), db: Session = Depends(get_db)):
-    if expire_holds(db):
-        db.commit()
-    st = db.get(Showtime, body.showtime_id)
-    if not st:
-        raise HTTPException(404, "Không tìm thấy suất chiếu.")
-    if user.role != "admin" and not age_allowed(user.birth_date, st.movie.age_rating, st.start_time.date()):
-        raise HTTPException(400, f"Bạn chưa đủ {st.movie.age_rating[1:]} tuổi để xem phim {st.movie.age_rating}.")
-    now = datetime.now()
-    if st.start_time <= now:
-        db.commit()
-        raise HTTPException(400, "Suất chiếu đã bắt đầu, không thể đặt vé.")
-    if st.movie.status == "ended":
-        raise HTTPException(400, "Phim đã chiếu xong, không thể đặt vé.")
-    if st.start_time <= now + timedelta(minutes=HOLD_CUTOFF_MINUTES):
-        db.commit()
-        raise HTTPException(400, "Suất chiếu sắp bắt đầu, vui lòng mua vé tại quầy.")
-    existing_hold = db.scalar(select(Booking.id).where(
-        Booking.user_id == user.id,
-        Booking.showtime_id == st.id,
-        Booking.status == "held",
-    ).limit(1))
-    if existing_hold is not None:
-        db.commit()
-        raise HTTPException(409, "Bạn đang giữ chỗ cho suất này. Hãy thanh toán vé đang giữ trước khi đặt thêm.")
-    held_count = len(db.scalars(select(Booking.id).where(
-        Booking.user_id == user.id, Booking.status == "held"
-    )).all())
-    if held_count >= 2:
-        db.commit()
-        raise HTTPException(409, "Bạn đang giữ 2 vé chưa thanh toán. Hãy thanh toán hoặc chờ vé hết hạn.")
-    seats = sorted(set(body.seats))
-    if not 1 <= len(seats) <= MAX_SEATS_PER_BOOKING:
-        raise HTTPException(400, f"Chọn từ 1 đến {MAX_SEATS_PER_BOOKING} ghế.")
-    invalid = [s for s in seats if not is_valid_seat(s)]
-    if invalid:
-        raise HTTPException(400, f"Ghế không hợp lệ: {', '.join(invalid)}.")
+    with _booking_lock:
+        if expire_holds(db):
+            db.commit()
+        st = db.get(Showtime, body.showtime_id)
+        if not st:
+            raise HTTPException(404, "Không tìm thấy suất chiếu.")
+        if user.role != "admin" and not age_allowed(user.birth_date, st.movie.age_rating, st.start_time.date()):
+            raise HTTPException(400, f"Bạn chưa đủ {st.movie.age_rating[1:]} tuổi để xem phim {st.movie.age_rating}.")
+        now = datetime.now()
+        if st.start_time <= now:
+            db.commit()
+            raise HTTPException(400, "Suất chiếu đã bắt đầu, không thể đặt vé.")
+        if st.movie.status == "ended":
+            raise HTTPException(400, "Phim đã chiếu xong, không thể đặt vé.")
+        if st.start_time <= now + timedelta(minutes=HOLD_CUTOFF_MINUTES):
+            db.commit()
+            raise HTTPException(400, "Suất chiếu sắp bắt đầu, vui lòng mua vé tại quầy.")
+        existing_hold = db.scalar(select(Booking.id).where(
+            Booking.user_id == user.id,
+            Booking.showtime_id == st.id,
+            Booking.status == "held",
+        ).limit(1))
+        if existing_hold is not None:
+            db.commit()
+            raise HTTPException(409, "Bạn đang giữ chỗ cho suất này. Hãy thanh toán vé đang giữ trước khi đặt thêm.")
+        held_count = len(db.scalars(select(Booking.id).where(
+            Booking.user_id == user.id, Booking.status == "held"
+        )).all())
+        if held_count >= 2:
+            db.commit()
+            raise HTTPException(409, "Bạn đang giữ 2 vé chưa thanh toán. Hãy thanh toán hoặc chờ vé hết hạn.")
+        seats = sorted(set(body.seats))
+        if not 1 <= len(seats) <= MAX_SEATS_PER_BOOKING:
+            raise HTTPException(400, f"Chọn từ 1 đến {MAX_SEATS_PER_BOOKING} ghế.")
+        invalid = [s for s in seats if not is_valid_seat(s)]
+        if invalid:
+            raise HTTPException(400, f"Ghế không hợp lệ: {', '.join(invalid)}.")
 
-    taken = db.scalars(select(BookingSeat.seat_code)
-                       .where(BookingSeat.showtime_id == st.id, BookingSeat.seat_code.in_(seats))).all()
-    if taken:
-        raise HTTPException(409, f"Ghế {', '.join(sorted(taken))} vừa có người đặt. Hãy chọn ghế khác.")
+        taken = db.scalars(select(BookingSeat.seat_code)
+                           .where(BookingSeat.showtime_id == st.id, BookingSeat.seat_code.in_(seats))).all()
+        if taken:
+            raise HTTPException(409, f"Ghế {', '.join(sorted(taken))} vừa có người đặt. Hãy chọn ghế khác.")
 
-    booking = Booking(user_id=user.id, showtime_id=st.id,
-                      total=sum(seat_price(s, st.price) for s in seats), status="held")
-    booking.seats = [BookingSeat(showtime_id=st.id, seat_code=s) for s in seats]
-    db.add(booking)
-    try:
-        db.commit()
-    except IntegrityError:  # 2 người bấm đặt cùng lúc
-        db.rollback()
-        raise HTTPException(409, "Có ghế vừa được người khác đặt. Hãy tải lại sơ đồ ghế.")
-    db.refresh(booking)
-    return {**booking_out(booking), "checked_in_at": booking.checked_in_at}
+        booking = Booking(user_id=user.id, showtime_id=st.id,
+                          total=sum(seat_price(s, st.price) for s in seats), status="held")
+        booking.seats = [BookingSeat(showtime_id=st.id, seat_code=s) for s in seats]
+        db.add(booking)
+        try:
+            db.commit()
+        except IntegrityError:  # 2 người bấm đặt cùng lúc
+            db.rollback()
+            raise HTTPException(409, "Có ghế vừa được người khác đặt. Hãy tải lại sơ đồ ghế.")
+        db.refresh(booking)
+        return {**booking_out(booking), "checked_in_at": booking.checked_in_at}
 
 
 @router.get("/me", response_model=list[BookingOut])

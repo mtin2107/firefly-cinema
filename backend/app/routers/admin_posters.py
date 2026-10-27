@@ -56,6 +56,13 @@ def validate_image(data: str, label: str = "Ảnh poster"):
     if ext is None:
         raise HTTPException(422, "Chỉ nhận ảnh JPG, PNG hoặc WebP.")
 
+    valid = {
+        "png": binary[12:16] == b"IHDR" and binary.endswith(bytes.fromhex("0000000049454e44ae426082")),
+        "jpg": binary.endswith(b"\xff\xd9"),
+        "webp": int.from_bytes(binary[4:8], "little") + 8 == len(binary),
+    }[ext]
+    if not valid:
+        raise HTTPException(422, "Ảnh bị hỏng hoặc không đầy đủ.")
     return binary, ext
 
 

@@ -629,3 +629,20 @@ cd backend
 ```
 
 5. Kiểm tra đăng nhập khách/admin, hồ sơ, ảnh đại diện, đặt vé và health. Nếu phục hồi: dừng backend, giữ DB mới riêng, khôi phục cùng bộ DB + sidecar + uploads đã kiểm hash, chạy phiên bản code trước T29 với schema cũ. Không chép đè DB khi backend còn chạy.
+
+
+## T30 — Reset DB một lần sau khi merge (PO tự thực hiện)
+
+**Đổi schema: Có** — bảng `bookings` dùng `sqlite_autoincrement`, mã vé `FF{id:05d}` không cấp lại sau khi hủy. Không có migration. `create_all` không sửa bảng cũ; chỉ khởi động lại backend không đủ cập nhật schema.
+
+PO chốt ngày 27/10/2026: thực hiện **một lần sau khi merge T30**, gộp thay đổi schema T29 và T30. Codex chỉ dùng SQLite và UPLOAD_DIR tạm, không reset DB thật.
+
+Áp dụng toàn bộ lệnh và các bước kiểm tra trong mục **T29 — Sao lưu và reset DB sau khi đổi schema**, đổi tên thư mục sao lưu từ `T29-` sang `T30-`:
+
+1. Dừng tất cả backend/uvicorn và tiến trình đang dùng database thật.
+2. Sao lưu `backend\firefly.db`, mọi sidecar `firefly.db*` (WAL/SHM, showtime-seed.json), toàn bộ `backend\uploads\`.
+3. Đối chiếu SHA-256 từng file gốc/bản sao, kiểm `PRAGMA integrity_check` và `foreign_key_check` trên bản sao chỉ đọc. Dừng nếu thiếu file, checksum lệch hoặc kiểm tra không đạt. Giữ bản sao để phục hồi.
+4. Chỉ sau khi xác minh bản sao, PO tự xóa database làm việc theo bước reset T29, xử lý sidecar như hướng dẫn T29, rồi khởi động lại backend để tạo schema và seed mới. Không ghi đè bản sao lưu; reset sẽ mất dữ liệu DB làm việc.
+5. Kiểm schema `users` có `birth_date`, `gender`, `avatar_url`; truy vấn `SELECT sql FROM sqlite_master WHERE name='bookings'` phải có `AUTOINCREMENT`. Kiểm `/api/health` PhoBERT B, đăng nhập và đặt → hủy → đặt lại phải nhận mã mới lớn hơn. Gắn lại nội dung upload nếu cần theo mục T29.
+
+Khóa giới hạn giữ chỗ T30 chỉ bảo đảm trong **một tiến trình / một worker uvicorn**. Nhiều worker cần khóa tại database trước khi triển khai.

@@ -89,6 +89,7 @@ class Booking(Base):
             "status IN ('held', 'pending_verify', 'paid', 'expired', 'rejected')",
             name="ck_bookings_status",
         ),
+        {"sqlite_autoincrement": True},
     )
     id: Mapped[int] = mapped_column(primary_key=True)
     user_id: Mapped[int] = mapped_column(ForeignKey("users.id"), index=True)

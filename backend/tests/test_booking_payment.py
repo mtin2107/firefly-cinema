@@ -161,7 +161,7 @@ def test_qr_url_configured_and_missing(client, auth_headers, showtime, monkeypat
     assert client.get("/api/bookings/me", headers=auth_headers["user"]).json()[0]["qr_url"] is None
 
 
-def test_delete_movie_ignores_expired_or_rejected_bookings(
+def test_delete_movie_preserves_expired_or_rejected_bookings(
     client, auth_headers, showtime, movie, db
 ):
     booking = _create(client, auth_headers["user"], showtime).json()
@@ -171,4 +171,7 @@ def test_delete_movie_ignores_expired_or_rejected_bookings(
         db.delete(seat)
     db.commit()
     response = client.delete(f"/api/admin/movies/{movie.id}", headers=auth_headers["admin"])
-    assert response.status_code == 200
+    assert response.status_code == 409
+    db.expire_all()
+    assert db.get(Booking, booking["id"]).status == "rejected"
+    assert client.get("/api/bookings/me", headers=auth_headers["user"]).status_code == 200

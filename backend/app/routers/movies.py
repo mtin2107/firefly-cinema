@@ -14,6 +14,7 @@ from ..models import Movie, Showtime, Booking, BookingSeat, Comment, Rating
 from ..schemas import MovieOut, ShowtimeOut, ShowtimeDetailOut
 
 router = APIRouter(prefix="/api", tags=["Phim & suất chiếu"])
+TOP_RATED_MIN = 8.0
 
 
 def get_movie_or_404(db: Session, movie_id: int) -> Movie:
@@ -84,6 +85,12 @@ def list_movies(
         query = query.where(Movie.release_date < f"{year_before}-01-01")
     if age_rating:
         query = query.where(Movie.age_rating == age_rating)
+    if collection == "top_rated":
+        # Apply the threshold before rounding the average for display.
+        query = query.where(Movie.id.in_(
+            select(Rating.movie_id).group_by(Rating.movie_id)
+            .having(func.avg(Rating.stars) >= TOP_RATED_MIN)
+        ))
     movies = []
     for movie, average, count in db.execute(query).all():
         set_committed_value(movie, "rating_avg", average)
@@ -100,7 +107,7 @@ def list_movies(
         movies = [m for m in movies if needle in _plain(m.title)]
 
     if collection == "top_rated":
-        movies = sorted([m for m in movies if m.rating_avg >= 4.0], key=lambda m: (m.rating_avg, m.rating_count), reverse=True)
+        movies = sorted([m for m in movies if m.rating_avg >= TOP_RATED_MIN], key=lambda m: (m.rating_avg, m.rating_count), reverse=True)
     elif collection:
         rank = _ranking(db, collection)
         movies = sorted([m for m in movies if m.id in rank], key=lambda m: rank[m.id], reverse=True)

@@ -36,9 +36,9 @@ Trước khi áp dụng workflow: giao diện React đầy đủ (`giao-dien-v1`
 
 ## 4. Current Project Status
 ```
-Overall Status: PO_REVIEW
-Phase: T29 Claude round 2 PASS_WITH_TODO (vòng sửa 1 đạt, TODO-03 Low), chờ PO merge và reset DB; T13 READY_FOR_HANDOFF sau khi merge T29 và reset DB
-Current Active Task: T29 — PO_REVIEW
+Overall Status: FIX_LOOP
+Phase: T29 PO quyết TODO-03 = FIX_NOW (27/10); Codex sửa trên nhánh T29 rồi Claude xác minh; T13 READY_FOR_HANDOFF sau khi merge T29 và reset DB
+Current Active Task: T29 — FIX_LOOP (TODO-03)
 Ngày bắt đầu sản phẩm: 05/10/2026 · Hạn: 01/11/2026
 ```
 
@@ -115,7 +115,7 @@ Trước đó — Codex: Codex hoàn tất 24/10/2026: upload raw/Range, synopsi
 | T26 | Khung đánh giá sao bật lên khi bấm vào điểm | Web | 4 | T25 | [T26.md](tasks/T26.md) | PO_REVIEW — Claude PASS_WITH_TODO trên `cffc533`; RF 0; TODO-01 Low; pytest 194/194; PO đã merge `c1916c6` |
 | T27 | Thang điểm 10 và khung đánh giá có hiệu ứng (đổi schema) | Web | 4 | T26 | [T27.md](tasks/T27.md) | PO_REVIEW — Claude PASS_WITH_TODO trên `73a57f6`; RF 0; TODO-01 Low; PO đã merge `f48922a`, DB đã reset |
 | T28 | Sửa lỗi hiển thị, hiệu ứng và trang tài khoản | Web | 4 | T27 | [T28.md](tasks/T28.md) | PO đã merge `419b07e` (27/10), chờ closure ở T13; trước đó PO_REVIEW — Claude round 3 PASS trên `5b27199` (vòng sửa 2); RF 0; không reset DB |
-| T29 | Tài khoản người dùng và quản trị (đổi schema) | Web | 4 | T28 | [T29.md](tasks/T29.md) | PO_REVIEW — Claude round 2 PASS_WITH_TODO trên `4b495d5`; RF 0; TODO-03 Low; reset DB sau merge |
+| T29 | Tài khoản người dùng và quản trị (đổi schema) | Web | 4 | T28 | [T29.md](tasks/T29.md) | FIX_LOOP — PO: TODO-03 FIX_NOW 27/10; trước đó Claude round 2 PASS_WITH_TODO `4b495d5`; reset DB sau merge |
 
 Chuỗi chính: `T00 → T01 → T02` và `T03 → T08 → T09 → T10`. T03 bắt đầu ngay ngày đầu (song song).
 

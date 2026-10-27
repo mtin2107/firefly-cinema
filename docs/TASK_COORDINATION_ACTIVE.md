@@ -36,13 +36,15 @@ Trước khi áp dụng workflow: giao diện React đầy đủ (`giao-dien-v1`
 
 ## 4. Current Project Status
 ```
-Overall Status: CLAUDE_REVIEW
-Phase: T29 CLAUDE_REVIEW vòng sửa 2 — Codex bàn giao TODO-03 (27/10), chờ Claude xác minh; T13 READY_FOR_HANDOFF sau khi merge T29 và reset DB
-Current Active Task: T29 — CLAUDE_REVIEW (vòng sửa 2, TODO-03)
+Overall Status: PO_REVIEW
+Phase: T29 Claude round 3 PASS (TODO-03 CLOSED, không còn TODO mở), chờ PO merge và reset DB; T13 READY_FOR_HANDOFF sau khi merge T29 và reset DB
+Current Active Task: T29 — PO_REVIEW
 Ngày bắt đầu sản phẩm: 05/10/2026 · Hạn: 01/11/2026
 ```
 
 ## 5. Current Active Task
+**T29 — PO_REVIEW.** Claude review round 3 **PASS** trên `da86372`: TODO-03 CLOSED (upload ảnh đại diện dạng chunked > 3 MB → 413, dừng đọc sớm). RF 0, không còn TODO mở. Report: `reports/2026-10-27/claude_review_T29_round3_PASS_2026-10-27.md`. **Reset DB sau merge.**
+
 
 **T29 — CLAUDE_REVIEW, vòng sửa 2 / TODO-03 (27/10/2026).** Codex sửa trên baseline `51b4ddd` theo PO FIX_NOW: put_avatar đọc request.stream(), cộng dồn byte và dừng ngay khi vượt 3 MiB (413 tiếng Việt), giữ chặn Content-Length sớm/media type/schema/kiểm ảnh/ghi và xóa file cũ. Hai test chunked không Content-Length: quá lớn 413, không đọc chunk còn lại/không tạo file; ảnh hợp lệ 200. Focused 11/11; compileall exit 0; full pytest **241/241**, 12:51:48–12:53:04 +07:00; build real/mock exit 0. **Đổi schema: Không**; chỉ SQLite/UPLOAD_DIR tạm, không đụng DB/uploads thật. Report: `reports/2026-10-27/codex_fix_T29_round2_2026-10-27.md`. Chờ Claude review độc lập; không tự review/PASS/merge, không mở T13.
 **T29 — PO_REVIEW.** Claude review round 2 **PASS_WITH_TODO** trên `4b495d5`: R1-01..05 đạt (giao diện khớp bản mẫu v3, admin cùng phong cách, 11/3 biểu tượng menu khác nhau, 413 khi Content-Length > 3 MB, bình luận công khai về 12 khóa). RF 0; TODO-01/02 CLOSED; TODO-03 Low (upload dạng chunked vẫn đọc hết body vào bộ nhớ). compileall 0, pytest 239/239, build real/mock đạt. Report: `reports/2026-10-27/claude_review_T29_round2_PASS_WITH_TODO_2026-10-27.md`. **Reset DB sau merge.**
@@ -117,7 +119,7 @@ Trước đó — Codex: Codex hoàn tất 24/10/2026: upload raw/Range, synopsi
 | T26 | Khung đánh giá sao bật lên khi bấm vào điểm | Web | 4 | T25 | [T26.md](tasks/T26.md) | PO_REVIEW — Claude PASS_WITH_TODO trên `cffc533`; RF 0; TODO-01 Low; pytest 194/194; PO đã merge `c1916c6` |
 | T27 | Thang điểm 10 và khung đánh giá có hiệu ứng (đổi schema) | Web | 4 | T26 | [T27.md](tasks/T27.md) | PO_REVIEW — Claude PASS_WITH_TODO trên `73a57f6`; RF 0; TODO-01 Low; PO đã merge `f48922a`, DB đã reset |
 | T28 | Sửa lỗi hiển thị, hiệu ứng và trang tài khoản | Web | 4 | T27 | [T28.md](tasks/T28.md) | PO đã merge `419b07e` (27/10), chờ closure ở T13; trước đó PO_REVIEW — Claude round 3 PASS trên `5b27199` (vòng sửa 2); RF 0; không reset DB |
-| T29 | Tài khoản người dùng và quản trị (đổi schema) | Web | 4 | T28 | [T29.md](tasks/T29.md) | CLAUDE_REVIEW — Codex vòng sửa 2 xử lý TODO-03 chunked, report 27/10; không đổi schema; reset DB T29 gốc sau merge |
+| T29 | Tài khoản người dùng và quản trị (đổi schema) | Web | 4 | T28 | [T29.md](tasks/T29.md) | PO_REVIEW — Claude round 3 PASS trên `da86372`; RF 0; TODO-01/02/03 CLOSED; reset DB sau merge |
 
 Chuỗi chính: `T00 → T01 → T02` và `T03 → T08 → T09 → T10`. T03 bắt đầu ngay ngày đầu (song song).
 

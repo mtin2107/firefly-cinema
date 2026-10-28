@@ -86,6 +86,12 @@ source venv/bin/activate
 ```bash
 pip install -r requirements.txt
 cp .env.example .env        # Windows (cmd): copy .env.example .env
+python -c "import secrets; print(secrets.token_urlsafe(48))"
+```
+
+Mở `backend/.env`, dán chuỗi vừa in ra vào sau `SECRET_KEY=` (bắt buộc, ít nhất 32 ký tự; để trống thì backend báo `SECRET_KEY không hợp lệ` và không chạy). Nên đặt luôn `ADMIN_PASSWORD`, nếu để trống tài khoản admin dùng mật khẩu mặc định cho máy dev. Sau đó chạy:
+
+```bash
 uvicorn app.main:app --reload --port 8000
 ```
 
@@ -178,6 +184,8 @@ Ngưỡng ẩn bình luận chỉnh bằng `NEGATIVE_THRESHOLD` (mặc định 0
 | Console trình duyệt báo lỗi CORS | Frontend không chạy ở cổng 5173. Sửa `FRONTEND_ORIGIN` trong `backend/.env` cho đúng địa chỉ, chạy lại backend |
 | Sửa `.env` mà không thấy thay đổi | Phải tắt và chạy lại `npm run dev` hoặc `uvicorn` |
 | `uvicorn` / `pip` không nhận lệnh | Chưa kích hoạt venv (không thấy `(venv)` đầu dòng) |
+| `RuntimeError: SECRET_KEY không hợp lệ` | Chưa điền `SECRET_KEY` trong `backend/.env` (xem Phần 2) |
+| Mở http://localhost:8000 thấy `{"detail":"Not Found"}` | Backend đang chạy, chỉ là không có trang gốc. Mở `/api/health` hoặc `/docs` |
 | PowerShell chặn `Activate.ps1` | Chạy `Set-ExecutionPolicy -Scope CurrentUser RemoteSigned` một lần, hoặc dùng cmd với `activate.bat` |
 | `Address already in use` | Cổng đang bị chiếm, tắt terminal cũ hoặc đổi `--port 8001` (nhớ sửa `VITE_API_URL`) |
 | Bị đăng xuất sau một ngày | Token hết hạn sau 24 giờ (`TOKEN_EXPIRE_HOURS` trong `app/config.py`) |

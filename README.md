@@ -1,5 +1,7 @@
 # Firefly Cinema — Hướng dẫn chạy và kết nối từ đầu đến cuối
 
+**Xem thử trực tuyến:** https://mtin2107.github.io/firefly-cinema/ (giao diện chạy với dữ liệu mẫu, không có backend và PhoBERT; dữ liệu chỉ lưu trong trình duyệt của mỗi người).
+
 Bộ mã gồm hai phần chạy riêng:
 
 ```

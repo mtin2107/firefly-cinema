@@ -404,9 +404,15 @@ function jpegComplete(binary) {
   let i = 2;
   while (i + 4 <= binary.length && at(i) === 0xff) {
     if (at(i + 1) === 0xff) { i += 1; continue; }
-    const end = i + 2 + at(i + 2) * 256 + at(i + 3);
-    // chỉ tìm EOI trong dữ liệu ảnh, sau hết header SOS
-    if (at(i + 1) === 0xda) return end <= binary.length && binary.indexOf(EOI, end) !== -1;
+    const length = at(i + 2) * 256 + at(i + 3);
+    if (length < 2) return false; // độ dài luôn gồm 2 byte của chính nó
+    const end = i + 2 + length;
+    if (at(i + 1) === 0xda) {
+      // header SOS dài đúng 6 + 2 x số thành phần (1-4); EOI chỉ tìm sau hết header
+      const components = i + 4 < binary.length ? at(i + 4) : 0;
+      return components >= 1 && components <= 4 && length === 6 + 2 * components
+        && end <= binary.length && binary.indexOf(EOI, end) !== -1;
+    }
     i = end;
   }
   return false;

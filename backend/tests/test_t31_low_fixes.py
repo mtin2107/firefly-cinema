@@ -23,6 +23,17 @@ TRUNCATED = [
     SOI + APP0 + APP1_WITH_EOI + b"junk",   # không có SOS
     SOS_HEADER_EOI,
     SOI + APP0 + b"\xff\xda\x00\x40\x01",   # độ dài SOS vượt quá file
+    # Codex RF-02: độ dài SOS 0/1, header sai cấu trúc, segment APP độ dài 0
+    SOI + APP0 + bytes.fromhex("ffda0000ffd97461696c"),
+    SOI + APP0 + bytes.fromhex("ffda0001ffd97461696c"),
+    SOI + APP0 + b"\xff\xda\x00\x08\x05\x01\x00\x00\x3f\x00" + EOI + b"x",  # 5 thành phần
+    SOI + APP0 + b"\xff\xda\x00\x0a\x01\x01\x00\x00\x3f\x00\x00\x00" + EOI + b"x",  # độ dài lệch số thành phần
+    SOI + b"\xff\xe0\x00\x00" + SOS + EOI + b"x",
+]
+# hợp lệ: byte đệm FF trước SOS, SOS 3 thành phần, có dữ liệu sau EOI
+VALID_EXTRA = [
+    SOI + APP0 + b"\xff\xff\xff" + SOS + EOI + b"tail",
+    SOI + APP0 + b"\xff\xda\x00\x0c\x03\x01\x00\x02\x11\x03\x11\x00\x3f\x00" + b"\x12" * 20 + EOI + b"tail",
 ]
 
 
@@ -32,9 +43,10 @@ def upload(client, headers, raw):
 
 
 def test_accept_jpeg_with_data_after_eoi(client, auth_headers, posters_dir):  # noqa: F811
-    result = upload(client, auth_headers["admin"], TRAILING)
-    assert result.status_code == 201
-    assert result.json()["poster_url"].endswith(".jpg")
+    for raw in [TRAILING, *VALID_EXTRA]:
+        result = upload(client, auth_headers["admin"], raw)
+        assert result.status_code == 201
+        assert result.json()["poster_url"].endswith(".jpg")
 
 
 @pytest.mark.parametrize("raw", TRUNCATED)

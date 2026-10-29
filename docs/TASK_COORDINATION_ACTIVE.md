@@ -36,14 +36,14 @@ Trước khi áp dụng workflow: giao diện React đầy đủ (`giao-dien-v1`
 
 ## 4. Current Project Status
 ```
-Overall Status: CODEX_REVIEW
+Overall Status: FIX_LOOP
 Phase: T30 đã merge, DB thật đã reset (29/10, Claude theo lệnh PO); T31 sửa 6 mục Low do Claude viết, chờ Codex review; T13 READY_FOR_HANDOFF sau khi T31 merge
-Current Active Task: T31 — CODEX_REVIEW
+Current Active Task: T31 — FIX_LOOP
 Ngày bắt đầu sản phẩm: 05/10/2026 · Hạn: 01/11/2026
 ```
 
 ## 5. Current Active Task
-**T31 — CODEX_REVIEW (29/10/2026).** PO yêu cầu trong chat: Claude sửa nhóm A (T25 TODO-01/02, T27 TODO-01, T30 TODO-01) và nhóm B (audit OBS-05/06) trên `task/T31-sua-low` từ master `a772cdf`. Không đổi schema. Vì Claude viết code, **Codex review độc lập**. Task Record: `docs/tasks/T31.md`; report: `reports/2026-10-29/claude_implementation_T31_2026-10-29.md`.
+**T31 — FIX_LOOP (29/10/2026).** Codex review FAIL: RF-01 Medium, JPEG bị cắt có FFD9 trong header SOS vẫn được nhận ở backend/mock. Xem reports/2026-10-29/codex_review_T31_FAIL_2026-10-29.md. Browser gate độc lập còn pending. PO yêu cầu trong chat: Claude sửa nhóm A (T25 TODO-01/02, T27 TODO-01, T30 TODO-01) và nhóm B (audit OBS-05/06) trên `task/T31-sua-low` từ master `a772cdf`. Không đổi schema. Vì Claude viết code, **Codex review độc lập**. Task Record: `docs/tasks/T31.md`; report: `reports/2026-10-29/claude_implementation_T31_2026-10-29.md`.
 
 **Trước T31 (29/10/2026, theo lệnh PO):** Claude sao lưu `firefly.db` + sidecar vào `backup\T30-20261029-121409` (SHA-256 khớp, integrity + foreign_key_check OK), xóa DB làm việc, khởi động lại: schema `users` có birth_date/gender/avatar_url, `bookings` có AUTOINCREMENT, health `phobert_b`. Chưa thử đặt → hủy → đặt lại trên DB thật (để DB demo sạch; test tự động đã phủ). Xóa thư mục clone lạ `firefly-cinema/` trong repo (sạch, commit b361d2a). PO quyết: T12 TODO-01 ghi Hạn chế; audit OBS-01..04/07/08 và T28 OBS-01..03 ghi Hạn chế ở T13.
 
@@ -452,3 +452,4 @@ Nếu trễ: cắt T14 → T15 → rút gọn T05. Không cắt T01–T03, T07�
 | 11/10/2026 | Tín (PO) | Merge T11 vào `master` tại `06dd44f0d845fecea829b82c48ff2f5a8dbab984`; tip `task/T11-kiem-thu` `3c21055` là ancestor, PO report và sidecar `.gitignore` exception đã nằm trong master (`T11_MERGE_VERIFIED`). |
 | 11/10/2026 | Codex | Final Closure Sync: T11 → DONE / CLOSED; Overall Status → READY_FOR_NEXT_TASK; Current Active Task → NONE; Next Task → NOT SELECTED / NOT AUTHORIZED. T12 giữ PLANNED / NOT AUTHORIZED; Q4 giữ OPEN; TODO T11 và runtime authorization database thật giữ nguyên. |
 | 12/10/2026 | Tín + Claude | Thiết kế phát triển thêm: chốt luồng giữ chỗ 30 phút + QR (T16) và chatbot tư vấn Gemini free (T17); Claude soạn `T16.md`, `T17.md` theo yêu cầu PO; T16 → READY_FOR_HANDOFF |
+

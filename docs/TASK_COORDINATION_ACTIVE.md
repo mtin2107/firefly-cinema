@@ -36,14 +36,16 @@ Trước khi áp dụng workflow: giao diện React đầy đủ (`giao-dien-v1`
 
 ## 4. Current Project Status
 ```
-Overall Status: CODEX_REVIEW
+Overall Status: PO_REVIEW
 Phase: T24–T31 DONE / CLOSED (master `db4b452`); T13 do Claude làm theo lệnh PO, chờ Codex review; sau đó PO làm phần Drive/AC-02, video, rồi gắn tag v1.0
-Current Active Task: T13 — CODEX_REVIEW
+Current Active Task: T13 — PO_REVIEW
 Ngày bắt đầu sản phẩm: 05/10/2026 · Hạn: 01/11/2026
 ```
 
 ## 5. Current Active Task
-**T13 — CODEX_REVIEW (29/10/2026).** PO yêu cầu trong chat: Claude merge T31 (`db4b452`) và làm T13 trên `task/T13-v1` từ master mới. README, HUONG_DAN "Cài đặt từ số 0", CHANGELOG [1.0.0], `docs/SAO_LUU.md`, 14 ảnh `docs/images/`, CONG_NGHE/ARCHITECTURE; `backup\v1.0\` 72 file SHA-256 khớp. AC-01 clone `C:\Temp\firefly-test`; AC-02 phần Drive và AC-04 tag chờ Tín. Report: `reports/2026-10-29/claude_implementation_T13_2026-10-29.md`. Vì Claude làm, **Codex review độc lập**.
+
+Codex review T13 **PASS_WITH_TODO** trên 915bd67: clone độc lập, compileall/pytest 286/286, health phobert_b (6 model available), build real/mock đạt; 9/9 hash khớp; 14 ảnh đúng trang. RF 0; TODO Low: mốc dung lượng mock và xác nhận thông tin liên hệ footer ảnh. Report: reports/2026-10-29/codex_review_T13_PASS_WITH_TODO_2026-10-29.md. AC-02 Drive và AC-04 tag giữ PO action; không merge/tag.
+**T13 — PO_REVIEW (29/10/2026).** PO yêu cầu trong chat: Claude merge T31 (`db4b452`) và làm T13 trên `task/T13-v1` từ master mới. README, HUONG_DAN "Cài đặt từ số 0", CHANGELOG [1.0.0], `docs/SAO_LUU.md`, 14 ảnh `docs/images/`, CONG_NGHE/ARCHITECTURE; `backup\v1.0\` 72 file SHA-256 khớp. AC-01 clone `C:\Temp\firefly-test`; AC-02 phần Drive và AC-04 tag chờ Tín. Report: `reports/2026-10-29/claude_implementation_T13_2026-10-29.md`. Vì Claude làm, **Codex review độc lập**.
 
 **T31 — DONE / CLOSED (29/10/2026), merge `db4b452`.** Trước đó PO_REVIEW: Codex review round 3 **PASS** trên `984f06a`: RF-01/RF-02 CLOSED, RF mở 0; 12 mẫu JPEG HTTP poster/avatar + browser mock đều đúng; compileall, full pytest 286/286, build real/mock PASS. AC-01/02/03/05/06 giữ PASS độc lập round 2; AC-04/07 PASS round 3. Report: `reports/2026-10-29/codex_review_T31_PASS_2026-10-29_round3.md`. Không đổi schema; không merge hoặc mở task tiếp theo.
 
@@ -457,6 +459,7 @@ Nếu trễ: cắt T14 → T15 → rút gọn T05. Không cắt T01–T03, T07�
 | 11/10/2026 | Tín (PO) | Merge T11 vào `master` tại `06dd44f0d845fecea829b82c48ff2f5a8dbab984`; tip `task/T11-kiem-thu` `3c21055` là ancestor, PO report và sidecar `.gitignore` exception đã nằm trong master (`T11_MERGE_VERIFIED`). |
 | 11/10/2026 | Codex | Final Closure Sync: T11 → DONE / CLOSED; Overall Status → READY_FOR_NEXT_TASK; Current Active Task → NONE; Next Task → NOT SELECTED / NOT AUTHORIZED. T12 giữ PLANNED / NOT AUTHORIZED; Q4 giữ OPEN; TODO T11 và runtime authorization database thật giữ nguyên. |
 | 12/10/2026 | Tín + Claude | Thiết kế phát triển thêm: chốt luồng giữ chỗ 30 phút + QR (T16) và chatbot tư vấn Gemini free (T17); Claude soạn `T16.md`, `T17.md` theo yêu cầu PO; T16 → READY_FOR_HANDOFF |
+
 
 
 

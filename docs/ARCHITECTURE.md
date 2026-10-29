@@ -319,3 +319,13 @@ theo cùng điều kiện, không đổi schema DB. Frontend khóa ghế và nú
 - booking_rules.age_allowed tính tuổi vào ngày suất chiếu; P/không khai/admin được qua. Frontend/mock dùng chung utils/account.js; API vẫn kiểm tra khi đặt vé.
 - Ngưỡng hạng nằm tại config.js MEMBERSHIP. Khách có 4 thẻ nhớ URL hash; admin có việc cần làm và bảo mật. Mock DB v7; avatar lưu data URL trong localStorage; real/mock cùng khóa JSON.
 - Không migration; PO sao lưu/kiểm tra/reset theo mục T29 trong HUONG_DAN.md.
+
+## T30–T31 và chốt v1.0 (29/10/2026)
+
+- `bookings` dùng `sqlite_autoincrement`: mã vé `FF{id:05d}` không bị cấp lại sau khi hủy. Đổi schema, DB thật đã reset 29/10 (sao lưu `backup\T30-20261029-121409`).
+- Đoạn kiểm tra và tạo vé chạy trong một khóa trong tiến trình để giữ giới hạn 2 vé `held`/người. Chỉ đúng khi chạy **một** worker uvicorn; nhiều worker cần khóa ở database.
+- Xóa phim bị chặn nếu phim có bất kỳ vé nào, kể cả `expired`/`rejected`.
+- `validate_image` (dùng chung cho poster và ảnh đại diện, mock có bản tương ứng `posterMime`): kiểm magic bytes và cấu trúc. PNG cần IHDR + IEND; WebP cần độ dài RIFF khớp; JPEG nhận khi file kết thúc bằng FFD9, hoặc khi đi theo các segment (độ dài ≥ 2) tới SOS có header đúng `6 + 2 × Ns` (Ns 1–4) và có FFD9 sau header (T31, ảnh điện thoại có dữ liệu sau EOI).
+- Schema `CommentIn`/`RatingIn` dùng chung `ScoreInput`; cờ lớp `allow_empty_score` cho phép bình luận không kèm điểm.
+- Header: ở ≤ 420 px nút tài khoản hiện chữ viết tắt/ảnh đại diện, tên đầy đủ vẫn nằm trong nút cho trình đọc màn hình. Tổng quan quản trị dùng `.sentiment-summary--dashboard` (3 cột ở 861–1100 px).
+- Cây thư mục mục 1b không đổi ở v1.0. Thêm `docs/SAO_LUU.md`, `docs/images/` (ảnh chụp cho báo cáo), `backup\v1.0\` (ngoài Git).

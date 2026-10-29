@@ -1,6 +1,30 @@
 # Changelog
 
-## [Unreleased]
+## [1.0.0] — 29/10/2026
+
+Phiên bản chốt khóa luận. Tag `v1.0` do PO gắn sau khi duyệt T13.
+
+### Tính năng có trong 1.0.0
+- Đặt vé: lọc/tìm phim, suất chiếu, sơ đồ ghế 8 × 12 (VIP F–H), giữ chỗ có hạn, thanh toán chuyển khoản VietQR, hủy vé, Vé của tôi (T00–T05, T14, T16, T24).
+- Bình luận: PhoBERT B chấm và tự ẩn bình luận tiêu cực; kiểm duyệt có người duyệt, thống kê TP/FP/TN/FN, CSV (T06, T10, T22).
+- Mô hình: PhoBERT A/B, SVM/LR/NB; trang So sánh mô hình; thí nghiệm lệch miền và tách từ (T01, T02, T07, T08, T09, T15).
+- Quản trị: phim (poster, trailer tải lên), suất chiếu, vé, tổng quan kinh doanh, soát vé, thống kê cảm xúc (T04, T05, T19, T21, T23, T25).
+- Điểm phim 1–10 có phân bố và khung đánh giá; bình luận ẩn danh (T22, T26, T27).
+- Tài khoản: hồ sơ, ảnh đại diện, đổi email/mật khẩu, hạng thành viên, kiểm tra độ tuổi (T28, T29).
+- Trợ lý AI tư vấn phim, chỉ local (T17); hiệu ứng chuyển động (T18).
+- Gia cố, kiểm thử tự động 286 test, dữ liệu và kịch bản demo (T11, T12, T20, T30).
+
+### T31 — 29/10/2026
+- Form trailer: ô chọn file giữ tên video đã chọn; phim có video tải lên thì ô YouTube để trống và hiện "Đang dùng video đã tải lên." (T25 TODO-01/02).
+- Validator điểm dùng cờ lớp `allow_empty_score` thay vì so tên lớp (T27 TODO-01).
+- Nhận JPEG có dữ liệu thừa sau EOI (ảnh điện thoại); kiểm độ dài segment và cấu trúc header SOS, áp dụng cho poster, ảnh đại diện và mock (T30 TODO-01; Codex RF-01/RF-02).
+- Header một hàng ở điện thoại khi đã đăng nhập; thẻ Tổng quan không xuống dòng ở 800–1280 px (audit OBS-05/06).
+
+### T13 — 29/10/2026
+- README (giới thiệu, ảnh, kết quả F1, hạn chế), HUONG_DAN mục "Cài đặt từ số 0", `docs/SAO_LUU.md`, 14 ảnh `docs/images/`, sao lưu `backup\v1.0\` kèm SHA-256.
+- Thêm `tzdata==2026.5` vào `backend/requirements.txt`: trên Windows cài mới, `ZoneInfo("Asia/Ho_Chi_Minh")` (chatbot) làm backend lỗi ngay khi import vì thiếu dữ liệu múi giờ. Phát hiện khi dựng lại từ bản clone (AC-01).
+
+## Ghi chú theo task trước 1.0.0
 
 ### T30 — 27/10/2026
 

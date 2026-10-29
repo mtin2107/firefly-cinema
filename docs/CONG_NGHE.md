@@ -147,3 +147,21 @@ T01 dùng `text_norm` và `has_negative` trên đúng split UIT-ViSFD của T00.
 | Model AI mặc định | `gemini-3.8-flash` | Tên model API | Function calling để tư vấn phim, lịch chiếu, giá (read-only) |
 
 Cấu hình trong `backend/.env` (không commit): `CHAT_BASE_URL`, `CHAT_API_KEY`, `CHAT_MODEL`, `CHAT_RATE_PER_MINUTE`, `CHAT_RATE_PER_DAY`. Khi không có key backend vẫn hoạt động. Theo tài liệu Google AI (tra cứu 12/10/2026), `gemini-3.8-flash` có gói miễn phí input/output và tương thích OpenAI API. Hạn mức thực tế RPM/TPM/RPD theo từng dự án phải xem tại https://aistudio.google.com/rate-limit; không được coi giới hạn 5/phút, 50/ngày trong ứng dụng là hạn mức Google. Nguồn: https://ai.google.dev/gemini-api/docs/openai ; https://ai.google.dev/gemini-api/docs/pricing ; https://ai.google.dev/gemini-api/docs/rate-limits .
+
+## Phiên bản chốt v1.0 (29/10/2026)
+
+| Thành phần | Phiên bản đã kiểm ở v1.0 |
+|---|---|
+| Python | 3.13.2 (venv `backend\venv`) |
+| Node.js | 24.21.0 |
+| FastAPI / uvicorn / SQLAlchemy / PyJWT / Pydantic | 0.115.0 / 0.30.6 / 2.0.35 / 2.9.0 / 2.9.2 |
+| PyTorch (CPU) / Transformers / scikit-learn / joblib | 2.11.0 / 5.18.0 / 1.7.2 / 1.5.2 |
+| `openai` SDK (chatbot) | 3.29.0; model đã kiểm khi demo: `gemini-3.5-flash-lite` (T17 AC-02), mẫu trong `backend/.env.example` |
+| pytest / httpx | 8.3.3 / 0.27.2 |
+| React / React Router / Vite | 18.3 / 6.26 / 5.4 |
+| GSAP / @gsap/react | 3.15.0 / 2.1.2 (T18) |
+| Cơ sở dữ liệu | SQLite (file `backend/firefly.db`), không migration |
+
+Dòng `gemini-3.8-flash` ở mục T17 phía trên là mặc định cũ trong code lúc đó, chưa được duyệt vận hành. Bản v1.0 cấu hình `CHAT_MODEL` theo `.env.example`.
+
+Mốc dung lượng build v1.0 (`npm run build`, 29/10/2026): JS 457,21 KB (gzip 156,31 KB), CSS 71,38 KB (gzip 14,78 KB). Bản mock: JS 485,24 KB (gzip 165,27 KB). Đây là mốc thay cho mốc T18 không tái lập được (T18 TODO-03).

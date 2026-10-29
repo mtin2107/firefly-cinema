@@ -1,5 +1,86 @@
 # Firefly Cinema — Hướng dẫn chạy và kết nối từ đầu đến cuối
 
+## Cài đặt từ số 0 (v1.0)
+
+Mục này đủ để dựng lại bản v1.0 trên một máy Windows mới. Các phần phía dưới ("Phần 0" trở đi và các mục theo task T17–T30) là ghi chú chi tiết và lịch sử, chỉ đọc khi cần.
+
+### 1. Công cụ
+- **Git**, **Python 3.13** (tick *Add Python to PATH*), **Node.js 24**. Kiểm tra: `git --version`, `python --version`, `node -v`.
+- PowerShell chặn `Activate.ps1` thì chạy một lần: `Set-ExecutionPolicy -Scope CurrentUser RemoteSigned`.
+
+### 2. Lấy mã nguồn và file ngoài Git
+```powershell
+git clone <địa chỉ repo> C:\Projects\firefly-cinema
+cd C:\Projects\firefly-cinema
+```
+Model và dữ liệu không nằm trong Git. Lấy từ bản sao lưu (`backup\v1.0\` hoặc Drive `MyDrive/thesis_backup_v1/`, xem `docs/SAO_LUU.md`) và chép đúng chỗ:
+
+| Từ bản sao lưu | Chép vào repo | Dùng cho |
+|---|---|---|
+| `backend\models\phobert-binhluan\` | `backend\models\phobert-binhluan\` | PhoBERT A (đối chiếu, fallback) |
+| `backend\models\phobert-binhluan-B\` | `backend\models\phobert-binhluan-B\` | PhoBERT B (model chấm bình luận trên web) |
+| `ml\artifacts\baselines\svm_A.joblib`, `lr_A.joblib`, `nb_A.joblib` | `ml\artifacts\baselines\` | SVM / LR / NB ở trang So sánh mô hình |
+| `data\` | `data\` | Chỉ cần khi chạy lại notebook/đánh giá ML |
+
+So hash sau khi chép: `Get-FileHash backend\models\phobert-binhluan-B\model.safetensors -Algorithm SHA256` phải ra `0B80947C…2F4F` (đầy đủ trong `docs/SAO_LUU.md`).
+
+### 3. Backend
+```powershell
+cd backend
+python -m venv venv
+venv\Scripts\Activate.ps1
+pip install torch==2.11.0 --index-url https://download.pytorch.org/whl/cpu
+pip install -r requirements-ml.txt -r requirements-dev.txt
+copy .env.example .env
+python -c "import secrets; print(secrets.token_urlsafe(48))"
+```
+Mở `backend\.env` (không commit file này):
+
+| Khóa | Bắt buộc | Ghi chú |
+|---|---|---|
+| `SECRET_KEY` | Có | Dán chuỗi vừa in ra (≥ 32 ký tự) |
+| `ADMIN_PASSWORD` | Nên đặt | Mật khẩu `admin@firefly.vn` khi seed DB mới; để trống thì dùng mặc định cho máy dev |
+| `DATABASE_URL`, `FRONTEND_ORIGIN`, `UPLOAD_DIR` | Không | Giữ giá trị mẫu |
+| `MODEL_DIR`, `MODEL_DIR_B`, `MODEL_VERSION_A`, `MODEL_VERSION_B`, `NEGATIVE_LABEL_ID`, `USE_WORD_SEGMENT`, `USE_TEXT_NORM`, `NEGATIVE_THRESHOLD`, `ACTIVE_MODEL`, `SKLEARN_MODELS` | Không | Giá trị mẫu đã trỏ đúng các thư mục ở bước 2; `ACTIVE_MODEL=phobert_b` |
+| `BANK_ID`, `BANK_ACCOUNT`, `BANK_ACCOUNT_NAME` | Không | Để trống thì vé không có ảnh VietQR |
+| `CHAT_BASE_URL`, `CHAT_API_KEY`, `CHAT_MODEL`, `CHAT_RATE_PER_MINUTE`, `CHAT_RATE_PER_DAY` | Không | Trợ lý AI; thiếu `CHAT_API_KEY` thì chatbot trả "Trợ lý chưa được bật.", phần còn lại vẫn chạy |
+
+Chạy: `uvicorn app.main:app --port 8000`. Lần đầu tự tạo `firefly.db` và dữ liệu mẫu. Kiểm tra http://localhost:8000/api/health: `"classifier":"phobert_b"` và mục `models` có `phobert`, `phobert_b`, `svm`, `lr`, `nb` đều `available`. Còn `keyword` thì model chưa nạp được: xem lại bước 2.
+
+### 4. Frontend
+```powershell
+cd frontend
+copy .env.example .env
+npm install
+npm run dev
+```
+Trong `frontend\.env`: `VITE_USE_MOCK=false`, `VITE_API_URL=http://localhost:8000`. Mở http://localhost:5173. Muốn chạy giao diện không cần backend thì đặt `VITE_USE_MOCK=true`.
+
+Từ lần sau: `chay-firefly.bat` ở thư mục gốc mở cả hai cửa sổ và chờ backend báo PhoBERT.
+
+### 5. Kiểm thử
+```powershell
+cd backend
+venv\Scripts\python -m compileall -q app
+venv\Scripts\python -m pytest -q
+cd ..\frontend
+npm run build
+```
+Test backend dùng SQLite và thư mục upload tạm, không đụng `firefly.db`. Phải chạy `pytest` trong thư mục `backend`.
+
+### 6. Reset dữ liệu demo
+Tắt cửa sổ backend rồi chạy `reset-demo.bat` ở thư mục gốc. Script chỉ làm với SQLite cục bộ và từ chối nếu DB còn bị khóa. Lịch chiếu mẫu tính từ ngày reset, nên reset trước buổi demo. Kịch bản demo: `docs/KICH_BAN_DEMO.md`.
+
+### 7. Trailer, poster, ảnh đại diện
+- Trailer tải lên: **MP4 hoặc WebM**, tối đa **100 MB**; hoặc dán link YouTube (cần mạng). File lưu ở `backend\uploads\trailers\`.
+- Poster và ảnh đại diện: JPG, PNG hoặc WebP, tối đa 2 MB; ảnh hỏng hoặc bị cắt bị từ chối. File lưu ở `backend\uploads\posters\` và `backend\uploads\avatars\`.
+- Sao lưu `backend\uploads\` cùng lúc với `firefly.db`.
+
+### 8. Đổi schema
+Không có migration. Khi một bản cập nhật đổi schema: dừng backend, sao lưu `firefly.db*` và `uploads\` (xem mục T29 bên dưới cho lệnh kiểm SHA-256/integrity), xóa `firefly.db`, khởi động lại để tạo bảng mới.
+
+---
+
 Bộ mã gồm hai phần chạy riêng:
 
 ```

@@ -40,6 +40,21 @@ def _extension(data: bytes) -> str | None:
     return None
 
 
+def _jpeg_complete(data: bytes) -> bool:
+    # Máy chụp có thể ghi thêm dữ liệu sau EOI: đi theo segment tới SOS rồi tìm FFD9 phía sau.
+    if data.endswith(b"\xff\xd9"):
+        return True
+    i = 2
+    while i + 4 <= len(data) and data[i] == 0xFF:
+        if data[i + 1] == 0xFF:  # byte đệm giữa các segment
+            i += 1
+        elif data[i + 1] == 0xDA:
+            return data.find(b"\xff\xd9", i + 2) != -1
+        else:
+            i += 2 + int.from_bytes(data[i + 2:i + 4], "big")
+    return False
+
+
 def validate_image(data: str, label: str = "Ảnh poster"):
     try:
         # Không chấp nhận tiền tố data: hoặc chuỗi base64 không hợp lệ.
@@ -58,7 +73,7 @@ def validate_image(data: str, label: str = "Ảnh poster"):
 
     valid = {
         "png": binary[12:16] == b"IHDR" and binary.endswith(bytes.fromhex("0000000049454e44ae426082")),
-        "jpg": binary.endswith(b"\xff\xd9"),
+        "jpg": _jpeg_complete(binary),
         "webp": int.from_bytes(binary[4:8], "little") + 8 == len(binary),
     }[ext]
     if not valid:

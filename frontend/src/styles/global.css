@@ -1144,3 +1144,17 @@ a.ac-stat:hover { text-decoration: none; border-color: var(--yellow); }
   .ac-page *, .ac-page *::before, .ac-page *::after { animation: none !important; transition: none !important; }
   .ac-ticket:hover { transform: none; }
 }
+
+/* T31 — header một hàng ở điện thoại: nút tài khoản chỉ hiện chữ viết tắt, tên vẫn đọc được bằng trình đọc màn hình. */
+.header__avatar { display: none; }
+@media (max-width: 420px) {
+  .header__inner { gap: 10px 8px; }
+  .header__account { gap: 6px; }
+  .logo { font-size: 1.2rem; }
+  .header__avatar { display: grid; width: 30px; height: 30px; font-size: .8rem; }
+  .header__name { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+}
+/* T31 — Tổng quan 6 thẻ: 3 cột ở 861–1100px để số tiền không xuống dòng. */
+@media (min-width: 861px) and (max-width: 1100px) {
+  .sentiment-summary--dashboard { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+}

@@ -2,7 +2,7 @@ from datetime import date, datetime, timezone
 import re
 from urllib.parse import urlparse, parse_qs
 
-from typing import Literal
+from typing import ClassVar, Literal
 
 from pydantic import BaseModel, ConfigDict, EmailStr, Field, field_validator, model_validator
 from pydantic_core import PydanticCustomError
@@ -366,10 +366,12 @@ class AdminBookingOut(BookingOut):
 
 # ---------- Bình luận ----------
 class ScoreInput(BaseModel):
+    allow_empty_score: ClassVar[bool] = False
+
     @field_validator("stars", mode="before", check_fields=False)
     @classmethod
     def valid_score(cls, value):
-        if value is None and cls.__name__ == "CommentIn":
+        if value is None and cls.allow_empty_score:
             return value
         if type(value) is not int or not 1 <= value <= 10:
             raise PydanticCustomError("comment_score", "Điểm phải từ 1 đến 10.")
@@ -381,6 +383,7 @@ class RatingIn(ScoreInput):
 
 
 class CommentIn(ScoreInput):
+    allow_empty_score: ClassVar[bool] = True
     is_anonymous: bool = False
     stars: int | None = Field(default=None, ge=1, le=10, strict=True)
     content: str = Field(min_length=2, max_length=1000)

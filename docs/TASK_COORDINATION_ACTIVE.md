@@ -36,13 +36,17 @@ Trước khi áp dụng workflow: giao diện React đầy đủ (`giao-dien-v1`
 
 ## 4. Current Project Status
 ```
-Overall Status: PO_REVIEW
-Phase: T30 Claude PASS_WITH_TODO (RF 0, TODO-01 Low); chờ PO merge T30 và reset DB một lần (T29 + T30); T13 READY_FOR_HANDOFF sau đó
-Current Active Task: T30 — PO_REVIEW
+Overall Status: CODEX_REVIEW
+Phase: T30 đã merge, DB thật đã reset (29/10, Claude theo lệnh PO); T31 sửa 6 mục Low do Claude viết, chờ Codex review; T13 READY_FOR_HANDOFF sau khi T31 merge
+Current Active Task: T31 — CODEX_REVIEW
 Ngày bắt đầu sản phẩm: 05/10/2026 · Hạn: 01/11/2026
 ```
 
 ## 5. Current Active Task
+**T31 — CODEX_REVIEW (29/10/2026).** PO yêu cầu trong chat: Claude sửa nhóm A (T25 TODO-01/02, T27 TODO-01, T30 TODO-01) và nhóm B (audit OBS-05/06) trên `task/T31-sua-low` từ master `a772cdf`. Không đổi schema. Vì Claude viết code, **Codex review độc lập**. Task Record: `docs/tasks/T31.md`; report: `reports/2026-10-29/claude_implementation_T31_2026-10-29.md`.
+
+**Trước T31 (29/10/2026, theo lệnh PO):** Claude sao lưu `firefly.db` + sidecar vào `backup\T30-20261029-121409` (SHA-256 khớp, integrity + foreign_key_check OK), xóa DB làm việc, khởi động lại: schema `users` có birth_date/gender/avatar_url, `bookings` có AUTOINCREMENT, health `phobert_b`. Chưa thử đặt → hủy → đặt lại trên DB thật (để DB demo sạch; test tự động đã phủ). Xóa thư mục clone lạ `firefly-cinema/` trong repo (sạch, commit b361d2a). PO quyết: T12 TODO-01 ghi Hạn chế; audit OBS-01..04/07/08 và T28 OBS-01..03 ghi Hạn chế ở T13.
+
 **T30 — PO_REVIEW.** Claude review **PASS_WITH_TODO** trên `9a2cc34`: AC 9/9, RF 0. Regression trên master `73eb3c7` (Claude chạy lại): 16 fail/4 đạt; nhánh 20/20; full pytest 263/263; compileall và build real/mock exit 0. TODO-01 Low: JPEG có dữ liệu sau FFD9 bị từ chối (PO thử ảnh điện thoại). OBS-01: `test_booking_payment.py` ngoài allowlist, Codex ghi PO cho phép, cần PO xác nhận. Report: `reports/2026-10-27/claude_review_T30_PASS_WITH_TODO_2026-10-27.md`. **Reset DB một lần sau merge** (HUONG_DAN mục T30).
 
 **T30 — CLAUDE_REVIEW (27/10/2026).** PO authorize trong chat, Q1 sqlite_autoincrement, Q2 8.0/10, Q3 PO reset sau merge T30. Baseline master 73eb3c7; chỉ DB/uploads tạm.
@@ -108,7 +112,7 @@ Trước đó — Codex: Codex hoàn tất 24/10/2026: upload raw/Range, synopsi
 | T10 | Gắn model B vào web | Web | 3 | T07, T09 | [T10.md](tasks/T10.md) | DONE / CLOSED — PO APPROVED_WITH_NOTES; Claude Final PASS_WITH_TODO; AC 7/7; Technical DoD MET; RF 0; fast-forward merge + annotated tag `phobert-B` VERIFIED tại `857a8272` |
 | T11 | Kiểm thử tự động và sửa lỗi | Web | 4 | T04–T10 | [T11.md](tasks/T11.md) | DONE / CLOSED — Claude PASS_WITH_TODO; PO APPROVED_WITH_NOTES; AC 6/6; DoD MET; RF 0; merge `06dd44f0` VERIFIED |
 | T12 | Dữ liệu demo và kịch bản bảo vệ | Web | 4 | T10, T20 | [T12.md](tasks/T12.md) | DONE / CLOSED — PO duyệt, merge `0a717e9`; TODO-01: PO chưa quyết định — giữ mở, xử lý trước T13 |
-| T13 | Chốt v1.0 và sao lưu | Tất cả | 4 | T12, T14, T15, T20, T21, T22, T23, T24, T25, T26, T27, T28, T29 | [T13.md](tasks/T13.md) | READY_FOR_HANDOFF — sau khi PO merge T30 và reset DB một lần (T29 + T30); prompt ở mục 7 report Claude T30, PO điền quyết định trước khi gửi |
+| T13 | Chốt v1.0 và sao lưu | Tất cả | 4 | T12, T14, T15, T20, T21, T22, T23, T24, T25, T26, T27, T28, T29, T30, T31 | [T13.md](tasks/T13.md) | READY_FOR_HANDOFF sau khi T31 merge; DB đã reset; prompt đã điền quyết định PO ở mục 8 report Claude T31 |
 | T14 | Hủy vé giữ chỗ, đổi mật khẩu | Web | 4 | T20 | [T14.md](tasks/T14.md) | PO_REVIEW — Claude Round 2 PASS_WITH_TODO; TODO-01 CLOSED; AC 5/5; RF 0 |
 | T15 | Thử nghiệm có tách từ | ML | 4 | T09 | [T15.md](tasks/T15.md) | DONE / CLOSED — PO approved trong chat 16/10, merge vào `master`; Claude PASS_WITH_TODO; TODO-01 PO_ATTESTED (bằng chứng tái lập trên Drive), TODO-02..04 ACCEPT_LATER → T13 |
 | T16 | Giữ chỗ có hạn và thanh toán QR (đổi schema) | Web | phát triển thêm | T11 | [T16.md](tasks/T16.md) | DONE / CLOSED — PO APPROVED, merge theo PO; Claude PASS_WITH_TODO, AC 12/12, RF 0, TODO-01..07 preserved |
@@ -126,7 +130,8 @@ Trước đó — Codex: Codex hoàn tất 24/10/2026: upload raw/Range, synopsi
 | T27 | Thang điểm 10 và khung đánh giá có hiệu ứng (đổi schema) | Web | 4 | T26 | [T27.md](tasks/T27.md) | PO_REVIEW — Claude PASS_WITH_TODO trên `73a57f6`; RF 0; TODO-01 Low; PO đã merge `f48922a`, DB đã reset |
 | T28 | Sửa lỗi hiển thị, hiệu ứng và trang tài khoản | Web | 4 | T27 | [T28.md](tasks/T28.md) | PO đã merge `419b07e` (27/10), chờ closure ở T13; trước đó PO_REVIEW — Claude round 3 PASS trên `5b27199` (vòng sửa 2); RF 0; không reset DB |
 | T29 | Tài khoản người dùng và quản trị (đổi schema) | Web | 4 | T28 | [T29.md](tasks/T29.md) | PO_REVIEW — Claude round 3 PASS trên `da86372`; RF 0; TODO-01/02/03 CLOSED; reset DB sau merge |
-| T30 | Sửa BUG-01..06 và TEST-01 audit trước T13 | Web | 4 | T29 (master 73eb3c7) | [T30.md](tasks/T30.md) | PO_REVIEW — Claude PASS_WITH_TODO trên `9a2cc34`; RF 0; TODO-01 Low; đổi schema, reset DB sau merge |
+| T30 | Sửa BUG-01..06 và TEST-01 audit trước T13 | Web | 4 | T29 (master 73eb3c7) | [T30.md](tasks/T30.md) | PO đã merge; DB thật reset 29/10 (backup `T30-20261029-121409`); chờ closure ở T13; TODO-01 → T31 FX-04 |
+| T31 | Sửa 6 mục Low trước v1.0 | Web | 4 | T30 | [T31.md](tasks/T31.md) | CODEX_REVIEW — Claude viết code theo lệnh PO, Codex review độc lập; không đổi schema |
 
 Chuỗi chính: `T00 → T01 → T02` và `T03 → T08 → T09 → T10`. T03 bắt đầu ngay ngày đầu (song song).
 
@@ -267,14 +272,14 @@ Nếu trễ: cắt T14 → T15 → rút gọn T05. Không cắt T01–T03, T07�
 | Claude review T23 R1 | OBS-03: code trang admin dồn dòng, định dạng giờ lỗi 409 mock/real khác nhau | **ACCEPT_LATER — theo PO closure T23; không mở task mới** |
 
 ## 11. Current Next Step
-1. **Codex:** xong T30.
-2. **Claude:** review T30 PASS_WITH_TODO (`reports/2026-10-27/claude_review_T30_PASS_WITH_TODO_2026-10-27.md`).
-3. **Tín:** xác nhận OBS-01 (allowlist), thử ảnh điện thoại cho TODO-01; sau đó gửi prompt T13 ở mục 7 report review T30.
-4. **Tín (PO):** sau review, PO duyệt/merge T30 rồi tự sao lưu, kiểm checksum/integrity và reset DB thật **một lần** cho T29 + T30 theo HUONG_DAN mục T30. Không khởi động backend trên DB thật chưa reset. T13 chưa được mở trong T30.
+1. **Tín:** gửi prompt Codex review T31 (mục 7 report `reports/2026-10-29/claude_implementation_T31_2026-10-29.md`).
+2. **Codex:** review độc lập T31, không sửa code; PASS → PO_REVIEW, FAIL → FIX_LOOP (Claude sửa).
+3. **Tín (PO):** duyệt/merge T31 (không cần reset DB), tạo lại `task/T13-v1` từ master mới, rồi gửi prompt T13 (mục 8 report T31).
 
 ## 12. Active Timeline
 | Ngày | Ai | Sự kiện |
 |---|---|---|
+| 29/10/2026 | Claude | Theo lệnh PO: sao lưu + reset DB thật cho T29/T30 (`backup\T30-20261029-121409`, health `phobert_b`), xóa clone lạ `firefly-cinema/`. PO yêu cầu sửa các mục Low trước khi chốt → Claude soạn `docs/tasks/T31.md` và viết FX-01..06 trên `task/T31-sua-low`; T31 → `CODEX_REVIEW`. Quyết định PO cho T13 ghi ở T31.md mục 13. |
 | 25/10/2026 | Claude | T27 review **PASS_WITH_TODO** trên `73a57f6`: scope 19/19; compileall 0; pytest 200 pass, 1 fail `test_sentiment` (T21, fail y hệt trên master lúc 00:42 — lệch ngày UTC/giờ máy, OBS-01); build real/mock đạt; probe PUT 1/10 = 200, 0/11/5.5/"8"/true/null = 422, distribution đủ 10 khóa, CHECK 1–10 chặn ghi thẳng; browser: đếm điểm khi mở, 18 hạt khi chọn 9, lưu 8.3→8.4 + tự đóng, 0 hạt sót, giảm chuyển động tắt hết hiệu ứng, 375px 10 sao 28px một hàng, mọi chỗ hiển thị /10; mock đạt. TODO-01 Low. T27 `CLAUDE_REVIEW → PO_REVIEW`; T13 → `READY_FOR_HANDOFF` sau merge + reset. |
 | 24/10/2026 | Codex | T27 IN_PROGRESS → CLAUDE_REVIEW: thang 10 + distribution + RatingDialog/GSAP; compileall, health model B SQLite tạm, pytest 201/201, build real/mock, browser 375/1280/reduced motion/hồi quy đạt DEV. Đổi schema; HUONG_DAN có runbook PO backup/reset. Không sửa DB thật, không merge hoặc mở T13. |
 | 24/10/2026 | Claude | Theo lệnh PO: merge T26 vào master (`c1916c6`, không đổi schema). PO yêu cầu thiết kế lại khung đánh giá (poster, vòng điểm, phân bố, hiệu ứng) và chuyển sang thang 10 → Claude dựng bản phác thảo trong chat, soạn `docs/tasks/T27.md` (đổi constraint `ratings`, reset DB sau merge), T27 `READY_FOR_HANDOFF`; T13 chờ T27. |

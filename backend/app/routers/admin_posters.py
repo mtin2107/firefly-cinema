@@ -48,10 +48,12 @@ def _jpeg_complete(data: bytes) -> bool:
     while i + 4 <= len(data) and data[i] == 0xFF:
         if data[i + 1] == 0xFF:  # byte đệm giữa các segment
             i += 1
-        elif data[i + 1] == 0xDA:
-            return data.find(b"\xff\xd9", i + 2) != -1
         else:
-            i += 2 + int.from_bytes(data[i + 2:i + 4], "big")
+            end = i + 2 + int.from_bytes(data[i + 2:i + 4], "big")
+            if data[i + 1] == 0xDA:
+                # chỉ tìm EOI trong dữ liệu ảnh, sau hết header SOS
+                return end <= len(data) and data.find(b"\xff\xd9", end) != -1
+            i = end
     return False
 
 

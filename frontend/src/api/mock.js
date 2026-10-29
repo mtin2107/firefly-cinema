@@ -403,9 +403,11 @@ function jpegComplete(binary) {
   const at = (k) => binary.charCodeAt(k);
   let i = 2;
   while (i + 4 <= binary.length && at(i) === 0xff) {
-    if (at(i + 1) === 0xff) i += 1;
-    else if (at(i + 1) === 0xda) return binary.indexOf(EOI, i + 2) !== -1;
-    else i += 2 + at(i + 2) * 256 + at(i + 3);
+    if (at(i + 1) === 0xff) { i += 1; continue; }
+    const end = i + 2 + at(i + 2) * 256 + at(i + 3);
+    // chỉ tìm EOI trong dữ liệu ảnh, sau hết header SOS
+    if (at(i + 1) === 0xda) return end <= binary.length && binary.indexOf(EOI, end) !== -1;
+    i = end;
   }
   return false;
 }

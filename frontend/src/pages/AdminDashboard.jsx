@@ -34,7 +34,7 @@ export default function AdminDashboard() {
     {error && <ErrorState message={error} onRetry={() => setRetry((n) => n + 1)} />}
     {!data && !error && <Loading label="Đang tải tổng quan…" />}
     {data && <>
-      <div className="sentiment-summary">{[["Doanh thu", money(data.revenue)], ["Vé đã thanh toán", data.paid_tickets], ["Vé đang chờ", data.pending_tickets], ["Vé đã hủy", data.cancelled_tickets], ["Ghế đã bán", data.seats_sold], ["Điểm", `${data.rating_avg.toFixed(1)} / 10 · ${data.rating_count} lượt`]].map(([label,value]) => <div key={label}><span>{label}</span><strong>{value}</strong></div>)}</div>
+      <div className="sentiment-summary sentiment-summary--dashboard">{[["Doanh thu", money(data.revenue)], ["Vé đã thanh toán", data.paid_tickets], ["Vé đang chờ", data.pending_tickets], ["Vé đã hủy", data.cancelled_tickets], ["Ghế đã bán", data.seats_sold], ["Điểm", `${data.rating_avg.toFixed(1)} / 10`, `${data.rating_count} lượt chấm`]].map(([label,value,note]) => <div key={label}><span>{label}</span><strong>{value}</strong>{note && <small>{note}</small>}</div>)}</div>
       <h2>Doanh thu theo ngày</h2>
       <div className="t23-chart" ref={chartRef}><svg viewBox={`0 0 ${chartWidth} 250`} role="img" aria-label={`Doanh thu ${days} ngày`}>
         <line x1="30" x2={chartWidth-30} y1="210" y2="210" stroke="currentColor" />

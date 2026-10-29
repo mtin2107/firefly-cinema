@@ -396,6 +396,28 @@ function decodePosterBase64(data) {
   }
 }
 
+// Cùng luật với backend _jpeg_complete: nhận dữ liệu thêm sau EOI nếu có FFD9 sau SOS.
+function jpegComplete(binary) {
+  const EOI = String.fromCharCode(255, 217);
+  if (binary.endsWith(EOI)) return true;
+  const at = (k) => binary.charCodeAt(k);
+  let i = 2;
+  while (i + 4 <= binary.length && at(i) === 0xff) {
+    if (at(i + 1) === 0xff) { i += 1; continue; }
+    const length = at(i + 2) * 256 + at(i + 3);
+    if (length < 2) return false; // độ dài luôn gồm 2 byte của chính nó
+    const end = i + 2 + length;
+    if (at(i + 1) === 0xda) {
+      // header SOS dài đúng 6 + 2 x số thành phần (1-4); EOI chỉ tìm sau hết header
+      const components = i + 4 < binary.length ? at(i + 4) : 0;
+      return components >= 1 && components <= 4 && length === 6 + 2 * components
+        && end <= binary.length && binary.indexOf(EOI, end) !== -1;
+    }
+    i = end;
+  }
+  return false;
+}
+
 function posterMime(binary) {
   const codes = [...binary.slice(0, 12)].map((ch) => ch.charCodeAt(0));
   let mime;
@@ -405,7 +427,7 @@ function posterMime(binary) {
   else throw new ApiError("Chỉ nhận ảnh JPG, PNG hoặc WebP.", 422);
   const valid = mime === "image/png"
     ? binary.slice(12, 16) === "IHDR" && [...binary.slice(-12)].map((ch) => ch.charCodeAt(0)).join(",") === "0,0,0,0,73,69,78,68,174,66,96,130"
-    : mime === "image/jpeg" ? binary.slice(-2) === String.fromCharCode(255, 217)
+    : mime === "image/jpeg" ? jpegComplete(binary)
     : codes[4] + codes[5] * 256 + codes[6] * 65536 + codes[7] * 16777216 + 8 === binary.length;
   if (!valid) throw new ApiError("Ảnh bị hỏng hoặc không đầy đủ.", 422);
   return mime;

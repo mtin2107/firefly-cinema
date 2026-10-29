@@ -54,13 +54,16 @@ export default function AdminMovies() {
   };
   const selectVideo = (event) => {
     const file = event.target.files?.[0];
-    clearVideo();
     let error = "";
     if (file && !["video/mp4", "video/webm"].includes(file.type)) error = "Chỉ nhận video MP4 hoặc WebM.";
     else if (file && file.size > 100 * 1024 * 1024) error = "Video trailer tối đa 100 MB.";
     setFieldErrors((current) => ({ ...current, trailer_file: error }));
+    // giữ tên file trong ô khi hợp lệ, chỉ xóa ô khi file bị từ chối
     if (!error && file) setSelectedVideo(file);
+    else clearVideo();
   };
+  // trailer đã tải lên (thật: /uploads/trailers/..., mock: blob:) không hiện trong ô link YouTube
+  const uploadedTrailer = /^(\/uploads\/trailers\/|blob:)/.test(form.trailer_url);
   const fileInputRef = useRef(null);
   const fileRequestRef = useRef(0);
 
@@ -263,7 +266,7 @@ export default function AdminMovies() {
             <fieldset className="choice-field">
               <legend>Trailer</legend>
               <label className="field"><span id="movie-trailer-label">Chọn video từ máy</span><input aria-labelledby="movie-trailer-label" ref={videoInputRef} type="file" accept="video/mp4,video/webm" onChange={selectVideo} aria-invalid={Boolean(fieldErrors.trailer_file)} /><small>MP4 hoặc WebM, tối đa 100 MB</small>{selectedVideo && <span>Đã chọn: {selectedVideo.name}</span>}{fieldErrors.trailer_file && <span className="field__error" role="alert">{fieldErrors.trailer_file}</span>}</label>
-              <label className="field"><span>Hoặc dán link YouTube</span><input value={form.trailer_url} onChange={(event) => update("trailer_url", event.target.value)} placeholder="https://www.youtube.com/watch?v=..." /></label>
+              <label className="field"><span>Hoặc dán link YouTube</span><input value={uploadedTrailer ? "" : form.trailer_url} onChange={(event) => update("trailer_url", event.target.value)} placeholder="https://www.youtube.com/watch?v=..." />{uploadedTrailer && !selectedVideo && <small>Đang dùng video đã tải lên.</small>}</label>
               {(form.trailer_url || selectedVideo) && <button type="button" className="btn btn--ghost btn--sm" onClick={() => { clearVideo(); update("trailer_url", ""); setFieldErrors((current) => ({ ...current, trailer_file: "" })); }}>Gỡ trailer</button>}
             </fieldset>
             <label className="field"><span>Mô tả</span><textarea rows="4" value={form.description} onChange={(event) => update("description", event.target.value)} /></label>

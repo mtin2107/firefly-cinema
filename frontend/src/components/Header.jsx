@@ -81,7 +81,8 @@ export default function Header() {
           <SearchBox />
           {USE_MOCK && <span className="mock-flag" title="Đang dùng dữ liệu giả, chưa nối backend">Dữ liệu mẫu</span>}
           {user ? (
-            <Dropdown id="account" label={user.full_name} openId={openId} setOpenId={setOpenId} align="right">
+            <Dropdown id="account" openId={openId}
+              label={<><span className="account-avatar header__avatar" aria-hidden="true">{user.avatar_url ? <img src={avatarSrc(user.avatar_url)} alt="" /> : initials(user.full_name)}</span><span className="header__name">{user.full_name}</span></>} setOpenId={setOpenId} align="right">
               <div className={`account-menu${user.role === "admin" ? " account-menu--admin" : ""}`}>
                 <div className="account-menu__profile">
                   <span className="account-avatar" aria-hidden="true">{user.avatar_url ? <img src={avatarSrc(user.avatar_url)} alt="" /> : initials(user.full_name)}</span>

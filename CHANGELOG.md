@@ -22,6 +22,7 @@ Phiên bản chốt khóa luận. Tag `v1.0` do PO gắn sau khi duyệt T13.
 
 ### T13 — 29/10/2026
 - README (giới thiệu, ảnh, kết quả F1, hạn chế), HUONG_DAN mục "Cài đặt từ số 0", `docs/SAO_LUU.md`, 14 ảnh `docs/images/`, sao lưu `backup\v1.0\` kèm SHA-256.
+- Thêm `tzdata==2026.5` vào `backend/requirements.txt`: trên Windows cài mới, `ZoneInfo("Asia/Ho_Chi_Minh")` (chatbot) làm backend lỗi ngay khi import vì thiếu dữ liệu múi giờ. Phát hiện khi dựng lại từ bản clone (AC-01).
 
 ## Ghi chú theo task trước 1.0.0
 

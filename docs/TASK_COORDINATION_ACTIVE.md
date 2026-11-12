@@ -36,14 +36,16 @@ Trước khi áp dụng workflow: giao diện React đầy đủ (`giao-dien-v1`
 
 ## 4. Current Project Status
 ```
-Overall Status: INDEPENDENT_REVIEW
-Phase: v1.0 đã chốt (master `c581ab7`); T32 menu mới do Claude làm theo lệnh PO (Codex hết hạn), chờ review độc lập
-Current Active Task: T32 — INDEPENDENT_REVIEW
+Overall Status: IDLE
+Phase: v1.0 + T32 (menu mới) trên master `55ced2f`
+Current Active Task: không có — task tiếp theo chưa chọn
 ```
 
 ## 5. Current Active Task
 
-**T32 — INDEPENDENT_REVIEW (12/11/2026).** PO yêu cầu trong chat: Codex hết hạn, Claude làm toàn bộ menu mới trên `task/T32-menu-moi` từ master `c581ab7`. Logo đom đóm SVG, menu Phim 4 cột, Lịch chiếu, Giá vé, Ưu đãi, Thành viên, nút Mua vé ngay; 3 trang mới; `GET /api/showtimes?date=` công khai (real + mock). Gate: compileall, pytest 289/289, build real + mock, health `phobert_b`, kiểm tra trình duyệt real + mock ở 375/768/1280/1440px. Không đổi schema. Report: `reports/2026-11-12/claude_implementation_T32_2026-11-12.md`. Vì Claude viết code, **cần người review độc lập** (Codex khi có lại hoặc Tín) trước khi merge.
+**T32 — DONE / CLOSED (12/11/2026), merge `55ced2f`.** PO xem thử trên web thật, góp ý vòng 1 (menu ngang từ 1101px, commit `f8aabdb`), rồi APPROVED và yêu cầu Claude merge trong chat. PO chấp nhận không có review độc lập vì Codex hết hạn.
+
+Trước đó — **T32 — INDEPENDENT_REVIEW (12/11/2026).** PO yêu cầu trong chat: Codex hết hạn, Claude làm toàn bộ menu mới trên `task/T32-menu-moi` từ master `c581ab7`. Logo đom đóm SVG, menu Phim 4 cột, Lịch chiếu, Giá vé, Ưu đãi, Thành viên, nút Mua vé ngay; 3 trang mới; `GET /api/showtimes?date=` công khai (real + mock). Gate: compileall, pytest 289/289, build real + mock, health `phobert_b`, kiểm tra trình duyệt real + mock ở 375/768/1280/1440px. Không đổi schema. Report: `reports/2026-11-12/claude_implementation_T32_2026-11-12.md`. Vì Claude viết code, **cần người review độc lập** (Codex khi có lại hoặc Tín) trước khi merge.
 
 
 Codex review T13 **PASS_WITH_TODO** trên 915bd67: clone độc lập, compileall/pytest 286/286, health phobert_b (6 model available), build real/mock đạt; 9/9 hash khớp; 14 ảnh đúng trang. RF 0; TODO Low: mốc dung lượng mock và xác nhận thông tin liên hệ footer ảnh. Report: reports/2026-10-29/codex_review_T13_PASS_WITH_TODO_2026-10-29.md. AC-02 Drive và AC-04 tag giữ PO action; không merge/tag.

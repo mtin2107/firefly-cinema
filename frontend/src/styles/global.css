@@ -1163,7 +1163,7 @@ a.ac-stat:hover { text-decoration: none; border-color: var(--yellow); }
 @media (min-width: 1101px) {
   .header__inner { gap: 18px; }
   .header__register { display: none; } /* đã có "Đăng ký thành viên" trong menu Thành viên */
-  .nav { gap: 0; }
+  .nav { gap: 0; justify-content: space-evenly; } /* dàn đều 5 mục, không để trống bên phải */
   .nav__link, .nav > .dd > .dd__btn { padding: 0 9px; }
   .nav__link, .dd__btn { position: relative; border-bottom: 0; }
   .nav__link::after, .dd__btn::after { content: ""; position: absolute; left: 50%; right: 50%; bottom: 0; height: 2px; background: var(--yellow);

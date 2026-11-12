@@ -476,7 +476,7 @@ h1, h2, h3 { margin: 0; line-height: 1.35; }
 @keyframes bubble-pop { from { opacity: 0; transform: scale(.6); } }
 
 /* ---------- Màn hình nhỏ ---------- */
-@media (max-width: 1360px) {
+@media (max-width: 1100px) {
   .header__inner { flex-wrap: wrap; gap: 10px 16px; padding-top: 12px; padding-bottom: 12px; }
   .menu-toggle { display: inline-block; order: 2; margin-left: 0; }
   .header__account { order: 1; align-self: center; margin-left: auto; }
@@ -1160,7 +1160,7 @@ a.ac-stat:hover { text-decoration: none; border-color: var(--yellow); }
 .nav__icon { flex-shrink: 0; transition: transform var(--dur) cubic-bezier(.34,1.56,.64,1); }
 .nav__link:hover .nav__icon, .dd__btn:hover .nav__icon, .dd__btn--open .nav__icon { transform: translateY(-2px) rotate(-8deg) scale(1.12); }
 .nav__label--active { color: var(--yellow); }
-@media (min-width: 1361px) {
+@media (min-width: 1101px) {
   .header__inner { gap: 18px; }
   .header__register { display: none; } /* đã có "Đăng ký thành viên" trong menu Thành viên */
   .nav { gap: 0; }
@@ -1175,7 +1175,12 @@ a.ac-stat:hover { text-decoration: none; border-color: var(--yellow); }
 .dd__panel--wide .mega__col:nth-child(2) .dd__list { grid-template-columns: repeat(3, auto); }
 .dd__panel--wide .mega__col:nth-child(3) .dd__list { grid-template-columns: repeat(2, auto); }
 .mega__title { white-space: nowrap; }
-@media (min-width: 1361px) { .mega .dd__list a { padding-top: 6px; padding-bottom: 6px; } }
+@media (min-width: 1101px) {
+  .mega .dd__list a { padding-top: 6px; padding-bottom: 6px; }
+  /* menu Phim canh theo khung header để không tràn ở màn 1101–1360px */
+  .nav > .dd:first-child { position: static; }
+  .nav > .dd:first-child > .dd__panel { left: 20px; }
+}
 .mega .dd__list a { white-space: nowrap; }
 .mega__group + .mega__group { margin-top: 10px; }
 .mega__title { margin: 4px 10px 4px; font-size: .72rem; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
@@ -1187,11 +1192,21 @@ a.ac-stat:hover { text-decoration: none; border-color: var(--yellow); }
 @keyframes buy-shine { 0%, 65% { left: -60%; } 100% { left: 130%; } }
 .buy-now:hover svg { animation: buy-wiggle .5s ease-in-out; }
 @keyframes buy-wiggle { 25% { transform: rotate(-14deg); } 75% { transform: rotate(14deg); } }
-@media (max-width: 1360px) {
+@media (max-width: 1100px) {
   .mega { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .dd__panel--wide .mega .dd__list, .dd__panel--wide .mega__col:nth-child(n) .dd__list { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .mega .dd__list a { white-space: normal; }
   .buy-now { order: -1; }
+}
+/* 1101–1360px: menu vẫn nằm ngang, thu gọn để vừa khung */
+@media (min-width: 1101px) and (max-width: 1360px) {
+  .logo { font-size: 1.4rem; gap: 6px; }
+  .header__inner { gap: 14px; }
+  .nav__link, .nav > .dd > .dd__btn { padding: 0 7px; }
+  .nav__link:hover::after, .nav__link.active::after, .dd__btn:hover::after, .dd__btn--open::after { left: 7px; right: 7px; }
+  .buy-now__more { display: none; }
+  .header__account { gap: 8px; }
+  .header__account .dd__btn { max-width: 150px; }
 }
 @media (max-width: 520px) { .buy-now { display: none; } .mega { grid-template-columns: minmax(0, 1fr); } }
 

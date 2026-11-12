@@ -102,7 +102,7 @@ export default function Header() {
 
         <div className="header__account">
           <SearchBox />
-          <Link className="btn btn--primary btn--sm buy-now" to="/lich-chieu"><Icon name="ticket" size={16} />Mua vé ngay</Link>
+          <Link className="btn btn--primary btn--sm buy-now" to="/lich-chieu"><Icon name="ticket" size={16} />Mua vé<span className="buy-now__more"> ngay</span></Link>
           {USE_MOCK && <span className="mock-flag" title="Đang dùng dữ liệu giả, chưa nối backend">Dữ liệu mẫu</span>}
           {user ? (
             <Dropdown id="account" openId={openId}

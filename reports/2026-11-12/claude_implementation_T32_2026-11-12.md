@@ -44,3 +44,13 @@ Không đổi. Không cần xóa `firefly.db`.
 - Header ≥1361px rất sát khung: tên người dùng dài đã có `max-width` + ellipsis, nhưng nên kiểm tra thêm với admin tên dài.
 - Menu Phim ở điện thoại cao khoảng 1.100px (23 thể loại); trước đây cũng dài như vậy khi mở lần lượt từng menu cũ.
 - `Footer` vẫn dùng chữ, chưa gắn logo SVG (không bắt buộc).
+
+## 6. Vòng sửa 1 — PO xem thử (12/11/2026)
+PO chụp header ở màn ~1240px CSS (laptop 125%): menu bị gom vào nút "Menu", thanh header trống. Yêu cầu: để các mục ở ngoài.
+
+- Mốc gom menu hạ từ ≤1360px xuống ≤1100px (khớp `Dropdown.canHover` vốn dùng 1101px). Khối CSS header cũ và khối T32 cùng đổi.
+- 1101–1360px: logo 1.4rem, khoảng cách mục 7px, nút còn "Mua vé" (chữ "ngay" ẩn), tên tài khoản tối đa 150px có "…". Icon menu giữ nguyên.
+- Menu Phim canh theo mép trái khung header (`.nav > .dd:first-child` static) để không tràn ở 1101px; rê chuột từ nút xuống menu vẫn giữ mở.
+- Ẩn nút "Đăng ký" góc phải từ ≥1101px (trước là ≥1361px).
+
+Kiểm tra: real đã đăng nhập ở 1101/1120/1180/1240/1241/1440px và mock chưa đăng nhập ở 1101/1440px: header 1 hàng (68px), không tràn khung, không tràn ngang; menu Phim 20→952px ở 1101px; menu Thành viên và tài khoản trong màn hình. 1100px vẫn gom vào "Menu"; 375px menu Phim không link nào tràn. `npm run build` real + mock đạt. Lần sửa này chỉ đụng `Header.jsx` và `global.css`; backend không đổi nên không chạy lại pytest (lần trước 289/289).

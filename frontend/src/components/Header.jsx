@@ -1,4 +1,4 @@
-import Icon from "./Icons";
+import Icon, { FireflyLogo } from "./Icons";
 import { api } from "../api";
 import { avatarSrc, initials } from "../utils/account";
 import { useEffect, useRef, useState } from "react";
@@ -9,8 +9,11 @@ import { FILTERS, exploreLink } from "../utils/taxonomy";
 import Dropdown from "./Dropdown";
 import SearchBox from "./SearchBox";
 
-// Các menu thả xuống, lấy từ utils/taxonomy.js
-const MENUS = FILTERS.filter((f) => f.key !== "trang-thai");
+// Menu Phim gom các bộ lọc ở utils/taxonomy.js thành 4 cột (cột 3 gồm 2 bộ lọc)
+const byKey = Object.fromEntries(FILTERS.map((f) => [f.key, f]));
+const FILM_COLUMNS = [["trang-thai"], ["the-loai"], ["quoc-gia", "nam"], ["chu-de"]];
+const STATUS_IN_MENU = ["dang-chieu", "sap-chieu"];
+const navIcon = (name) => <Icon name={name} size={17} className="nav__icon" />;
 
 export default function Header() {
   const { user, logout } = useAuth();
@@ -41,16 +44,13 @@ export default function Header() {
 
   const onExplore = location.pathname === "/kham-pha";
   const isActive = (key, slug) => onExplore && params.get(key) === slug;
-  const statusLink = (slug, label) => (
-    <Link to={exploreLink("trang-thai", slug)}
-      className={`nav__link${isActive("trang-thai", slug) ? " active" : ""}`}>{label}</Link>
-  );
+  const filmActive = onExplore && FILTERS.some((f) => params.has(f.key));
 
   return (
     <header className="header" ref={ref}>
       <div className="container header__inner">
         <Link to="/" className="logo" aria-label={`${SITE_NAME} - trang chủ`}>
-          <span className="logo__mark" aria-hidden="true" />
+          <FireflyLogo />
           {SITE_NAME}
         </Link>
 
@@ -60,25 +60,49 @@ export default function Header() {
         </button>
 
         <nav id="main-nav" className={`nav${mobileOpen ? " nav--open" : ""}`} aria-label="Điều hướng chính">
-          {statusLink("dang-chieu", "Đang chiếu")}
-          {statusLink("sap-chieu", "Sắp chiếu")}
-          {MENUS.map((menu) => (
-            <Dropdown key={menu.key} id={menu.key} label={menu.label} openId={openId} setOpenId={setOpenId}
-              wide={menu.options.length > 5}>
-              <ul className="dd__list">
-                {menu.options.map((o) => (
-                  <li key={o.slug}>
-                    <Link to={exploreLink(menu.key, o.slug)}
-                      className={isActive(menu.key, o.slug) ? "active" : undefined}>{o.label}</Link>
-                  </li>
-                ))}
-              </ul>
-            </Dropdown>
-          ))}
+          <Dropdown id="phim" openId={openId} setOpenId={setOpenId} wide
+            label={<span className={`nav__label${filmActive ? " nav__label--active" : ""}`}>{navIcon("film")}Phim</span>}>
+            <div className="mega">
+              {FILM_COLUMNS.map((keys) => (
+                <div key={keys[0]} className="mega__col">
+                  {keys.map((key) => {
+                    const menu = byKey[key];
+                    const options = key === "trang-thai" ? menu.options.filter((o) => STATUS_IN_MENU.includes(o.slug)) : menu.options;
+                    return (
+                      <div key={key} className="mega__group">
+                        <h3 className="mega__title">{menu.label}</h3>
+                        <ul className="dd__list dd__list--single">
+                          {options.map((o) => (
+                            <li key={o.slug}>
+                              <Link to={exploreLink(key, o.slug)}
+                                className={isActive(key, o.slug) ? "active" : undefined}>{o.label}</Link>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    );
+                  })}
+                </div>
+              ))}
+            </div>
+          </Dropdown>
+          <NavLink to="/lich-chieu" className="nav__link">{navIcon("calendar")}Lịch chiếu</NavLink>
+          <NavLink to="/gia-ve" className="nav__link">{navIcon("receipt")}Giá vé</NavLink>
+          <NavLink to="/uu-dai" end className="nav__link">{navIcon("gift")}Ưu đãi</NavLink>
+          <Dropdown id="thanh-vien" openId={openId} setOpenId={setOpenId}
+            label={<span className="nav__label">{navIcon("crown")}Thành viên</span>}>
+            <ul className="dd__list dd__list--single member-menu">
+              <li><Link to="/uu-dai#hang-thanh-vien"><Icon name="star" size={16} />Hạng thành viên</Link></li>
+              <li><Link to="/ve-cua-toi"><Icon name="ticket" size={16} />Vé của tôi</Link></li>
+              <li><Link to="/tai-khoan"><Icon name="user" size={16} />Tài khoản của tôi</Link></li>
+              {!user && <li><Link to="/dang-ky"><Icon name="email" size={16} />Đăng ký thành viên</Link></li>}
+            </ul>
+          </Dropdown>
         </nav>
 
         <div className="header__account">
           <SearchBox />
+          <Link className="btn btn--primary btn--sm buy-now" to="/lich-chieu"><Icon name="ticket" size={16} />Mua vé ngay</Link>
           {USE_MOCK && <span className="mock-flag" title="Đang dùng dữ liệu giả, chưa nối backend">Dữ liệu mẫu</span>}
           {user ? (
             <Dropdown id="account" openId={openId}
@@ -102,7 +126,7 @@ export default function Header() {
           ) : (
             <>
               <Link className="btn btn--ghost btn--sm" to="/dang-nhap">Đăng nhập</Link>
-              <Link className="btn btn--primary btn--sm" to="/dang-ky">Đăng ký</Link>
+              <Link className="btn btn--primary btn--sm header__register" to="/dang-ky">Đăng ký</Link>
             </>
           )}
         </div>

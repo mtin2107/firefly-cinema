@@ -22,6 +22,9 @@ const shapes = {
   clock: <><circle cx="12" cy="12" r="9" /><path d="M12 7v5l3 2" /></>,
   location: <><path d="M19 10c0 5-7 11-7 11S5 15 5 10a7 7 0 0 1 14 0Z" /><circle cx="12" cy="10" r="2" /></>,
   upload: <><path d="M12 16V3m-5 5 5-5 5 5M4 16v5h16v-5" /></>,
+  receipt: <><path d="M6 3h12v18l-3-2-3 2-3-2-3 2Z" /><path d="M9 8h6M9 12h6M9 16h3" /></>,
+  gift: <><rect x="3" y="8" width="18" height="5" rx="1" /><path d="M5 13v8h14v-8M12 8v13M12 8S10.5 3 8 4s0 4 4 4m0 0s1.5-5 4-4 0 4-4 4" /></>,
+  crown: <><path d="m3 8 4.5 4L12 5l4.5 7L21 8l-2 11H5Z" /><path d="M5 19h14" /></>,
 };
 
 export default function Icon({ name, size = 20, className = "" }) {
@@ -36,5 +39,16 @@ export function Medal({ level }) {
   return <svg width="34" height="34" viewBox="0 0 40 40" aria-hidden="true" focusable="false">
     <circle cx="20" cy="20" r="17" fill={fill} stroke={stroke} strokeWidth="1.5" />
     <path d="m20 10 3 6.2 6.8 1-4.9 4.8 1.2 6.8-6.1-3.2-6.1 3.2 1.2-6.8-4.9-4.8 6.8-1Z" fill={star} />
+  </svg>;
+}
+
+// Logo đom đóm: hai cánh, thân, đuôi phát sáng (đuôi nhấp nháy bằng CSS .logo__tail)
+export function FireflyLogo({ size = 30 }) {
+  return <svg className="logo__mark" width={size} height={size * 0.8} viewBox="0 0 40 32" aria-hidden="true" focusable="false">
+    <ellipse cx="16" cy="12" rx="7" ry="4" fill="none" stroke="currentColor" strokeWidth="1.5" opacity=".7" transform="rotate(-25 16 12)" />
+    <ellipse cx="24" cy="12" rx="7" ry="4" fill="none" stroke="currentColor" strokeWidth="1.5" opacity=".7" transform="rotate(25 24 12)" />
+    <ellipse cx="20" cy="14" rx="3" ry="6" fill="var(--text)" />
+    <circle className="logo__halo" cx="20" cy="23" r="6.5" fill="var(--yellow)" />
+    <circle cx="20" cy="23" r="3.6" fill="#fff3c4" />
   </svg>;
 }

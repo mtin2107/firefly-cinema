@@ -329,3 +329,10 @@ theo cùng điều kiện, không đổi schema DB. Frontend khóa ghế và nú
 - Schema `CommentIn`/`RatingIn` dùng chung `ScoreInput`; cờ lớp `allow_empty_score` cho phép bình luận không kèm điểm.
 - Header: ở ≤ 420 px nút tài khoản hiện chữ viết tắt/ảnh đại diện, tên đầy đủ vẫn nằm trong nút cho trình đọc màn hình. Tổng quan quản trị dùng `.sentiment-summary--dashboard` (3 cột ở 861–1100 px).
 - Cây thư mục mục 1b không đổi ở v1.0. Thêm `docs/SAO_LUU.md`, `docs/images/` (ảnh chụp cho báo cáo), `backup\v1.0\` (ngoài Git).
+
+
+## T32 — Menu mới và lịch chiếu công khai (12/11/2026)
+
+- `GET /api/showtimes?date=YYYY-MM-DD` (công khai, `date` tùy chọn) → `list[ScheduleOut]` = `ShowtimeOut` + `movie: MovieOut`, sắp theo giờ rồi phòng. Chỉ trả suất sau mốc chặn `HOLD_CUTOFF_MINUTES` như T24. Ngày sai định dạng → 422 tiếng Việt qua handler chung. Real/mock cùng `api.showtimes.list({ date })`.
+- Trang mới: `/lich-chieu` (`Schedule.jsx`, chọn 7 ngày, nhóm suất theo phim), `/gia-ve` (`Prices.jsx`, giá ghế theo `utils/seats.js`), `/uu-dai` (`Offers.jsx`, hạng thành viên theo `MEMBERSHIP`, phim sắp chiếu).
+- Header: logo `FireflyLogo` (SVG trong `Icons.jsx`), menu Phim gom `FILTERS` thành 4 cột, Lịch chiếu, Giá vé, Ưu đãi, Thành viên, nút "Mua vé ngay". Không đổi schema.

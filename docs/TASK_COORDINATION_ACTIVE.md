@@ -36,13 +36,15 @@ Trước khi áp dụng workflow: giao diện React đầy đủ (`giao-dien-v1`
 
 ## 4. Current Project Status
 ```
-Overall Status: PO_REVIEW
-Phase: T24–T31 DONE / CLOSED (master `db4b452`); T13 do Claude làm theo lệnh PO, chờ Codex review; sau đó PO làm phần Drive/AC-02, video, rồi gắn tag v1.0
-Current Active Task: T13 — PO_REVIEW
-Ngày bắt đầu sản phẩm: 05/10/2026 · Hạn: 01/11/2026
+Overall Status: INDEPENDENT_REVIEW
+Phase: v1.0 đã chốt (master `c581ab7`); T32 menu mới do Claude làm theo lệnh PO (Codex hết hạn), chờ review độc lập
+Current Active Task: T32 — INDEPENDENT_REVIEW
 ```
 
 ## 5. Current Active Task
+
+**T32 — INDEPENDENT_REVIEW (12/11/2026).** PO yêu cầu trong chat: Codex hết hạn, Claude làm toàn bộ menu mới trên `task/T32-menu-moi` từ master `c581ab7`. Logo đom đóm SVG, menu Phim 4 cột, Lịch chiếu, Giá vé, Ưu đãi, Thành viên, nút Mua vé ngay; 3 trang mới; `GET /api/showtimes?date=` công khai (real + mock). Gate: compileall, pytest 289/289, build real + mock, health `phobert_b`, kiểm tra trình duyệt real + mock ở 375/768/1280/1440px. Không đổi schema. Report: `reports/2026-11-12/claude_implementation_T32_2026-11-12.md`. Vì Claude viết code, **cần người review độc lập** (Codex khi có lại hoặc Tín) trước khi merge.
+
 
 Codex review T13 **PASS_WITH_TODO** trên 915bd67: clone độc lập, compileall/pytest 286/286, health phobert_b (6 model available), build real/mock đạt; 9/9 hash khớp; 14 ảnh đúng trang. RF 0; TODO Low: mốc dung lượng mock và xác nhận thông tin liên hệ footer ảnh. Report: reports/2026-10-29/codex_review_T13_PASS_WITH_TODO_2026-10-29.md. AC-02 Drive và AC-04 tag giữ PO action; không merge/tag.
 **T13 — PO_REVIEW (29/10/2026).** PO yêu cầu trong chat: Claude merge T31 (`db4b452`) và làm T13 trên `task/T13-v1` từ master mới. README, HUONG_DAN "Cài đặt từ số 0", CHANGELOG [1.0.0], `docs/SAO_LUU.md`, 14 ảnh `docs/images/`, CONG_NGHE/ARCHITECTURE; `backup\v1.0\` 72 file SHA-256 khớp. AC-01 clone `C:\Temp\firefly-test`; AC-02 phần Drive và AC-04 tag chờ Tín. Report: `reports/2026-10-29/claude_implementation_T13_2026-10-29.md`. Vì Claude làm, **Codex review độc lập**.

@@ -21,6 +21,9 @@ import AdminCheckin from "./pages/AdminCheckin";
 import AdminSentiment from "./pages/AdminSentiment";
 import NotFound from "./pages/NotFound";
 import Explore from "./pages/Explore";
+import Schedule from "./pages/Schedule";
+import Prices from "./pages/Prices";
+import Offers from "./pages/Offers";
 
 export default function App() {
   const { pathname } = useLocation();
@@ -32,6 +35,9 @@ export default function App() {
           <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/kham-pha" element={<Explore />} />
+            <Route path="/lich-chieu" element={<Schedule />} />
+            <Route path="/gia-ve" element={<Prices />} />
+            <Route path="/uu-dai" element={<Offers />} />
             <Route path="/phim/:id" element={<MovieDetail />} />
             <Route path="/dang-nhap" element={<Login />} />
             <Route path="/dang-ky" element={<Register />} />

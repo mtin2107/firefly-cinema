@@ -671,6 +671,15 @@ export const mockApi = {
     },
   },
   showtimes: {
+    async list({ date } = {}) {
+      await wait();
+      if (date && !/^\d{4}-\d{2}-\d{2}$/.test(date)) throw new ApiError("Trường 'date' không hợp lệ: Giá trị không hợp lệ.", 422);
+      const now = Date.now() + HOLD_CUTOFF_MINUTES * 60000;
+      return clone(db.showtimes
+        .filter((s) => new Date(s.start_time).getTime() > now && (!date || s.start_time.slice(0, 10) === date))
+        .sort((a, b) => a.start_time.localeCompare(b.start_time) || a.room.localeCompare(b.room))
+        .map((s) => ({ ...s, movie: movieById(s.movie_id) })));
+    },
     async get(id) {
       await wait();
       expireHolds();

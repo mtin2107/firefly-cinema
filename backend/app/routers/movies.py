@@ -1,6 +1,6 @@
 from ..taxonomy import effective_status
 import unicodedata
-from datetime import datetime, timedelta
+from datetime import date as Date, datetime, timedelta
 from typing import Literal
 
 from fastapi import APIRouter, Depends, HTTPException
@@ -11,7 +11,7 @@ from sqlalchemy.orm.attributes import set_committed_value
 from ..database import get_db
 from ..booking_rules import HOLD_CUTOFF_MINUTES, expire_holds
 from ..models import Movie, Showtime, Booking, BookingSeat, Comment, Rating
-from ..schemas import MovieOut, ShowtimeOut, ShowtimeDetailOut
+from ..schemas import MovieOut, ScheduleOut, ShowtimeOut, ShowtimeDetailOut
 
 router = APIRouter(prefix="/api", tags=["Phim & suất chiếu"])
 TOP_RATED_MIN = 8.0
@@ -128,6 +128,17 @@ def movie_showtimes(movie_id: int, db: Session = Depends(get_db)):
                Showtime.start_time > datetime.now() + timedelta(minutes=HOLD_CUTOFF_MINUTES))
         .order_by(Showtime.start_time)
     ).all()
+
+
+@router.get("/showtimes", response_model=list[ScheduleOut])
+def schedule(date: Date | None = None, db: Session = Depends(get_db)):
+    """Lịch chiếu công khai: chỉ suất còn đặt online được, có thể lọc theo ngày."""
+    query = select(Showtime).where(
+        Showtime.start_time > datetime.now() + timedelta(minutes=HOLD_CUTOFF_MINUTES))
+    if date:
+        start = datetime.combine(date, datetime.min.time())
+        query = query.where(Showtime.start_time >= start, Showtime.start_time < start + timedelta(days=1))
+    return db.scalars(query.order_by(Showtime.start_time, Showtime.room)).all()
 
 
 @router.get("/showtimes/{showtime_id}", response_model=ShowtimeDetailOut)

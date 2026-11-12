@@ -1,5 +1,11 @@
 # Changelog
 
+## [Chưa phát hành]
+
+### T32 — 12/11/2026
+- Menu mới theo cách các rạp lớn: Phim (menu xổ 4 cột gom bộ lọc cũ), Lịch chiếu, Giá vé, Ưu đãi, Thành viên; icon, gạch chân trượt, nút "Mua vé ngay" có vệt sáng; logo đom đóm SVG.
+- Trang mới Lịch chiếu, Giá vé, Ưu đãi; endpoint công khai `GET /api/showtimes?date=`.
+
 ## [1.0.0] — 29/10/2026
 
 Phiên bản chốt khóa luận. Tag `v1.0` do PO gắn sau khi duyệt T13.

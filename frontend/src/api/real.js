@@ -44,6 +44,7 @@ export const realApi = {
     showtimes: (id) => request(`/api/movies/${id}/showtimes`),
   },
   showtimes: {
+    list: ({ date } = {}) => request(`/api/showtimes${date ? `?date=${encodeURIComponent(date)}` : ""}`),
     get: (id) => request(`/api/showtimes/${id}`),
   },
   bookings: {

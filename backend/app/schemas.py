@@ -331,6 +331,10 @@ class ShowtimeIn(BaseModel):
         return value
 
 
+class ScheduleOut(ShowtimeOut):
+    movie: MovieOut
+
+
 class ShowtimeDetailOut(BaseModel):
     bookable: bool
     showtime: ShowtimeOut

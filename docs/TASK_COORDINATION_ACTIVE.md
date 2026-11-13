@@ -36,13 +36,16 @@ Trước khi áp dụng workflow: giao diện React đầy đủ (`giao-dien-v1`
 
 ## 4. Current Project Status
 ```
-Overall Status: ACTIVE
-Phase: v1.0 + T32 (menu mới) trên master
-Current Active Task: T34 — PO_REVIEW
+Overall Status: IDLE
+Phase: v1.0 + T32 + T34 trên master `2cfa0cc`
+Current Active Task: không có — task tiếp theo chưa chọn
 ```
 
 ## 5. Current Active Task
 
+**T34 — DONE / CLOSED (13/11/2026), merge `2cfa0cc`.** PO APPROVED trong chat ("Duyệt, merge đi") và yêu cầu Claude merge; chấp nhận self-review thay review độc lập. Sau merge: compileall OK, pytest 290/290 trên master. TODO-01 Low giữ nguyên (ACCEPT_LATER).
+
+Trước đó —
 **T34 — PO_REVIEW (13/11/2026).** Claude **self-review** theo yêu cầu PO trong chat (không độc lập): **PASS_WITH_TODO** trên `2ae64ab`, RF 0; AC 5/5; gate chạy lại compileall, pytest 290/290, build; probe DB mới 12/12 phim đang chiếu có suất. TODO-01 Low: phim sắp khởi chiếu trong cửa sổ chỉ có suất từ ngày khởi chiếu. Report: `reports/2026-11-13/claude_review_T34_PASS_WITH_TODO_2026-11-13.md`. Chờ Tín duyệt và merge.
 
 Trước đó — **T34 — INDEPENDENT_REVIEW (13/11/2026).** PO yêu cầu trong chat: Claude sửa lỗi 3 phim hiện "Đang chiếu" (coming_soon đã tới ngày khởi chiếu) nhưng không có suất. Nhánh `task/T34-suat-chieu-phim-moi-khoi-chieu`: `_ensure_showtimes` dùng `effective_status` như API/mock + test hồi quy. Gate: compileall, pytest 290/290, build, health `phobert_b`, trang `/phim/7` hiện lịch chiếu. Không đổi schema. DB local đã chia lại 24 suất chưa có vé (PO chọn), có sao lưu. Report: `reports/2026-11-13/claude_implementation_T34_2026-11-13.md`. Vì Claude viết code, **cần người review độc lập** trước khi merge. (T33 dành cho đề xuất thanh toán.)

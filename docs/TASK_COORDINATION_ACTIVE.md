@@ -36,12 +36,14 @@ Trước khi áp dụng workflow: giao diện React đầy đủ (`giao-dien-v1`
 
 ## 4. Current Project Status
 ```
-Overall Status: IDLE
-Phase: v1.0 + T32 (menu mới) trên master `55ced2f`
-Current Active Task: không có — task tiếp theo chưa chọn
+Overall Status: ACTIVE
+Phase: v1.0 + T32 (menu mới) trên master
+Current Active Task: T34 — INDEPENDENT_REVIEW
 ```
 
 ## 5. Current Active Task
+
+**T34 — INDEPENDENT_REVIEW (13/11/2026).** PO yêu cầu trong chat: Claude sửa lỗi 3 phim hiện "Đang chiếu" (coming_soon đã tới ngày khởi chiếu) nhưng không có suất. Nhánh `task/T34-suat-chieu-phim-moi-khoi-chieu`: `_ensure_showtimes` dùng `effective_status` như API/mock + test hồi quy. Gate: compileall, pytest 290/290, build, health `phobert_b`, trang `/phim/7` hiện lịch chiếu. Không đổi schema. DB local đã chia lại 24 suất chưa có vé (PO chọn), có sao lưu. Report: `reports/2026-11-13/claude_implementation_T34_2026-11-13.md`. Vì Claude viết code, **cần người review độc lập** trước khi merge. (T33 dành cho đề xuất thanh toán.)
 
 **T32 — DONE / CLOSED (12/11/2026), merge `55ced2f`.** PO xem thử trên web thật, góp ý vòng 1 (menu ngang từ 1101px, commit `f8aabdb`), rồi APPROVED và yêu cầu Claude merge trong chat. PO chấp nhận không có review độc lập vì Codex hết hạn.
 

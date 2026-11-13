@@ -87,6 +87,13 @@ export const realApi = {
       confirm: (id) => request(`/api/admin/bookings/${id}/confirm`, { method: "POST" }),
       reject: (id) => request(`/api/admin/bookings/${id}/reject`, { method: "POST" }),
     },
+    payments: {
+      list: (filters = {}) => {
+        const params = new URLSearchParams(Object.entries(filters).filter(([, value]) => value !== undefined && value !== ""));
+        return request(`/api/admin/payments${params.toString() ? `?${params}` : ""}`);
+      },
+      resolve: (id) => request(`/api/admin/payments/${id}/resolve`, { method: "POST" }),
+    },
     comments: {
       list: (filters = {}) => {
         const params = new URLSearchParams(Object.entries(filters).filter(([, value]) => value !== undefined && value !== ""));

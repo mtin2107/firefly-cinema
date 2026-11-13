@@ -430,6 +430,8 @@ h1, h2, h3 { margin: 0; line-height: 1.35; }
 .booking-filters { display: flex; align-items: end; gap: 12px; margin-bottom: 24px; }
 .booking-filters .field { min-width: 220px; }
 .admin-booking-table { min-width: 940px; }
+.admin-payments { margin-top: 48px; }
+.admin-payments h2 { margin-bottom: 8px; }
 
 /* ---------- So sánh mô hình ---------- */
 .model-compare-form {

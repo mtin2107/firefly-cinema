@@ -206,10 +206,23 @@ function createDb() {
   return {
     ratings: MOVIES.filter((m) => ["now_showing", "ended"].includes(m.status)).flatMap((m) =>
       viewers.slice(0, 2 + m.id % 5).map((viewer, index) => ({ movie_id: m.id, user_id: viewer.id, stars: 6 + ((m.id + index) % 5) }))),
-    users, movies: clone(MOVIES), comments, bookings, showtimes,
+    users, movies: clone(MOVIES), comments, bookings, showtimes, payments: seedPayments(),
     adminShowtimeIds: [],
     seq: { user: users.length + 1, movie: Math.max(...MOVIES.map((m) => m.id)) + 1, comment: 31, booking: 4, showtime: Math.max(...showtimes.map((item) => item.id), 0) + 1 },
   };
+}
+
+// T33: giao dịch SePay mẫu để trang Quản lý vé có dữ liệu ở mock mode.
+function seedPayments() {
+  const at = (minutes) => new Date(Date.now() - minutes * 60000).toISOString();
+  // transactionDate của SePay là giờ địa phương dạng "YYYY-MM-DD HH:mm:ss".
+  const local = (minutes) => { const d = new Date(Date.now() - minutes * 60000); return new Date(d.getTime() - d.getTimezoneOffset() * 60000).toISOString().slice(0, 19).replace("T", " "); };
+  return [
+    { id: 90002, booking_code: "FF00002", amount: 50000, content: "FF00002 chuyen tien", transaction_date: local(3),
+      result: "needs_review", note: "Thiếu tiền so với tổng vé.", received_at: at(3) },
+    { id: 90001, booking_code: "FF00001", amount: 180000, content: "FF00001 chuyen tien", transaction_date: local(2880),
+      result: "paid", note: "", received_at: at(2880) },
+  ];
 }
 
 function load() {
@@ -221,6 +234,7 @@ function load() {
       if (!db.showtimes) db.showtimes = buildShowtimes(db.movies);
       if (!db.seq.movie) db.seq.movie = Math.max(...db.movies.map((m) => m.id)) + 1;
       if (!db.adminShowtimeIds) db.adminShowtimeIds = [];
+      if (!db.payments) db.payments = seedPayments();
       if (!db.seq.showtime) db.seq.showtime = Math.max(...db.showtimes.map((item) => item.id), 0) + 1;
       db.comments.forEach((comment) => {
         if (!comment.model_name) comment.model_name = "keyword";
@@ -980,6 +994,26 @@ export const mockApi = {
         booking.seats = [];
         save();
         return clone(adminBookingOut(booking));
+      },
+    },
+    payments: {
+      async list(filters = {}) {
+        await wait();
+        requireAdmin();
+        return clone(db.payments
+          .filter((item) => !filters.result || item.result === filters.result)
+          .sort((a, b) => b.received_at.localeCompare(a.received_at))
+          .slice(0, 200));
+      },
+      async resolve(id) {
+        await wait();
+        requireAdmin();
+        const row = db.payments.find((item) => item.id === Number(id));
+        if (!row) throw new ApiError("Không tìm thấy giao dịch.", 404);
+        if (row.result !== "needs_review") throw new ApiError("Chỉ đánh dấu được giao dịch đang cần xử lý.", 409);
+        row.result = "resolved";
+        save();
+        return clone(row);
       },
     },
     comments: {

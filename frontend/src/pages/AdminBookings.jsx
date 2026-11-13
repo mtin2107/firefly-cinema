@@ -14,6 +14,57 @@ const STATUSES = [
 ];
 const labelFor = (status) => STATUSES.find(([value]) => value === status)?.[1] ?? status;
 
+const PAYMENT_RESULTS = [
+  ["needs_review", "Cần xử lý tay"],
+  ["paid", "Đã tự xác nhận vé"],
+  ["resolved", "Đã xử lý"],
+  ["ignored", "Bỏ qua (tiền ra)"],
+  ["", "Tất cả giao dịch"],
+];
+const paymentLabel = (result) => PAYMENT_RESULTS.find(([value]) => value === result)?.[1] ?? result;
+
+// T33: giao dịch SePay báo về. Giao dịch thiếu tiền, sai mã hoặc vé hết hạn cần admin hoàn tiền/xử lý tay.
+function SepayPayments() {
+  const [result, setResult] = useState("needs_review");
+  const [rows, setRows] = useState(null);
+  const [error, setError] = useState("");
+  const [busyId, setBusyId] = useState(null);
+
+  const load = async (next = result) => {
+    setError(""); setRows(null);
+    try { setRows(await api.admin.payments.list({ result: next })); }
+    catch (err) { setError(err.message); }
+  };
+  useEffect(() => { load(); }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const resolve = async (row) => {
+    if (!window.confirm(`Đánh dấu giao dịch ${row.id} là đã xử lý (đã hoàn tiền hoặc đã duyệt tay)?`)) return;
+    setBusyId(row.id); setError("");
+    try { await api.admin.payments.resolve(row.id); await load(); }
+    catch (err) { setError(err.message); }
+    finally { setBusyId(null); }
+  };
+
+  return <section className="admin-payments">
+    <h2>Giao dịch SePay</h2>
+    <p className="muted admin__intro">Tiền vào đúng mã vé và đủ số tiền được tự xác nhận. Các giao dịch còn lại cần hoàn tiền hoặc duyệt tay ở bảng vé phía trên, sau đó bấm "Đã xử lý".</p>
+    <form className="booking-filters" onSubmit={(event) => { event.preventDefault(); load(result); }}>
+      <label className="field"><span>Kết quả</span><select value={result} onChange={(event) => setResult(event.target.value)}>{PAYMENT_RESULTS.map(([value, label]) => <option key={value} value={value}>{label}</option>)}</select></label>
+      <button className="btn btn--ghost" type="submit">Lọc giao dịch</button>
+    </form>
+    {error ? <ErrorState message={error} onRetry={() => load(result)} />
+      : !rows ? <Loading label="Đang tải giao dịch..." />
+      : rows.length === 0 ? <Empty><p>Không có giao dịch phù hợp.</p></Empty>
+      : <div className="table-wrap"><table className="admin-table"><thead><tr><th>Mã GD / thời gian</th><th>Nội dung</th><th>Số tiền</th><th>Kết quả</th><th>Thao tác</th></tr></thead><tbody>{rows.map((row) => <tr key={row.id}>
+        <td><strong>{row.id}</strong><br /><span className="muted">{row.transaction_date || fullDateTime(row.received_at)}</span></td>
+        <td>{row.content || "(trống)"}<br /><span className="muted">Mã vé: {row.booking_code ?? "không tìm thấy"}</span></td>
+        <td><strong>{money(row.amount)}</strong></td>
+        <td>{paymentLabel(row.result)}{row.note && <><br /><span className="muted">{row.note}</span></>}</td>
+        <td>{row.result === "needs_review" && <button className="btn btn--primary btn--sm" disabled={busyId === row.id} onClick={() => resolve(row)}>Đã xử lý</button>}</td>
+      </tr>)}</tbody></table></div>}
+  </section>;
+}
+
 export default function AdminBookings() {
   usePageTitle("Quản lý vé");
   const [filters, setFilters] = useState({ status: "pending_verify", code: "" });
@@ -62,5 +113,6 @@ export default function AdminBookings() {
         <td><span className={`ticket-status ticket-status--${booking.status}`}>{labelFor(booking.status)}</span><br /><strong>{money(booking.total)}</strong></td>
         <td><div className="admin-movie-actions">{["held", "pending_verify"].includes(booking.status) && <><button className="btn btn--primary btn--sm" disabled={busyId === booking.id} onClick={() => act(booking, "confirm")}>Đã nhận tiền</button><button className="btn btn--danger btn--sm" disabled={busyId === booking.id} onClick={() => act(booking, "reject")}>Từ chối</button></>}</div></td>
       </tr>)}</tbody></table></div>}
+    <SepayPayments />
   </div>;
 }

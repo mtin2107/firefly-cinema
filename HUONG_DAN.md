@@ -43,6 +43,7 @@ Mở `backend\.env` (không commit file này):
 | `DATABASE_URL`, `FRONTEND_ORIGIN`, `UPLOAD_DIR` | Không | Giữ giá trị mẫu |
 | `MODEL_DIR`, `MODEL_DIR_B`, `MODEL_VERSION_A`, `MODEL_VERSION_B`, `NEGATIVE_LABEL_ID`, `USE_WORD_SEGMENT`, `USE_TEXT_NORM`, `NEGATIVE_THRESHOLD`, `ACTIVE_MODEL`, `SKLEARN_MODELS` | Không | Giá trị mẫu đã trỏ đúng các thư mục ở bước 2; `ACTIVE_MODEL=phobert_b` |
 | `BANK_ID`, `BANK_ACCOUNT`, `BANK_ACCOUNT_NAME` | Không | Để trống thì vé không có ảnh VietQR |
+| `SEPAY_WEBHOOK_SECRET` hoặc `SEPAY_API_KEY` | Không | T33: tự xác nhận vé khi tiền về qua webhook SePay. Để trống cả hai thì chỉ admin duyệt tay |
 | `CHAT_BASE_URL`, `CHAT_API_KEY`, `CHAT_MODEL`, `CHAT_RATE_PER_MINUTE`, `CHAT_RATE_PER_DAY` | Không | Trợ lý AI; thiếu `CHAT_API_KEY` thì chatbot trả "Trợ lý chưa được bật.", phần còn lại vẫn chạy |
 
 Chạy: `uvicorn app.main:app --port 8000`. Lần đầu tự tạo `firefly.db` và dữ liệu mẫu. Kiểm tra http://localhost:8000/api/health: `"classifier":"phobert_b"` và mục `models` có `phobert`, `phobert_b`, `svm`, `lr`, `nb` đều `available`. Còn `keyword` thì model chưa nạp được: xem lại bước 2.
@@ -727,3 +728,30 @@ PO chốt ngày 27/10/2026: thực hiện **một lần sau khi merge T30**, g�
 5. Kiểm schema `users` có `birth_date`, `gender`, `avatar_url`; truy vấn `SELECT sql FROM sqlite_master WHERE name='bookings'` phải có `AUTOINCREMENT`. Kiểm `/api/health` PhoBERT B, đăng nhập và đặt → hủy → đặt lại phải nhận mã mới lớn hơn. Gắn lại nội dung upload nếu cần theo mục T29.
 
 Khóa giới hạn giữ chỗ T30 chỉ bảo đảm trong **một tiến trình / một worker uvicorn**. Nhiều worker cần khóa tại database trước khi triển khai.
+
+## T33 — Tự xác nhận vé qua SePay (không cần xóa DB)
+
+Khi khách chuyển khoản theo mã VietQR, SePay báo về backend và vé tự chuyển sang "Đã thanh toán". Bảng mới `payment_transactions` được tạo tự động khi backend khởi động; **không cần xóa `firefly.db`**. Nút "Đã nhận tiền" của admin vẫn dùng được như cũ.
+
+**1. Trên my.sepay.vn (tài khoản ngân hàng phải trùng `BANK_ACCOUNT` trong `.env`):**
+- Cấu hình công ty → Cấu hình chung → Cấu trúc mã thanh toán: tiền tố `FF`, chỉ chữ số, độ dài 5–8.
+- Tích hợp Webhooks → Thêm webhook: sự kiện **tiền vào**, URL `https://<địa-chỉ-tunnel>/api/payments/sepay-webhook`, kiểu JSON, bật Auto retry.
+- Kiểu xác thực: **HMAC-SHA256** (khuyên dùng), chép Secret Key; hoặc **API Key**. Key chỉ hiện đầy đủ một lần.
+
+**2. Trong `backend\.env`** (không commit, không gửi key cho ai):
+```
+SEPAY_WEBHOOK_SECRET=<Secret Key nếu chọn HMAC>
+SEPAY_API_KEY=<API Key nếu chọn API Key>
+```
+Có `SEPAY_WEBHOOK_SECRET` thì backend bắt buộc chữ ký HMAC và bỏ qua API key. Khởi động lại backend sau khi sửa.
+
+**3. URL công khai:** SePay không gọi được `localhost`. Khi chạy trên máy, mở tunnel tới cổng 8000, ví dụ:
+```powershell
+cloudflared tunnel --url http://localhost:8000
+# hoặc: ngrok http 8000
+```
+Mỗi lần tunnel đổi địa chỉ thì sửa lại URL webhook trên SePay.
+
+**4. Thử không tốn tiền:** bật Test mode trên my.sepay.vn → Mô phỏng giao dịch → tiền vào, số tiền đúng tổng vé, nội dung `FF000xx` của một vé đang giữ chỗ. Trang "Vé của tôi" tự đổi sang "Đã thanh toán" trong khoảng 5 giây. Test mode có webhook và cấu trúc mã thanh toán riêng, cần cấu hình lại như bước 1.
+
+**5. Giao dịch cần xử lý tay:** trang Quản trị → Quản lý vé → mục "Giao dịch SePay". Thiếu tiền, sai hoặc thiếu mã vé, vé đã hết hạn hoặc đã thanh toán đều nằm ở "Cần xử lý tay": hoàn tiền hoặc duyệt tay vé ở bảng phía trên, rồi bấm "Đã xử lý".

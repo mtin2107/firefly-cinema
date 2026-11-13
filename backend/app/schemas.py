@@ -368,6 +368,28 @@ class AdminBookingOut(BookingOut):
     customer_email: str
 
 
+# ---------- Thanh toán SePay (T33) ----------
+class SepayWebhookIn(BaseModel):
+    """Chỉ các trường cần dùng; SePay gửi thêm trường khác thì bỏ qua."""
+    id: int
+    transferType: str
+    transferAmount: int = Field(ge=0)
+    content: str = ""
+    code: str | None = None
+    transactionDate: str = ""
+
+
+class PaymentOut(ORM):
+    id: int
+    booking_code: str | None
+    amount: int
+    content: str
+    transaction_date: str
+    result: str
+    note: str
+    received_at: datetime
+
+
 # ---------- Bình luận ----------
 class ScoreInput(BaseModel):
     allow_empty_score: ClassVar[bool] = False

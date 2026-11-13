@@ -120,9 +120,13 @@ def _reset_seed_state_for_new_database(db: Session) -> None:
 def _ensure_showtimes(db: Session, days: int = 5) -> None:
     """Đảm bảo luôn có suất chiếu cho `days` ngày tới (chạy mỗi lần khởi động)."""
     from .showtime_rules import ROOMS, find_showtime_conflict
+    from .taxonomy import effective_status
 
-    movies = db.scalars(select(Movie).where(Movie.status == "now_showing").order_by(Movie.id)).all()
     window_days = [date.today() + timedelta(days=offset) for offset in range(days)]
+    # Cùng luật với API: phim coming_soon đã tới ngày khởi chiếu được tính là đang chiếu.
+    movies = db.scalars(select(Movie).where(
+        effective_status(sql=True, today=window_days[0]) == "now_showing"
+    ).order_by(Movie.id)).all()
     movie_ids = {movie.id for movie in movies}
     state, state_path = _read_seed_state(db, window_days, movie_ids)
 

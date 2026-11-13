@@ -299,3 +299,28 @@ def test_seed_does_not_change_admin_showtime_or_bookings(db, movie, users, monke
     assert db.scalar(select(func.count()).select_from(BookingSeat).where(
         BookingSeat.booking_id == booking_id
     )) == 1
+
+
+def test_coming_soon_movie_past_release_date_gets_schedule(db, movie, monkeypatch):
+    """Phim lưu coming_soon nhưng đã tới ngày khởi chiếu hiện là "Đang chiếu" nên phải có suất."""
+    today = date(2026, 10, 11)
+    common = dict(
+        genre="Gia đình", duration_min=90, age_rating="P", status="coming_soon",
+        director="Đạo diễn", cast="Diễn viên", score=0, description="Mô tả",
+        poster_bg="#445566", poster_fg="#ffffff", country="Việt Nam", formats="Lồng tiếng",
+    )
+    released = Movie(title="Đã khởi chiếu", release_date="2026-10-11", **common)
+    upcoming = Movie(title="Chưa khởi chiếu", release_date="2026-10-12", **common)
+    db.add_all([released, upcoming])
+    db.commit()
+    freeze_today(monkeypatch, today)
+
+    _ensure_showtimes(db, days=5)
+
+    def days_of(m):
+        return {v.date() for v in db.scalars(
+            select(Showtime.start_time).where(Showtime.movie_id == m.id)
+        ).all()}
+
+    assert days_of(released) == {today + timedelta(days=o) for o in range(5)}
+    assert days_of(upcoming) == set()

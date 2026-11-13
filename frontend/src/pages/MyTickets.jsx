@@ -38,6 +38,14 @@ export default function MyTickets() {
     }
   };
   useEffect(load, []);
+  const waiting = Boolean(bookings?.some((b) => ["held", "pending_verify"].includes(b.status)
+    && new Date(b.showtime.start_time).getTime() > Date.now()));
+  useEffect(() => {
+    if (!waiting) return undefined;
+    // T33: SePay báo tiền về qua webhook ở backend; hỏi lại định kỳ để vé tự chuyển sang "Đã thanh toán".
+    const timer = setInterval(() => api.bookings.mine().then(setBookings).catch(() => {}), 5000);
+    return () => clearInterval(timer);
+  }, [waiting]);
 
   const claim = async (booking) => {
     setClaimingId(booking.id); setError(""); setNotice("");

@@ -24,6 +24,9 @@ FRONTEND_ORIGINS = [o.strip() for o in os.getenv("FRONTEND_ORIGIN", "http://loca
 BANK_ID = os.getenv("BANK_ID", "").strip()
 BANK_ACCOUNT = os.getenv("BANK_ACCOUNT", "").strip()
 BANK_ACCOUNT_NAME = os.getenv("BANK_ACCOUNT_NAME", "").strip()
+# T33: webhook SePay. Có secret thì bắt buộc HMAC; chỉ có API key thì dùng API key.
+SEPAY_WEBHOOK_SECRET = os.getenv("SEPAY_WEBHOOK_SECRET", "").strip()
+SEPAY_API_KEY = os.getenv("SEPAY_API_KEY", "").strip()
 
 MODEL_DIR = os.getenv("MODEL_DIR", "models/phobert-binhluan")
 MODEL_DIR_B = os.getenv("MODEL_DIR_B", "models/phobert-binhluan-B")

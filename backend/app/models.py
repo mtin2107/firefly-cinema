@@ -105,6 +105,26 @@ class Booking(Base):
     seats: Mapped[list["BookingSeat"]] = relationship(back_populates="booking", cascade="all, delete-orphan")
 
 
+class PaymentTransaction(Base):
+    """Giao dịch tiền vào do SePay báo qua webhook. PK là id của SePay nên gửi trùng không xử lý lại."""
+    __tablename__ = "payment_transactions"
+    __table_args__ = (
+        CheckConstraint(
+            "result IN ('paid', 'needs_review', 'ignored', 'resolved')",
+            name="ck_payment_transactions_result",
+        ),
+    )
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=False)
+    # Không đặt FK: khách vẫn được hủy vé đang giữ dù đã có giao dịch thiếu tiền gắn với vé đó.
+    booking_id: Mapped[int | None] = mapped_column(Integer, nullable=True, index=True)
+    amount: Mapped[int] = mapped_column(Integer)
+    content: Mapped[str] = mapped_column(String(255))
+    transaction_date: Mapped[str] = mapped_column(String(30), default="")
+    result: Mapped[str] = mapped_column(String(20))
+    note: Mapped[str] = mapped_column(String(255), default="")
+    received_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.now)
+
+
 class BookingSeat(Base):
     """Mỗi ghế đã đặt là 1 dòng. Ràng buộc UNIQUE đảm bảo 2 người không đặt trùng 1 ghế."""
     __tablename__ = "booking_seats"

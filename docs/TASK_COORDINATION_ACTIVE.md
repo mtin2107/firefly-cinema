@@ -36,12 +36,16 @@ Trước khi áp dụng workflow: giao diện React đầy đủ (`giao-dien-v1`
 
 ## 4. Current Project Status
 ```
-Overall Status: IDLE
-Phase: v1.0 + T32 + T34 trên master `2cfa0cc`
-Current Active Task: không có — task tiếp theo chưa chọn
+Overall Status: ACTIVE
+Phase: v1.0 + T32 + T34 trên master `7322d15`
+Current Active Task: T33 — Tự xác nhận thanh toán VietQR qua webhook SePay (INDEPENDENT_REVIEW)
 ```
 
 ## 5. Current Active Task
+
+**T33 — PO đã xem demo và chốt trong chat (13/11/2026): "đã thấy ổn rồi chốt và push lên github"**, Claude commit và push nhánh `task/T33-sepay-webhook`; chưa merge master; AC-11 (SePay Test mode qua tunnel) vẫn chờ PO.
+
+Trước đó — **T33 — INDEPENDENT_REVIEW (13/11/2026).** PO yêu cầu trong chat: Claude tự làm (Q3), làm cả HMAC-SHA256 lẫn API key (Q1), thêm phần admin giao dịch (Q2). Nhánh `task/T33-sepay-webhook` từ master `7322d15`. `POST /api/payments/sepay-webhook` + bảng mới `payment_transactions` (không cần xóa DB) + `GET /api/admin/payments`, `POST /api/admin/payments/{id}/resolve` (real + mock); trang Vé của tôi tự làm mới 5 giây khi có vé chờ của suất sắp chiếu. Gate: compileall, pytest 313/313 (23 test T33), build real + mock, health `phobert_b`, trình duyệt real + mock. **AC-11 (Test mode SePay qua tunnel) chờ PO.** Report: `reports/2026-11-13/claude_implementation_T33_2026-11-13.md`. Vì Claude viết code, **cần người review độc lập** trước khi merge.
 
 **T34 — DONE / CLOSED (13/11/2026), merge `2cfa0cc`.** PO APPROVED trong chat ("Duyệt, merge đi") và yêu cầu Claude merge; chấp nhận self-review thay review độc lập. Sau merge: compileall OK, pytest 290/290 trên master. TODO-01 Low giữ nguyên (ACCEPT_LATER).
 

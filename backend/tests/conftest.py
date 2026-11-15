@@ -91,6 +91,7 @@ def client(db, fake_classifier):
     from app.routers import auth, comments
 
     auth._login_failures.clear_all()
+    auth._register_limits.clear_all()
     comments._comment_limits.clear_all()
     def override_db():
         yield db

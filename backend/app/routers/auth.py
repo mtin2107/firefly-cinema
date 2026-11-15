@@ -19,12 +19,16 @@ from ..security import hash_password, verify_password, create_token, get_current
 
 router = APIRouter(prefix="/api/auth", tags=["Tài khoản"])
 _login_failures = SlidingWindowRateLimiter()
+_register_limits = SlidingWindowRateLimiter()
 _LOGIN_LIMIT_MESSAGE = "Bạn đăng nhập sai quá nhiều lần. Hãy thử lại sau 5 phút."
 _CHANGE_PASSWORD_LIMIT_MESSAGE = "Bạn nhập sai mật khẩu quá nhiều lần. Hãy thử lại sau 5 phút."
 
 
 @router.post("/register", response_model=TokenOut, status_code=201)
-def register(body: RegisterIn, db: Session = Depends(get_db)):
+def register(body: RegisterIn, request: Request, db: Session = Depends(get_db)):
+    # Chặn tạo tài khoản rác hàng loạt từ một địa chỉ IP.
+    ip = request.client.host if request.client else "unknown"
+    _register_limits.hit(ip, limit=10, seconds=3600, message="Bạn đăng ký quá nhiều tài khoản. Hãy thử lại sau 1 giờ.")
     email = body.email.lower()
     if db.scalar(select(User).where(User.email == email)):
         raise HTTPException(400, "Email này đã được đăng ký.")

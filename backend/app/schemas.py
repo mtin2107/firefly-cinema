@@ -23,7 +23,7 @@ class RegisterIn(BaseModel):
 
 class LoginIn(BaseModel):
     email: EmailStr
-    password: str
+    password: str = Field(max_length=100)
 
 
 class UpdateProfileIn(BaseModel):
@@ -49,13 +49,13 @@ class UpdateProfileIn(BaseModel):
 
 
 class ChangePasswordIn(BaseModel):
-    current_password: str
+    current_password: str = Field(max_length=100)
     new_password: str = Field(min_length=6, max_length=100)
 
 
 class ChangeEmailIn(BaseModel):
     new_email: EmailStr
-    current_password: str
+    current_password: str = Field(max_length=100)
 
 
 class UserOut(ORM):

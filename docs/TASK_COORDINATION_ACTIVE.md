@@ -36,14 +36,16 @@ Trước khi áp dụng workflow: giao diện React đầy đủ (`giao-dien-v1`
 
 ## 4. Current Project Status
 ```
-Overall Status: ACTIVE
-Phase: v1.0 + T32 + T34 + T33 trên master `0121890`
-Current Active Task: T35 — PO_REVIEW
+Overall Status: IDLE
+Phase: v1.0 + T32 + T34 + T33 + T35 trên master `12fabac`
+Current Active Task: không có — task tiếp theo chưa chọn
 ```
 
 ## 5. Current Active Task
 
-**T35 — PO_REVIEW (15/11/2026).** PO yêu cầu trong chat: Claude rà bảo mật web, tự sửa và tự review. Nhánh `task/T35-bao-mat-web` từ master `0121890`: security headers, giới hạn đăng ký 10/giờ/IP, `max_length=100` cho mật khẩu ở login/đổi mật khẩu/đổi email. Gate: compileall, pytest 317/317, build, health `phobert_b`. Self-review **PASS_WITH_TODO** (không độc lập), RF 0, TODO-01/02 Low. Không đổi schema. Report: `reports/2026-11-15/claude_implementation_T35_2026-11-15.md`. Chờ Tín duyệt và merge.
+**T35 — DONE / CLOSED (15/11/2026), merge `12fabac`.** PO APPROVED trong chat ("Duyệt, merge đi") và yêu cầu Claude merge; chấp nhận self-review thay review độc lập. TODO-01/02 Low giữ nguyên (ACCEPT_LATER).
+
+Trước đó — **T35 — PO_REVIEW (15/11/2026).** PO yêu cầu trong chat: Claude rà bảo mật web, tự sửa và tự review. Nhánh `task/T35-bao-mat-web` từ master `0121890`: security headers, giới hạn đăng ký 10/giờ/IP, `max_length=100` cho mật khẩu ở login/đổi mật khẩu/đổi email. Gate: compileall, pytest 317/317, build, health `phobert_b`. Self-review **PASS_WITH_TODO** (không độc lập), RF 0, TODO-01/02 Low. Không đổi schema. Report: `reports/2026-11-15/claude_implementation_T35_2026-11-15.md`. Chờ Tín duyệt và merge.
 
 **T33 — DONE / CLOSED (13/11/2026), merge `3e60b66`.** PO chốt trong chat sau khi xem demo và yêu cầu Claude merge + push master; chấp nhận không có review độc lập. Sau merge trên master: compileall OK, pytest 313/313, health `phobert_b`. **Còn mở (PO):** AC-11 thử SePay Test mode qua tunnel; AC-14 checklist hồi quy mục 7 chạy tay.
 
